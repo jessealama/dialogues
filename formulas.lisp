@@ -114,6 +114,12 @@
 ;;; Sequents
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defstruct (sequent 
+	     (:print-function print-sequent)
+	     (:constructor make-seq))
+  (lhs nil :type list)
+  (rhs nil :type list))
+
 (defun print-sequent (seq stream depth)
   (declare (ignore depth))
   (let ((lhs (sequent-lhs seq))
@@ -134,12 +140,6 @@
 		    :rhs (list rhs))
 	  (make-seq :lhs lhs
 		    :rhs rhs))))
-
-(defstruct (sequent 
-	     (:print-function print-sequent)
-	     (:constructor make-seq))
-  (lhs nil :type list)
-  (rhs nil :type list))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Sundry formula-related utilities
