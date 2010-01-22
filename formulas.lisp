@@ -96,6 +96,16 @@
 	   (cdr x)
 	   (not (listp (car x))))))
 
+(defun atomic-formula? (formula)
+  (or (symbolp formula)
+      (and (not (disjunction? formula))
+	   (not (conjunction? formula))
+	   (not (equivalence? formula))
+	   (not (implication? formula))
+	   (not (negation? formula))
+	   (not (universal? formula))
+	   (not (existential? formula)))))
+
 (defun equal-formulas? (form-1 form-2)
   "Determine whether formulas FORM-1 and FORM-2 are equal."
   (equalp form-1 form-2))
