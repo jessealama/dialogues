@@ -28,6 +28,25 @@
 	    (setf (aref a i) x))))
       (make-array (list 0))))
 
+(defun read-symbol (&rest symbols)
+  (let (response)
+    (until (and (symbolp response)
+		(member response symbols))
+      (setq response (read t nil nil)))
+    response))
+
+(defun read-number-in-interval (a b)
+  (let (response)    
+    (until (and (numberp response)
+		(<= a response)
+		(<= response b))
+      (setq response (read t nil nil)))
+    response))
+
+(defun read-non-negative-number-at-most (n)
+  (read-number-in-interval 0 (1- n)))
+
+
 (provide 'utils)
 
 ;;; utils.lisp ends here
