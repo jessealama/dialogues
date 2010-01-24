@@ -171,15 +171,6 @@ in TERM or FORMULA."
 (defun variable-name (typed-variable)
   (first typed-variable))
 
-(defun v-statement? (formula)
-  (eq (car formula) 'V))
-
-(defun e-statement? (formula)
-  (eq (car formula) 'E))
-
-(defun f-statement? (formula)
-  (eq (car formula) 'F))
-
 (defun equation? (formula)
   (eq (car formula) '=))
 
