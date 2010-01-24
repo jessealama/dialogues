@@ -46,7 +46,6 @@
 (defun read-non-negative-number-at-most (n)
   (read-number-in-interval 0 (1- n)))
 
-
 (provide 'utils)
 
 ;;; utils.lisp ends here
