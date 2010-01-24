@@ -253,6 +253,11 @@ in TERM or FORMULA."
 (defun contains-formula? (lst formula)
   (member formula lst :test #'equal-formulas?))
 
+(defun read-term ()
+  (let (response)
+    (until (symbolp response)
+      (setq response (read nil t t)))))
+
 
 (provide 'formulas)
 
