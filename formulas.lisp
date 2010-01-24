@@ -1,5 +1,7 @@
 ;;; formulas.lisp A representation for first-order formulas
 
+(require 'utils "utils.lisp")
+
 (defconstant contradiction '⊥)
 (defconstant top '⊤)
 
