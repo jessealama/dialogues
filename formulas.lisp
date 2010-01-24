@@ -202,10 +202,6 @@ in TERM or FORMULA."
 	   (not (universal? formula))
 	   (not (existential? formula)))))
 
-(defun equal-formulas? (form-1 form-2)
-  "Determine whether formulas FORM-1 and FORM-2 are equal."
-  (equalp form-1 form-2))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Sequents
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
