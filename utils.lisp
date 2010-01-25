@@ -46,6 +46,9 @@
 (defun read-non-negative-number-at-most (n)
   (read-number-in-interval 0 (1- n)))
 
+(defun msg (format-string &rest args)
+  (apply #'format t format-string args))
+
 (provide 'utils)
 
 ;;; utils.lisp ends here
