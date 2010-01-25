@@ -75,6 +75,8 @@
 	     (:constructor make-dialogue-int))
   (plays nil :type list)
   (length 0 :type number)
+  (proponents-attacked-statements nil :type list)
+  (defenses nil :type list)
   (closed-attacks nil :type list))
 
 (defun dialogue? (d)
@@ -119,6 +121,15 @@
 
 (defun previously-asserted? (dialogue statement)
   (member statement (dialogue-plays dialogue) :key #'move-statement :test #'equalp))
+
+(defun close-attack (dialogue index-of-attack)
+  (push index-of-attack (dialogue-closed-attacks dialogue)))
+
+(defun register-attack-against-proponent (dialogue index-of-attacked-statement)
+  (push index-of-attacked-statement (dialogue-proponents-attacked-statements dialogue)))
+
+(defun register-defense (dialogue index-of-defense)
+  (push index-of-defense (dialogue-defenses dialogue)))
 
 (defun start-dialogue (initial-statement)
   (when (atomic-formula? initial-statement)
