@@ -49,6 +49,10 @@
 (defun msg (format-string &rest args)
   (apply #'format t format-string args))
 
+(defun same-parity (m n)
+  (or (and (evenp m) (evenp n))
+      (and (oddp m) (oddp n))))
+
 (provide 'utils)
 
 ;;; utils.lisp ends here
