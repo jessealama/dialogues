@@ -17,6 +17,12 @@
 		 :stance stance
 		 :reference reference))
 
+(defun make-attack (statement reference)
+  (make-move statement 'a reference))
+
+(defun make-defense (statement reference)
+  (make-move statement 'd reference))
+
 (defstruct (move
 	     (:print-function print-move)
 	     (:constructor make-move-int))
