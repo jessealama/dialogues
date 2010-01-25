@@ -3,7 +3,23 @@
 (require 'utils "utils.lisp")
 (require 'formulas "formulas.lisp")
 
-(defstruct move
+(defun print-move (move stream depth)
+  (declare (ignore depth))
+  (let ((stance (move-stance move))
+	(ref (move-reference move))
+	(statement (move-statement move)))
+    (if (and stance ref) ; a non-initial move
+	(format stream "[~A,~A] ~A" stance ref statement)
+	(format stream "~A" statement))))
+
+(defun make-move (statement stance reference)
+  (make-move-int :statement statement
+		 :stance stance
+		 :reference reference))
+
+(defstruct (move
+	     (:print-function print-move)
+	     (:constructor make-move-int))
   statement
   stance
   reference)
