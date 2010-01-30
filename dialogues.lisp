@@ -124,29 +124,37 @@
 (defun previously-asserted? (dialogue statement)
   (member statement (dialogue-plays dialogue) :key #'move-statement :test #'equalp))
 
+(defun opponent-already-attacked? (dialogue index-of-attack)
+  (member index-of-attack (dialogue-proponents-attacked-statements dialogue)))
+
 (defun close-attack (dialogue index-of-attack)
   (push index-of-attack (dialogue-closed-attacks dialogue)))
 
 (defun register-attack-against-proponent (dialogue index-of-attacked-statement)
   (push index-of-attacked-statement (dialogue-proponents-attacked-statements dialogue)))
 
+(defun nth-move (dialogue n)
+  (nth n (dialogue-plays dialogue)))
+
 (defun register-defense (dialogue index-of-defense)
   (push index-of-defense (dialogue-defenses dialogue)))
 
 (defun extend-dialogue-with-attack (dialogue)
-  (let (index)
-    (msg "Attack which statement? (Your response should be a number between 0 and ~A.) " (1- (dialogue-length dialogue)))
+  (let ((index nil)
+	(turn-number (dialogue-length dialogue)))
+    (msg "Attack which statement? (Your response should be a number between 0 and ~A.) " (1- turn-number))
     (setq index (read-non-negative-number-at-most turn-number))
     (if (same-parity turn-number index)
 	(msg "One cannot attack oneself or defend against one's own attacks!~%")
-	(if (and (oddp turn-number) (member index (dialogue-proponents-attacked-statements dialogue)))
+	(if (and (oddp turn-number) (opponent-already-attacked? dialogue index))
 	    (msg "Opponent cannot attack move ~A because it has already been attacked.~%" index)
-	    (let* ((attacked-move (nth index (dialogue-plays dialogue)))
+	    (let* ((attacked-move (nth-move dialogue n))
 		   (attacked-statement (move-statement attacked-move)))
 	      (if (atomic-formula? attacked-statement)
 		  (msg "One cannot attack atomic statements!~%")
 		  (cond ((conjunction? attacked-statement)
-			 (msg "The attacked statement,~%~%  ~A,~%~%is a conjunction. Attack the left or right conjunct? " attacked-statement)
+			 (msg "The attacked statement,~%~%  ~A,~%~%is a conjunction. ")
+			 (msg "Attack the left or right conjunct? " attacked-statement)
 			 (let ((left-or-right (read-symbol 'l 'r)))
 			   (msg "OK, you are attacking move ~A by challenging the other player to defend~%~%  ~A.~%" index
 				   (if (eq left-or-right 'l)
@@ -200,8 +208,9 @@
 
 
 (defun extend-dialogue-with-defense (dialogue)
-  (let (index)
-    (msg "Defend against which attack? (Your response should be a number between 0 and ~A.) " (1- (dialogue-length dialogue)))
+  (let ((index nil)
+	(turn-number (dialogue-length dialogue)))
+    (msg "Defend against which attack? (Your response should be a number between 0 and ~A.) " (1- turn-number))
     (setq index (read-non-negative-number-at-most turn-number))
     (if (same-parity turn-number index)
 	(msg "One cannot attack oneself or defend against one's own attacks!~%")
@@ -279,7 +288,6 @@
     (error "A dialogue cannot commence with a composite formula!"))
   (let ((response nil)
 	(stance nil)
-	(index nil)
 	(acceptable-input? nil)
 	(turn-number 1)
 	(dialogue (make-dialogue initial-statement)))
@@ -301,7 +309,7 @@
 	(d (extend-dialogue-with-defense dialogue)))
     (msg "Thanks for playing.~%")
     (msg "The dialogue went like this:~%~A~%" dialogue)
-    (msg "Here were the closed attacks: ~A" (dialogue-closed-attacks dialogue))))
+    (msg "Here were the closed attacks: ~A" (dialogue-closed-attacks dialogue)))))
 
 
 (defun proof-to-strategy (d)
@@ -319,8 +327,6 @@
   "Play a dialogue game for FORMULA as opponent."
   (declare (ignore formula))
   nil)
-
-
 
 (provide 'dialogues)
 
