@@ -12,10 +12,17 @@
 	(format stream "[~A,~A] ~A" stance ref statement)
 	(format stream "~A" statement))))
 
-(defun make-move (statement stance reference)
-  (make-move-int :statement statement
+(defun make-move (player statement stance reference)
+  (make-move-int :player player
+		 :statement statement
 		 :stance stance
 		 :reference reference))
+
+(defun make-proponent-move (statement stance reference)
+  (make-move 'p statement stance reference))
+
+(defun make-opponent-move (statement stance reference)
+  (make-move 'o statement stance reference))
 
 (defun make-attack (statement reference)
   (make-move statement 'a reference))
@@ -26,6 +33,7 @@
 (defstruct (move
 	     (:print-function print-move)
 	     (:constructor make-move-int))
+  player
   statement
   stance
   reference)
