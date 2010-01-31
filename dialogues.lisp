@@ -159,7 +159,7 @@
     (msg "Attack which statement? (Your response should be a number between 0 and ~A.) " (1- turn-number))
     (setq index (read-non-negative-number-at-most turn-number))
     (if (same-parity turn-number index)
-	(msg "One cannot attack oneself or defend against one's own attacks!~%")
+	(msg "You cannot attack yourself!~%")
 	(if (and (oddp turn-number) (opponent-already-attacked? dialogue index))
 	    (msg "Opponent cannot attack move ~A because it has already been attacked.~%" index)
 	    (let* ((attacked-move (nth-move dialogue n))
