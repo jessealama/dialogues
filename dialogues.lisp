@@ -72,7 +72,7 @@
 	(format stream "~%")))))
 
 (defun make-dialogue (initial-statement)
-  (let ((first-move (make-move initial-statement nil nil)))
+  (let ((first-move (make-proponent-move initial-statement nil nil)))
     (make-dialogue-int :plays (list first-move)
 		       :length 1
 		       :closed-attacks nil)))
