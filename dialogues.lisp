@@ -78,10 +78,10 @@
 		       :closed-attacks nil)))
 
 (defun some-move (predicate dialogue)
-  (some predicate (dialogue-moves dialogue)))
+  (some predicate (dialogue-plays dialogue)))
 
 (defun every-move (predicate dialogue)
-  (some predicate (dialogue-moves dialogue)))
+  (some predicate (dialogue-plays dialogue)))
 
 (defun nth-move (dialogue n)
   (nth n (dialogue-plays dialogue)))
@@ -196,7 +196,7 @@ adheres to the argumentation forms."
 	     :failure-message "Proponent cannot assert an atomic formula before opponent has asserted it."))
 
 (defun closed-attack-indices (dialogue)
-  (let ((defenses (remove-if #'attacking-move? (dialogue-moves dialogue))))
+  (let ((defenses (remove-if #'attacking-move? (dialogue-plays dialogue))))
     (mapcar #'move-reference defenses)))
 
 (defun open-attack-indices (dialogue)
