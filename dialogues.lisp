@@ -260,6 +260,7 @@ adheres to the argumentation forms."
 	rule-d02-attack
 	rule-d02-adheres-to-forms
 	rule-d10
+	rule-d11
 	rule-d12
 	rule-d13))
 
