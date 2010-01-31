@@ -243,7 +243,8 @@ in TERM or FORMULA."
 (defun read-term ()
   (let (response)
     (until (symbolp response)
-      (setq response (read nil t t)))))
+      (setq response (read nil t t)))
+    response))
 
 (defun read-formula ()
   (let (response)
