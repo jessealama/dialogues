@@ -332,7 +332,8 @@ adheres to the argumentation forms."
 (defun register-defense (dialogue index-of-defense)
   (push index-of-defense (dialogue-defenses dialogue)))
 
-(defun extend-dialogue-with-attack (dialogue)
+(defun extend-dialogue-with-attack (dialogue rules)
+  (declare (ignore rules))
   (let* ((index nil)
 	 (turn-number (dialogue-length dialogue))
 	 (current-player (if (evenp turn-number) 'p 'o)))
@@ -401,7 +402,8 @@ adheres to the argumentation forms."
 			 (if (oddp turn-number) (register-attack-against-proponent dialogue index))))))))))
 
 
-(defun extend-dialogue-with-defense (dialogue)
+(defun extend-dialogue-with-defense (dialogue rules)
+  (declare (ignore rules))
   (let* ((index nil)
 	 (turn-number (dialogue-length dialogue))
 	 (current-player (if (evenp turn-number) 'p 'o)))
@@ -509,8 +511,8 @@ adheres to the argumentation forms."
       (case stance
 	(p (msg "~A" dialogue))
 	(q (setf response 'done))
-	(a (extend-dialogue-with-attack dialogue))
-	(d (extend-dialogue-with-defense dialogue)))
+	(a (extend-dialogue-with-attack dialogue rules))
+	(d (extend-dialogue-with-defense dialogue rules)))
       (msg "Thanks for playing.~%")
       (msg "The dialogue went like this:~%~A~%" dialogue))))
 
