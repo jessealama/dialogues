@@ -245,6 +245,11 @@ in TERM or FORMULA."
     (until (symbolp response)
       (setq response (read nil t t)))))
 
+(defun read-formula ()
+  (let (response)
+    (until (formula? response)
+      (setf response (read nil t t)))
+    response))
 
 (provide 'formulas)
 
