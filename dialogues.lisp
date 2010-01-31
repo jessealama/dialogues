@@ -508,7 +508,7 @@ adheres to the argumentation forms."
 					     "Opponent"))
       (msg "Attack (A), defend (D), print dialogue so far (P), or quit (Q)? ")
       (setf response (read-symbol 'a 'd 'p 'q))
-      (case stance
+      (case response
 	(p (msg "~A" dialogue))
 	(q (setf response 'done))
 	(a (extend-dialogue-with-attack dialogue rules))
