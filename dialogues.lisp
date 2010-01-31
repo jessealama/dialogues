@@ -24,11 +24,11 @@
 (defun make-opponent-move (statement stance reference)
   (make-move 'o statement stance reference))
 
-(defun make-attack (statement reference)
-  (make-move statement 'a reference))
+(defun make-attack (player statement reference)
+  (make-move player statement 'a reference))
 
-(defun make-defense (statement reference)
-  (make-move statement 'd reference))
+(defun make-defense (player statement reference)
+  (make-move player statement 'd reference))
 
 (defstruct (move
 	     (:print-function print-move)
@@ -331,8 +331,9 @@ adheres to the argumentation forms."
   (push index-of-defense (dialogue-defenses dialogue)))
 
 (defun extend-dialogue-with-attack (dialogue)
-  (let ((index nil)
-	(turn-number (dialogue-length dialogue)))
+  (let* ((index nil)
+	 (turn-number (dialogue-length dialogue))
+	 (current-player (if (evenp turn-number) 'p 'o)))
     (msg "Attack which statement? (Your response should be a number between 0 and ~A.) " (1- turn-number))
     (setq index (read-non-negative-number-at-most turn-number))
     (if (same-parity turn-number index)
@@ -353,12 +354,12 @@ adheres to the argumentation forms."
 				       (right-conjunct attacked-statement)))
 			   (add-move-to-dialogue dialogue
 						 (if (eq left-or-right 'l)
-						     (make-attack 'attack-left-conjunction index)
-						     (make-attack 'attack-right-conjunction index)))
+						     (make-attack current-player 'attack-left-conjunction index)
+						     (make-attack current-player 'attack-right-conjunction index)))
 			   (if (oddp turn-number) (register-attack-against-proponent dialogue index))))
 			((disjunction? attacked-statement)
 			 (msg "OK, you are attacking move ~A by challenging the other player to specify one of the disjuncts and defend it.~%" index)
-			 (add-move-to-dialogue dialogue (make-attack 'which-disjunct? 'a))
+			 (add-move-to-dialogue dialogue (make-attack current-player 'which-disjunct? 'a))
 			 (if (oddp turn-number) (register-attack-against-proponent dialogue index)))
 			((implication? attacked-statement)
 			 (let ((antecedent (antecedent attacked-statement))
@@ -369,7 +370,7 @@ adheres to the argumentation forms."
 			       (msg "Proponent cannot assert an atomic formula that has not yet been asserted by Opponent.~%")
 			       (progn
 				 (msg "OK, you are attacking move ~A by asserting~%~%  ~A~%~%and asking the other player to defend~%~%  ~A~%" index antecedent consequent)
-				 (add-move-to-dialogue dialogue (make-attack antecedent index))
+				 (add-move-to-dialogue dialogue (make-attack current-player antecedent index))
 				 (if (oddp turn-number) (register-attack-against-proponent dialogue index))))))
 			((negation? attacked-statement)
 			 (let ((unnegated (unnegate attacked-statement)))
@@ -379,7 +380,7 @@ adheres to the argumentation forms."
 			       (msg "Proponent cannot assert an atomic formula that has not yet been asserted by Opponent.~%")
 			       (progn
 				 (msg "OK, you are attacking move ~A by asserting ~A.~%" index unnegated)
-				 (add-move-to-dialogue dialogue (make-attack unnegated index))
+				 (add-move-to-dialogue dialogue (make-attack current-player unnegated index))
 				 (if (oddp turn-number) (register-attack-against-proponent dialogue index))))))
 			((universal? attacked-statement)
 			 (let ((var (bound-variable attacked-statement))
@@ -390,17 +391,18 @@ adheres to the argumentation forms."
 			   (msg "What term do you choose? (Your answer must be a symbol.) ")
 			   (setq instance (read-term))
 			   (msg "OK, the other player must now defend the statement ~A~%" (instantiate instance var formula))
-			   (add-move-to-dialogue dialogue (make-attack instance index))
+			   (add-move-to-dialogue dialogue (make-attack current-player instance index))
 			   (if (oddp turn-number) (register-attack-against-proponent dialogue index))))
 			(t ;; existential case
 			 (msg "OK, you are attacking move ~A, an existential statement.~%" attacked-statement)
-			 (add-move-to-dialogue dialogue (make-attack 'which-instance? index))
+			 (add-move-to-dialogue dialogue (make-attack current-player 'which-instance? index))
 			 (if (oddp turn-number) (register-attack-against-proponent dialogue index))))))))))
 
 
 (defun extend-dialogue-with-defense (dialogue)
-  (let ((index nil)
-	(turn-number (dialogue-length dialogue)))
+  (let* ((index nil)
+	 (turn-number (dialogue-length dialogue))
+	 (current-player (if (evenp turn-number) 'p 'o)))
     (msg "Defend against which attack? (Your response should be a number between 0 and ~A.) " (1- turn-number))
     (setq index (read-non-negative-number-at-most turn-number))
     (if (same-parity turn-number index)
@@ -422,7 +424,7 @@ adheres to the argumentation forms."
 				 (msg "Proponent cannot assert an atomic formula that has not yet been asserted by Opponent.~%")
 				 (progn
 				   (msg "OK, you are responding to the attack at position ~A by asserting ~A~%" index left)
-				   (add-move-to-dialogue dialogue (make-defense left index))
+				   (add-move-to-dialogue dialogue (make-defense current-player left index))
 				   (close-attack dialogue index)))))
 			  ((eq attacking-statement 'attack-right-conjunction)
 			   (let ((right (right-conjunct initial-statement)))
@@ -432,7 +434,7 @@ adheres to the argumentation forms."
 				 (msg "Proponent cannot assert an atomic formula that has not yet been asserted by Opponent.~%")
 				 (progn
 				   (msg "OK, you are responding to the attack at position ~A by asserting ~A~%" index right)
-				   (add-move-to-dialogue dialogue (make-defense right index))
+				   (add-move-to-dialogue dialogue (make-defense  current-player right index))
 				   (close-attack dialogue index)))))
 			  ((eq attacking-statement 'which-disjunct?)
 			   (let ((left-or-right nil)
@@ -443,7 +445,7 @@ adheres to the argumentation forms."
 						 (left-disjunct initial-statement)
 						 (right-disjunct initial-statement)))
 			     (msg "OK, you are responding to the attack by asserting ~A~%" assertion)
-			     (add-move-to-dialogue dialogue (make-defense assertion index))
+			     (add-move-to-dialogue dialogue (make-defense current-player assertion index))
 			     (close-attack dialogue index)))
 			  ((negation? initial-statement)
 			   (msg "You cannot (directly) defend against an attack on a negation.~%"))
@@ -455,13 +457,13 @@ adheres to the argumentation forms."
 				 (msg "Proponent cannot assert an atomic formula that has not yet been asserted by Opponent.~%")
 				 (progn
 				   (msg "OK, you are responding to the attack on the implication~%~%  ~A~%~%by asserting ~A.~%" initial-statement consequent)
-				   (add-move-to-dialogue dialogue (make-defense consequent index))
+				   (add-move-to-dialogue dialogue (make-defense current-player consequent index))
 				   (close-attack dialogue index)))))
 			  ((universal? initial-statement)
 			   (let ((instantiated (instantiate attacking-statement (bound-variable initial-statement) (matrix initial-statement))))
 			     (msg "OK, you are responding to the attack on your universal statement~%~%  ~A~%~%by asserting ~A"
 				     initial-statement instantiated)
-			     (add-move-to-dialogue dialogue (make-defense instantiated index))
+			     (add-move-to-dialogue dialogue (make-defense current-player instantiated index))
 			     (close-attack dialogue index)))
 			  ((existential? initial-statement)
 			   (msg "OK, you are defending an existential claim.  To do so, you must provide a witness.~%")
@@ -470,7 +472,7 @@ adheres to the argumentation forms."
 			     (setf witness (read-term))
 			     (let ((instantiated (instantiate witness (bound-variable initial-statement) (matrix initial-statement))))
 			       (msg "OK, you've chosen term ~A. Your assertion for this move is thus~%~%  ~A~%" witness instantiated)
-			       (add-move-to-dialogue dialogue (make-defense instantiated index))
+			       (add-move-to-dialogue dialogue (make-defense current-player instantiated index))
 			       (close-attack dialogue index))))
 			  (t (error "Unrecognized defensive move!"))))))))))
 
