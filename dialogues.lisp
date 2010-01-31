@@ -144,6 +144,9 @@
 (defun nth-move (dialogue n)
   (nth n (dialogue-plays dialogue)))
 
+(defun last-move (dialogue)
+  (nth-move dialogue (1- (length (dialogue-plays dialogue)))))
+
 (defun nth-statement (dialogue n)
   (move-statement (nth-move dialogue n)))
 
