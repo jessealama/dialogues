@@ -77,7 +77,193 @@
 		       :length 1
 		       :closed-attacks nil)))
 
+(defun some-move (predicate dialogue)
+  (some predicate (dialogue-moves dialogue)))
 
+(defun every-move (predicate dialogue)
+  (some predicate (dialogue-moves dialogue)))
+
+(defun nth-move (dialogue n)
+  (nth n (dialogue-plays dialogue)))
+
+(defun last-move (dialogue)
+  (nth-move dialogue (1- (length (dialogue-plays dialogue)))))
+
+(defun nth-statement (dialogue n)
+  (move-statement (nth-move dialogue n)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Argumentation forms
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun maybe-adheres-to-argumentation-forms (move-1 move-2)
+  "Determine whether MOVE-2 could follow MOVE-1 according to the
+argumentation forms.  The argumentation forms are, strictly speaking,
+triples; it does not make sense to say of, two moves, that they
+adheres to the argumentation forms.  What is computed by this function
+is a notion of adherence derived from the proper notion:
+MAYBE-ADHERES-TO-ARGUMENTATION-FORMS determines whether there could
+exist a third move, say, MOVE-3, such that (MOVE-1,MOVE-2,MOVE-3)
+adheres to the argumentation forms."
+  nil)
+
+(defun adheres-to-argumentation-forms (move-1 move-2 move-3)
+  "Determine whether the ordered triple (MOVE-1, MOVE-2, MOVE-3)
+adheres to the argumentation forms."
+  nil)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Dialogue rules
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmacro make-rule (name &key condition body failure-message)
+  `(lambda (dialogue current-player 
+	             current-position
+	             current-statement
+	             current-stance
+	             current-reference)
+     (if ,condition
+	 (values ,body (concatenate 'string "[~A] " ,failure-message ,name))
+	 (values t nil))))
+
+(defvar rule-d00-atomic
+  (make-rule :name d00-atomic
+	     :condition (zerop current-position)
+	     :body (atomic-formula? current-statement)
+	     :failure-message "Dialogues must open with an atomic statement."))
+
+(defvar rule-d00-proponent
+  (make-rule :name d00-proponent
+	     :condition (evenp current-position)
+	     :body (eq current-player 'p)
+	     :failure-message "Proponent plays even-numbered positions.  (Counting starts at zero.)"))
+
+(defvar rule-d00-opponent
+  (make-rule :name d00-opponent
+	     :condition (oddp current-position)
+	     :body (eq current-player 'o)
+	     :failure-message "Opponent plays odd-numbered positions.  (Counting starts at zero.)"))
+
+(defvar rule-d01-composite
+  (make-rule :name d01-composite
+	     :condition (eq current-stance 'a)
+	     :body (not (atomic-formula? (nth-statement dialogue 
+							current-reference)))
+	     :failure-message "Atomic formulas cannot be attacked."))
+
+(defvar rule-d01-adheres-to-forms
+  (make-rule :name d01-adherence
+	     :condition (eq current-stance 'a)
+	     :body (let ((attacking-move (make-move current-player
+						    current-statement
+						    current-stance
+						    current-reference))
+			 (attacked-move (nth-move dialogue current-reference)))
+		     (maybe-adheres-to-argumentation-forms attacked-move
+							   attacking-move))
+	     :failure-message "The proposed attack does not adhere to the argumentation forms."))
+
+(defvar rule-d02-attack
+  (make-rule :name d02-attack
+	     :condition (eq current-stance 'd)
+	     :body (attacking-move? (nth-move dialogue current-reference))
+	     :failure-message "The move being defended against is not an attack."))
+
+(defvar rule-d02-adheres-to-forms
+  (make-rule :name d02-adherence
+	     :condition (eq current-stance 'd)
+	     :body (let* ((middle-move (nth-move dialogue current-reference))
+			  (first-move (nth-move dialogue 
+						(move-reference middle-move)))
+			  (proposed-move (make-move current-player
+						    current-statement
+						    current-stance
+						    current-reference)))
+		     (adheres-to-argumentation-forms first-move
+						     middle-move
+						     proposed-move))
+	     :failure-message "The proposed move does not adhere to the argumentation forms."))
+
+(defvar rule-d10
+  (make-rule :name d10
+	     :condition (and (evenp current-position) 
+			     (atomic-formula? current-statement))
+	     :body (some-move #'(lambda (move)
+				  (when (opponent-move? move)
+				    (equal-formulas? (move-statement move)
+						     current-statement)))
+			      dialogue)
+	     :failure-message "Proponent cannot assert an atomic formula before opponent has asserted it."))
+
+(defun closed-attack-indices (dialogue)
+  (let ((defenses (remove-if #'attacking-move? (dialogue-moves dialogue))))
+    (mapcar #'move-reference defenses)))
+
+(defun open-attack-indices (dialogue)
+  (let ((result nil)
+	(moves (dialogue-plays dialogue)))
+    (when moves
+      (do ((i 0 (1+ i))
+	   (move (car moves) (cdr moves-tail))
+	   (moves-tail (cdr moves) (cdr moves-tail)))
+	  ((null moves-tail) result)
+	(if (attacking-move? move)
+	    (push i result)
+	    (delete (move-reference move) result))))))
+
+(defun most-recent-open-attack (dialogue)
+  (let ((open-attacks (open-attack-indices dialogue)))
+    (when open-attacks
+      (car open-attacks))))
+
+(defvar rule-d11
+  (make-rule :name d11
+	     :condition (eq current-stance 'd)
+	     :body (= current-reference (most-recent-open-attack dialogue))
+	     :failure-message "You must defend against only the most recent open attack."))
+
+(defvar rule-d12
+  (make-rule :name d12
+	     :condition (eq current-stance 'd)
+	     :body (every-move #'(lambda (move)
+				   (or (attacking-move? d)
+				       (/= (move-reference move)
+					   current-reference)))
+			       dialogue)
+	     :failure-message "Attacks may be answered at most once."))
+
+(defvar rule-d13
+  (make-rule :name d13
+	     :condition (and (oddp current-position)
+			     (eq current-stance 'a))
+	     :body (every-move #'(lambda (move)
+				   (or (proponent-move move)
+				       (/= (move-reference move)
+					   current-reference)))
+			       dialogue)
+	     :failure-message "A P-assertion may be attacked at most once."))
+
+(defvar rule-e
+  (make-rule :name e
+	     :condition (oddp current-position)
+	     :body (= current-reference (1- current-position))
+	     :failure-message "Opponent must react to the most recent statement by Proponent."))
+
+(defvar d-dialogue-rules
+  (list rule-d00-atomic
+	rule-d00-proponent
+	rule-d00-opponent
+	rule-d01-composite
+	rule-d01-adheres-to-forms
+	rule-d02-attack
+	rule-d02-adheres-to-forms
+	rule-d10
+	rule-d12
+	rule-d13))
+
+(defvar e-dialogue-rules
+  (append d-dialogue-rules (list rule-e)))
+	
 (defstruct (dialogue
 	     (:print-function print-dialogue)
 	     (:constructor make-dialogue-int))
@@ -140,15 +326,6 @@
 
 (defun register-attack-against-proponent (dialogue index-of-attacked-statement)
   (push index-of-attacked-statement (dialogue-proponents-attacked-statements dialogue)))
-
-(defun nth-move (dialogue n)
-  (nth n (dialogue-plays dialogue)))
-
-(defun last-move (dialogue)
-  (nth-move dialogue (1- (length (dialogue-plays dialogue)))))
-
-(defun nth-statement (dialogue n)
-  (move-statement (nth-move dialogue n)))
 
 (defun register-defense (dialogue index-of-defense)
   (push index-of-defense (dialogue-defenses dialogue)))
@@ -297,33 +474,47 @@
 			       (close-attack dialogue index))))
 			  (t (error "Unrecognized defensive move!"))))))))))
 
-(defun start-dialogue (initial-statement)
-  (when (atomic-formula? initial-statement)
-    (error "A dialogue cannot commence with a composite formula!"))
-  (let ((response nil)
-	(stance nil)
-	(acceptable-input? nil)
-	(turn-number 1)
-	(dialogue (make-dialogue initial-statement)))
-    (msg "Let's play a dialogue for ~A.~%" initial-statement)
-    (msg "Turn number 0.~%")
-    (msg "Proponent asserts ~A~%" initial-statement)
+(defun evaluate-rules (rules dialogue turn-number statement stance)
+  (if rules
+      (do ((rule (car rules) (car rules-tail))
+	   (rules-tail (cdr rules) (cdr rules-tail))
+	   (message nil)
+	   (all-ok? t))
+	  ((null rules-tail) (values all-ok? message))
+	  (multiple-value-bind (result error-message)
+	      (funcall rule dialogue turn-number statement stance)
+	    (unless result
+	      (setf rules-tail nil
+		    all-ok? nil
+		    message error-message))))))
+
+(defun play-dialogue-game (rules)
+  (msg "Let's play a dialogue game!~%")
+  (msg "Proponent starts by playing an atomic formula.~%")
+  (msg "Input an atomic formula.")
+  (let* ((initial-statement (read-atomic-formula))
+	 (dialogue (make-dialogue initial-statement))
+	 (turn-number 1)
+	 (response nil))
     (until (eq response 'done)
-      (msg "Turn number ~A.~%" turn-number)
-      (setq acceptable-input? nil)
-      (if (evenp turn-number)
-	  (msg "Proponent's turn.~%")
-	  (msg "Opponent's turn.~%"))
-      (msg "Attack (A), defend (D), print dialogue (P), or quit (Q)? ")
-      (setq stance (read-symbol 'a 'd 'q 'p))
+      (msg "Turn number ~A: ~A's turn~%" (if (evenp turn-number)
+					     "Proponent"
+					     "Opponent"))
+      (msg "Attack (A), defend (D), print dialogue so far (P), or quit (Q)? ")
+      (setf response (read-symbol 'a 'd 'p 'q))
       (case stance
-	(p (msg "The dialogue so far is:~%~A~%" dialogue))
+	(p (msg "~A" dialogue))
 	(q (setf response 'done))
 	(a (extend-dialogue-with-attack dialogue))
 	(d (extend-dialogue-with-defense dialogue)))
-    (msg "Thanks for playing.~%")
-    (msg "The dialogue went like this:~%~A~%" dialogue)
-    (msg "Here were the closed attacks: ~A" (dialogue-closed-attacks dialogue)))))
+      (msg "Thanks for playing.~%")
+      (msg "The dialogue went like this:~%~A~%" dialogue))))
+
+(defun play-d-dialogue-game ()
+  (play-dialogue-game d-dialogue-rules))
+
+(defun play-e-dialogue-game ()
+  (play-dialogue-game e-dialogue-rules))
 
 
 (defun proof-to-strategy (d)
