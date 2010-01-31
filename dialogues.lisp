@@ -105,11 +105,13 @@ is a notion of adherence derived from the proper notion:
 MAYBE-ADHERES-TO-ARGUMENTATION-FORMS determines whether there could
 exist a third move, say, MOVE-3, such that (MOVE-1,MOVE-2,MOVE-3)
 adheres to the argumentation forms."
+  (declare (ignore move-1 move-2))
   nil)
 
 (defun adheres-to-argumentation-forms (move-1 move-2 move-3)
   "Determine whether the ordered triple (MOVE-1, MOVE-2, MOVE-3)
 adheres to the argumentation forms."
+  (declare (ignore move-1 move-2 move-3))
   nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
