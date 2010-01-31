@@ -342,7 +342,7 @@ adheres to the argumentation forms."
 	(msg "You cannot attack yourself!~%")
 	(if (and (oddp turn-number) (opponent-already-attacked? dialogue index))
 	    (msg "Opponent cannot attack move ~A because it has already been attacked.~%" index)
-	    (let* ((attacked-move (nth-move dialogue n))
+	    (let* ((attacked-move (nth-move dialogue turn-number))
 		   (attacked-statement (move-statement attacked-move)))
 	      (if (atomic-formula? attacked-statement)
 		  (msg "One cannot attack atomic statements!~%")
