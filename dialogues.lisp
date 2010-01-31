@@ -211,7 +211,7 @@ adheres to the argumentation forms."
 	  ((null moves-tail) result)
 	(if (attacking-move? move)
 	    (push i result)
-	    (delete (move-reference move) result))))))
+	    (setf result (delete (move-reference move) result)))))))
 
 (defun most-recent-open-attack (dialogue)
   (let ((open-attacks (open-attack-indices dialogue)))
