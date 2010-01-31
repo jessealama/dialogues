@@ -116,7 +116,7 @@ adheres to the argumentation forms."
 ;;; Dialogue rules
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmacro make-rule (name &key condition body failure-message)
+(defmacro make-rule (&key name condition body failure-message)
   `(lambda (dialogue current-player 
 	             current-position
 	             current-statement
