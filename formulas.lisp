@@ -252,6 +252,12 @@ in TERM or FORMULA."
       (setf response (read nil t t)))
     response))
 
+(defun read-atomic-formula ()
+  (let (response)
+    (until (atomic-formula? response)
+      (setf response (read nil t t)))
+    response))
+
 (provide 'formulas)
 
 ;;; formulas.lisp ends here
