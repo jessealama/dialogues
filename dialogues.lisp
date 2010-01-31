@@ -144,6 +144,9 @@
 (defun nth-move (dialogue n)
   (nth n (dialogue-plays dialogue)))
 
+(defun nth-statement (dialogue n)
+  (move-statement (nth-move dialogue n)))
+
 (defun register-defense (dialogue index-of-defense)
   (push index-of-defense (dialogue-defenses dialogue)))
 
