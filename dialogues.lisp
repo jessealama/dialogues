@@ -444,10 +444,17 @@ adheres to the argumentation forms."
 	  (setf response t)))
     (msg "What is your attack? (Your response can be a formula or a symbolic attack.) ")
     (setf response (read-statement))
-    (until (evaluate-rules rules dialogue current-player turn-number response 'a index)
-      (msg "At least one of the dialogue rules is violated by your attack.~%")
-      (msg "Please try another formula or symbolic attack: ")
-      (setf response (read-statement)))
+    (multiple-value-bind (result message)
+	(evaluate-rules rules dialogue current-player turn-number response 'a index)
+      (until result
+	(msg "At least one of the dialogue rules is violated by your attack.~%")
+	(msg "Error message: ~A~%" message)
+	(msg "Please try another formula or symbolic attack: ")
+	(setf response (read-statement))
+	(multiple-value-bind (result-temp message-temp)
+	    (evaluate-rules rules dialogue current-player turn-number response 'a index)
+	  (setf result result-temp
+		message message-temp))))
     (add-move-to-dialogue dialogue 
 			  (make-move current-player response 'a index))))
 
