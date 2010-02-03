@@ -194,12 +194,12 @@ adheres to the argumentation forms."
 	             current-statement
 	             current-stance
 	             current-reference)
-     (these-are-ignorable dialogue 
-			  current-player
-			  current-position
-			  current-statement
-			  current-stance
-			  current-reference)
+     (declare (ignorable dialogue
+			 current-player
+			 current-position
+			 current-statement
+			 current-stance
+			 current-reference))
      (with-value-and-error (,condition-result ,condition-error)
          ,condition
        (if ,condition-error
