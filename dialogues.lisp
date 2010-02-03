@@ -1,7 +1,8 @@
 ;;; dialogues.lisp Play Lorenzen dialogue games
 
-(require 'utils "utils.lisp")
-(require 'formulas "formulas.lisp")
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require 'utils "utils.lisp")
+  (require 'formulas "formulas.lisp"))
 
 (defun print-move (move stream depth)
   (declare (ignore depth))
