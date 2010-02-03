@@ -182,22 +182,38 @@ adheres to the argumentation forms."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Dialogue rules
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+		      
 (defmacro make-rule (&key name condition body failure-message)
+  (let ((condition-result (gensym))
+	(condition-error (gensym))
+	(body-result (gensym))
+	(body-error (gensym)))
   `(lambda (dialogue current-player 
 	             current-position
 	             current-statement
 	             current-stance
 	             current-reference)
-     (declare (ignorable dialogue
-			 current-player
-			 current-position
-			 current-statement
-			 current-stance
-			 current-reference))
-     (if ,condition
-	 (values ,body (concatenate 'string "[~A] " ,failure-message (quote ,name)))
-	 (values t nil))))
+     (these-are-ignorable dialogue 
+			  current-player
+			  current-position
+			  current-statement
+			  current-stance
+			  current-reference)
+     (with-value-and-error (,condition-result ,condition-error)
+         ,condition
+       (if ,condition-error
+	   (warn "An error occured while evaluating the condition for rule ~A! The type of the error was ~A. Continuing..." 
+		 (quote ,name)
+		 ,condition-error)
+	   (if ,condition-result
+	       (with-value-and-error (,body-result ,body-error)
+		   ,body
+		 (if ,body-error 
+		     (warn "An error occured while evaluating the body of rule ~A! The type of the error was ~A.  Continuing..."
+			   (quote ,name)
+			   ,body-error)
+		     (values ,body-result (concatenate 'string "[~A] " ,failure-message (quote ,name)))))
+	       (values t nil)))))))
 
 (defvar rule-d00-atomic
   (make-rule :name d00-atomic
