@@ -130,8 +130,14 @@ adheres to the argumentation forms."
 	             current-statement
 	             current-stance
 	             current-reference)
+     (declare (ignorable dialogue
+			 current-player
+			 current-position
+			 current-statement
+			 current-stance
+			 current-reference))
      (if ,condition
-	 (values ,body (concatenate 'string "[~A] " ,failure-message ,name))
+	 (values ,body (concatenate 'string "[~A] " ,failure-message (quote ,name)))
 	 (values t nil))))
 
 (defvar rule-d00-atomic
