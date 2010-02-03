@@ -324,19 +324,19 @@ in TERM or FORMULA."
 (defun read-term ()
   (let (response)
     (until (symbolp response)
-      (setq response (read nil t t)))
+      (setq response (read t nil nil)))
     response))
 
 (defun read-formula ()
   (let (response)
     (until (formula? response)
-      (setf response (read nil t t)))
+      (setf response (read t nil nil)))
     response))
 
 (defun read-atomic-formula ()
   (let (response)
     (until (atomic-formula? response)
-      (setf response (read nil t t)))
+      (setf response (read t nil nil)))
     response))
 
 (provide 'formulas)
