@@ -92,7 +92,7 @@
 
 (defun term? (x)
   (or (variable? x)
-      (symbolp? x)
+      (symbolp x)
       (and (listp x)
 	   (not (null x))
 	   (symbolp (car x))
