@@ -107,6 +107,15 @@
 	     (not (universal? formula))
 	     (not (existential? formula))))))
 
+(defun composite-formula? (formula)
+  (or (disjunction? formula)
+      (conjunction? formula)
+      (equivalence? formula)
+      (implication? formula)
+      (negation? formula)
+      (universal? formula)
+      (existential? formula)))
+
 (defun predicate (atomic-formula)
   (car atomic-formula))
 

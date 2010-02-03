@@ -218,8 +218,8 @@ adheres to the argumentation forms."
 (defvar rule-d00-atomic
   (make-rule :name d00-atomic
 	     :condition (zerop current-position)
-	     :body (atomic-formula? current-statement)
-	     :failure-message "Dialogues must open with an atomic statement."))
+	     :body (composite-formula? current-statement)
+	     :failure-message "Dialogues must open with a composite formula."))
 
 (defvar rule-d00-proponent
   (make-rule :name d00-proponent
@@ -236,8 +236,8 @@ adheres to the argumentation forms."
 (defvar rule-d01-composite
   (make-rule :name d01-composite
 	     :condition (eq current-stance 'a)
-	     :body (not (atomic-formula? (nth-statement dialogue 
-							current-reference)))
+	     :body (composite-formula? (nth-statement dialogue 
+						      current-reference))
 	     :failure-message "Atomic formulas cannot be attacked."))
 
 (defvar rule-d01-adheres-to-forms
@@ -372,7 +372,7 @@ adheres to the argumentation forms."
 	(let ((first (first plays)))
 	  (let ((first-statement (move-statement first)))
 	    (when (and (formula? first-statement)
-		       (not (atomic-formula? first-statement)))
+		       (composite-formula? first-statement))
 	      (let ((len (length plays)))
 		(let ((plays-vec (list-to-array plays)))
 		  (or (zerop len)
@@ -584,7 +584,7 @@ adheres to the argumentation forms."
 
 (defun play-dialogue-game (rules)
   (msg "Let's play a dialogue game!~%")
-  (msg "Proponent starts by playing an atomic formula.~%")
+  (msg "Proponent starts by playing a composite formula.~%")
   (msg "Input an atomic formula.")
   (let* ((initial-statement (read-atomic-formula))
 	 (dialogue (make-dialogue initial-statement))
