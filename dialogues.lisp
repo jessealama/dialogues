@@ -81,7 +81,6 @@
 (defun make-dialogue (initial-statement)
   (let ((first-move (make-proponent-move initial-statement nil nil)))
     (make-dialogue-int :plays (list first-move)
-		       :length 1
 		       :closed-attacks nil)))
 
 (defun some-move (predicate dialogue)
