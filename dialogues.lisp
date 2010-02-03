@@ -301,7 +301,7 @@ adheres to the argumentation forms."
 	     :body (every-move #'(lambda (move)
 				   (or (attacking-move? move))
 				       (/= (move-reference move)
-					   current-reference)))
+					   current-reference))
 			       dialogue)
 	     :failure-message "Attacks may be answered at most once."))
 
