@@ -212,7 +212,7 @@ adheres to the argumentation forms."
 		     (warn "An error occured while evaluating the body of rule ~A! The type of the error was ~A.  Continuing..."
 			   (quote ,name)
 			   ,body-error)
-		     (values ,body-result (concatenate 'string "[~A] " ,failure-message (quote ,name)))))
+		     (values ,body-result (format nil (concatenate 'string "[~A] " ,failure-message) (quote ,name)))))
 	       (values t nil)))))))
 
 (defvar rule-d00-atomic
