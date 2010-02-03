@@ -240,7 +240,7 @@ adheres to the argumentation forms."
   (make-rule :name d12
 	     :condition (eq current-stance 'd)
 	     :body (every-move #'(lambda (move)
-				   (or (attacking-move? d)
+				   (or (attacking-move? move))
 				       (/= (move-reference move)
 					   current-reference)))
 			       dialogue)
@@ -251,7 +251,7 @@ adheres to the argumentation forms."
 	     :condition (and (oddp current-position)
 			     (eq current-stance 'a))
 	     :body (every-move #'(lambda (move)
-				   (or (proponent-move move)
+				   (or (proponent-move? move)
 				       (/= (move-reference move)
 					   current-reference)))
 			       dialogue)
