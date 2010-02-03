@@ -1,5 +1,59 @@
 ;;; utils.lisp For stuff that doesn't fit any where else
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Iteration
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmacro until (condition &body body)
+  `(do nil (,condition) ,@body))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Lists
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun list-to-array (lst)
+  (if lst
+      (let ((len (length lst)))
+	(let ((a (make-array (list len))))
+	  (do ((i 0 (1+ i))
+	       (x (car lst) (car tail))
+	       (tail (cdr lst) (cdr tail)))
+	      ((null tail) a)
+	    (setf (aref a i) x))))
+      (make-array (list 0))))
+
+(defun every-pair (pred lst-1 lst-2)
+  "With LST-1 = (a-1 a-2 ...) and LST-2 = (b-1 b-2 ...), and PRED a
+  binary predicate, determine whether PRED applies
+  to (a-1,b-1), (a-2,b-2), ... . If LST-1 and LST-2 do not have the
+  same length, return NIL."
+  (if lst-1
+      (when lst-2
+	(do ((head-1 (car lst-1) (car tail-1))
+	     (head-2 (car lst-2) (cdr tail-2))
+	     (tail-1 (cdr lst-1) (cdr tail-1))
+	     (tail-2 (cdr lst-2) (cdr tail-2))
+	     (all-pass t (funcall pred head-1 head-2)))
+	    ((or (null tail-1)
+		 (null tail-2)
+		 (not all-pass)) (if (null tail-1)
+				     (and (null tail-2) all-pass)
+				     (not (null tail-2)))))))
+      (null lst-2))
+	
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Numbers
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun same-parity (m n)
+  (or (and (evenp m) (evenp n))
+      (and (oddp m) (oddp n))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Input and output
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;; This could be done iteratively rather than recursively, but I'm not
 ;; sure it makes much of a difference.  I don't expect this function
 ;; to get called very much anyway.
@@ -13,20 +67,6 @@
 			 (format nil "~S" head))
 		     (comma-separated-list tail)))
       ""))
-
-(defmacro until (condition &body body)
-  `(do nil (,condition) ,@body))
-
-(defun list-to-array (lst)
-  (if lst
-      (let ((len (length lst)))
-	(let ((a (make-array (list len))))
-	  (do ((i 0 (1+ i))
-	       (x (car lst) (car tail))
-	       (tail (cdr lst) (cdr tail)))
-	      ((null tail) a)
-	    (setf (aref a i) x))))
-      (make-array (list 0))))
 
 (defun read-symbol (&rest symbols)
   (let (response)
@@ -48,10 +88,6 @@
 
 (defun msg (format-string &rest args)
   (apply #'format t format-string args))
-
-(defun same-parity (m n)
-  (or (and (evenp m) (evenp n))
-      (and (oddp m) (oddp n))))
 
 (provide 'utils)
 
