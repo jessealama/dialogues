@@ -586,7 +586,7 @@ adheres to the argumentation forms."
   (msg "Let's play a dialogue game!~%")
   (msg "Proponent starts by playing a composite formula.~%")
   (msg "Input a composite formula: ")
-  (let* ((initial-statement (read-atomic-formula))
+  (let* ((initial-statement (read-composite-formula))
 	 (dialogue (make-dialogue initial-statement))
 	 (turn-number 0)
 	 (response nil))

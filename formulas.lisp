@@ -348,6 +348,12 @@ in TERM or FORMULA."
       (setf response (read t nil nil)))
     response))
 
+(defun read-composite-formula ()
+  (let (response)
+    (until (composite-formula? response)
+      (setf response (read t nil nil)))
+    response))
+
 (provide 'formulas)
 
 ;;; formulas.lisp ends here
