@@ -88,13 +88,13 @@
   (cadr quantified-formula))
 
 (defun formula? (x)
-  (or (symbolp x)
-      (eq x contradiction)
-      (eq x top)
-      (and x
-	   (listp x)
-	   (cdr x)
-	   (not (listp (car x))))))
+  (when x
+    (or (symbolp x)
+	(eq x contradiction)
+	(eq x top)
+	(and (listp x)
+	     (cdr x)
+	     (not (listp (car x)))))))
 
 (defun atomic-formula? (formula)
   (when formula
