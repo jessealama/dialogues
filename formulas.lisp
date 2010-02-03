@@ -154,12 +154,13 @@
        (eq (aref (symbol-name term) 0) #\?)))
 
 (defun term? (x)
-  (or (variable? x)
-      (symbolp x)
-      (and (listp x)
-	   (not (null x))
-	   (symbolp (car x))
-	   (every #'term? (cdr x)))))
+  (when x
+    (or (variable? x)
+	(symbolp x)
+	(and (listp x)
+	     (not (null x))
+	     (symbolp (car x))
+	     (every #'term? (cdr x))))))
 
 (defun function-symbol (complex-term)
   (car complex-term))
