@@ -29,17 +29,18 @@
   same length, return NIL."
   (if lst-1
       (when lst-2
-	(do ((head-1 (car lst-1) (car tail-1))
-	     (head-2 (car lst-2) (cdr tail-2))
-	     (tail-1 (cdr lst-1) (cdr tail-1))
-	     (tail-2 (cdr lst-2) (cdr tail-2))
-	     (all-pass t (funcall pred head-1 head-2)))
-	    ((or (null tail-1)
-		 (null tail-2)
-		 (not all-pass)) (if (null tail-1)
-				     (and (null tail-2) all-pass)
-				     (not (null tail-2)))))))
-      (null lst-2))
+	(do* ((head-1 (car lst-1) (car tail-1))
+	      (head-2 (car lst-2) (car tail-2))
+	      (tail-1 (cdr lst-1) (cdr tail-1))
+	      (tail-2 (cdr lst-2) (cdr tail-2))
+	      (pass (funcall pred head-1 head-2)
+		    (funcall pred head-1 head-2)))
+	     ((or (null tail-1)
+		  (null tail-2)
+		  (not pass)) (if (null tail-1)
+				  (and (null tail-2) pass)
+				  (not (null tail-2))))))
+      (null lst-2)))
 	
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
