@@ -11,7 +11,7 @@
 	(statement (move-statement move)))
     (if (and stance ref) ; a non-initial move
 	(format stream "[~A,~A] ~A" stance ref statement)
-	(format stream "~A" statement))))
+	(format stream "~A (initial move)" statement))))
 
 (defun make-move (player statement stance reference)
   (make-move-int :player player
