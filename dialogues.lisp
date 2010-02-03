@@ -588,10 +588,11 @@ adheres to the argumentation forms."
   (msg "Input an atomic formula.")
   (let* ((initial-statement (read-atomic-formula))
 	 (dialogue (make-dialogue initial-statement))
-	 (turn-number 1)
+	 (turn-number 0)
 	 (response nil))
     (until (eq response 'done)
-      (msg "Turn number ~A: ~A's turn~%" (if (evenp turn-number)
+      (msg "Turn number ~A: ~A's turn~%" turn-number
+	                                 (if (evenp turn-number)
 					     "Proponent"
 					     "Opponent"))
       (msg "Attack (A), defend (D), print dialogue so far (P), or quit (Q)? ")
