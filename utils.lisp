@@ -96,6 +96,16 @@
 (defun read-non-negative-number-at-most (n)
   (read-number-in-interval 0 (1- n)))
 
+(defun read-number-in-interval-or-symbol (m n &rest symbols)
+  (let (response)
+    (until (or (and (numberp response)
+		    (<= m response)
+		    (<= response n))
+	       (and (symbolp response)
+		    (member response symbols)))
+      (setf response (read t nil nil)))
+    response))
+
 (defun msg (format-string &rest args)
   (apply #'format t format-string args))
 
