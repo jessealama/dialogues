@@ -479,10 +479,18 @@ adheres to the argumentation forms."
 	  (setf response t)))
     (msg "What is your defense? (Your response can be a formula or a term.) ")
     (setf response (read-formula-or-term))
-    (until (evaluate-rules rules dialogue current-player turn-number response 'd index)
-      (msg "At least one of the dialogue rules is violated by your defense.")
-      (msg "Please try another formula or term: ")
-      (setf response (read-statement)))
+
+    (multiple-value-bind (result message)
+	(evaluate-rules rules dialogue current-player turn-number response 'd index)
+      (until result
+	(msg "At least one of the dialogue rules is violated by your defense.~%")
+	(msg "Error message: ~A~%" message)
+	(msg "Please try another defense: ")
+	(setf response (read-formula-or-term))
+	(multiple-value-bind (result-temp message-temp)
+	    (evaluate-rules rules dialogue current-player turn-number response 'd index)
+	  (setf result result-temp
+		message message-temp))))
     (add-move-to-dialogue dialogue 
 			  (make-move current-player response 'd index))))
 
