@@ -97,14 +97,15 @@
 	   (not (listp (car x))))))
 
 (defun atomic-formula? (formula)
-  (or (symbolp formula)
-      (and (not (disjunction? formula))
-	   (not (conjunction? formula))
-	   (not (equivalence? formula))
-	   (not (implication? formula))
-	   (not (negation? formula))
-	   (not (universal? formula))
-	   (not (existential? formula)))))
+  (when formula
+    (or (symbolp formula)
+	(and (not (disjunction? formula))
+	     (not (conjunction? formula))
+	     (not (equivalence? formula))
+	     (not (implication? formula))
+	     (not (negation? formula))
+	     (not (universal? formula))
+	     (not (existential? formula))))))
 
 (defun predicate (atomic-formula)
   (car atomic-formula))
