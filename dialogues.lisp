@@ -30,6 +30,12 @@
 (defun make-defense (player statement reference)
   (make-move player statement 'd reference))
 
+(defun proponent-move? (move)
+  (eq (move-player move) 'p))
+
+(defun opponent-move? (move)
+  (eq (move-player move) 'o))
+
 (defstruct (move
 	     (:print-function print-move)
 	     (:constructor make-move-int))
