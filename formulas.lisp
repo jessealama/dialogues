@@ -2,6 +2,10 @@
 
 (require 'utils "utils.lisp")
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Basic predicates and constructions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defconstant contradiction '⊥)
 (defconstant top '⊤)
 
@@ -83,6 +87,54 @@
 (defun bound-variable (quantified-formula)
   (cadr quantified-formula))
 
+(defun formula? (x)
+  (or (symbolp x)
+      (eq x contradiction)
+      (eq x top)
+      (and x
+	   (listp x)
+	   (cdr x)
+	   (not (listp (car x))))))
+
+(defun atomic-formula? (formula)
+  (or (symbolp formula)
+      (and (not (disjunction? formula))
+	   (not (conjunction? formula))
+	   (not (equivalence? formula))
+	   (not (implication? formula))
+	   (not (negation? formula))
+	   (not (universal? formula))
+	   (not (existential? formula)))))
+
+(defun predicate (atomic-formula)
+  (car atomic-formula))
+
+(defun arguments (atomic-formula)
+  (cdr atomic-formula))
+
+(defun make-atomic-formula (predicate &rest arguments)
+  (cons predicate arguments))
+
+(defun equal-formulas? (form-1 form-2)
+  "Determine whether formulas FORM-1 and FORM-2 are equal."
+  (equalp form-1 form-2))
+
+(defun equation? (formula)
+  (eq (car formula) '=))
+
+(defun unary-statement-argument (unary-statement)
+  (cadr unary-statement))
+
+(defun binary-statement-first-arg (binary-statement)
+  (cadr binary-statement))
+
+(defun binary-statement-second-arg (binary-statement)
+  (caddr binary-statement))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Terms
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defun equal-variables? (var-1 var-2)
   (eql var-1 var-2))
 
@@ -110,6 +162,18 @@
 (defun equal-terms? (term-1 term-2)
   (equalp term-1 term-2))
 
+(defun bare-variable? (variable)
+  (symbolp variable))
+
+(defun typed-variable? (variable)
+  (not (bare-variable? variable)))
+
+(defun variable-type (typed-variable)
+  (second typed-variable))
+
+(defun variable-name (typed-variable)
+  (first typed-variable))
+
 (defun subst-term-for-var-in-term (term variable target-term)
   (if (variable? target-term)
       (if (equal-variables? variable target-term)
@@ -120,19 +184,6 @@
 	(apply #'make-complex-term f
 	                           (mapcar #'(lambda (x) (subst-term-for-var-in-term term variable x))
 					   args)))))    
-
-(defun predicate (atomic-formula)
-  (car atomic-formula))
-
-(defun arguments (atomic-formula)
-  (cdr atomic-formula))
-
-(defun make-atomic-formula (predicate &rest arguments)
-  (cons predicate arguments))
-
-(defun equal-formulas? (form-1 form-2)
-  "Determine whether formulas FORM-1 and FORM-2 are equal."
-  (equalp form-1 form-2))
 
 (defun instantiate (term variable formula)
   "Substitute TERM for free occurances of VARIBLE in FORMULA.
@@ -230,49 +281,6 @@ in TERM or FORMULA."
 				       (arguments formula-2)))))))
 	(values (instance-helper instantiated matrix)
 		instance-term)))))
-
-(defun bare-variable? (variable)
-  (symbolp variable))
-
-(defun typed-variable? (variable)
-  (not (bare-variable? variable)))
-
-(defun variable-type (typed-variable)
-  (second typed-variable))
-
-(defun variable-name (typed-variable)
-  (first typed-variable))
-
-(defun equation? (formula)
-  (eq (car formula) '=))
-
-(defun unary-statement-argument (unary-statement)
-  (cadr unary-statement))
-
-(defun binary-statement-first-arg (binary-statement)
-  (cadr binary-statement))
-
-(defun binary-statement-second-arg (binary-statement)
-  (caddr binary-statement))
-
-(defun formula? (x)
-  (or (symbolp x)
-      (eq x contradiction)
-      (eq x top)
-      (and x
-	   (listp x)
-	   (cdr x)
-	   (not (listp (car x))))))
-
-(defun atomic-formula? (formula)
-  (or (symbolp formula)
-      (and (not (disjunction? formula))
-	   (not (conjunction? formula))
-	   (not (equivalence? formula))
-	   (not (implication? formula))
-	   (not (negation? formula))
-	   (not (universal? formula))
-	   (not (existential? formula)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Sequents
