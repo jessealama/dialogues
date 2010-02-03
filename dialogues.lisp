@@ -588,7 +588,7 @@ adheres to the argumentation forms."
   (msg "Input a composite formula: ")
   (let* ((initial-statement (read-composite-formula))
 	 (dialogue (make-dialogue initial-statement))
-	 (turn-number 0)
+	 (turn-number 1)
 	 (response nil))
     (until (eq response 'done)
       (msg "Turn number ~A: ~A's turn~%" turn-number
