@@ -104,21 +104,80 @@
 
 (defun maybe-adheres-to-argumentation-forms (move-1 move-2)
   "Determine whether MOVE-2 could follow MOVE-1 according to the
-argumentation forms.  The argumentation forms are, strictly speaking,
-triples; it does not make sense to say of, two moves, that they
-adheres to the argumentation forms.  What is computed by this function
-is a notion of adherence derived from the proper notion:
-MAYBE-ADHERES-TO-ARGUMENTATION-FORMS determines whether there could
-exist a third move, say, MOVE-3, such that (MOVE-1,MOVE-2,MOVE-3)
-adheres to the argumentation forms."
-  (declare (ignore move-1 move-2))
-  nil)
+argumentation forms.
+
+The argumentation forms are, strictly speaking, triples; it does not
+make sense to say of, two moves, that they adhere to the
+argumentation forms.  What is computed by this function is a derived
+notion of adherence: MAYBE-ADHERES-TO-ARGUMENTATION-FORMS determines
+whether there could exist a third move, say, MOVE-3, such
+that (MOVE-1,MOVE-2,MOVE-3) adheres to the argumentation forms."
+  (let ((statement-1 (move-statement move-1))
+	(statement-2 (move-statement move-2))
+	(player-1 (move-player move-1))
+	(player-2 (move-player move-2))
+	(stance (move-stance move-2)))
+    (and (not (eq player-1 player-2))
+	 (eq stance 'a)
+	 (cond ((conjunction? statement-1)
+		(or (eq statement-2 'attack-left-conjunct)
+		    (eq statement-2 'attack-right-conjunct)))
+	       ((disjunction? statement-1)
+		(eq statement-2 'which-disjunct?))
+	       ((implication? statement-1)
+		(equal-formulas? statement-2 (antecedent statement-1)))
+	       ((negation? statement-1)
+		(equal-formulas? statement-2 (unnegate statement-1)))
+	       ((universal? statement-1)
+		(term? statement-2))
+	       ((existential? statement-2)
+		(eq statement-2 'which-instance?))
+	       (t (error "Unrecognized statement: ~A" statement-1))))))
 
 (defun adheres-to-argumentation-forms (move-1 move-2 move-3)
   "Determine whether the ordered triple (MOVE-1, MOVE-2, MOVE-3)
 adheres to the argumentation forms."
-  (declare (ignore move-1 move-2 move-3))
-  nil)
+  (let ((statement-1 (move-statement move-1))
+	(statement-2 (move-statement move-2))
+	(statement-3 (move-statement move-3))
+	(player-1 (move-player move-1))
+	(player-2 (move-player move-2))
+	(player-3 (move-player move-3))
+	(stance-2 (move-stance move-2))
+	(stance-3 (move-stance move-3)))
+    (and (eq player-1 player-3)
+	 (not (eq player-1 player-2))
+	 (eq stance-2 'a)
+	 (eq stance-3 'd)
+	 (cond ((conjunction? statement-1)
+		(or (and (eq statement-2 'attack-left-conjunct)
+			 (equal-formulas? statement-3
+					  (left-conjunct statement-1)))
+		    (and (eq statement-2 'attack-right-conjunct)
+			 (equal-formulas? statement-3 
+					  (right-conjunct statement-1)))))
+	       ((disjunction? statement-1)
+		(and (eq statement-2 'which-disjunct?)
+		     (or (equal-formulas? statement-3 
+					  (left-disjunct statement-1))
+			 (equal-formulas? statement-3 
+					  (right-conjunct statement-1)))))
+	       ((implication? statement-1)
+		(and (equal-formulas? statement-2 (antecedent statement-1))
+		     (equal-formulas? statement-3 (consequent statement-1))))
+	       ((negation? statement-1)
+		(equal-formulas? statement-2 (unnegate statement-1)))
+	       ((universal? statement-1)
+		(when (term? statement-2)
+		  (equal-formulas? statement-3 
+				   (instantiate statement-2
+						(bound-variable statement-1)
+						(matrix statement-1)))))
+	       ((existential? statement-2)
+		(and (eq statement-2 'which-instance?)
+		     (instance-of-quantified? statement-3 statement-1)))
+	       (t (error "Unrecognized statement: ~A" statement-1))))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Dialogue rules
