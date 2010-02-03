@@ -613,13 +613,6 @@ adheres to the argumentation forms."
 (defun play-e-dialogue-game ()
   (play-dialogue-game e-dialogue-rules))
 
-
-(defun proof-to-strategy (d)
-  "Transform the deduction D with endformula x into a strategy for
-  winning a dialogue game based on x."
-  (declare (ignore d))
-  nil)
-
 (defun play-as-proponent (formula)
   "Play a dialogue game for FORMULA as proponent."
   (declare (ignore formula))

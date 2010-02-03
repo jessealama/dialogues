@@ -51,6 +51,11 @@
   (declare (ignore figure))
   nil)
 
+(defun proof-to-strategy (d)
+  "Transform the deduction D with endformula x into a strategy for
+  winning a dialogue game based on x."
+  (declare (ignore d))
+  nil)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Examples
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
