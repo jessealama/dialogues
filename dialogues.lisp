@@ -585,7 +585,7 @@ adheres to the argumentation forms."
 (defun play-dialogue-game (rules)
   (msg "Let's play a dialogue game!~%")
   (msg "Proponent starts by playing a composite formula.~%")
-  (msg "Input a composite formula.")
+  (msg "Input a composite formula: ")
   (let* ((initial-statement (read-atomic-formula))
 	 (dialogue (make-dialogue initial-statement))
 	 (turn-number 0)
