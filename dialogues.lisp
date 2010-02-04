@@ -351,7 +351,7 @@ attacks which, being symbols, do qualify as terms."
   :body (with-original-statement (original-statement)
 	  (equal-formulas? current-statement
 			   (left-conjunct original-statement)))
-  :failure-message "To defend against the ATTACK-LEFT-CONJUNCT attack~%, assert the left conjunct of the original conjunction."))
+  :failure-message "To defend against the ATTACK-LEFT-CONJUNCT attack,~% assert the left conjunct of the original conjunction."))
 
 (defvar rule-d02-right-conjunct
   (make-defensive-rule 
@@ -361,7 +361,7 @@ attacks which, being symbols, do qualify as terms."
    :body (with-original-statement (original-statement)
 	   (equal-formulas? current-statement
 			    (right-conjunct original-statement)))
-   :failure-message "To defend against the ATTACK-RIGHT-CONJUNCT attack~%, assert the right conjunct of the original conjunction."))
+   :failure-message "To defend against the ATTACK-RIGHT-CONJUNCT attack,~% assert the right conjunct of the original conjunction."))
 
 (defvar rule-d02-which-disjunct
   (make-defensive-rule
