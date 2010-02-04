@@ -97,7 +97,7 @@
   (nth n (dialogue-plays dialogue)))
 
 (defun last-move (dialogue)
-  (nth-move dialogue (1- (length (dialogue-plays dialogue)))))
+  (nth-move dialogue (1- (dialogue-length dialogue))))
 
 (defun nth-statement (dialogue n)
   (move-statement (nth-move dialogue n)))
@@ -385,38 +385,13 @@ adheres to the argumentation forms."
 (defun dialogue-length (dialogue)
   (length (dialogue-plays dialogue)))
 
-(defun dialogue? (d)
-  "Determine whether the dialogue data structure D really does represent a Lorenzen dialogue."
-  (let ((plays (dialogue-plays d)))
-    (or (null plays)
-	(let ((first (first plays)))
-	  (let ((first-statement (move-statement first)))
-	    (when (and (formula? first-statement)
-		       (composite-formula? first-statement))
-	      (let ((len (length plays)))
-		(let ((plays-vec (list-to-array plays)))
-		  (or (zerop len)
-		      (do ((i 0 (1+ i))
-			   (ok? t)
-			   (move (aref plays-vec 0) (aref plays-vec i)))
-			  ((and ok? (= i len)) ok?)
-			(unless (= i 0)
-			  (let ((ref (move-reference move)))
-			    (unless (and (>= ref 0)
-					 (< ref i)
-					 (not (= (mod ref 2) (mod i 2)))
-					 (or (attacking-move? move)
-					     (let ((old-move (aref plays-vec ref)))
-					       (attacking-move? old-move))))
-			      (setq ok? nil))))))))))))))
-
 (defun next-moves (dialogue)
   "The set of moves by which DIALOGUE can be legally extended."
   (declare (ignore dialogue))
   nil)
 
 (defun proponent-wins? (dialogue)
-  (let ((len (length (dialogue-plays dialogue))))
+  (let ((len (dialogue-length dialogue)))
     (when (evenp len)
       (null (next-moves dialogue)))))
 
@@ -436,9 +411,6 @@ adheres to the argumentation forms."
 
 (defun register-attack-against-proponent (dialogue index-of-attacked-statement)
   (push index-of-attacked-statement (dialogue-proponents-attacked-statements dialogue)))
-
-(defun register-defense (dialogue index-of-defense)
-  (push index-of-defense (dialogue-defenses dialogue)))
 
 (defvar symbolic-attacks
   '(attack-left-conjunct attack-right-conjunct which-instance? which-disjunct?))
@@ -556,16 +528,6 @@ adheres to the argumentation forms."
 
 (defun play-e-dialogue-game ()
   (play-dialogue-game e-dialogue-rules))
-
-(defun play-as-proponent (formula)
-  "Play a dialogue game for FORMULA as proponent."
-  (declare (ignore formula))
-  nil)
-
-(defun play-as-opponent (formula)
-  "Play a dialogue game for FORMULA as opponent."
-  (declare (ignore formula))
-  nil)
 
 (provide 'dialogues)
 
