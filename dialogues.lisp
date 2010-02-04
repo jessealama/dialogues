@@ -421,6 +421,13 @@ adheres to the argumentation forms."
       (setf response (read t nil nil)))
     response))
 
+(defun read-formula-or-term ()
+  (let (response)
+    (until (or (formula? response)
+	       (term? response))
+      (setf response (read t nil nil)))
+    response))
+
 (defun extend-dialogue-with-attack (dialogue rules)
   (let* ((index nil)
 	 (turn-number (dialogue-length dialogue))
@@ -448,13 +455,6 @@ adheres to the argumentation forms."
 	      (msg "Please try another formula or symbolic attack: ")))))
     (add-move-to-dialogue dialogue 
 			  (make-move current-player response 'a index))))
-
-(defun read-formula-or-term ()
-  (let (response)
-    (until (or (formula? response)
-	       (term? response))
-      (setf response (read t nil nil)))
-    response))
 
 (defun extend-dialogue-with-defense (dialogue rules)
   (let* ((index nil)
