@@ -199,7 +199,13 @@ adheres to the argumentation forms."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Dialogue rules
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-		      
+
+(defun attack? (sym)
+  (eq sym 'a))
+
+(defun defense? (sym)
+  (eq sym 'd))
+
 (defmacro make-rule (&key name condition body failure-message)
   (let ((condition-result (gensym))
 	(condition-error (gensym))
@@ -243,6 +249,26 @@ adheres to the argumentation forms."
 			   current-reference)
 		     (values ,body-result (format nil (concatenate 'string "[~A] " ,failure-message) (quote ,name)))))
 	       (values t nil)))))))
+
+(defmacro make-defensive-rule (&key name
+			            (condition t)
+			            body
+				    failure-message)
+  `(make-rule :name ,name
+	      :condition (and (defense? current-stance)
+			      ,condition)
+	      :body ,body
+	      :failure-message ,failure-message))
+
+(defmacro make-offensive-rule (&key name
+			            (condition t)
+			            body
+			            failure-message)
+  `(make-rule :name ,name
+	      :condition (and (attack? current-stance)
+			      ,condition)
+	      :body ,body
+	      :failure-message ,failure-message))
 
 (defvar rule-d00-atomic
   (make-rule :name d00-atomic
