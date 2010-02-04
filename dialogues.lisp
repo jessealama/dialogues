@@ -206,16 +206,28 @@ adheres to the argumentation forms."
      (with-value-and-error (,condition-result ,condition-error)
          ,condition
        (if ,condition-error
-	   (warn "An error occured while evaluating the condition for rule ~A! The type of the error was ~A. Continuing..." 
+	   (warn "An error occurred while evaluating the condition for rule ~A!~%The type of the error was ~A.~%The dialogue at this point is:~%~A~%player: ~A~%position: ~A~%statement: ~A~%stance: ~A~%reference:~A~%Continuing..." 
 		 (quote ,name)
-		 ,condition-error)
+		 ,condition-error
+		 dialogue
+		 current-player
+		 current-position
+		 current-statement
+		 current-stance
+		 current-reference)
 	   (if ,condition-result
 	       (with-value-and-error (,body-result ,body-error)
 		   ,body
 		 (if ,body-error 
-		     (warn "An error occured while evaluating the body of rule ~A! The type of the error was ~A.  Continuing..."
+		     (warn "An error occurred while evaluating the body of rule ~A!~%The type of the error was ~A.~%The dialogue at this point is:~%~A~%player: ~A~%position: ~A~%statement: ~A~%stance: ~A~%reference:~A~%Continuing..." 
 			   (quote ,name)
-			   ,body-error)
+			   ,body-error
+			   dialogue
+			   current-player
+			   current-position
+			   current-statement
+			   current-stance
+			   current-reference)
 		     (values ,body-result (format nil (concatenate 'string "[~A] " ,failure-message) (quote ,name)))))
 	       (values t nil)))))))
 
