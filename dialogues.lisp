@@ -91,7 +91,7 @@
   (some predicate (dialogue-plays dialogue)))
 
 (defun every-move (predicate dialogue)
-  (some predicate (dialogue-plays dialogue)))
+  (every predicate (dialogue-plays dialogue)))
 
 (defun nth-move (dialogue n)
   (nth n (dialogue-plays dialogue)))
