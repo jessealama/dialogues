@@ -51,6 +51,10 @@
 (defun defensive-move? (move)
   (eq (move-stance move) 'D))
 
+(defun initial-move? (move)
+  (and (null (move-stance move))
+       (null (move-reference move))))
+
 (defun print-move-at-position (position move stream)
   (let ((statement (move-statement move))
 	(stance (move-stance move))
@@ -308,16 +312,20 @@ adheres to the argumentation forms."
 (defvar rule-d11
   (make-rule :name d11
 	     :condition (eq current-stance 'd)
-	     :body (= current-reference (most-recent-open-attack dialogue))
+	     :body (let ((most-recent (most-recent-open-attack dialogue)))
+		     (or (null most-recent)
+			 (= most-recent current-reference)))
 	     :failure-message "You must defend against only the most recent open attack."))
 
 (defvar rule-d12
   (make-rule :name d12
 	     :condition (eq current-stance 'd)
 	     :body (every-move #'(lambda (move)
-				   (or (attacking-move? move))
+				   (format t "the move to check is ~A~%" move)
+				   (or (initial-move? move)
+				       (attacking-move? move)
 				       (/= (move-reference move)
-					   current-reference))
+					   current-reference)))
 			       dialogue)
 	     :failure-message "Attacks may be answered at most once."))
 
