@@ -441,7 +441,8 @@ adheres to the argumentation forms."
   (let* ((index nil)
 	 (turn-number (dialogue-length dialogue))
 	 (current-player (if (evenp turn-number) 'p 'o))
-	 (response))
+	 (response)
+	 (result))
     (until response
       (msg "Attack which statement?~%")
       (msg "Your response should be a number between 0 and ~A.~%" (1- turn-number))
@@ -451,18 +452,16 @@ adheres to the argumentation forms."
 	  (format t "~A~%" dialogue)
 	  (setf response t)))
     (msg "What is your attack? (Your response can be a formula or a symbolic attack.) ")
-    (setf response (read-statement))
-    (multiple-value-bind (result message)
-	(evaluate-rules rules dialogue current-player turn-number response 'a index)
-      (until result
-	(msg "At least one of the dialogue rules is violated by your attack.~%")
-	(msg "Error message: ~A~%" message)
-	(msg "Please try another formula or symbolic attack: ")
-	(setf response (read-statement))
-	(multiple-value-bind (result-temp message-temp)
-	    (evaluate-rules rules dialogue current-player turn-number response 'a index)
-	  (setf result result-temp
-		message message-temp))))
+    (until result
+      (setf response (read-statement))
+      (multiple-value-bind (rules-result message)
+	  (evaluate-rules rules dialogue current-player turn-number response 'a index)
+	(if rules-result
+	    (setf result t)
+	    (progn
+	      (msg "At least one of the dialogue rules is violated by your attack.~%")
+	      (msg "Error message: ~A~%" message)
+	      (msg "Please try another formula or symbolic attack: ")))))
     (add-move-to-dialogue dialogue 
 			  (make-move current-player response 'a index))))
 
@@ -477,7 +476,8 @@ adheres to the argumentation forms."
   (let* ((index nil)
 	 (turn-number (dialogue-length dialogue))
 	 (current-player (if (evenp turn-number) 'p 'o))
-	 (response))
+	 (response)
+	 (result))
     (until response
       (msg "Defend against which attack? Your response should be a number between 0 and ~A." (1- turn-number))
       (msg "(Type P to print the dialogue so far.) ")
@@ -486,19 +486,16 @@ adheres to the argumentation forms."
 	  (format t "~A" dialogue)
 	  (setf response t)))
     (msg "What is your defense? (Your response can be a formula or a term.) ")
-    (setf response (read-formula-or-term))
-
-    (multiple-value-bind (result message)
-	(evaluate-rules rules dialogue current-player turn-number response 'd index)
-      (until result
-	(msg "At least one of the dialogue rules is violated by your defense.~%")
-	(msg "Error message: ~A~%" message)
-	(msg "Please try another defense: ")
-	(setf response (read-formula-or-term))
-	(multiple-value-bind (result-temp message-temp)
-	    (evaluate-rules rules dialogue current-player turn-number response 'd index)
-	  (setf result result-temp
-		message message-temp))))
+    (until result
+      (setf response (read-formula-or-term))
+      (multiple-value-bind (rules-result message)
+	  (evaluate-rules rules dialogue current-player turn-number response 'd index)
+	(if rules-result
+	    (setf result t)
+	    (progn
+	      (msg "At least one of the dialogue rules is violated by your defense.~%")
+	      (msg "Error message: ~A~%" message)
+	      (msg "Please try another defense: ")))))
     (add-move-to-dialogue dialogue 
 			  (make-move current-player response 'd index))))
 
