@@ -115,9 +115,127 @@
 (defun nth-statement (dialogue n)
   (move-statement (nth-move dialogue n)))
 
+(defvar symbolic-attacks
+  '(attack-left-conjunct attack-right-conjunct which-instance? which-disjunct?))
+
+(defun symbolic-attack? (obj)
+  (member obj symbolic-attacks))
+
+(defun statement? (obj)
+  (or (formula? obj)
+      (symbolic-attack? obj)
+      (term? obj)))
+
+(defun read-statement ()
+  (let (response)
+    (until (statement? response)
+      (setf response (read t nil nil)))
+    response))
+
+(defun read-statement-or-symbols (&rest symbols)
+  (let (response)
+    (until (or (statement? response)
+	       (member response symbols))
+      (setf response (read t nil nil)))
+    response))
+
+(defun read-formula-or-term ()
+  (let (response)
+    (until (or (formula? response)
+	       (term? response))
+      (setf response (read t nil nil)))
+    response))
+
+(defun non-symbolic-attack-term? (obj)
+  "Determine whether OBJ is a term different from the symbolic
+attacks which, being symbols, do qualify as terms."
+  (and (not (symbolic-attack? obj))
+       (term? obj)))
+
+(defun non-symbolic-attack-formula? (obj)
+  "Determine whether OBJ is a formula different from the symbolic
+  attacks which, being simply lisp symbols, do qualify as [atomic]
+  formulas)."
+  (and (not (symbolic-attack? obj))
+       (formula? obj)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Argumentation forms
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmacro make-rule (&key name condition body failure-message)
+  (let ((condition-result (gensym))
+	(condition-error (gensym))
+	(body-result (gensym))
+	(body-error (gensym)))
+  `(lambda (dialogue current-player 
+	             current-position
+	             current-statement
+	             current-stance
+	             current-reference)
+     (declare (ignorable dialogue
+			 current-player
+			 current-position
+			 current-statement
+			 current-stance
+			 current-reference))
+     (with-value-and-error (,condition-result ,condition-error)
+         ,condition
+       (if ,condition-error
+	   (warn "An error occurred while evaluating the condition for rule ~A!~%The type of the error was ~A.~%The dialogue at this point is:~%~A~%player: ~A~%position: ~A~%statement: ~A~%stance: ~A~%reference:~A~%Continuing..." 
+		 (quote ,name)
+		 ,condition-error
+		 dialogue
+		 current-player
+		 current-position
+		 current-statement
+		 current-stance
+		 current-reference)
+	   (if ,condition-result
+	       (with-value-and-error (,body-result ,body-error)
+		   ,body
+		 (if ,body-error 
+		     (warn "An error occurred while evaluating the body of rule ~A!~%The type of the error was ~A.~%The dialogue at this point is:~%~A~%player: ~A~%position: ~A~%statement: ~A~%stance: ~A~%reference:~A~%Continuing..." 
+			   (quote ,name)
+			   ,body-error
+			   dialogue
+			   current-player
+			   current-position
+			   current-statement
+			   current-stance
+			   current-reference)
+		     (values ,body-result (format nil (concatenate 'string "[~A] " ,failure-message) (quote ,name)))))
+	       (values t nil)))))))
+
+(defmacro make-defensive-rule (&key name
+			            (condition t)
+			            body
+				    failure-message)
+  `(make-rule :name ,name
+	      :condition (and (defense? current-stance)
+			      ,condition)
+	      :body ,body
+	      :failure-message ,failure-message))
+
+(defmacro make-offensive-rule (&key name
+			            (condition t)
+			            body
+			            failure-message)
+  `(make-rule :name ,name
+	      :condition (and (attack? current-stance)
+			      ,condition)
+	      :body ,body
+	      :failure-message ,failure-message))
+
+(defmacro with-original-statement ((original-statement) &body body)
+  (let ((attack (gensym))
+	(attack-refers-to (gensym))
+	(original-move (gensym)))
+    `(let* ((,attack (nth-move dialogue current-reference))
+	    (,attack-refers-to (move-reference ,attack))
+	    (,original-move (nth-move dialogue ,attack-refers-to))
+	    (,original-statement (move-statement ,original-move)))
+       ,@body)))
 
 (defvar rule-d01-conjunction
   (make-offensive-rule
@@ -125,23 +243,24 @@
    :condition (conjunction? (nth-statement dialogue current-reference))
    :body (or (eq current-statement 'attack-left-conjunct)
 	     (eq current-statement 'attack-right-conjunct))
-   :failure-message "Only two attacks against conjuncts are permitted: ATTACK-LEFT-CONJUNCT and ATTACK-RIGHT-CONJUNCT."))
+   :failure-message "Only two attacks against conjunctions are permitted:~%ATTACK-LEFT-CONJUNCT and ATTACK-RIGHT-CONJUNCT."))
 
 (defvar rule-d01-left-conjunct
   (make-offensive-rule
    :name d01-left-conjunct
    :condition (eq current-statement 'attack-left-conjunct)
-   :body (and (formula? current-statement)
+   :body (and (non-symbolic-attack-formula? current-statement)
 	      (conjunction? (nth-statement dialogue current-reference)))
-   :failure-message "One cannot attack the left conjunct of something that isn't a conjunction."))
+   :failure-message "One cannot attack the left conjunct of a formula~%that isn't a conjunction."))
 
 (defvar rule-d01-right-conjunct
   (make-offensive-rule
    :name d01-right-conjunct
    :condition (eq current-statement 'attack-right-conjunct)
-   :body (and (formula? current-statement)
+   :body (and (non-symbolic-attack-formula?
+	       (nth-statement dialogue current-reference))
 	      (conjunction? (nth-statement dialogue current-reference)))
-   :failure-message "One cannot attack the left conjunct of something that isn't a conjunction."))
+   :failure-message "One cannot attack the right conjunct of a formula that isn't a conjunction."))
 
 (defvar rule-d01-disjunction
   (make-offensive-rule
@@ -161,7 +280,7 @@
   (make-offensive-rule
    :name d01-implication
    :condition (implication? (nth-statement dialogue current-reference))
-   :body (and (formula? current-statement)
+   :body (and (non-symbolic-attack-formula? current-statement)
 	      (equal-formulas? current-statement
 			       (antecedent
 				(nth-statement dialogue current-reference))))
@@ -171,7 +290,7 @@
   (make-offensive-rule 
    :name d01-negation
    :condition (negation? (nth-statement dialogue current-reference))
-   :body (and (formula? current-statement)
+   :body (and (non-symbolic-attack-formula? current-statement)
 	      (equal-formulas? current-statement
 			       (unnegate
 				(nth-statement dialogue current-reference))))
@@ -181,15 +300,15 @@
   (make-offensive-rule
    :name d01-universal
    :condition (universal? (nth-statement dialogue current-reference))
-   :body (term? current-statement)
+   :body (non-symbolic-attack-term? current-statement)
    :failure-message "To attack a universal, one must assert a term."))
 
 (defvar rule-d01-term
   (make-offensive-rule
    :name d01-term
-   :condition (term? current-statement)
+   :condition (non-symbolic-attack-term? current-statement)
    :body (let ((s (nth-statement dialogue current-reference)))
-	   (and (formula? s)
+	   (and (non-symbolic-attack-formula? s)
 		(universal? s)))
    :failure-message "If one asserts a term as an attack, then the assertion being attacked must be a universal generalization."))
 
@@ -198,7 +317,7 @@
    :name d01-which-instance
    :condition (eq current-statement 'which-instance?)
    :body (let ((s (nth-statement dialogue current-reference)))
-	   (and (formula? s)
+	   (and (non-symbolic-attack-formula? s)
 		(existential? s)))
    :failure-message "The WHICH-INSTANCE? attack applies only to existential generalizations."))
 
@@ -212,7 +331,7 @@
 (defvar rule-d01-formula
   (make-offensive-rule 
    :name d01-formula
-   :condition (formula? current-statement)
+   :condition (non-symbolic-attack-formula? current-statement)
    :body (or (implication? (nth-statement dialogue current-reference))
 	     (negation? (nth-statement dialogue current-reference))
 	     (universal? (nth-statement dialogue current-reference)))
@@ -221,18 +340,8 @@
 (defvar rule-d02-formula
   (make-defensive-rule
    :name d02-formula
-   :body (formula? current-statement)
+   :body (non-symbolic-attack-formula? current-statement)
    :failure-message "All defensive statements are supposed to be formulas."))
-
-(defmacro with-original-statement ((original-statement) &body body)
-  (let ((attack (gensym))
-	(attack-refers-to (gensym))
-	(original-move (gensym)))
-    `(let* ((,attack (nth-move dialogue current-reference))
-	    (,attack-refers-to (move-reference ,attack))
-	    (,original-move (nth-move dialogue ,attack-refers-to))
-	    (,original-statement (move-statement ,original-move)))
-       ,@body)))
 
 (defvar rule-d02-left-conjunct
   (make-defensive-rule
@@ -309,26 +418,26 @@
 				    original-statement))
    :failure-message "The asserted statement is not an instance of the original existential generalization."))
 
-(defvar argumentation-forms '(rule-d01-conjunction
-			      rule-d01-left-conjunct
-			      rule-d01-right-conjunct
-			      rule-d01-disjunction
-			      rule-d01-which-disjunct
-			      rule-d01-implication
-			      rule-d01-negation
-			      rule-d01-universal
-			      rule-d01-term
-			      rule-d01-which-instance
-			      rule-d01-existential
-			      rule-d01-formula
-			      rule-d02-formula
-			      rule-d02-left-conjunct
-			      rule-d02-right-conjunct
-			      rule-d02-which-disjunct
-			      rule-d02-implication
-			      rule-d02-negation
-			      rule-d02-universal
-			      rule-d02-existential))
+(defvar argumentation-forms (list rule-d01-conjunction
+				  rule-d01-left-conjunct
+				  rule-d01-right-conjunct
+				  rule-d01-disjunction
+				  rule-d01-which-disjunct
+				  rule-d01-implication
+				  rule-d01-negation
+				  rule-d01-universal
+				  rule-d01-term
+				  rule-d01-which-instance
+				  rule-d01-existential
+				  rule-d01-formula
+				  rule-d02-formula
+				  rule-d02-left-conjunct
+				  rule-d02-right-conjunct
+				  rule-d02-which-disjunct
+				  rule-d02-implication
+				  rule-d02-negation
+				  rule-d02-universal
+				  rule-d02-existential))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Dialogue rules
@@ -339,70 +448,6 @@
 
 (defun defense? (sym)
   (eq sym 'd))
-
-(defmacro make-rule (&key name condition body failure-message)
-  (let ((condition-result (gensym))
-	(condition-error (gensym))
-	(body-result (gensym))
-	(body-error (gensym)))
-  `(lambda (dialogue current-player 
-	             current-position
-	             current-statement
-	             current-stance
-	             current-reference)
-     (declare (ignorable dialogue
-			 current-player
-			 current-position
-			 current-statement
-			 current-stance
-			 current-reference))
-     (with-value-and-error (,condition-result ,condition-error)
-         ,condition
-       (if ,condition-error
-	   (warn "An error occurred while evaluating the condition for rule ~A!~%The type of the error was ~A.~%The dialogue at this point is:~%~A~%player: ~A~%position: ~A~%statement: ~A~%stance: ~A~%reference:~A~%Continuing..." 
-		 (quote ,name)
-		 ,condition-error
-		 dialogue
-		 current-player
-		 current-position
-		 current-statement
-		 current-stance
-		 current-reference)
-	   (if ,condition-result
-	       (with-value-and-error (,body-result ,body-error)
-		   ,body
-		 (if ,body-error 
-		     (warn "An error occurred while evaluating the body of rule ~A!~%The type of the error was ~A.~%The dialogue at this point is:~%~A~%player: ~A~%position: ~A~%statement: ~A~%stance: ~A~%reference:~A~%Continuing..." 
-			   (quote ,name)
-			   ,body-error
-			   dialogue
-			   current-player
-			   current-position
-			   current-statement
-			   current-stance
-			   current-reference)
-		     (values ,body-result (format nil (concatenate 'string "[~A] " ,failure-message) (quote ,name)))))
-	       (values t nil)))))))
-
-(defmacro make-defensive-rule (&key name
-			            (condition t)
-			            body
-				    failure-message)
-  `(make-rule :name ,name
-	      :condition (and (defense? current-stance)
-			      ,condition)
-	      :body ,body
-	      :failure-message ,failure-message))
-
-(defmacro make-offensive-rule (&key name
-			            (condition t)
-			            body
-			            failure-message)
-  `(make-rule :name ,name
-	      :condition (and (attack? current-stance)
-			      ,condition)
-	      :body ,body
-	      :failure-message ,failure-message))
 
 (defvar rule-d00-atomic
   (make-rule :name d00-atomic
@@ -438,6 +483,7 @@
 (defvar rule-d10
   (make-rule :name d10
 	     :condition (and (evenp current-position) 
+			     (non-symbolic-attack-formula? current-statement)
 			     (atomic-formula? current-statement))
 	     :body (some-move #'(lambda (move)
 				  (when (opponent-move? move)
@@ -544,37 +590,6 @@
   (setf (dialogue-plays dialogue)
 	(append (dialogue-plays dialogue) 
 		(list move))))
-
-(defvar symbolic-attacks
-  '(attack-left-conjunct attack-right-conjunct which-instance? which-disjunct?))
-
-(defun symbolic-attack? (obj)
-  (member obj symbolic-attacks))
-
-(defun statement? (obj)
-  (or (formula? obj)
-      (term? obj)
-      (symbolic-attack? obj)))
-
-(defun read-statement ()
-  (let (response)
-    (until (statement? response)
-      (setf response (read t nil nil)))
-    response))
-
-(defun read-statement-or-symbols (&rest symbols)
-  (let (response)
-    (until (or (statement? response)
-	       (member response symbols))
-      (setf response (read t nil nil)))
-    response))
-
-(defun read-formula-or-term ()
-  (let (response)
-    (until (or (formula? response)
-	       (term? response))
-      (setf response (read t nil nil)))
-    response))
 
 (defun evaluate-rules (rules dialogue player turn-number statement stance index)
   (if (null rules)
