@@ -446,9 +446,14 @@
 			      dialogue)
 	     :failure-message "Proponent cannot assert an atomic formula before opponent has asserted it."))
 
+(defun attacking-moves (dialogue)
+  (remove-if-not #'attacking-move? (dialogue-plays dialogue)))
+
+(defun defensive-moves (dialogue)
+  (remove-if-not #'defensive-move? (dialogue-plays dialogue)))
+
 (defun closed-attack-indices (dialogue)
-  (let ((defenses (remove-if #'attacking-move? (dialogue-plays dialogue))))
-    (mapcar #'move-reference defenses)))
+  (mapcar #'move-reference (defensive-moves dialogue)))
 
 (defun open-attack-indices (dialogue)
   (let ((moves (dialogue-plays dialogue)))
