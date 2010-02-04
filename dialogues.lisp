@@ -55,17 +55,27 @@
   (and (null (move-stance move))
        (null (move-reference move))))
 
+(defun print-initial-move (dialogue stream)
+  (let ((first-move (first (dialogue-plays dialogue)))
+	 (num-moves (dialogue-length dialogue)))
+    (if (= num-moves 1)
+	(format stream "0 ~A ~A" (move-player first-move)
+		                 (move-statement first-move))
+	(let* ((num-digits (ceiling (log num-moves 10)))
+	       (padding (make-string (+ 5 num-digits) :initial-element #\Space)))
+	  (format stream (concatenate 'string "0 ~A " padding "~A~%")
+		         (move-player first-move)
+		         (move-statement first-move))))))
+
 (defun print-move-at-position (position move stream)
   (let ((statement (move-statement move))
 	(stance (move-stance move))
 	(ref-index (move-reference move)))
     (if (evenp position)
-	(if (zerop position)
-	    (format stream "0 P ~A" statement)
-	    (format stream "~A P [~A,~A] ~A" position
-		                             stance
-					     ref-index
-					     statement))
+	(format stream "~A P [~A,~A] ~A" position
+		                         stance
+					 ref-index
+					 statement)
 	(format stream "~A O [~A,~A] ~A" position 
 	                                 stance
 					 ref-index
@@ -74,18 +84,21 @@
 (defun print-dialogue (dialogue stream depth)
   (declare (ignore depth))
   (let ((plays (dialogue-plays dialogue)))
-    (when plays
-      (do ((i 0 (1+ i))
-	   (moves (cdr plays) (cdr moves))
-	   (move (car plays) (car moves)))
-	  ((null moves) (print-move-at-position i move stream))
-	(print-move-at-position i move stream)
-	(format stream "~%")))))
+    (cond ((null plays) (format stream ""))
+	  (t 
+	   (print-initial-move dialogue stream)
+	   (when (cdr plays)
+	     (do ((i 1 (1+ i))
+		  (moves (cddr plays) (cdr moves))
+		  (move (second plays) (car moves)))
+		 ((null moves) (print-move-at-position i move stream))
+	       (print-move-at-position i move stream)
+	       (format stream "~%")))))))
+
 
 (defun make-dialogue (initial-statement)
   (let ((first-move (make-proponent-move initial-statement nil nil)))
-    (make-dialogue-int :plays (list first-move)
-		       :closed-attacks nil)))
+    (make-dialogue-int :plays (list first-move))))
 
 (defun some-move (predicate dialogue)
   (some predicate (dialogue-plays dialogue)))
