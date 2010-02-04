@@ -533,14 +533,14 @@ adheres to the argumentation forms."
       (msg "Attack (A), defend (D), print dialogue so far (P), or quit (Q)? ")
       (setf response (read-symbol 'a 'd 'p 'q))
       (ecase response
-	(p (msg "~A" dialogue))
+	(p (msg "~A~%" dialogue))
 	(q (setf response 'done))
 	(a (extend-dialogue-with-attack dialogue rules)
 	   (incf turn-number))
 	(d (extend-dialogue-with-defense dialogue rules)
-	   (incf turn-number)))
-      (msg "Thanks for playing.~%")
-      (msg "The dialogue went like this:~%~A~%" dialogue))))
+	   (incf turn-number))))
+    (msg "Thanks for playing.~%")
+    (msg "The dialogue went like this:~%~A~%" dialogue)))
 
 (defun play-d-dialogue-game ()
   (play-dialogue-game d-dialogue-rules))
