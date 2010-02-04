@@ -509,19 +509,18 @@
 	     :body (= current-reference (1- current-position))
 	     :failure-message "Opponent must react to the most recent statement by Proponent."))
 
-(defvar d-dialogue-rules (append argumentation-forms '(rule-d00-atomic
-						       rule-d00-proponent
-						       rule-d00-opponent
-						       rule-d01-composite
-						       rule-d01-adheres-to-forms
-						       rule-d02-attack
-						       rule-d02-adheres-to-forms
-						       rule-d10
-						       rule-d11
-						       rule-d12
-						       rule-d13)))
+(defvar d-dialogue-rules (append argumentation-forms 
+				 (list rule-d00-atomic
+				       rule-d00-proponent
+				       rule-d00-opponent
+				       rule-d01-composite
+				       rule-d02-attack
+				       rule-d10
+				       rule-d11
+				       rule-d12
+				       rule-d13)))
 
-(defvar e-dialogue-rules (append d-dialogue-rules '(rule-e)))
+(defvar e-dialogue-rules (append d-dialogue-rules (list rule-e)))
 	
 (defstruct (dialogue
 	     (:print-function print-dialogue)
