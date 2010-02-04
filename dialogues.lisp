@@ -289,227 +289,207 @@ adheres to the argumentation forms."
 	     :failure-message "Opponent plays odd-numbered positions.  (Counting starts at zero.)"))
 
 (defvar rule-d01-composite
-  (make-rule :name d01-composite
-	     :condition (eq current-stance 'a)
-	     :body (composite-formula? (nth-statement dialogue 
-						      current-reference))
-	     :failure-message "Atomic formulas cannot be attacked."))
+  (make-offensive-rule
+   :name d01-composite
+   :body (composite-formula? (nth-statement dialogue 
+					    current-reference))
+   :failure-message "Atomic formulas cannot be attacked."))
 
 (defvar rule-d01-conjunction
-  (make-rule :name d01-conjunction
-	     :condition (and (eq current-stance 'a)
-			     (conjunction? 
-			      (nth-stacement dialogue current-reference)))
-	     :body (or (eq current-statement 'attack-left-conjunct)
-		       (eq current-statement 'attack-right-conjunct))
-	     :failure-message "Only two attacks against conjuncts are permitted: ATTACK-LEFT-CONJUNCT and ATTACK-RIGHT-CONJUNCT."))
+  (make-offensive-rule
+   :name d01-conjunction
+   :condition (conjunction? (nth-statement dialogue current-reference))
+   :body (or (eq current-statement 'attack-left-conjunct)
+	     (eq current-statement 'attack-right-conjunct))
+   :failure-message "Only two attacks against conjuncts are permitted: ATTACK-LEFT-CONJUNCT and ATTACK-RIGHT-CONJUNCT."))
 
 (defvar rule-d01-left-conjunct
-  (make-rule :name d01-left-conjunct
-	     :condition (and (eq current-stance 'a)
-			     (eq current-statement 'attack-left-conjunct))
-	     :body (and (formula? current-statement)
-			(conjunction? (nth-stacement dialogue current-reference)))
-	     :failure-message "One cannot attack the left conjunct of something that isn't a conjunction."))
+  (make-offensive-rule
+   :name d01-left-conjunct
+   :condition (eq current-statement 'attack-left-conjunct)
+   :body (and (formula? current-statement)
+	      (conjunction? (nth-statement dialogue current-reference)))
+   :failure-message "One cannot attack the left conjunct of something that isn't a conjunction."))
 
 (defvar rule-d01-right-conjunct
-  (make-rule :name d01-right-conjunct
-	     :condition (and (eq current-stance 'a)
-			     (eq current-statement 'attack-right-conjunct))
-	     :body (and (formula? current-statement)
-			(conjunction? (nth-statement dialogue current-reference)))
-	     :failure-message "One cannot attack the left conjunct of something that isn't a conjunction."))
+  (make-offensive-rule
+   :name d01-right-conjunct
+   :condition (eq current-statement 'attack-right-conjunct)
+   :body (and (formula? current-statement)
+	      (conjunction? (nth-statement dialogue current-reference)))
+   :failure-message "One cannot attack the left conjunct of something that isn't a conjunction."))
 
 (defvar rule-d01-disjunction
-  (make-rule :name d01-disjunction
-	     :condition (and (eq current-stance 'a)
-			     (disjunction?
-			      (nth-statement dialogue current-reference)))
-	     :body (eq current-statement 'which-disjunct?)
-	     :failure-message "WHICH-DISJUNCT? is the only permissible attack against a disjunction."))
+  (make-offensive-rule
+   :name d01-disjunction
+   :condition (disjunction? (nth-statement dialogue current-reference))
+   :body (eq current-statement 'which-disjunct?)
+   :failure-message "WHICH-DISJUNCT? is the only permissible attack against a disjunction."))
 
 (defvar rule-d01-which-disjunct
-  (make-rule :name d01-which-disjunct
-	     :condition (and (eq current-stance 'a)
-			     (eq current-statement 'which-disjunct?))
-	     :body (disjunction? (nth-statement dialogue current-reference))
-	     :failure-message "The WHICH-DISJUNCT? attack applies only to disjunctions."))
+  (make-offensive-rule
+   :name d01-which-disjunct
+   :condition (eq current-statement 'which-disjunct?)
+   :body (disjunction? (nth-statement dialogue current-reference))
+   :failure-message "The WHICH-DISJUNCT? attack applies only to disjunctions."))
 
 (defvar rule-d01-implication
-  (make-rule :name d01-implication
-	     :condition (and (eq current-stance 'a)
-			     (implication? (nth-statement current-reference)))
-	     :body (and (formula? current-statement)
-			(equal-formulas? current-statement
-					 (antecedent
-					  (nth-statement current-reference))))
-	     :failure-condition "To attack an implication, one must assert the antecdent."))
+  (make-offensive-rule
+   :name d01-implication
+   :condition (implication? (nth-statement dialogue current-reference))
+   :body (and (formula? current-statement)
+	      (equal-formulas? current-statement
+			       (antecedent
+				(nth-statement dialogue current-reference))))
+   :failure-message "To attack an implication, one must assert the antecdent."))
 
 (defvar rule-d01-negation
-  (make-rule :name d01-negation
-	     :condition (and (eq current-stance 'a)
-			     (negation? (nth-statement current-reference)))
-	     :body (and (formula? current-statement)
-			(equal-formulas? current-statement
-					 (unnegate
-					  (nth-statement dialogue current-reference))))
-	     :failure-message "To attack a negation, one must assert the \"unnegation\" of the negation."))
+  (make-offensive-rule 
+   :name d01-negation
+   :condition (negation? (nth-statement dialogue current-reference))
+   :body (and (formula? current-statement)
+	      (equal-formulas? current-statement
+			       (unnegate
+				(nth-statement dialogue current-reference))))
+   :failure-message "To attack a negation, one must assert the \"unnegation\" of the negation."))
 
 (defvar rule-d01-universal
-  (make-rule :name d01-universal
-	     :condition (and (eq current-stance 'a)
-			     (universal? (nth-statement dialogue current-reference)))
-	     :body (term? current-statement)
-	     :failure-message "To attack a universal, one must assert a term."))
+  (make-offensive-rule
+   :name d01-universal
+   :condition (universal? (nth-statement dialogue current-reference))
+   :body (term? current-statement)
+   :failure-message "To attack a universal, one must assert a term."))
 
 (defvar rule-d01-term
-  (make-rule :name d01-term
-	     :condition (and (eq current-stance 'a)
-			     (term? current-statement))
-	     :body (let ((s (nth-statement dialogue current-reference)))
-		     (and (formula? s)
-			  (universal? s)))
-	     :failure-message "If one asserts a term as an attack, then the assertion being attacked must be a universal generalization."))
+  (make-offensive-rule
+   :name d01-term
+   :condition (term? current-statement)
+   :body (let ((s (nth-statement dialogue current-reference)))
+	   (and (formula? s)
+		(universal? s)))
+   :failure-message "If one asserts a term as an attack, then the assertion being attacked must be a universal generalization."))
 
 (defvar rule-d01-which-instance
-  (make-rule :name d01-which-instance
-	     :condition (and (eq current-stance 'a)
-			     (eq current-statement 'which-instance?))
-	     :body (let ((s (nth-statement dialogue current-reference)))
-		     (and (formula? s)
-			  (existential? s)))
-	     :failure-message "The WHICH-INSTANCE? attack applies only to existential generalizations."))
+  (make-offensive-rule 
+   :name d01-which-instance
+   :condition (eq current-statement 'which-instance?)
+   :body (let ((s (nth-statement dialogue current-reference)))
+	   (and (formula? s)
+		(existential? s)))
+   :failure-message "The WHICH-INSTANCE? attack applies only to existential generalizations."))
 
 (defvar rule-d01-existential
-  (make-rule :name d01-existential
-	     :condition (and (eq current-stance 'a)
-			     (existential? (nth-statement dialogue current-reference)))
-	     :body (eq current-statement 'which-instance?)
-	     :failure-message "WHICH-INSTANCE? is the only permissible attack on existential generalizations."))
+  (make-offensive-rule
+   :name d01-existential
+   :condition (existential? (nth-statement dialogue current-reference))
+   :body (eq current-statement 'which-instance?)
+   :failure-message "WHICH-INSTANCE? is the only permissible attack on existential generalizations."))
 
 (defvar rule-d01-formula
-  (make-rule :name d01-formula
-	     :condition (and (eq current-stance 'a)
-			     (formula? current-statement))
-	     :body (or (implication? (nth-statement dialogue current-reference))
-		       (negation? (nth-statement dialogue current-reference))
-		       (universal? (nth-statement current-reference)))
-	     :formula "When the attacking statement is a formula,~%the statement being attacked must be either~%an implication or a negation."))
+  (make-offensive-rule 
+   :name d01-formula
+   :condition (formula? current-statement)
+   :body (or (implication? (nth-statement dialogue current-reference))
+	     (negation? (nth-statement dialogue current-reference))
+	     (universal? (nth-statement dialogue current-reference)))
+   :failure-message "When the attacking statement is a formula,~%the statement being attacked must be either~%an implication or a negation."))
 
 (defvar rule-d02-attack
-  (make-rule :name d02-attack
-	     :condition (eq current-stance 'd)
-	     :body (attacking-move? (nth-move dialogue current-reference))
-	     :failure-message "The move being defended against is not an attack."))
+  (make-defensive-rule 
+   :name d02-attack
+   :body (attacking-move? (nth-move dialogue current-reference))
+   :failure-message "The move being defended against is not an attack."))
 
 (defvar rule-d02-formula
-  (make-rule :name d02-formula
-	     :condition (eq current-stance 'd)
-	     :body (formula? current-statement)
-	     :failure-message "All defensive statements are supposed to be formulas."))
+  (make-defensive-rule
+   :name d02-formula
+   :body (formula? current-statement)
+   :failure-message "All defensive statements are supposed to be formulas."))
+
+(defmacro with-original-statement ((original-statement) &body body)
+  (let ((attack (gensym))
+	(attack-refers-to (gensym))
+	(original-move (gensym)))
+    `(let* ((,attack (nth-move dialogue current-reference))
+	    (,attack-refers-to (move-reference ,attack))
+	    (,original-move (nth-move dialogue ,attack-refers-to))
+	    (,original-statement (move-statement ,original-move)))
+       ,@body)))
 
 (defvar rule-d02-left-conjunct
-  (make-rule :name d02-left-conjunct
-	     :condition (and (eq current-stance 'd)
-			     (eq (nth-statement dialogue current-reference)
-				 'attack-left-conjunct))
-	     :body (let* ((attack (nth-move dialogue current-reference))
-			  (attack-refers-to (move-reference attack))
-			  (original-move (nth-move dialogue attack-refers-to))
-			  (original-statement (move-statement original-move)))
-		     (equal-formulas? current-statement
-				      (left-conjunct original-statement)))
-	     :failure-message "To defend against the ATTACK-LEFT-CONJUNCT attack~%, assert the left conjunct of the original conjunction."))
+  (make-defensive-rule
+   :name d02-left-conjunct
+   :condition (eq (nth-statement dialogue current-reference)
+		  'attack-left-conjunct)
+  :body (with-original-statement (original-statement)
+	  (equal-formulas? current-statement
+			   (left-conjunct original-statement)))
+  :failure-message "To defend against the ATTACK-LEFT-CONJUNCT attack~%, assert the left conjunct of the original conjunction."))
 
 (defvar rule-d02-right-conjunct
-  (make-rule :name d02-right-conjunct
-	     :condition (and (eq current-stance 'd)
-			     (eq (nth-statement dialogue current-reference)
-				 'attack-right-conjunct))
-	     :body (let* ((attack (nth-move dialogue current-reference))
-			  (attack-refers-to (move-reference attack))
-			  (original-move (nth-move dialogue attack-refers-to))
-			  (original-statement (move-statement original-move)))
-		     (equal-formulas? current-statement
-				      (right-conjunct original-statement)))
-	     :failure-message "To defend against the ATTACK-RIGHT-CONJUNCT attack~%, assert the right conjunct of the original conjunction."))
+  (make-defensive-rule 
+   :name d02-right-conjunct
+   :condition (eq (nth-statement dialogue current-reference)
+		  'attack-right-conjunct)
+   :body (with-original-statement (original-statement)
+	   (equal-formulas? current-statement
+			    (right-conjunct original-statement)))
+   :failure-message "To defend against the ATTACK-RIGHT-CONJUNCT attack~%, assert the right conjunct of the original conjunction."))
 
 (defvar rule-d02-which-disjunct
-  (make-rule :name d02-which-disjunct
-	     :condition (and (eq current-stance 'd)
-			     (eq (nth-statement dialogue current-reference)
-				 'which-disjunct?))
-	     :body (let* ((attack (nth-move dialogue current-reference))
-			  (attack-refers-to (move-reference attack))
-			  (original-move (nth-move dialogue attack-refers-to))
-			  (original-statement (move-statement original-move)))
-		     (or (equal-formulas? current-statement
-					  (left-disjunct original-statement))
-			 (equal-formulas? current-statement
-					  (right-disjunct original-statement))))
-	     :failure-message "To defend against the WHICH-DISJUNCT? attack,~%assert either the left or the right disjunct~%of the original disjunction."))
+  (make-defensive-rule
+   :name d02-which-disjunct
+   :condition (eq (nth-statement dialogue current-reference) 'which-disjunct?)
+   :body (with-original-statement (original-statement)
+	   (or (equal-formulas? current-statement
+				(left-disjunct original-statement))
+	       (equal-formulas? current-statement
+				(right-disjunct original-statement))))
+   :failure-message "To defend against the WHICH-DISJUNCT? attack,~%assert either the left or the right disjunct~%of the original disjunction."))
 
 (defvar rule-d02-implication
-  (make-rule :name d02-implication
-	     :condition (and (eq current-stance 'd)
-			     (let* ((attack (nth-move dialogue current-reference))
-				    (attack-refers-to (move-reference attack))
-				    (original-move (nth-move dialogue attack-refers-to))
-				    (original-statement (move-statement original-move)))
-			       (implication? original-statement)))
-	     :body (let* ((attack (nth-move dialogue current-reference))
-			  (attack-refers-to (move-reference attack))
-			  (original-move (nth-move dialogue attack-refers-to))
-			  (original-statement (move-statement original-move)))
-		     (equal-formulas? current-statement
-				      (consequent original-statement)))
-	     :failure-message "To defend against an attack on an implication, assert its consequent."))
+  (make-defensive-rule 
+   :name d02-implication
+   :condition (with-original-statement (original-statement)
+		(implication? original-statement))
+   :body (with-original-statement (original-statement)
+	   (equal-formulas? current-statement
+			    (consequent original-statement)))
+   :failure-message "To defend against an attack on an implication, assert its consequent."))
 
 (defvar rule-d02-negation
-  (make-rule :name d02-negation
-	     :condition (and (eq current-stance 'd)
-			     (let* ((attack (nth-move dialogue current-reference))
-				    (attack-refers-to (move-reference attack))
-				    (original-move (nth-move dialogue attack-refers-to))
-				    (original-statement (move-statement original-move)))
-			       (negation? original-statement)))
-	     :body t
-	     :failure-message "One cannot (directly) defend against an attack on a negation."))
+  (make-defensive-rule 
+   :name d02-negation
+   :condition (with-original-statement (original-statement)
+		(negation? original-statement))
+   :body t
+   :failure-message "One cannot (directly) defend against an attack on a negation."))
 
 (defvar rule-d02-universal
-  (make-rule :name d02-universal
-	     :condition (and (eq current-stance 'd)
-			     (let* ((attack (nth-move dialogue current-reference))
-				    (attack-refers-to (move-reference attack))
-				    (original-move (nth-move dialogue attack-refers-to))
-				    (original-statement (move-statement original-move)))
-			       (universal? original-statement)))
-	     :body (let* ((attack (nth-move dialogue current-reference))
-			  (attack-refers-to (move-reference attack))
-			  (instance (move-statement attack))
-			  (original-move (nth-move dialogue attack-refers-to))
-			  (original-statement (move-statement original-move))
-			  (var (bound-variable original-statement))
-			  (matrix (matrix original-statement)))
-		     (equal-formulas? current-statement
-				      (instantiate instance var matrix)))
-	     :failure-message "The asserted statement is not the required instance of the original universal generalization."))
+  (make-defensive-rule
+   :name d02-universal
+   :condition (with-original-statement (original-statement)
+		(universal? original-statement))
+   :body (let* ((attack (nth-move dialogue current-reference))
+		(attack-refers-to (move-reference attack))
+		(instance (move-statement attack))
+		(original-move (nth-move dialogue attack-refers-to))
+		(original-statement (move-statement original-move))
+		(var (bound-variable original-statement))
+		(matrix (matrix original-statement)))
+	   (equal-formulas? current-statement
+			    (instantiate instance var matrix)))
+   :failure-message "The asserted statement is not the required instance of the original universal generalization."))
 
 (defvar rule-d02-existential
-  (make-rule :name d02-existential
-	     :condition (and (eq current-stance 'd)
-			     (let* ((attack (nth-move dialogue current-reference))
-				    (attack-refers-to (move-reference attack))
-				    (original-move (nth-move dialogue attack-refers-to))
-				    (original-statement (move-statement original-move)))
-			       (existential? original-statement)))
-	     :body (let* ((attack (nth-move dialogue current-reference))
-			  (attack-refers-to (move-reference attack))
-			  (original-move (nth-move dialogue attack-refers-to))
-			  (original-statement (move-statement original-move)))
-		     (instance-of-quantified? current-statement
-					      original-statement))
-	     :failure-message "The asserted statement is not an instance of the original existential generalization."))
+  (make-defensive-rule
+   :name d02-existential
+   :condition (with-original-statement (original-statement)
+		(existential? original-statement))
+   :body (with-original-statement (original-statement)
+	   (instance-of-quantified? current-statement
+				    original-statement))
+   :failure-message "The asserted statement is not an instance of the original existential generalization."))
 
 (defvar rule-d10
   (make-rule :name d10
@@ -545,34 +525,34 @@ adheres to the argumentation forms."
       (car open-attacks))))
 
 (defvar rule-d11
-  (make-rule :name d11
-	     :condition (eq current-stance 'd)
-	     :body (let ((most-recent (most-recent-open-attack dialogue)))
-		     (or (null most-recent)
-			 (= most-recent current-reference)))
-	     :failure-message "You must defend against only the most recent open attack."))
+  (make-defensive-rule 
+   :name d11
+   :body (let ((most-recent (most-recent-open-attack dialogue)))
+	   (or (null most-recent)
+	       (= most-recent current-reference)))
+   :failure-message "You must defend against only the most recent open attack."))
 
 (defvar rule-d12
-  (make-rule :name d12
-	     :condition (eq current-stance 'd)
-	     :body (every-move #'(lambda (move)
-				   (or (initial-move? move)
-				       (attacking-move? move)
-				       (/= (move-reference move)
-					   current-reference)))
-			       dialogue)
-	     :failure-message "Attacks may be answered at most once."))
+  (make-defensive-rule
+   :name d12
+   :body (every-move #'(lambda (move)
+			 (or (initial-move? move)
+			     (attacking-move? move)
+			     (/= (move-reference move)
+				 current-reference)))
+		     dialogue)
+   :failure-message "Attacks may be answered at most once."))
 
 (defvar rule-d13
-  (make-rule :name d13
-	     :condition (and (oddp current-position)
-			     (eq current-stance 'a))
-	     :body (every-move #'(lambda (move)
-				   (or (proponent-move? move)
-				       (/= (move-reference move)
-					   current-reference)))
-			       dialogue)
-	     :failure-message "A P-assertion may be attacked at most once."))
+  (make-offensive-rule
+   :name d13
+   :condition (oddp current-position)
+   :body (every-move #'(lambda (move)
+			 (or (proponent-move? move)
+			     (/= (move-reference move)
+				 current-reference)))
+		     dialogue)
+   :failure-message "A P-assertion may be attacked at most once."))
 
 (defvar rule-e
   (make-rule :name e
