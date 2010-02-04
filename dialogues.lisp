@@ -269,17 +269,106 @@ adheres to the argumentation forms."
 						      current-reference))
 	     :failure-message "Atomic formulas cannot be attacked."))
 
-(defvar rule-d01-adheres-to-forms
-  (make-rule :name d01-adherence
-	     :condition (eq current-stance 'a)
-	     :body (let ((attacking-move (make-move current-player
-						    current-statement
-						    current-stance
-						    current-reference))
-			 (attacked-move (nth-move dialogue current-reference)))
-		     (maybe-adheres-to-argumentation-forms attacked-move
-							   attacking-move))
-	     :failure-message "The proposed attack does not adhere to the argumentation forms."))
+(defvar rule-d01-conjunction
+  (make-rule :name d01-conjunction
+	     :condition (and (eq current-stance 'a)
+			     (conjunction? 
+			      (nth-stacement dialogue current-reference)))
+	     :body (or (eq current-statement 'attack-left-conjunct)
+		       (eq current-statement 'attack-right-conjunct))
+	     :failure-message "Only two attacks against conjuncts are permitted: ATTACK-LEFT-CONJUNCT and ATTACK-RIGHT-CONJUNCT."))
+
+(defvar rule-d01-left-conjunct
+  (make-rule :name d01-left-conjunct
+	     :condition (and (eq current-stance 'a)
+			     (eq current-statement 'attack-left-conjunct))
+	     :body (and (formula? current-statement)
+			(conjunction? (nth-stacement dialogue current-reference)))
+	     :failure-message "One cannot attack the left conjunct of something that isn't a conjunction."))
+
+(defvar rule-d01-right-conjunct
+  (make-rule :name d01-right-conjunct
+	     :condition (and (eq current-stance 'a)
+			     (eq current-statement 'attack-right-conjunct))
+	     :body (and (formula? current-statement)
+			(conjunction? (nth-statement dialogue current-reference)))
+	     :failure-message "One cannot attack the left conjunct of something that isn't a conjunction."))
+
+(defvar rule-d01-disjunction
+  (make-rule :name d01-disjunction
+	     :condition (and (eq current-stance 'a)
+			     (disjunction?
+			      (nth-statement dialogue current-reference)))
+	     :body (eq current-statement 'which-disjunct?)
+	     :failure-message "WHICH-DISJUNCT? is the only permissible attack against a disjunction."))
+
+(defvar rule-d01-which-disjunct
+  (make-rule :name d01-which-disjunct
+	     :condition (and (eq current-stance 'a)
+			     (eq current-statement 'which-disjunct?))
+	     :body (disjunction? (nth-statement dialogue current-reference))
+	     :failure-message "The WHICH-DISJUNCT? attack applies only to disjunctions."))
+
+(defvar rule-d01-implication
+  (make-rule :name d01-implication
+	     :condition (and (eq current-stance 'a)
+			     (implication? (nth-statement current-reference)))
+	     :body (and (formula? current-statement)
+			(equal-formulas? current-statement
+					 (antecedent
+					  (nth-statement current-reference))))
+	     :failure-condition "To attack an implication, one must assert the antecdent."))
+
+(defvar rule-d01-negation
+  (make-rule :name d01-negation
+	     :condition (and (eq current-stance 'a)
+			     (negation? (nth-statement current-reference)))
+	     :body (and (formula? current-statement)
+			(equal-formulas? current-statement
+					 (unnegate
+					  (nth-statement dialogue current-reference))))
+	     :failure-message "To attack a negation, one must assert the \"unnegation\" of the negation."))
+
+(defvar rule-d01-universal
+  (make-rule :name d01-universal
+	     :condition (and (eq current-stance 'a)
+			     (universal? (nth-statement dialogue current-reference)))
+	     :body (term? current-statement)
+	     :failure-message "To attack a universal, one must assert a term."))
+
+(defvar rule-d01-term
+  (make-rule :name d01-term
+	     :condition (and (eq current-stance 'a)
+			     (term? current-statement))
+	     :body (let ((s (nth-statement dialogue current-reference)))
+		     (and (formula? s)
+			  (universal? s)))
+	     :failure-message "If one asserts a term as an attack, then the assertion being attacked must be a universal generalization."))
+
+(defvar rule-d01-which-instance
+  (make-rule :name d01-which-instance
+	     :condition (and (eq current-stance 'a)
+			     (eq current-statement 'which-instance?))
+	     :body (let ((s (nth-statement dialogue current-reference)))
+		     (and (formula? s)
+			  (existential? s)))
+	     :failure-message "The WHICH-INSTANCE? attack applies only to existential generalizations."))
+
+(defvar rule-d01-existential
+  (make-rule :name d01-existential
+	     :condition (and (eq current-stance 'a)
+			     (existential? (nth-statement dialogue current-reference)))
+	     :body (eq current-statement 'which-instance?)
+	     :failure-message "WHICH-INSTANCE? is the only permissible attack on existential generalizations."))
+
+(defvar rule-d01-formula
+  (make-rule :name d01-formula
+	     :condition (and (eq current-stance 'a)
+			     (formula? current-statement))
+	     :body (or (implication? (nth-statement dialogue current-reference))
+		       (negation? (nth-statement dialogue current-reference))
+		       (universal? (nth-statement current-reference)))
+	     :formula "When the attacking statement is a formula,~%the statement being attacked must be either~%an implication or a negation."))
 
 (defvar rule-d02-attack
   (make-rule :name d02-attack
@@ -287,20 +376,114 @@ adheres to the argumentation forms."
 	     :body (attacking-move? (nth-move dialogue current-reference))
 	     :failure-message "The move being defended against is not an attack."))
 
-(defvar rule-d02-adheres-to-forms
-  (make-rule :name d02-adherence
+(defvar rule-d02-formula
+  (make-rule :name d02-formula
 	     :condition (eq current-stance 'd)
-	     :body (let* ((middle-move (nth-move dialogue current-reference))
-			  (first-move (nth-move dialogue 
-						(move-reference middle-move)))
-			  (proposed-move (make-move current-player
-						    current-statement
-						    current-stance
-						    current-reference)))
-		     (adheres-to-argumentation-forms first-move
-						     middle-move
-						     proposed-move))
-	     :failure-message "The proposed move does not adhere to the argumentation forms."))
+	     :body (formula? current-statement)
+	     :failure-message "All defensive statements are supposed to be formulas."))
+
+(defvar rule-d02-left-conjunct
+  (make-rule :name d02-left-conjunct
+	     :condition (and (eq current-stance 'd)
+			     (eq (nth-statement dialogue current-reference)
+				 'attack-left-conjunct))
+	     :body (let* ((attack (nth-move dialogue current-reference))
+			  (attack-refers-to (move-reference attack))
+			  (original-move (nth-move dialogue attack-refers-to))
+			  (original-statement (move-statement original-move)))
+		     (equal-formulas? current-statement
+				      (left-conjunct original-statement)))
+	     :failure-message "To defend against the ATTACK-LEFT-CONJUNCT attack~%, assert the left conjunct of the original conjunction."))
+
+(defvar rule-d02-right-conjunct
+  (make-rule :name d02-right-conjunct
+	     :condition (and (eq current-stance 'd)
+			     (eq (nth-statement dialogue current-reference)
+				 'attack-right-conjunct))
+	     :body (let* ((attack (nth-move dialogue current-reference))
+			  (attack-refers-to (move-reference attack))
+			  (original-move (nth-move dialogue attack-refers-to))
+			  (original-statement (move-statement original-move)))
+		     (equal-formulas? current-statement
+				      (right-conjunct original-statement)))
+	     :failure-message "To defend against the ATTACK-RIGHT-CONJUNCT attack~%, assert the right conjunct of the original conjunction."))
+
+(defvar rule-d02-which-disjunct
+  (make-rule :name d02-which-disjunct
+	     :condition (and (eq current-stance 'd)
+			     (eq (nth-statement dialogue current-reference)
+				 'which-disjunct?))
+	     :body (let* ((attack (nth-move dialogue current-reference))
+			  (attack-refers-to (move-reference attack))
+			  (original-move (nth-move dialogue attack-refers-to))
+			  (original-statement (move-statement original-move)))
+		     (or (equal-formulas? current-statement
+					  (left-disjunct original-statement))
+			 (equal-formulas? current-statement
+					  (right-disjunct original-statement))))
+	     :failure-message "To defend against the WHICH-DISJUNCT? attack,~%assert either the left or the right disjunct~%of the original disjunction."))
+
+(defvar rule-d02-implication
+  (make-rule :name d02-implication
+	     :condition (and (eq current-stance 'd)
+			     (let* ((attack (nth-move dialogue current-reference))
+				    (attack-refers-to (move-reference attack))
+				    (original-move (nth-move dialogue attack-refers-to))
+				    (original-statement (move-statement original-move)))
+			       (implication? original-statement)))
+	     :body (let* ((attack (nth-move dialogue current-reference))
+			  (attack-refers-to (move-reference attack))
+			  (original-move (nth-move dialogue attack-refers-to))
+			  (original-statement (move-statement original-move)))
+		     (equal-formulas? current-statement
+				      (consequent original-statement)))
+	     :failure-message "To defend against an attack on an implication, assert its consequent."))
+
+(defvar rule-d02-negation
+  (make-rule :name d02-negation
+	     :condition (and (eq current-stance 'd)
+			     (let* ((attack (nth-move dialogue current-reference))
+				    (attack-refers-to (move-reference attack))
+				    (original-move (nth-move dialogue attack-refers-to))
+				    (original-statement (move-statement original-move)))
+			       (negation? original-statement)))
+	     :body t
+	     :failure-message "One cannot (directly) defend against an attack on a negation."))
+
+(defvar rule-d02-universal
+  (make-rule :name d02-universal
+	     :condition (and (eq current-stance 'd)
+			     (let* ((attack (nth-move dialogue current-reference))
+				    (attack-refers-to (move-reference attack))
+				    (original-move (nth-move dialogue attack-refers-to))
+				    (original-statement (move-statement original-move)))
+			       (universal? original-statement)))
+	     :body (let* ((attack (nth-move dialogue current-reference))
+			  (attack-refers-to (move-reference attack))
+			  (instance (move-statement attack))
+			  (original-move (nth-move dialogue attack-refers-to))
+			  (original-statement (move-statement original-move))
+			  (var (bound-variable original-statement))
+			  (matrix (matrix original-statement)))
+		     (equal-formulas? current-statement
+				      (instantiate instance var matrix)))
+	     :failure-message "The asserted statement is not the required instance of the original universal generalization."))
+
+(defvar rule-d02-existential
+  (make-rule :name d02-existential
+	     :condition (and (eq current-stance 'd)
+			     (let* ((attack (nth-move dialogue current-reference))
+				    (attack-refers-to (move-reference attack))
+				    (original-move (nth-move dialogue attack-refers-to))
+				    (original-statement (move-statement original-move)))
+			       (existential? original-statement)))
+	     :body (let* ((attack (nth-move dialogue current-reference))
+			  (attack-refers-to (move-reference attack))
+			  (original-move (nth-move dialogue attack-refers-to))
+			  (original-statement (move-statement original-move)))
+		     (instance-of-quantified? current-statement
+					      original-statement))
+	     :failure-message "The asserted statement is not an instance of the original existential generalization."))
 
 (defvar rule-d10
   (make-rule :name d10
@@ -318,16 +501,17 @@ adheres to the argumentation forms."
     (mapcar #'move-reference defenses)))
 
 (defun open-attack-indices (dialogue)
-  (let ((result nil)
-	(moves (dialogue-plays dialogue)))
+  (let ((moves (dialogue-plays dialogue)))
     (when moves
-      (do ((i 0 (1+ i))
-	   (move (car moves) (cdr moves-tail))
-	   (moves-tail (cdr moves) (cdr moves-tail)))
-	  ((null moves-tail) result)
-	(if (attacking-move? move)
-	    (push i result)
-	    (setf result (delete (move-reference move) result)))))))
+      (do* ((i 0 (1+ i))
+	    (move (car moves) (car moves-tail))
+	    (moves-tail (cdr moves) (cdr moves-tail))
+	    (result (when (attacking-move? move)
+		      (list 0))
+		    (if (attacking-move? move)
+			(cons i result)
+			(remove (move-reference move) result))))
+	   ((null moves-tail) result)))))
 
 (defun most-recent-open-attack (dialogue)
   (let ((open-attacks (open-attack-indices dialogue)))
@@ -371,29 +555,45 @@ adheres to the argumentation forms."
 	     :body (= current-reference (1- current-position))
 	     :failure-message "Opponent must react to the most recent statement by Proponent."))
 
-(defvar d-dialogue-rules
-  (list rule-d00-atomic
-	rule-d00-proponent
-	rule-d00-opponent
-	rule-d01-composite
-	rule-d01-adheres-to-forms
-	rule-d02-attack
-	rule-d02-adheres-to-forms
-	rule-d10
-	rule-d11
-	rule-d12
-	rule-d13))
+(defvar argumentation-forms '(rule-d01-conjunction
+			      rule-d01-left-conjunct
+			      rule-d01-right-conjunct
+			      rule-d01-disjunction
+			      rule-d01-which-disjunct
+			      rule-d01-implication
+			      rule-d01-negation
+			      rule-d01-universal
+			      rule-d01-term
+			      rule-d01-which-instance
+			      rule-d01-existential
+			      rule-d01-formula
+			      rule-d02-formula
+			      rule-d02-left-conjunct
+			      rule-d02-right-conjunct
+			      rule-d02-which-disjunct
+			      rule-d02-implication
+			      rule-d02-negation
+			      rule-d02-universal
+			      rule-d02-existential))
 
-(defvar e-dialogue-rules
-  (append d-dialogue-rules (list rule-e)))
+(defvar d-dialogue-rules (append argumentation-forms '(rule-d00-atomic
+						       rule-d00-proponent
+						       rule-d00-opponent
+						       rule-d01-composite
+						       rule-d01-adheres-to-forms
+						       rule-d02-attack
+						       rule-d02-adheres-to-forms
+						       rule-d10
+						       rule-d11
+						       rule-d12
+						       rule-d13)))
+
+(defvar e-dialogue-rules (append d-dialogue-rules '(rule-e)))
 	
 (defstruct (dialogue
 	     (:print-function print-dialogue)
 	     (:constructor make-dialogue-int))
-  (plays nil :type list)
-  (proponents-attacked-statements nil :type list)
-  (defenses nil :type list)
-  (closed-attacks nil :type list))
+  (plays nil :type list))
 
 (defun dialogue-length (dialogue)
   (length (dialogue-plays dialogue)))
@@ -413,24 +613,27 @@ adheres to the argumentation forms."
 	(append (dialogue-plays dialogue) 
 		(list move))))
 
-(defun previously-asserted? (dialogue statement)
-  (member statement (dialogue-plays dialogue) :key #'move-statement :test #'equalp))
-
-(defun opponent-already-attacked? (dialogue index-of-attack)
-  (member index-of-attack (dialogue-proponents-attacked-statements dialogue)))
-
-(defun close-attack (dialogue index-of-attack)
-  (push index-of-attack (dialogue-closed-attacks dialogue)))
-
-(defun register-attack-against-proponent (dialogue index-of-attacked-statement)
-  (push index-of-attacked-statement (dialogue-proponents-attacked-statements dialogue)))
-
 (defvar symbolic-attacks
   '(attack-left-conjunct attack-right-conjunct which-instance? which-disjunct?))
 
+(defun symbolic-attack? (obj)
+  (member obj symbolic-attacks))
+
+(defun statement? (obj)
+  (or (formula? obj)
+      (term? obj)
+      (symbolic-attack? obj)))
+
 (defun read-statement ()
   (let (response)
-    (until (or (formula? response) (member response symbolic-attacks))
+    (until (statement? response)
+      (setf response (read t nil nil)))
+    response))
+
+(defun read-statement-or-symbols (&rest symbols)
+  (let (response)
+    (until (or (statement? response)
+	       (member response symbols))
       (setf response (read t nil nil)))
     response))
 
@@ -441,100 +644,166 @@ adheres to the argumentation forms."
       (setf response (read t nil nil)))
     response))
 
-(defun extend-dialogue-with-attack (dialogue rules)
-  (let* ((index nil)
-	 (turn-number (dialogue-length dialogue))
-	 (current-player (if (evenp turn-number) 'p 'o))
-	 (response)
-	 (result))
-    (until response
-      (msg "Attack which statement?~%")
-      (msg "Your response should be a number between 0 and ~A.~%" (1- turn-number))
-      (msg "(Type P to print the dialogue so far.) ")
-      (setq index (read-number-in-interval-or-symbol 0 (1- turn-number) 'p))
-      (if (eq index 'p)
-	  (format t "~A~%" dialogue)
-	  (setf response t)))
-    (msg "What is your attack? (Your response can be a formula or a symbolic attack.) ")
-    (until result
-      (setf response (read-statement))
-      (multiple-value-bind (rules-result message)
-	  (evaluate-rules rules dialogue current-player turn-number response 'a index)
-	(if rules-result
-	    (setf result t)
-	    (progn
-	      (msg "At least one of the dialogue rules is violated by your attack.~%")
-	      (msg "Error message: ~A~%" message)
-	      (msg "Please try another formula or symbolic attack: ")))))
-    (add-move-to-dialogue dialogue 
-			  (make-move current-player response 'a index))))
-
-(defun extend-dialogue-with-defense (dialogue rules)
-  (let* ((index nil)
-	 (turn-number (dialogue-length dialogue))
-	 (current-player (if (evenp turn-number) 'p 'o))
-	 (response)
-	 (result))
-    (until response
-      (msg "Defend against which attack? Your response should be a number between 0 and ~A." (1- turn-number))
-      (msg "(Type P to print the dialogue so far.) ")
-      (setq index (read-number-in-interval-or-symbol 0 (1- turn-number) 'q))
-      (if (eq index 'q)
-	  (format t "~A" dialogue)
-	  (setf response t)))
-    (msg "What is your defense? (Your response can be a formula or a term.) ")
-    (until result
-      (setf response (read-formula-or-term))
-      (multiple-value-bind (rules-result message)
-	  (evaluate-rules rules dialogue current-player turn-number response 'd index)
-	(if rules-result
-	    (setf result t)
-	    (progn
-	      (msg "At least one of the dialogue rules is violated by your defense.~%")
-	      (msg "Error message: ~A~%" message)
-	      (msg "Please try another defense: ")))))
-    (add-move-to-dialogue dialogue 
-			  (make-move current-player response 'd index))))
-
 (defun evaluate-rules (rules dialogue player turn-number statement stance index)
   (if (null rules)
       (values t nil)
-      (do ((rule (car rules) (car rules-tail))
-	   (rules-tail (cdr rules) (cdr rules-tail))
-	   (message nil)
-	   (all-ok? t))
-	  ((null rules-tail) (values all-ok? message))
+      (let ((rule (car rules)))
 	(multiple-value-bind (result error-message)
 	    (funcall rule dialogue player turn-number statement stance index)
-	  (unless result
-	    (setf rules-tail nil
-		  all-ok? nil
-		  message error-message))))))
+	  (if result
+	      (evaluate-rules (cdr rules) dialogue
+			                  player
+					  turn-number 
+					  statement 
+					  stance 
+					  index)
+	      (values nil error-message))))))
 
 (defun play-dialogue-game (rules)
-  (msg "Let's play a dialogue game!~%")
-  (msg "Proponent starts by playing a composite formula.~%")
-  (msg "Input a composite formula: ")
-  (let* ((initial-statement (read-composite-formula))
-	 (dialogue (make-dialogue initial-statement))
-	 (turn-number 1)
-	 (response nil))
-    (until (eq response 'done)
-      (msg "Turn number ~A: ~A's turn~%" turn-number
-	                                 (if (evenp turn-number)
-					     "Proponent"
-					     "Opponent"))
-      (msg "Attack (A), defend (D), print dialogue so far (P), or quit (Q)? ")
-      (setf response (read-symbol 'a 'd 'p 'q))
-      (ecase response
-	(p (msg "~A~%" dialogue))
-	(q (setf response 'done))
-	(a (extend-dialogue-with-attack dialogue rules)
-	   (incf turn-number))
-	(d (extend-dialogue-with-defense dialogue rules)
-	   (incf turn-number))))
-    (msg "Thanks for playing.~%")
-    (msg "The dialogue went like this:~%~A~%" dialogue)))
+  (let ((dialogue nil)
+	(turn-number 0)
+	(player nil)
+	(stance nil)
+	(index nil)
+	(statement nil))
+    (tagbody (go initial-move)
+     initial-move
+       (msg "Let's play a dialogue game!~%")
+       (msg "Proponent starts by playing a composite formula.~%")
+       (msg "Input a composite formula: ")
+       (setf dialogue (make-dialogue (read-composite-formula)))
+       (msg "Game on!~%")
+       (incf turn-number)
+       (go start-move)
+     start-move
+       (if (evenp turn-number)
+	   (setf player 'p)
+	   (setf player 'o))
+       (msg "Turn #~A: ~A~%" turn-number (ecase player
+					   (p "Proponent")
+					   (o "Opponent")))
+       (msg "Enter:~%")
+       (msg "- A to attack,~%")
+       (msg "- D to defend,~%")
+       (msg "- P to print the dialogue so far,~%")
+       (msg "- Q to quit.~%")
+       (ecase (read-symbol 'a 'd 'p 'q)
+	 (q (go quit))
+	 (p (go print-then-restart))
+	 (a (go attack))
+	 (d (go defend)))
+     print-then-restart
+       (msg "The dialogue so far looks like this:~%")
+       (msg "~A~%" dialogue)
+       (go start-move)
+     print-then-attack
+       (msg "The dialogue so far looks like this:~%")
+       (msg "~A~%" dialogue)
+       (go attack)
+     print-then-defend
+       (msg "The dialogue so far looks like this:~%")
+       (msg "~A~%" dialogue)
+       (go defend)
+     print-then-statement
+       (msg "The dialogue so far looks like this:~%")
+       (msg "~A~%" dialogue)
+       (go statement)
+     print-then-statement-input
+       (msg "The dialogue so far looks like this:~%")
+       (msg "~A~%" dialogue)
+       (go statement-input)
+     attack
+       (msg "Attack which move? Enter:~%")
+       (msg "- An integer between 0 and ~A,~%" (1- turn-number))
+       (msg "- P to print the dialogue so far and come back to this prompt,~%")
+       (msg "- Q to quit,~%")
+       (msg "- R to restart the move.~%")
+       (setf index (read-number-in-interval-or-symbol 
+		    0 (1- turn-number) 
+		    'p 'q 'r))
+       (when (integerp index)
+	 (setf stance 'a)
+	 (go statement))
+       (ecase index
+	 (p (go print-then-attack))
+	 (q (go quit))
+	 (r (go start-move)))
+     defend
+       (msg "Defend against which move? Enter:~%")
+       (msg "- An integer between 0 and ~A,~%" (1- turn-number))
+       (msg "- P to print the dialogue so far and come back to this prompt,~%")
+       (msg "- Q to quit,~%")
+       (msg "- R to restart the move.~%")
+       (setf index (read-number-in-interval-or-symbol 
+		    0 (1- turn-number) 
+		    'p 'q 'r))
+       (when (integerp index)
+	 (setf stance 'd)
+	 (go statement))
+       (ecase index
+	 (p (go print-then-defend))
+	 (q (go quit))
+	 (r (go start-move)))
+     formula-input
+       (msg "Enter a formula:~%")
+       (setf statement (read-formula))
+       (go evaluate-rules)
+     term-input
+       (msg "Enter a term:~%")
+       (setf statement (read-term))
+       (go evaluate-rules)
+     statement-input
+       (if (eq stance 'a)
+	   (msg "What is your attack? ")
+	   (msg "What is your defense? "))
+       (msg "Enter:~%")
+       (msg "- P to print the dialogue so far and return to this prompt,~%")
+       (msg "- Q to quit,~%")
+       (msg "- F to type a formula,~%")
+       (msg "- T to type a term,~%")
+       (when (eq stance 'a)
+	 (msg "- L for ATTACK-LEFT-CONJUNCT,~%")
+	 (msg "- R for ATTACK-RIGHT-CONJUNCT,~%")
+	 (msg "- D for WHICH-DISJUNCT?,~%")
+	 (msg "- I for WHICH-INSTANCE?,~%"))
+       (ecase (read-symbol 'p 'q 'f 't 'l 'r 'd 'i)
+	 (p (go print-then-statement-input))
+	 (f (go formula-input))
+	 (t (go term-input))
+	 (l (setf statement 'attack-left-conjunct))
+	 (r (setf statement 'attack-right-conjunct))
+	 (d (setf statement 'which-disjunct?))
+	 (i (setf statement 'which-instance?)))
+       (go evaluate-rules)
+     statement
+       (msg "You are responding to move #~A.  Enter:~%" index)
+       (msg "- P to print the dialogue so far and come back to this prompt,~%")
+       (msg "- Q to quit,~%")
+       (msg "- R to restart the move,~%")
+       (msg "- S to enter your response to move #~A.~%" index)
+       (setf statement (read-symbol 'p 'q 'r 's))
+       (ecase statement
+	 (p (go print-then-statement))
+	 (q (go quit))
+	 (r (go start-move))
+	 (s (go statement-input)))
+     evaluate-rules
+       (multiple-value-bind (rules-result message)
+	   (evaluate-rules rules dialogue player turn-number statement stance index)
+	 (when rules-result
+	   (go successful-turn))
+	 (msg "At least one of the dialogue rules is violated by your attack.~%")
+	 (msg "The rule says:~%~A~%" message)
+	 (msg "Restarting the move...~%")
+	 (go start-move))
+     successful-turn
+       (incf turn-number)
+       (add-move-to-dialogue dialogue
+			     (make-move player statement stance index))
+       (go start-move)
+     quit
+       (msg "Thanks for playing, I hope you had fun.~%"))
+    dialogue))
 
 (defun play-d-dialogue-game ()
   (play-dialogue-game d-dialogue-rules))
