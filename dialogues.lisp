@@ -530,7 +530,6 @@ adheres to the argumentation forms."
   (make-rule :name d12
 	     :condition (eq current-stance 'd)
 	     :body (every-move #'(lambda (move)
-				   (format t "the move to check is ~A~%" move)
 				   (or (initial-move? move)
 				       (attacking-move? move)
 				       (/= (move-reference move)
