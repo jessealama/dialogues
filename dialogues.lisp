@@ -95,10 +95,13 @@
 	       (print-move-at-position i move stream)
 	       (format stream "~%")))))))
 
-
 (defun make-dialogue (initial-statement)
   (let ((first-move (make-proponent-move initial-statement nil nil)))
     (make-dialogue-int :plays (list first-move))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Dialogue utilities
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun some-move (predicate dialogue)
   (some predicate (dialogue-plays dialogue)))
@@ -114,6 +117,10 @@
 
 (defun nth-statement (dialogue n)
   (move-statement (nth-move dialogue n)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Statements
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar symbolic-attacks
   '(attack-left-conjunct attack-right-conjunct which-instance? which-disjunct?))
