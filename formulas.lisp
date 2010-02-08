@@ -4,7 +4,7 @@
   (require 'utils "utils.lisp"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Basic predicates and constructions
+;;; Signatures
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defstruct signature
@@ -20,6 +20,13 @@
 	(when (= num-args arity)
 	  (push sym result))))))
 
+(defun function-of-arity (signature function-symbol arity)
+  (some #'(lambda (symbol-and-arity)
+	    (let ((symbol (car symbol-and-arity))
+		  (num-args (cdr symbol-and-arity)))
+	      (when (eq symbol function-symbol)
+		(= arity num-args))))))
+
 (defun predicates-of-arity (signature arity)
   (let (result)
     (dolist (symbol-and-arity (signature-predicates signature) result)
@@ -27,6 +34,13 @@
 	    (num-args (cdr symbol-and-arity)))
 	(when (= num-args arity)
 	  (push sym result))))))
+
+(defun predicate-of-arity (signature relation-symbol arity)
+  (some #'(lambda (symbol-and-arity)
+	    (let ((symbol (car symbol-and-arity))
+		  (num-args (cdr symbol-and-arity)))
+	      (when (eq symbol relation-symbol)
+		(= arity num-args))))))
 
 (defun constant? (signature sym)
   (member sym (signature-constants signature)))
