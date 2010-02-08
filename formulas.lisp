@@ -1,6 +1,7 @@
 ;;; formulas.lisp A representation for first-order formulas
 
-(require 'utils "utils.lisp")
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require 'utils "utils.lisp"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Basic predicates and constructions
