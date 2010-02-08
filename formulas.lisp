@@ -6,6 +6,118 @@
 ;;; Basic predicates and constructions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defstruct signature
+  (constants :type list)
+  (predicates :type assoc-list)
+  (functions :type assoc-list))
+
+(defun functions-of-arity (signature arity)
+  (let (result)
+    (dolist (symbol-and-arity (signature-functions signature) result)
+      (let ((sym (car symbol-and-arity))
+	    (num-args (cdr symbol-and-arity)))
+	(when (= num-args arity)
+	  (push sym result))))))
+
+(defun predicates-of-arity (signature arity)
+  (let (result)
+    (dolist (symbol-and-arity (signature-predicates signature) result)
+      (let ((sym (car symbol-and-arity))
+	    (num-args (cdr symbol-and-arity)))
+	(when (= num-args arity)
+	  (push sym result))))))
+
+(defun constant? (signature sym)
+  (member sym (signature-constants signature)))
+
+(defun predicate? (signature pred-sym)
+  (some #'(lambda (sym) (eq sym pred-sym))
+	(mapcar #'cdr (signature-predicates signature))))
+
+(defun function? (signature func-sym)
+  (some #'(lambda (sym) (eq sym func-sym))
+	(mapcar #'cdr (signature-functions signature))))
+
+(defun add-constant (signature constant)
+  (cond ((predicate? signature constant)
+	 (error "The symbol ~A is already reserved as a predicate in the the given signature" constant))
+	((function? signature constant)
+	 (error "The symbol ~A is alredy reserved as a function in the given signature" constant))
+	((member constant (signature-constants signature constant))
+	 (error "The symbol ~A is already a constant in the given signature" constant))
+	(t (push constant (signature-constants signature)))))
+
+(defun add-predicate (signature pred-sym arity)
+  (cond ((constant? signature pred-sym)
+	 (error "The symbol ~A is already reserved as a constant in the the given signature" pred-sym))
+	((predicate? signature pred-sym)
+	 (error "The symbol ~A is alredy reserved as a predicate in the given signature" pred-sym))
+	((function? signature pred-sym)
+	 (error "The symbol ~A is alredy reserved as a function in the given signature" pred-sym))
+
+	((member constant (signature-constants signature pred-sym))
+	 (error "The symbol ~A is already a constant in the given signature" constant))
+	(t (push (cons pred-sym arity) (signature-predicates signature)))))
+
+(defun add-function (signature func-sym arity)
+  (cond ((constant? signature func-sym)
+	 (error "The symbol ~A is already reserved as a constant in the the given signature" func-sym))
+	((predicate? signature func-sym)
+	 (error "The symbol ~A is alredy reserved as a predicate in the given signature" func-sym))
+	((function? signature func-sym)
+	 (error "The symbol ~A is alredy reserved as a function in the given signature" func-sym))
+
+	((member constant (signature-constants signature func-sym))
+	 (error "The symbol ~A is already a constant in the given signature" constant))
+	(t (push (cons func-sym arity) (signature-functions signature)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Terms
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun equal-variables? (var-1 var-2)
+  (eql var-1 var-2))
+
+(defun variable? (term)
+  (and (symbolp term)
+       (eq (aref (symbol-name term) 0) #\?)))
+
+(defun term? (x)
+  (when x
+    (or (variable? x)
+	(member x (constants *language*))
+	(and (listp x)
+	     (let* ((function-symbol (car x))
+		    (args (cdr x))
+		    (num-args (length args)))
+	       (and (member function-symbol
+			    (function-of-arity *language* num-args))
+		    (every #'term? args)))))))
+
+(defun function-symbol (complex-term)
+  (car complex-term))
+
+(defun term-arguments (complex-term)
+  (cdr complex-term))
+
+(defun make-complex-term (function &rest args)
+  (cons function args))
+
+(defun equal-terms? (term-1 term-2)
+  (equalp term-1 term-2))
+
+(defun bare-variable? (variable)
+  (symbolp variable))
+
+(defun typed-variable? (variable)
+  (not (bare-variable? variable)))
+
+(defun variable-type (typed-variable)
+  (second typed-variable))
+
+(defun variable-name (typed-variable)
+  (first typed-variable))
+
 (defconstant contradiction '⊥)
 (defconstant top '⊤)
 
@@ -97,15 +209,35 @@
 	     (not (listp (car x)))))))
 
 (defun atomic-formula? (formula)
-  (when formula
-    (or (symbolp formula)
-	(and (not (disjunction? formula))
-	     (not (conjunction? formula))
-	     (not (equivalence? formula))
-	     (not (implication? formula))
-	     (not (negation? formula))
-	     (not (universal? formula))
-	     (not (existential? formula))))))
+  (when x
+    (if (symbolp x)
+	(member x (predicates-of-arity *language* 0))
+	(let* ((pred (car x))
+	       (args (cdr x))
+	       (num-args (length args)))
+	  (and (member pred (predicates-of-arity *language* num-args))
+	       (every #'term? args))))))
+
+(defun formula? (x)
+  (when x
+    (or (atomic-formula? x)
+	(and (conjunction? x) 
+	     (formula? (left-conjunct x))
+	     (formula? (right-conjunct x)))
+	(and (disjunction? x)
+	     (formula? (left-disjunct x))
+	     (formula? (right-disjunct x)))
+	(and (implication? x)
+	     (formula? (antecedent x))
+	     (formula? (consequent x)))
+	(and (negation? x)
+	     (formula? (unnegate x)))
+	(and (universal? x)
+	     (variable? (bound-variable x))
+	     (formula? (matrix x)))
+	(and (existential? x)
+	     (variable? (bound-variable x))
+	     (formula? (matrix x))))))		       
 
 (defun composite-formula? (formula)
   (when (and formula (listp formula))
@@ -141,50 +273,6 @@
 
 (defun binary-statement-second-arg (binary-statement)
   (caddr binary-statement))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Terms
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defun equal-variables? (var-1 var-2)
-  (eql var-1 var-2))
-
-(defun variable? (term)
-  (and (symbolp term)
-       (eq (aref (symbol-name term) 0) #\?)))
-
-(defun term? (x)
-  (when x
-    (or (variable? x)
-	(symbolp x)
-	(and (listp x)
-	     (not (null x))
-	     (symbolp (car x))
-	     (every #'term? (cdr x))))))
-
-(defun function-symbol (complex-term)
-  (car complex-term))
-
-(defun term-arguments (complex-term)
-  (cdr complex-term))
-
-(defun make-complex-term (function &rest args)
-  (cons function args))
-
-(defun equal-terms? (term-1 term-2)
-  (equalp term-1 term-2))
-
-(defun bare-variable? (variable)
-  (symbolp variable))
-
-(defun typed-variable? (variable)
-  (not (bare-variable? variable)))
-
-(defun variable-type (typed-variable)
-  (second typed-variable))
-
-(defun variable-name (typed-variable)
-  (first typed-variable))
 
 (defun subst-term-for-var-in-term (term variable target-term)
   (if (variable? target-term)
