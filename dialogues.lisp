@@ -158,14 +158,14 @@
   "Determine whether OBJ is a term different from the symbolic
 attacks which, being symbols, do qualify as terms."
   (and (not (symbolic-attack? obj))
-       (term? signature obj)))
+       (term? obj signature)))
 
 (defun non-symbolic-attack-formula? (obj signature)
   "Determine whether OBJ is a formula different from the symbolic
   attacks which, being simply lisp symbols, do qualify as [atomic]
   formulas)."
   (and (not (symbolic-attack? obj))
-       (formula? signature obj)))
+       (formula? obj signature)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Argumentation forms
