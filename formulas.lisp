@@ -25,7 +25,8 @@
 	    (let ((symbol (car symbol-and-arity))
 		  (num-args (cdr symbol-and-arity)))
 	      (when (eq symbol function-symbol)
-		(= arity num-args))))))
+		(= arity num-args))))
+	(signature-functions signature)))
 
 (defun predicates-of-arity (signature arity)
   (let (result)
@@ -40,7 +41,8 @@
 	    (let ((symbol (car symbol-and-arity))
 		  (num-args (cdr symbol-and-arity)))
 	      (when (eq symbol relation-symbol)
-		(= arity num-args))))))
+		(= arity num-args))))
+	(signature-predicates signature)))
 
 (defun constant? (signature sym)
   (member sym (signature-constants signature)))
