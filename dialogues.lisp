@@ -128,43 +128,43 @@
 (defun symbolic-attack? (obj)
   (member obj symbolic-attacks))
 
-(defun statement? (obj)
-  (or (formula? obj)
+(defun statement? (obj signature)
+  (or (formula? signature obj)
       (symbolic-attack? obj)
-      (term? obj)))
+      (term? signature obj)))
 
-(defun read-statement ()
+(defun read-statement (signature)
   (let (response)
-    (until (statement? response)
+    (until (statement? response signature)
       (setf response (read t nil nil)))
     response))
 
-(defun read-statement-or-symbols (&rest symbols)
+(defun read-statement-or-symbols (signature &rest symbols)
   (let (response)
-    (until (or (statement? response)
+    (until (or (statement? signature response)
 	       (member response symbols))
       (setf response (read t nil nil)))
     response))
 
-(defun read-formula-or-term ()
+(defun read-formula-or-term (signature)
   (let (response)
-    (until (or (formula? response)
-	       (term? response))
+    (until (or (formula? signature response)
+	       (term? signature response))
       (setf response (read t nil nil)))
     response))
 
-(defun non-symbolic-attack-term? (obj)
+(defun non-symbolic-attack-term? (obj signature)
   "Determine whether OBJ is a term different from the symbolic
 attacks which, being symbols, do qualify as terms."
   (and (not (symbolic-attack? obj))
-       (term? obj)))
+       (term? signature obj)))
 
-(defun non-symbolic-attack-formula? (obj)
+(defun non-symbolic-attack-formula? (obj signature)
   "Determine whether OBJ is a formula different from the symbolic
   attacks which, being simply lisp symbols, do qualify as [atomic]
   formulas)."
   (and (not (symbolic-attack? obj))
-       (formula? obj)))
+       (formula? signature obj)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Argumentation forms
@@ -256,7 +256,8 @@ attacks which, being symbols, do qualify as terms."
   (make-offensive-rule
    :name d01-left-conjunct
    :condition (eq current-statement 'attack-left-conjunct)
-   :body (and (non-symbolic-attack-formula? current-statement)
+   :body (and (non-symbolic-attack-formula? current-statement
+					    (dialogue-signature dialogue))
 	      (conjunction? (nth-statement dialogue current-reference)))
    :failure-message "One cannot attack the left conjunct of a formula~%that isn't a conjunction."))
 
@@ -265,7 +266,8 @@ attacks which, being symbols, do qualify as terms."
    :name d01-right-conjunct
    :condition (eq current-statement 'attack-right-conjunct)
    :body (and (non-symbolic-attack-formula?
-	       (nth-statement dialogue current-reference))
+	       (nth-statement dialogue current-reference)
+	       (dialogue-signature dialogue))
 	      (conjunction? (nth-statement dialogue current-reference)))
    :failure-message "One cannot attack the right conjunct of a formula that isn't a conjunction."))
 
@@ -287,7 +289,8 @@ attacks which, being symbols, do qualify as terms."
   (make-offensive-rule
    :name d01-implication
    :condition (implication? (nth-statement dialogue current-reference))
-   :body (and (non-symbolic-attack-formula? current-statement)
+   :body (and (non-symbolic-attack-formula? current-statement
+					    (dialogue-signature dialogue))
 	      (equal-formulas? current-statement
 			       (antecedent
 				(nth-statement dialogue current-reference))))
@@ -297,7 +300,8 @@ attacks which, being symbols, do qualify as terms."
   (make-offensive-rule 
    :name d01-negation
    :condition (negation? (nth-statement dialogue current-reference))
-   :body (and (non-symbolic-attack-formula? current-statement)
+   :body (and (non-symbolic-attack-formula? current-statement
+					    (dialogue-signature dialogue))
 	      (equal-formulas? current-statement
 			       (unnegate
 				(nth-statement dialogue current-reference))))
@@ -307,15 +311,18 @@ attacks which, being symbols, do qualify as terms."
   (make-offensive-rule
    :name d01-universal
    :condition (universal? (nth-statement dialogue current-reference))
-   :body (non-symbolic-attack-term? current-statement)
+   :body (non-symbolic-attack-term? current-statement
+				    (dialogue-signature dialogue))
    :failure-message "To attack a universal, one must assert a term."))
 
 (defvar rule-d01-term
   (make-offensive-rule
    :name d01-term
-   :condition (non-symbolic-attack-term? current-statement)
+   :condition (non-symbolic-attack-term? current-statement
+					 (dialogue-signature dialogue))
    :body (let ((s (nth-statement dialogue current-reference)))
-	   (and (non-symbolic-attack-formula? s)
+	   (and (non-symbolic-attack-formula? s
+					      (dialogue-signature dialogue))
 		(universal? s)))
    :failure-message "If one asserts a term as an attack, then the assertion being attacked must be a universal generalization."))
 
@@ -324,7 +331,8 @@ attacks which, being symbols, do qualify as terms."
    :name d01-which-instance
    :condition (eq current-statement 'which-instance?)
    :body (let ((s (nth-statement dialogue current-reference)))
-	   (and (non-symbolic-attack-formula? s)
+	   (and (non-symbolic-attack-formula? s
+					      (dialogue-signature dialogue))
 		(existential? s)))
    :failure-message "The WHICH-INSTANCE? attack applies only to existential generalizations."))
 
@@ -338,7 +346,8 @@ attacks which, being symbols, do qualify as terms."
 (defvar rule-d01-formula
   (make-offensive-rule 
    :name d01-formula
-   :condition (non-symbolic-attack-formula? current-statement)
+   :condition (non-symbolic-attack-formula? current-statement
+					    (dialogue-signature dialogue))
    :body (or (implication? (nth-statement dialogue current-reference))
 	     (negation? (nth-statement dialogue current-reference))
 	     (universal? (nth-statement dialogue current-reference)))
@@ -347,7 +356,8 @@ attacks which, being symbols, do qualify as terms."
 (defvar rule-d02-formula
   (make-defensive-rule
    :name d02-formula
-   :body (non-symbolic-attack-formula? current-statement)
+   :body (non-symbolic-attack-formula? current-statement
+				       (dialogue-signature dialogue))
    :failure-message "All defensive statements are supposed to be formulas."))
 
 (defvar rule-d02-left-conjunct
@@ -422,7 +432,8 @@ attacks which, being symbols, do qualify as terms."
 		(existential? original-statement))
    :body (with-original-statement (original-statement)
 	   (instance-of-quantified? current-statement
-				    original-statement))
+				    original-statement
+				    (dialogue-signature dialogue)))
    :failure-message "The asserted statement is not an instance of the original existential generalization."))
 
 (defvar argumentation-forms (list rule-d01-conjunction
@@ -459,7 +470,8 @@ attacks which, being symbols, do qualify as terms."
 (defvar rule-d00-atomic
   (make-rule :name d00-atomic
 	     :condition (zerop current-position)
-	     :body (composite-formula? current-statement)
+	     :body (composite-formula? current-statement
+				       (dialogue-signature dialogue))
 	     :failure-message "Dialogues must open with a composite formula."))
 
 (defvar rule-d00-proponent
@@ -478,7 +490,8 @@ attacks which, being symbols, do qualify as terms."
   (make-offensive-rule
    :name d01-composite
    :body (composite-formula? (nth-statement dialogue 
-					    current-reference))
+					    current-reference)
+			     (dialogue-signature dialogue))
    :failure-message "Atomic formulas cannot be attacked."))
 
 (defvar rule-d02-attack
@@ -490,8 +503,10 @@ attacks which, being symbols, do qualify as terms."
 (defvar rule-d10
   (make-rule :name d10
 	     :condition (and (evenp current-position) 
-			     (non-symbolic-attack-formula? current-statement)
-			     (atomic-formula? current-statement))
+			     (non-symbolic-attack-formula? current-statement
+							   (dialogue-signature dialogue))
+			     (atomic-formula? current-statement
+					      (dialogue-signature dialogue)))
 	     :body (some-move #'(lambda (move)
 				  (when (opponent-move? move)
 				    (equal-formulas? (move-statement move)
@@ -578,6 +593,7 @@ attacks which, being symbols, do qualify as terms."
 (defstruct (dialogue
 	     (:print-function print-dialogue)
 	     (:constructor make-dialogue-int))
+  (signature nil :type signature)
   (plays nil :type list))
 
 (defun dialogue-length (dialogue)
@@ -625,7 +641,8 @@ attacks which, being symbols, do qualify as terms."
        (msg "Let's play a dialogue game!~%")
        (msg "Proponent starts by playing a composite formula.~%")
        (msg "Input a composite formula: ")
-       (setf dialogue (make-dialogue (read-composite-formula)))
+       (setf dialogue (make-dialogue (read-composite-formula 
+				      (make-signature))))
        (msg "Game on!~%")
        (incf turn-number)
        (go start-move)
@@ -700,7 +717,7 @@ attacks which, being symbols, do qualify as terms."
 	 (r (go start-move)))
      formula-input
        (msg "Enter a formula:~%")
-       (setf statement (read-formula))
+       (setf statement (read-formula (dialogue-signature dialogue)))
        (go evaluate-rules)
      term-input
        (msg "Enter a term:~%")
