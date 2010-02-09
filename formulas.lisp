@@ -245,6 +245,7 @@
 	     (formula? (matrix x)) signature))))	       
 
 (defun composite-formula? (formula signature)
+  (declare (ignore signature))
   (when formula
     (when (listp formula)
       (or (disjunction? formula)
