@@ -213,10 +213,10 @@
 (defun bound-variable (quantified-formula)
   (cadr quantified-formula))
 
-(defun atomic-formula? (formula signature)
+(defun atomic-formula? (x signature)
   (when x
     (if (symbolp x)
-	(predicate-of-arity signature formula 0)
+	(predicate-of-arity signature x 0)
 	(let* ((pred (car x))
 	       (args (cdr x))
 	       (num-args (length args)))
