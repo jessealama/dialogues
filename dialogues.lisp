@@ -95,9 +95,10 @@
 	       (print-move-at-position i move stream)
 	       (format stream "~%")))))))
 
-(defun make-dialogue (initial-statement)
+(defun make-dialogue (initial-statement signature)
   (let ((first-move (make-proponent-move initial-statement nil nil)))
-    (make-dialogue-int :plays (list first-move))))
+    (make-dialogue-int :plays (list first-move)
+		       :signature signature)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Dialogue utilities
@@ -641,8 +642,10 @@ attacks which, being symbols, do qualify as terms."
        (msg "Let's play a dialogue game!~%")
        (msg "Proponent starts by playing a composite formula.~%")
        (msg "Input a composite formula: ")
-       (setf dialogue (make-dialogue (read-composite-formula 
-				      (make-signature))))
+       (let ((initial-signature (make-signature :predicates '((p . 0)))))
+	 (let ((initial-formula (read-composite-formula initial-signature)))
+	   (setf dialogue (make-dialogue initial-formula
+					 initial-signature))))
        (msg "Game on!~%")
        (incf turn-number)
        (go start-move)
