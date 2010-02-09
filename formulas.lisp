@@ -60,7 +60,7 @@
 	 (error "The symbol ~A is already reserved as a predicate in the the given signature" constant))
 	((function? signature constant)
 	 (error "The symbol ~A is alredy reserved as a function in the given signature" constant))
-	((member constant (signature-constants signature constant))
+	((constant? signature constant)
 	 (error "The symbol ~A is already a constant in the given signature" constant))
 	(t (push constant (signature-constants signature)))))
 
@@ -71,9 +71,8 @@
 	 (error "The symbol ~A is alredy reserved as a predicate in the given signature" pred-sym))
 	((function? signature pred-sym)
 	 (error "The symbol ~A is alredy reserved as a function in the given signature" pred-sym))
-
-	((member constant (signature-constants signature pred-sym))
-	 (error "The symbol ~A is already a constant in the given signature" constant))
+	((constant? signature pred-sym)
+	 (error "The symbol ~A is already a constant in the given signature" pred-sym))
 	(t (push (cons pred-sym arity) (signature-predicates signature)))))
 
 (defun add-function (signature func-sym arity)
@@ -83,9 +82,8 @@
 	 (error "The symbol ~A is alredy reserved as a predicate in the given signature" func-sym))
 	((function? signature func-sym)
 	 (error "The symbol ~A is alredy reserved as a function in the given signature" func-sym))
-
-	((member constant (signature-constants signature func-sym))
-	 (error "The symbol ~A is already a constant in the given signature" constant))
+	((constant? signature func-sym)
+	 (error "The symbol ~A is already a constant in the given signature" func-sym))
 	(t (push (cons func-sym arity) (signature-functions signature)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -107,8 +105,9 @@
 	     (let* ((function-symbol (car x))
 		    (args (cdr x))
 		    (num-args (length args)))
-	       (and (function-of-arity signature x num-args))
-		    (every #'term? args))))))
+	       (and (function-of-arity signature function-symbol num-args))
+		    (every #'(lambda (arg) (term? signature arg))
+			   args))))))
 
 (defun function-symbol (complex-term)
   (car complex-term))
@@ -223,7 +222,8 @@
 	       (args (cdr x))
 	       (num-args (length args)))
 	  (and (predicate-of-arity signature pred num-args)
-	       (every #'term? args))))))
+	       (every #'(lambda (arg) (term? signature arg))
+		      args))))))
 
 (defun formula? (x signature)
   (when x
@@ -244,7 +244,7 @@
 	     (formula? (matrix x) signature))
 	(and (existential? x)
 	     (variable? (bound-variable x))
-	     (formula? (matrix x)) signature))))	       
+	     (formula? (matrix x) signature)))))
 
 (defun composite-formula? (formula signature)
   (declare (ignore signature))
@@ -329,7 +329,7 @@ in TERM or FORMULA."
 	   (apply #'make-atomic-formula predicate
   		                        (mapcar #'(lambda (arg) (subst-term-for-var-in-term term variable arg)) arguments))))))
 
-(defun instance-of-quantified? (instantiated quantified-statement)
+(defun instance-of-quantified? (signature instantiated quantified-statement)
   "Determine whether INSTANTIATED is obtained from
   QUANTIFIED-STATEMENT, (ALL ?X A) or (EXISTS ?X A), by plugging in a
   term for the free occurences of ?X."
@@ -374,7 +374,7 @@ in TERM or FORMULA."
 				(and (universal? formula-2)
 				     (instance-helper instance-matrix formula-2))))))
 		       (t ;; atomic case
-			(and (atomic-formula? formula-2)
+			(and (atomic-formula? signature formula-2)
 			   (eq (predicate formula-1)
 			       (predicate formula-2))
 			   (every-pair #'(lambda (term-1 term-2)
@@ -409,14 +409,14 @@ in TERM or FORMULA."
 	  (rhs-as-string (comma-separated-list rhs)))
       (format stream "~A => ~A" lhs-as-string rhs-as-string))))
 
-(defun make-sequent (lhs rhs)
-  (if (formula? lhs)
-      (if (formula? rhs)
+(defun make-sequent (signature lhs rhs)
+  (if (formula? signature lhs)
+      (if (formula? signature rhs)
 	  (make-seq :lhs (list lhs)
 		    :rhs (list rhs))
 	  (make-seq :lhs (list lhs)
 		    :rhs rhs))
-      (if (formula? rhs)
+      (if (formula? signature rhs)
 	  (make-seq :lhs lhs
 		    :rhs (list rhs))
 	  (make-seq :lhs lhs
@@ -435,21 +435,21 @@ in TERM or FORMULA."
       (setq response (read t nil nil)))
     response))
 
-(defun read-formula ()
+(defun read-formula (signature)
   (let (response)
-    (until (formula? response)
+    (until (formula? signature response)
       (setf response (read t nil nil)))
     response))
 
-(defun read-atomic-formula ()
+(defun read-atomic-formula (signature)
   (let (response)
-    (until (atomic-formula? response)
+    (until (atomic-formula? signature response)
       (setf response (read t nil nil)))
     response))
 
-(defun read-composite-formula ()
+(defun read-composite-formula (signature)
   (let (response)
-    (until (composite-formula? response)
+    (until (composite-formula? signature response)
       (setf response (read t nil nil)))
     response))
 
