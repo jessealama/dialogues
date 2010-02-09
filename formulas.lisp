@@ -453,7 +453,7 @@ in TERM or FORMULA."
 
 (defun read-composite-formula (signature)
   (let (response)
-    (until (composite-formula? signature response)
+    (until (composite-formula? response signature)
       (setf response (read t nil nil)))
     response))
 
