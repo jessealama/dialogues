@@ -80,10 +80,18 @@
 
 (defun read-symbol (&rest symbols)
   (let (response)
-    (until (and (symbolp response)
-		(member response symbols))
-      (setq response (read t nil nil)))
+    (if symbols
+	(until (and (symbolp response)
+		    (member response symbols))
+	  (setf response (read t nil nil)))
+	(until (symbolp response)
+	  (setf response (read t nil nil))))
     response))
+
+(defun read-symbol-different-from (&rest symbols)
+  (let (response)
+    (until (not (member response symbols))
+      (setf response (read t nil nil)))))
 
 (defun read-number-in-interval (a b)
   (let (response)    
@@ -103,6 +111,13 @@
 		    (<= response n))
 	       (and (symbolp response)
 		    (member response symbols)))
+      (setf response (read t nil nil)))
+    response))
+
+(defun read-natural-number ()
+  (let (response)
+    (until (and (integerp response)
+		(<= 0 response))
       (setf response (read t nil nil)))
     response))
 
