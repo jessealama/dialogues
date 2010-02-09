@@ -781,10 +781,9 @@ attacks which, being symbols, do qualify as terms."
 		    :functions functions
 		    :constants constants)))
 
-(defun play-dialogue-game (rules)
+(defun play-dialogue-game (rules &optional signature)
   (let ((dialogue nil)
 	(turn-number 0)
-	(signature nil)
 	(player nil)
 	(stance nil)
 	(index nil)
@@ -792,10 +791,9 @@ attacks which, being symbols, do qualify as terms."
     (tagbody (go greetings)
      greetings
        (msg "Let's play a dialogue game!~%")
-       (when (null *signature*)
-	 (go signature))
-       (msg "The global variable *SIGNATURE* has already been set; reusing it.")
-       (go initial-move)
+       (if signature
+	   (go initial-move)
+	   (go signature))
      signature
        (msg "Please supply a signature in which the sentences will be written.~%")
        (setf signature (read-signature))
@@ -938,11 +936,11 @@ attacks which, being symbols, do qualify as terms."
        (msg "Thanks for playing, I hope you had fun.~%"))
     dialogue))
 
-(defun play-d-dialogue-game ()
-  (play-dialogue-game d-dialogue-rules))
+(defun play-d-dialogue-game (&optional signature)
+  (play-dialogue-game d-dialogue-rules signature))
 
-(defun play-e-dialogue-game ()
-  (play-dialogue-game e-dialogue-rules))
+(defun play-e-dialogue-game (&optional signature)
+  (play-dialogue-game e-dialogue-rules signature))
 
 (provide 'dialogues)
 
