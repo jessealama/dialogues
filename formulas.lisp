@@ -433,7 +433,7 @@ in TERM or FORMULA."
 
 (defun read-formula (signature)
   (let (response)
-    (until (formula? signature response)
+    (until (formula? response signature)
       (setf response (read t nil nil)))
     response))
 
