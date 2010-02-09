@@ -40,6 +40,7 @@
 (defstruct (move
 	     (:print-function print-move)
 	     (:constructor make-move-int))
+  signature
   player
   statement
   stance
