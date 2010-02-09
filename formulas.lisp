@@ -8,9 +8,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defstruct signature
-  (constants :type list)
-  (predicates :type assoc-list)
-  (functions :type assoc-list))
+  (constants nil :type list)
+  (predicates nil :type list)
+  (functions nil :type list))
 
 (defun functions-of-arity (signature arity)
   (let (result)
