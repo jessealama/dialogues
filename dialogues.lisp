@@ -590,6 +590,18 @@ attacks which, being symbols, do qualify as terms."
 				       rule-d13)))
 
 (defvar e-dialogue-rules (append d-dialogue-rules (list rule-e)))
+
+(defvar classical-dialogue-rules
+  (append argumentation-forms
+	  (list rule-d00-atomic
+		rule-d00-proponent
+		rule-d00-opponent
+		rule-d01-composite
+		rule-d02-attack
+		rule-d10
+		;; rule-d11
+		rule-d12
+		rule-d13)))
 	
 (defstruct (dialogue
 	     (:print-function print-dialogue)
@@ -941,6 +953,9 @@ attacks which, being symbols, do qualify as terms."
 
 (defun play-e-dialogue-game (&optional signature)
   (play-dialogue-game e-dialogue-rules signature))
+
+(defun play-classical-dialogue-game (&optional signature)
+  (play-dialogue-game classical-dialogue-rules signature))
 
 (provide 'dialogues)
 
