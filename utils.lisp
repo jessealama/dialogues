@@ -143,7 +143,7 @@
     response))
 
 (defun msg (format-string &rest args)
-  (apply #'format t format-string args))
+  (apply #'format t (concatenate 'string format-string "~%") args))
 
 (provide 'utils)
 

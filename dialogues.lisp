@@ -663,95 +663,96 @@ attacks which, being symbols, do qualify as terms."
      start
        (go constants)
      constants
-       (msg "Do you want to input any constant symbols?~%")
+       (msg "Do you want to input any constant symbols?")
        (yes-or-no-go first-constant functions)
      first-constant
-       (msg "Input a symbol:~%")
+       (msg "Input a symbol:")
        (push (read-symbol) constants)
-       (msg "Enter more constants?~%")
+       (msg "Enter more constants?")
        (yes-or-no-go more-constants functions)
      more-constants
-       (msg "You've declared ~A constants so far ~A~%" (length constants)
-                                                       (comma-separated-list
-							constants))
+       (msg "You've declared ~A constants so far ~A" (length constants)
+                                                     (comma-separated-list
+						      onstants))
        (msg "Do you want to input any more?")
        (with-yes-or-no
-	   :yes ((msg "Input a symbol:~%")
+	   :yes ((msg "Input a symbol:")
 		 (push (read-symbol) constants)
 		 (go more-constants))
 	   :no ((go functions)))
      functions
-       (msg "Do you want to input any function symbols?~%")
+       (msg "Do you want to input any function symbols?")
        (yes-or-no-go first-function predicates)
      first-function
        (let (func-sym arity)
-	 (msg "Input a symbol:~%")
+	 (msg "Input a symbol:")
 	 (setf func-sym (read-symbol))
-	 (msg "What arity does ~A have?~%" func-sym)
+	 (msg "What arity does ~A have?" func-sym)
 	 (setf arity (read-natural-number))
 	 (push (cons func-sym arity) functions)
-	 (msg "Enter more function symbols?~%")
+	 (msg "Enter more function symbols?")
 	 (yes-or-no-go more-functions predicates))
      more-functions
-       (msg "You've declared ~A function symbols so far ~A~%" (length functions)
-                                                              (comma-separated-list
-							       functions))
-       (msg "Do you want to input any more?~%")
+       (msg "You've declared ~A function symbols so far ~A" 
+	    (length functions)
+	    (comma-separated-list functions))
+       (msg "Do you want to input any more?")
        (with-yes-or-no
 	   :yes ((let (func-sym arity)
-		   (msg "Input a symbol:~%")
+		   (msg "Input a symbol:")
 		   (setf func-sym (apply #'read-symbol-different-from
 					 (append symbolic-attacks
 						 constants
 						 functions)))
-		   (msg "What arity does ~A have?~%" func-sym)
+		   (msg "What arity does ~A have?" func-sym)
 		   (setf arity (read-natural-number))
 		   (push (cons func-sym arity) functions)
 		   (go more-functions)))
 	   :no ((go predicates)))
      predicates
-       (msg "Do you want to input any predicates?~%")
+       (msg "Do you want to input any predicates?")
        (yes-or-no-go first-predicate check)
      first-predicate
        (let (pred-sym arity)
-	 (msg "Input a symbol:~%")
+	 (msg "Input a symbol:")
 	 (setf pred-sym (read-symbol))
-	 (msg "What arity does ~A have?~%" pred-sym)
+	 (msg "What arity does ~A have?" pred-sym)
 	 (setf arity (read-natural-number))
 	 (push (cons pred-sym arity) predicates)
-	 (msg "Enter more predicates?~%")
+	 (msg "Enter more predicates?")
 	 (yes-or-no-go more-predicates check))
      more-predicates
-       (msg "You've declared ~A predicates so far ~A~%" (length predicates)
-                                                        (comma-separated-list 
-							 predicates))
-       (msg "Do you want to input any more?~%")
+       (msg "You've declared ~A predicates so far ~A" 
+	    (length predicates)
+	    (comma-separated-list 
+	     predicates))
+       (msg "Do you want to input any more?")
        (with-yes-or-no
 	   :yes ((let (pred-sym arity)
-		   (msg "Input a symbol:~%")
+		   (msg "Input a symbol:")
 		   (setf pred-sym (apply #'read-symbol-different-from
 					 (append symbolic-attacks
 						 constants
 						 predicates
 						 functions)))
-		   (msg "What arity does ~A have?~%" pred-sym)
+		   (msg "What arity does ~A have?" pred-sym)
 		   (setf arity (read-natural-number))
 		   (push (cons pred-sym arity) predicates)
 		   (go more-predicates)))
 	   :no ((go check)))
      check
        (when predicates
-	 (msg "The signature looks like this:~%")
-	 (msg "Constants: ~A~%" constants)
-	 (msg "Predicates: ~A~%" predicates)
-	 (msg "Functions: ~A~%" functions)
-	 (msg "Do you want to add to this?~%")
+	 (msg "The signature looks like this:")
+	 (msg "Constants: ~A" constants)
+	 (msg "Predicates: ~A" predicates)
+	 (msg "Functions: ~A" functions)
+	 (msg "Do you want to add to this?")
 	 (with-yes-or-no
-	     :yes ((msg "OK, returning to the first prompt...~%")
+	     :yes ((msg "OK, returning to the first prompt...")
 		   (go constants))
 	     :no ((go end))))
-       (msg "No predicates have been entered; you won't be able to say anything!~%")
-       (msg "Returning to the first prompt...~%")
+       (msg "No predicates have been entered; you won't be able to say anything!")
+       (msg "Returning to the first prompt...")
        (go start)
      end)
     (make-signature :predicates predicates
@@ -767,35 +768,35 @@ attacks which, being symbols, do qualify as terms."
 	(statement nil))
     (tagbody (go greetings)
      greetings
-       (msg "Let's play a dialogue game!~%")
+       (msg "Let's play a dialogue game!")
        (if signature
 	   (go initial-move)
 	   (go signature))
      signature
-       (msg "Please supply a signature in which the sentences will be written.~%")
+       (msg "Please supply a signature in which the sentences will be written.")
        (setf signature (read-signature))
        (go initial-move)
      initial-move
-       (msg "Proponent starts by playing a composite formula.~%")
-       (msg "Input a composite formula:~%")
+       (msg "Proponent starts by playing a composite formula.")
+       (msg "Input a composite formula:")
        (setf dialogue (make-dialogue (read-composite-formula signature)
 				     signature))
-       (msg "Game on!~%")
+       (msg "Game on!")
        (incf turn-number)
        (go start-move)
      start-move
        (if (evenp turn-number)
 	   (setf player 'p)
 	   (setf player 'o))
-       (msg "Turn #~A: ~A~%" turn-number (ecase player
+       (msg "Turn #~A: ~A" turn-number (ecase player
 					   (p "Proponent")
 					   (o "Opponent")))
-       (msg "Enter:~%")
-       (msg "- A to attack,~%")
-       (msg "- D to defend,~%")
-       (msg "- O to list the open attacks at this point,~%")
-       (msg "- P to print the dialogue so far,~%")
-       (msg "- Q to quit.~%")
+       (msg "Enter:")
+       (msg "- A to attack,")
+       (msg "- D to defend,")
+       (msg "- O to list the open attacks at this point,")
+       (msg "- P to print the dialogue so far,")
+       (msg "- Q to quit.")
        (ecase (read-symbol 'a 'd 'o 'p 'q)
 	 (q (go quit))
 	 (o (go print-open-attacks-then-start-move))
@@ -805,41 +806,41 @@ attacks which, being symbols, do qualify as terms."
      print-open-attacks-then-start-move
        (let ((open (open-attack-indices dialogue)))
 	 (if open
-	     (msg "Open attacks at this point: ~A~%" (comma-separated-list open))
-	     (msg "All attacks are closed at this point.~%"))
+	     (msg "Open attacks at this point: ~A" (comma-separated-list open))
+	     (msg "All attacks are closed at this point."))
 	 (go start-move))
      print-open-attacks-then-defend
        (let ((open (open-attack-indices dialogue)))
 	 (if open
-	     (msg "Open attacks at this point: ~A~%" (comma-separated-list open))
-	     (msg "All attacks are closed at this point.~%"))
+	     (msg "Open attacks at this point: ~A" (comma-separated-list open))
+	     (msg "All attacks are closed at this point."))
 	 (go defend))       
      print-then-restart
-       (msg "The dialogue so far looks like this:~%")
-       (msg "~A~%" dialogue)
+       (msg "The dialogue so far looks like this:")
+       (msg "~A" dialogue)
        (go start-move)
      print-then-attack
-       (msg "The dialogue so far looks like this:~%")
-       (msg "~A~%" dialogue)
+       (msg "The dialogue so far looks like this:")
+       (msg "~A" dialogue)
        (go attack)
      print-then-defend
-       (msg "The dialogue so far looks like this:~%")
-       (msg "~A~%" dialogue)
+       (msg "The dialogue so far looks like this:")
+       (msg "~A" dialogue)
        (go defend)
      print-then-statement
-       (msg "The dialogue so far looks like this:~%")
-       (msg "~A~%" dialogue)
+       (msg "The dialogue so far looks like this:")
+       (msg "~A" dialogue)
        (go statement)
      print-then-statement-input
-       (msg "The dialogue so far looks like this:~%")
-       (msg "~A~%" dialogue)
+       (msg "The dialogue so far looks like this:")
+       (msg "~A" dialogue)
        (go statement-input)
      attack
-       (msg "Attack which move? Enter:~%")
-       (msg "- An integer between 0 and ~A,~%" (1- turn-number))
-       (msg "- P to print the dialogue so far and come back to this prompt,~%")
-       (msg "- Q to quit,~%")
-       (msg "- R to restart the move.~%")
+       (msg "Attack which move? Enter:")
+       (msg "- An integer between 0 and ~A," (1- turn-number))
+       (msg "- P to print the dialogue so far and come back to this prompt,")
+       (msg "- Q to quit,")
+       (msg "- R to restart the move.")
        (setf index (read-number-in-interval-or-symbol 
 		    0 (1- turn-number) 
 		    'p 'q 'r))
@@ -851,12 +852,12 @@ attacks which, being symbols, do qualify as terms."
 	 (q (go quit))
 	 (r (go start-move)))
      defend
-       (msg "Defend against which move? Enter:~%")
-       (msg "- An integer between 0 and ~A,~%" (1- turn-number))
-       (msg "- O to list the open attacks at this point,~%")
-       (msg "- P to print the dialogue so far and come back to this prompt,~%")
-       (msg "- Q to quit,~%")
-       (msg "- R to restart the move.~%")
+       (msg "Defend against which move? Enter:")
+       (msg "- An integer between 0 and ~A," (1- turn-number))
+       (msg "- O to list the open attacks at this point,")
+       (msg "- P to print the dialogue so far and come back to this prompt,")
+       (msg "- Q to quit,")
+       (msg "- R to restart the move.")
        (setf index (read-number-in-interval-or-symbol 
 		    0 (1- turn-number) 
 		    'o 'p 'q 'r))
@@ -869,27 +870,27 @@ attacks which, being symbols, do qualify as terms."
 	 (q (go quit))
 	 (r (go start-move)))
      formula-input
-       (msg "Enter a formula:~%")
+       (msg "Enter a formula:")
        (setf statement (read-formula (dialogue-signature dialogue)))
        (go evaluate-rules)
      term-input
-       (msg "Enter a term:~%")
+       (msg "Enter a term:")
        (setf statement (read-term))
        (go evaluate-rules)
      statement-input
        (if (eq stance 'a)
 	   (msg "What is your attack? ")
 	   (msg "What is your defense? "))
-       (msg "Enter:~%")
-       (msg "- P to print the dialogue so far and return to this prompt,~%")
-       (msg "- Q to quit,~%")
-       (msg "- F to type a formula,~%")
-       (msg "- T to type a term,~%")
+       (msg "Enter:")
+       (msg "- P to print the dialogue so far and return to this prompt,")
+       (msg "- Q to quit,")
+       (msg "- F to type a formula,")
+       (msg "- T to type a term,")
        (when (eq stance 'a)
-	 (msg "- L for ATTACK-LEFT-CONJUNCT,~%")
-	 (msg "- R for ATTACK-RIGHT-CONJUNCT,~%")
-	 (msg "- D for WHICH-DISJUNCT?,~%")
-	 (msg "- I for WHICH-INSTANCE?,~%"))
+	 (msg "- L for ATTACK-LEFT-CONJUNCT,")
+	 (msg "- R for ATTACK-RIGHT-CONJUNCT,")
+	 (msg "- D for WHICH-DISJUNCT?,")
+	 (msg "- I for WHICH-INSTANCE?,"))
        (ecase (read-symbol 'p 'q 'f 't 'l 'r 'd 'i)
 	 (p (go print-then-statement-input))
 	 (f (go formula-input))
@@ -900,11 +901,11 @@ attacks which, being symbols, do qualify as terms."
 	 (i (setf statement 'which-instance?)))
        (go evaluate-rules)
      statement
-       (msg "You are responding to move #~A.  Enter:~%" index)
-       (msg "- P to print the dialogue so far and come back to this prompt,~%")
-       (msg "- Q to quit,~%")
-       (msg "- R to restart the move,~%")
-       (msg "- S to enter your response to move #~A.~%" index)
+       (msg "You are responding to move #~A.  Enter:" index)
+       (msg "- P to print the dialogue so far and come back to this prompt,")
+       (msg "- Q to quit,")
+       (msg "- R to restart the move,")
+       (msg "- S to enter your response to move #~A." index)
        (setf statement (read-symbol 'p 'q 'r 's))
        (ecase statement
 	 (p (go print-then-statement))
@@ -916,10 +917,10 @@ attacks which, being symbols, do qualify as terms."
 	   (evaluate-rules rules dialogue player turn-number statement stance index)
 	 (when rules-result
 	   (go successful-turn))
-	 (msg "At least one of the dialogue rules is violated by your attack:~%")
+	 (msg "At least one of the dialogue rules is violated by your attack:")
 	 (dolist (message messages)
-	   (msg "* ~A~%" message))
-	 (msg "Restarting the move...~%")
+	   (msg "* ~A" message))
+	 (msg "Restarting the move...")
 	 (go start-move))
      successful-turn
        (incf turn-number)
@@ -927,7 +928,7 @@ attacks which, being symbols, do qualify as terms."
 			     (make-move player statement stance index))
        (go start-move)
      quit
-       (msg "Thanks for playing, I hope you had fun.~%"))
+       (msg "Thanks for playing, I hope you had fun."))
     dialogue))
 
 (defun play-d-dialogue-game (&optional signature)
