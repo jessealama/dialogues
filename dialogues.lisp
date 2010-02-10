@@ -764,7 +764,7 @@ attacks which, being symbols, do qualify as terms."
        (go initial-move)
      initial-move
        (msg "Proponent starts by playing a composite formula.~%")
-       (msg "Input a composite formula: ")
+       (msg "Input a composite formula:~%")
        (setf dialogue (make-dialogue (read-composite-formula signature)
 				     signature))
        (msg "Game on!~%")
@@ -780,13 +780,27 @@ attacks which, being symbols, do qualify as terms."
        (msg "Enter:~%")
        (msg "- A to attack,~%")
        (msg "- D to defend,~%")
+       (msg "- O to list the open attacks at this point,~%")
        (msg "- P to print the dialogue so far,~%")
        (msg "- Q to quit.~%")
-       (ecase (read-symbol 'a 'd 'p 'q)
+       (ecase (read-symbol 'a 'd 'o 'p 'q)
 	 (q (go quit))
+	 (o (go print-open-attacks-then-start-move))
 	 (p (go print-then-restart))
 	 (a (go attack))
 	 (d (go defend)))
+     print-open-attacks-then-start-move
+       (let ((open (open-attack-indices dialogue)))
+	 (if open
+	     (msg "Open attacks at this point: ~A~%" (comma-separated-list open))
+	     (msg "All attacks are closed at this point.~%"))
+	 (go start-move))
+     print-open-attacks-then-defend
+       (let ((open (open-attack-indices dialogue)))
+	 (if open
+	     (msg "Open attacks at this point: ~A~%" (comma-separated-list open))
+	     (msg "All attacks are closed at this point.~%"))
+	 (go defend))       
      print-then-restart
        (msg "The dialogue so far looks like this:~%")
        (msg "~A~%" dialogue)
@@ -826,16 +840,18 @@ attacks which, being symbols, do qualify as terms."
      defend
        (msg "Defend against which move? Enter:~%")
        (msg "- An integer between 0 and ~A,~%" (1- turn-number))
+       (msg "- O to list the open attacks at this point,~%")
        (msg "- P to print the dialogue so far and come back to this prompt,~%")
        (msg "- Q to quit,~%")
        (msg "- R to restart the move.~%")
        (setf index (read-number-in-interval-or-symbol 
 		    0 (1- turn-number) 
-		    'p 'q 'r))
+		    'o 'p 'q 'r))
        (when (integerp index)
 	 (setf stance 'd)
 	 (go statement))
        (ecase index
+	 (o (go print-open-attacks-then-defend))
 	 (p (go print-then-defend))
 	 (q (go quit))
 	 (r (go start-move)))
