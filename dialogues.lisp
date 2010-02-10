@@ -664,102 +664,72 @@ attacks which, being symbols, do qualify as terms."
 					  index
 					  (cons error-message messages)))))))
 
-(defvar *signature* nil)
+(defmacro with-simple-prompt ((prompt) question &body body)
+  `(progn
+     (msg ,question)
+     (format t "~A" ,prompt)
+     ,@body))
 
-(defun read-signature ()
+(defun read-signature (prompt)
   (let (constants predicates functions)
     (tagbody (go start)
      start
        (go constants)
      constants
-       (msg "Do you want to input any constant symbols?")
-       (yes-or-no-go first-constant functions)
-     first-constant
-       (msg "Input a symbol:")
-       (push (read-symbol) constants)
-       (msg "Enter more constants?")
-       (yes-or-no-go more-constants functions)
-     more-constants
-       (msg "You've declared ~A constants so far ~A" 
-	    (length constants)
-	    (comma-separated-list constants))
-       (msg "Do you want to input any more?")
-       (with-yes-or-no
-	   :yes ((msg "Input a symbol:")
-		 (push (read-symbol) constants)
-		 (go more-constants))
-	   :no ((go functions)))
+       (with-simple-prompt (prompt)
+	 "Do you want to input any constant symbols?"
+	 (yes-or-no-go read-constant functions))
+     read-constant
+       (with-simple-prompt (prompt)
+	 "Input a symbol for the new constant:"
+	 (push (read-symbol) constants))
+       (with-simple-prompt (prompt)
+	 "Enter more constants?"
+	 (yes-or-no-go read-constant functions))
      functions
-       (msg "Do you want to input any function symbols?")
-       (yes-or-no-go first-function predicates)
-     first-function
+       (with-simple-prompt (prompt) 
+	   "Do you want to input any function symbols?"
+	 (yes-or-no-go read-function predicates))
+     read-function
        (let (func-sym arity)
-	 (msg "Input a symbol:")
-	 (setf func-sym (read-symbol))
+	 (with-simple-prompt (prompt)
+	     "Input a symbol for the new function:"
+	 (setf func-sym (read-symbol)))
 	 (msg "What arity does ~A have?" func-sym)
+	 (format t "~A" prompt)
 	 (setf arity (read-natural-number))
 	 (push (cons func-sym arity) functions)
-	 (msg "Enter more function symbols?")
-	 (yes-or-no-go more-functions predicates))
-     more-functions
-       (msg "You've declared ~A function symbols so far ~A" 
-	    (length functions)
-	    (comma-separated-list functions))
-       (msg "Do you want to input any more?")
-       (with-yes-or-no
-	   :yes ((let (func-sym arity)
-		   (msg "Input a symbol:")
-		   (setf func-sym (apply #'read-symbol-different-from
-					 (append symbolic-attacks
-						 constants
-						 functions)))
-		   (msg "What arity does ~A have?" func-sym)
-		   (setf arity (read-natural-number))
-		   (push (cons func-sym arity) functions)
-		   (go more-functions)))
-	   :no ((go predicates)))
+	 (with-simple-prompt (prompt)
+	     "Enter more function symbols?"
+	   (yes-or-no-go read-function predicates)))
      predicates
-       (msg "Do you want to input any predicates?")
-       (yes-or-no-go first-predicate check)
-     first-predicate
+       (with-simple-prompt (prompt)
+	   "Do you want to input any predicates?"
+	 (yes-or-no-go read-predicate check))
+     read-predicate
        (let (pred-sym arity)
-	 (msg "Input a symbol:")
-	 (setf pred-sym (read-symbol))
+	 (with-simple-prompt (prompt)
+	     "Input a symbol for the new predicate:"
+	   (setf pred-sym (read-symbol)))
 	 (msg "What arity does ~A have?" pred-sym)
+	 (format t "~A" prompt)
 	 (setf arity (read-natural-number))
 	 (push (cons pred-sym arity) predicates)
-	 (msg "Enter more predicates?")
-	 (yes-or-no-go more-predicates check))
-     more-predicates
-       (msg "You've declared ~A predicates so far ~A" 
-	    (length predicates)
-	    (comma-separated-list 
-	     predicates))
-       (msg "Do you want to input any more?")
-       (with-yes-or-no
-	   :yes ((let (pred-sym arity)
-		   (msg "Input a symbol:")
-		   (setf pred-sym (apply #'read-symbol-different-from
-					 (append symbolic-attacks
-						 constants
-						 predicates
-						 functions)))
-		   (msg "What arity does ~A have?" pred-sym)
-		   (setf arity (read-natural-number))
-		   (push (cons pred-sym arity) predicates)
-		   (go more-predicates)))
-	   :no ((go check)))
+	 (with-simple-prompt (prompt)
+	     "Enter more predicates?"
+	   (yes-or-no-go read-predicate check)))
      check
        (when predicates
 	 (msg "The signature looks like this:")
-	 (msg "Constants: ~A" constants)
+	 (msg "Constants: ~A" (or constants "(none)"))
 	 (msg "Predicates: ~A" predicates)
-	 (msg "Functions: ~A" functions)
-	 (msg "Do you want to add to this?")
-	 (with-yes-or-no
-	     :yes ((msg "OK, returning to the first prompt...")
-		   (go constants))
-	     :no ((go end))))
+	 (msg "Functions: ~A" (or functions "(none)"))
+	 (with-simple-prompt (prompt)
+	     "Do you want to add any more constants, predicates, or functions to the signature?"
+	   (with-yes-or-no
+	       :yes ((msg "OK, returning to the first prompt...")
+		     (go constants))
+	       :no ((go end)))))
        (msg "No predicates have been entered; you won't be able to say anything!")
        (msg "Returning to the first prompt...")
        (go start)
@@ -774,7 +744,8 @@ attacks which, being symbols, do qualify as terms."
 	(player nil)
 	(stance nil)
 	(index nil)
-	(statement nil))
+	(statement nil)
+	(prompt "> "))
     (tagbody (go greetings)
      greetings
        (msg "Let's play a dialogue game!")
@@ -783,11 +754,12 @@ attacks which, being symbols, do qualify as terms."
 	   (go signature))
      signature
        (msg "Please supply a signature in which the sentences will be written.")
-       (setf signature (read-signature))
+       (setf signature (read-signature prompt))
        (go initial-move)
      initial-move
        (msg "Proponent starts by playing a composite formula.")
        (msg "Input a composite formula:")
+       (format t "~A" prompt)
        (setf dialogue (make-dialogue (read-composite-formula signature)
 				     signature))
        (msg "Game on!")
@@ -806,6 +778,7 @@ attacks which, being symbols, do qualify as terms."
        (msg "- O to list the open attacks at this point,")
        (msg "- P to print the dialogue so far,")
        (msg "- Q to quit.")
+       (format t "~A" prompt)
        (ecase (read-symbol 'a 'd 'o 'p 'q)
 	 (q (go quit))
 	 (o (go print-open-attacks-then-start-move))
@@ -845,6 +818,7 @@ attacks which, being symbols, do qualify as terms."
        (msg "- P to print the dialogue so far and come back to this prompt,")
        (msg "- Q to quit,")
        (msg "- R to restart the move.")
+       (format t "~A" prompt)
        (setf index (read-number-in-interval-or-symbol 
 		    0 (1- turn-number) 
 		    'p 'q 'r))
@@ -862,6 +836,7 @@ attacks which, being symbols, do qualify as terms."
        (msg "- P to print the dialogue so far and come back to this prompt,")
        (msg "- Q to quit,")
        (msg "- R to restart the move.")
+       (format t "~A" prompt)
        (setf index (read-number-in-interval-or-symbol 
 		    0 (1- turn-number) 
 		    'o 'p 'q 'r))
@@ -875,10 +850,12 @@ attacks which, being symbols, do qualify as terms."
 	 (r (go start-move)))
      formula-input
        (msg "Enter a formula:")
+       (format t "~A" prompt)
        (setf statement (read-formula (dialogue-signature dialogue)))
        (go evaluate-rules)
      term-input
        (msg "Enter a term:")
+       (format t "~A" prompt)
        (setf statement (read-term))
        (go evaluate-rules)
      statement-input
@@ -895,6 +872,7 @@ attacks which, being symbols, do qualify as terms."
 	 (msg "- R for ATTACK-RIGHT-CONJUNCT,")
 	 (msg "- D for WHICH-DISJUNCT?,")
 	 (msg "- I for WHICH-INSTANCE?,"))
+       (format t "~A" prompt)
        (ecase (read-symbol 'p 'q 'f 't 'l 'r 'd 'i)
 	 (p (go print-then-statement-input))
 	 (f (go formula-input))
@@ -910,6 +888,7 @@ attacks which, being symbols, do qualify as terms."
        (msg "- Q to quit,")
        (msg "- R to restart the move,")
        (msg "- S to enter your response to move #~A." index)
+       (format t "~A" prompt)
        (setf statement (read-symbol 'p 'q 'r 's))
        (ecase statement
 	 (p (go print-then-statement))
