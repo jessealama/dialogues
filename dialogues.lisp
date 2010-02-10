@@ -95,6 +95,10 @@
 	       (print-move-at-position i move stream)
 	       (format stream "~%")))))))
 
+(defun msg-dialogue-so-far (dialogue)
+  (msg "The dialogue so far looks like this:")
+  (msg "~A" dialogue))
+
 (defun make-dialogue (initial-statement signature)
   (let ((first-move (make-proponent-move initial-statement nil nil)))
     (make-dialogue-int :plays (list first-move)
@@ -816,24 +820,19 @@ attacks which, being symbols, do qualify as terms."
 	     (msg "All attacks are closed at this point."))
 	 (go defend))       
      print-then-restart
-       (msg "The dialogue so far looks like this:")
-       (msg "~A" dialogue)
+       (msg-dialogue-so-far dialogue)
        (go start-move)
      print-then-attack
-       (msg "The dialogue so far looks like this:")
-       (msg "~A" dialogue)
+       (msg-dialogue-so-far dialogue)
        (go attack)
      print-then-defend
-       (msg "The dialogue so far looks like this:")
-       (msg "~A" dialogue)
+       (msg-dialogue-so-far dialogue)
        (go defend)
      print-then-statement
-       (msg "The dialogue so far looks like this:")
-       (msg "~A" dialogue)
+       (msg-dialogue-so-far dialogue)
        (go statement)
      print-then-statement-input
-       (msg "The dialogue so far looks like this:")
-       (msg "~A" dialogue)
+       (msg-dialogue-so-far dialogue)
        (go statement-input)
      attack
        (msg "Attack which move? Enter:")
