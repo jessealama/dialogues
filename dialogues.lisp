@@ -676,20 +676,23 @@ attacks which, being symbols, do qualify as terms."
      start
        (go constants)
      constants
-       (with-simple-prompt (prompt)
-	 "Do you want to input any constant symbols?"
-	 (yes-or-no-go read-constant functions))
+       (yes-or-no-go "Do you want to input any constant symbols?"
+		     *prompt*
+		     read-constant
+		     functions)
      read-constant
        (with-simple-prompt (prompt)
 	 "Input a symbol for the new constant:"
 	 (push (read-symbol) constants))
-       (with-simple-prompt (prompt)
-	 "Enter more constants?"
-	 (yes-or-no-go read-constant functions))
+       (yes-or-no-go "Enter more constants?"
+		     *prompt*
+		     read-constant
+		     functions)
      functions
-       (with-simple-prompt (prompt) 
-	   "Do you want to input any function symbols?"
-	 (yes-or-no-go read-function predicates))
+       (yes-or-no-go "Do you want to input any function symbols?"
+		     *prompt*
+		     read-function
+		     predicates)
      read-function
        (let (func-sym arity)
 	 (with-simple-prompt (prompt)
@@ -699,13 +702,15 @@ attacks which, being symbols, do qualify as terms."
 	 (format t "~A" prompt)
 	 (setf arity (read-natural-number))
 	 (push (cons func-sym arity) functions)
-	 (with-simple-prompt (prompt)
-	     "Enter more function symbols?"
-	   (yes-or-no-go read-function predicates)))
+	 (yes-or-no-go "Enter more function symbols?"
+		       *prompt*
+		       read-function
+		       predicates))
      predicates
-       (with-simple-prompt (prompt)
-	   "Do you want to input any predicates?"
-	 (yes-or-no-go read-predicate check))
+       (yes-or-no-go "Do you want to input any predicates?"
+		     *prompt*
+		     read-predicate
+		     check)
      read-predicate
        (let (pred-sym arity)
 	 (with-simple-prompt (prompt)
@@ -715,9 +720,10 @@ attacks which, being symbols, do qualify as terms."
 	 (format t "~A" prompt)
 	 (setf arity (read-natural-number))
 	 (push (cons pred-sym arity) predicates)
-	 (with-simple-prompt (prompt)
-	     "Enter more predicates?"
-	   (yes-or-no-go read-predicate check)))
+	 (yes-or-no-go "Enter more predicates?"
+		       *prompt*
+		       read-predicate
+		       check))
      check
        (when predicates
 	 (msg "The signature looks like this:")

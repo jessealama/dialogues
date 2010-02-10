@@ -100,12 +100,15 @@
      (n ,@no)
      (no ,@no)))
 
-(defmacro yes-or-no-go (yes-tag no-tag)
-  `(ecase (read-yes-or-no)
-     (y (go ,yes-tag))
-     (yes (go ,yes-tag))
-     (n (go ,no-tag))
-     (no (go ,no-tag))))
+(defmacro yes-or-no-go (question prompt yes-tag no-tag)
+  `(progn
+     (msg "~A" ,question)
+     (format t "~A" ,prompt)
+     (ecase (read-yes-or-no)
+       (y (go ,yes-tag))
+       (yes (go ,yes-tag))
+       (n (go ,no-tag))
+       (no (go ,no-tag)))))
 
 (defun read-symbol-different-from (&rest symbols)
   (let (response)
