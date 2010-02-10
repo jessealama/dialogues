@@ -123,6 +123,8 @@
 (defun nth-statement (dialogue n)
   (move-statement (nth-move dialogue n)))
 
+(defvar *prompt* "> ")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Statements
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -141,6 +143,7 @@
 (defun read-statement (signature)
   (let (response)
     (until (statement? response signature)
+      (format t "~A" *prompt*)
       (setf response (read t nil nil)))
     response))
 
@@ -148,6 +151,7 @@
   (let (response)
     (until (or (statement? signature response)
 	       (member response symbols))
+      (format t "~A" *prompt*)
       (setf response (read t nil nil)))
     response))
 
@@ -155,6 +159,7 @@
   (let (response)
     (until (or (formula? signature response)
 	       (term? signature response))
+      (format t "~A" *prompt*)
       (setf response (read t nil nil)))
     response))
 
