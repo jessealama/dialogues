@@ -239,11 +239,15 @@ attacks which, being symbols, do qualify as terms."
   (let ((attack (gensym))
 	(attack-refers-to (gensym))
 	(original-move (gensym)))
-    `(let* ((,attack (nth-move dialogue current-reference))
-	    (,attack-refers-to (move-reference ,attack))
-	    (,original-move (nth-move dialogue ,attack-refers-to))
-	    (,original-statement (move-statement ,original-move)))
-       ,@body)))
+    `(let ((,attack (nth-move dialogue current-reference)))
+       (when ,attack
+	 (let ((,attack-refers-to (move-reference ,attack)))
+	   (when ,attack-refers-to
+	     (let ((,original-move (nth-move dialogue ,attack-refers-to)))
+	       (when ,original-move
+		 (let ((,original-statement (move-statement ,original-move)))
+		   (when ,original-statement
+		     ,@body))))))))))
 
 (defvar rule-d01-conjunction
   (make-offensive-rule
