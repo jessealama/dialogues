@@ -101,7 +101,7 @@
 (defun read-symbol-different-from (&rest symbols)
   (let (response)
     (until (and response
-		(not (member response symbols)))(
+		(not (member response symbols)))
       (setf response (read t nil nil)))))
 
 (defun read-number-in-interval (a b)
