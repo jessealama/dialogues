@@ -659,7 +659,8 @@ attacks which, being symbols, do qualify as terms."
        (yes-or-no-go more-constants functions)
      more-constants
        (msg "You've declared ~A constants so far ~A~%" (length constants)
-                                                       constants)
+                                                       (comma-separated-list
+							constants))
        (msg "Do you want to input any more?")
        (with-yes-or-no
 	   :yes ((msg "Input a symbol:~%")
@@ -680,8 +681,9 @@ attacks which, being symbols, do qualify as terms."
 	 (yes-or-no-go more-functions predicates))
      more-functions
        (msg "You've declared ~A function symbols so far ~A~%" (length functions)
-                                                              functions)
-       (msg "Do you want to input any more?")
+                                                              (comma-separated-list
+							       functions))
+       (msg "Do you want to input any more?~%")
        (with-yes-or-no
 	   :yes ((let (func-sym arity)
 		   (msg "Input a symbol:~%")
@@ -689,7 +691,7 @@ attacks which, being symbols, do qualify as terms."
 					 (append symbolic-attacks
 						 constants
 						 functions)))
-		   (msg "What arity does ~A have?" func-sym)
+		   (msg "What arity does ~A have?~%" func-sym)
 		   (setf arity (read-natural-number))
 		   (push (cons func-sym arity) functions)
 		   (go more-functions)))
@@ -707,9 +709,10 @@ attacks which, being symbols, do qualify as terms."
 	 (msg "Enter more predicates?~%")
 	 (yes-or-no-go more-predicates check))
      more-predicates
-       (msg "You've declared ~A predicates so far ~A~%" (length functions)
-                                                        functions)
-       (msg "Do you want to input any more?")
+       (msg "You've declared ~A predicates so far ~A~%" (length predicates)
+                                                        (comma-separated-list 
+							 predicates))
+       (msg "Do you want to input any more?~%")
        (with-yes-or-no
 	   :yes ((let (pred-sym arity)
 		   (msg "Input a symbol:~%")
@@ -718,9 +721,9 @@ attacks which, being symbols, do qualify as terms."
 						 constants
 						 predicates
 						 functions)))
-		   (msg "What arity does ~A have?" pred-sym)
+		   (msg "What arity does ~A have?~%" pred-sym)
 		   (setf arity (read-natural-number))
-		   (push (cons pred-sym arity) functions)
+		   (push (cons pred-sym arity) predicates)
 		   (go more-predicates)))
 	   :no ((go check)))
      check
