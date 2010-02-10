@@ -706,7 +706,8 @@ attacks which, being symbols, do qualify as terms."
 	   (y (let (func-sym arity)
 		(msg "Input a symbol:~%")
 		(setf func-sym (apply #'read-symbol-different-from
-				      (append constants
+				      (append symbolic-attacks
+					      constants
 					      functions)))
 		(msg "What arity does ~A have?" func-sym)
 		(setf arity (read-natural-number))
@@ -715,7 +716,8 @@ attacks which, being symbols, do qualify as terms."
 	   (yes (let (func-sym arity)
 		(msg "Input a symbol:~%")
 		(setf func-sym (apply #'read-symbol-different-from
-				      (append constants
+				      (append symbolic-attacks
+					      constants
 					      functions)))
 		(msg "What arity does ~A have?" func-sym)
 		(setf arity (read-natural-number))
@@ -752,7 +754,8 @@ attacks which, being symbols, do qualify as terms."
 	   (y (let (pred-sym arity)
 		(msg "Input a symbol:~%")
 		(setf pred-sym (apply #'read-symbol-different-from
-				      (append constants
+				      (append symbolic-attacks
+					      constants
 					      predicates
 					      functions)))
 		(msg "What arity does ~A have?" pred-sym)
@@ -762,7 +765,8 @@ attacks which, being symbols, do qualify as terms."
 	   (yes (let (pred-sym arity)
 		(msg "Input a symbol:~%")
 		(setf pred-sym (apply #'read-symbol-different-from 
-				      (append constants
+				      (append symbolic-attacks
+					      constants
 					      predicates
 					      functions)))
 		(msg "What arity does ~A have?" pred-sym)
