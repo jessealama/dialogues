@@ -90,12 +90,22 @@
 	  (setf response (read t nil nil))))
     response))
 
+(defmacro read-yes-or-no ()
+  `(read-symbol 'y 'yes 'n 'no))
+
 (defmacro with-yes-or-no (&key yes no)
-  `(ecase (read-symbol 'y 'yes 'n 'no)
+  `(ecase (read-yes-or-no)
      (y ,@yes)
      (yes ,@yes)
      (n ,@no)
      (no ,@no)))
+
+(defmacro yes-or-no-go (yes-tag no-tag)
+  `(ecase (read-yes-or-no)
+     (y (go ,yes-tag))
+     (yes (go ,yes-tag))
+     (n (go ,no-tag))
+     (no (go ,no-tag))))
 
 (defun read-symbol-different-from (&rest symbols)
   (let (response)
