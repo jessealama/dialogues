@@ -651,16 +651,12 @@ attacks which, being symbols, do qualify as terms."
        (go constants)
      constants
        (msg "Do you want to input any constant symbols?~%")
-       (with-yes-or-no
-	   :yes ((go first-constant))
-	   :no ((go functions)))
+       (yes-or-no-go first-constant functions)
      first-constant
        (msg "Input a symbol:~%")
        (push (read-symbol) constants)
        (msg "Enter more constants?~%")
-       (with-yes-or-no
-	   :yes ((go more-constants))
-	   :no ((go functions)))
+       (yes-or-no-go more-constants functions)
      more-constants
        (msg "You've declared ~A constants so far ~A~%" (length constants)
                                                        constants)
@@ -672,9 +668,7 @@ attacks which, being symbols, do qualify as terms."
 	   :no ((go functions)))
      functions
        (msg "Do you want to input any function symbols?~%")
-       (with-yes-or-no
-	   :yes ((go first-function))
-	   :no ((go predicates)))
+       (yes-or-no-go first-function predicates)
      first-function
        (let (func-sym arity)
 	 (msg "Input a symbol:~%")
@@ -683,9 +677,7 @@ attacks which, being symbols, do qualify as terms."
 	 (setf arity (read-natural-number))
 	 (push (cons func-sym arity) functions)
 	 (msg "Enter more function symbols?~%")
-	 (with-yes-or-no
-	     :yes ((go more-functions))
-	     :no ((go predicates))))
+	 (yes-or-no-go more-functions predicates))
      more-functions
        (msg "You've declared ~A function symbols so far ~A~%" (length functions)
                                                               functions)
@@ -704,9 +696,7 @@ attacks which, being symbols, do qualify as terms."
 	   :no ((go predicates)))
      predicates
        (msg "Do you want to input any predicates?~%")
-       (with-yes-or-no
-	   :yes ((go first-predicate))
-	   :no ((go check)))
+       (yes-or-no-go first-predicate check)
      first-predicate
        (let (pred-sym arity)
 	 (msg "Input a symbol:~%")
@@ -715,9 +705,7 @@ attacks which, being symbols, do qualify as terms."
 	 (setf arity (read-natural-number))
 	 (push (cons pred-sym arity) predicates)
 	 (msg "Enter more predicates?~%")
-	 (with-yes-or-no
-	     :yes ((go more-predicates))
-	     :no ((go check))))
+	 (yes-or-no-go more-predicates check))
      more-predicates
        (msg "You've declared ~A predicates so far ~A~%" (length functions)
                                                         functions)
