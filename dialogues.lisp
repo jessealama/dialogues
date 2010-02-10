@@ -646,44 +646,35 @@ attacks which, being symbols, do qualify as terms."
 
 (defun read-signature ()
   (let (constants predicates functions)
-    (tagbody (go constants)
+    (tagbody (go start)
+     start
+       (go constants)
      constants
        (msg "Do you want to input any constant symbols?~%")
-       (ecase (read-symbol 'y 'n 'yes 'no)
-	 (y (go first-constant))
-	 (yes (go first-constant))
-	 (n (go functions))
-	 (no (go functions)))
+       (with-yes-or-no
+	   :yes ((go first-constant))
+	   :no ((go functions)))
      first-constant
        (msg "Input a symbol:~%")
        (push (read-symbol) constants)
        (msg "Enter more constants?~%")
-       (ecase (read-symbol 'y 'n 'yes 'no)
-	 (y (go more-constants))
-	 (yes (go more-constants))
-	 (n (go functions))
-	 (no (go functions)))
+       (with-yes-or-no
+	   :yes ((go more-constants))
+	   :no ((go functions)))
      more-constants
        (msg "You've declared ~A constants so far ~A~%" (length constants)
                                                        constants)
        (msg "Do you want to input any more?")
-       (let ((response (read-symbol 'y 'n 'yes 'no)))
-	 (ecase response
-	   (y (msg "Input a symbol:~%")
-	      (push (read-symbol) constants)
-	      (go more-constants))
-	   (yes (msg "Input a symbol:~%")
-		(push (read-symbol) constants)
-		(go more-constants))
-	   (n (go functions))
-	   (no (go functions))))
+       (with-yes-or-no
+	   :yes ((msg "Input a symbol:~%")
+		 (push (read-symbol) constants)
+		 (go more-constants))
+	   :no ((go functions)))
      functions
        (msg "Do you want to input any function symbols?~%")
-       (ecase (read-symbol 'y 'n 'yes 'no)
-	 (y (go first-function))
-	 (yes (go first-function))
-	 (n (go predicates))
-	 (no (go predicates)))
+       (with-yes-or-no
+	   :yes ((go first-function))
+	   :no ((go predicates)))
      first-function
        (let (func-sym arity)
 	 (msg "Input a symbol:~%")
@@ -692,46 +683,30 @@ attacks which, being symbols, do qualify as terms."
 	 (setf arity (read-natural-number))
 	 (push (cons func-sym arity) functions)
 	 (msg "Enter more function symbols?~%")
-	 (ecase (read-symbol 'y 'n 'yes 'no)
-	   (y (go more-functions))
-	   (yes (go more-functions))
-	   (n (go predicates))
-	   (no (go predicates))))
+	 (with-yes-or-no
+	     :yes ((go more-functions))
+	     :no ((go predicates))))
      more-functions
        (msg "You've declared ~A function symbols so far ~A~%" (length functions)
                                                               functions)
        (msg "Do you want to input any more?")
-       (let ((response (read-symbol 'y 'n 'yes 'no)))
-	 (ecase response
-	   (y (let (func-sym arity)
-		(msg "Input a symbol:~%")
-		(setf func-sym (apply #'read-symbol-different-from
-				      (append symbolic-attacks
-					      constants
-					      functions)))
-		(msg "What arity does ~A have?" func-sym)
-		(setf arity (read-natural-number))
-		(push (cons func-sym arity) functions)
-		(go more-functions)))
-	   (yes (let (func-sym arity)
-		(msg "Input a symbol:~%")
-		(setf func-sym (apply #'read-symbol-different-from
-				      (append symbolic-attacks
-					      constants
-					      functions)))
-		(msg "What arity does ~A have?" func-sym)
-		(setf arity (read-natural-number))
-		(push (cons func-sym arity) functions)
-		(go more-functions)))
-	   (n (go predicates))
-	   (no (go predicates))))
+       (with-yes-or-no
+	   :yes ((let (func-sym arity)
+		   (msg "Input a symbol:~%")
+		   (setf func-sym (apply #'read-symbol-different-from
+					 (append symbolic-attacks
+						 constants
+						 functions)))
+		   (msg "What arity does ~A have?" func-sym)
+		   (setf arity (read-natural-number))
+		   (push (cons func-sym arity) functions)
+		   (go more-functions)))
+	   :no ((go predicates)))
      predicates
        (msg "Do you want to input any predicates?~%")
-       (ecase (read-symbol 'y 'n 'yes 'no)
-	 (y (go first-predicate))
-	 (yes (go first-predicate))
-	 (n (go check))
-	 (no (go check)))
+       (with-yes-or-no
+	   :yes ((go first-predicate))
+	   :no ((go check)))
      first-predicate
        (let (pred-sym arity)
 	 (msg "Input a symbol:~%")
@@ -740,41 +715,26 @@ attacks which, being symbols, do qualify as terms."
 	 (setf arity (read-natural-number))
 	 (push (cons pred-sym arity) predicates)
 	 (msg "Enter more predicates?~%")
-	 (ecase (read-symbol 'y 'n 'yes 'no)
-	   (y (go more-predicates))
-	   (yes (go more-predicates))
-	   (n (go check))
-	   (no (go check))))
+	 (with-yes-or-no
+	     :yes ((go more-predicates))
+	     :no ((go check))))
      more-predicates
        (msg "You've declared ~A predicates so far ~A~%" (length functions)
                                                         functions)
        (msg "Do you want to input any more?")
-       (let ((response (read-symbol 'y 'n 'yes 'no)))
-	 (ecase response
-	   (y (let (pred-sym arity)
-		(msg "Input a symbol:~%")
-		(setf pred-sym (apply #'read-symbol-different-from
-				      (append symbolic-attacks
-					      constants
-					      predicates
-					      functions)))
-		(msg "What arity does ~A have?" pred-sym)
-		(setf arity (read-natural-number))
-		(push (cons pred-sym arity) functions)
-		(go more-predicates)))
-	   (yes (let (pred-sym arity)
-		(msg "Input a symbol:~%")
-		(setf pred-sym (apply #'read-symbol-different-from 
-				      (append symbolic-attacks
-					      constants
-					      predicates
-					      functions)))
-		(msg "What arity does ~A have?" pred-sym)
-		(setf arity (read-natural-number))
-		(push (cons pred-sym arity) predicates)
-		(go more-predicates)))
-	   (n (go check))
-	   (no (go check))))
+       (with-yes-or-no
+	   :yes ((let (pred-sym arity)
+		   (msg "Input a symbol:~%")
+		   (setf pred-sym (apply #'read-symbol-different-from
+					 (append symbolic-attacks
+						 constants
+						 predicates
+						 functions)))
+		   (msg "What arity does ~A have?" pred-sym)
+		   (setf arity (read-natural-number))
+		   (push (cons pred-sym arity) functions)
+		   (go more-predicates)))
+	   :no ((go check)))
      check
        (when predicates
 	 (msg "The signature looks like this:~%")
@@ -782,16 +742,13 @@ attacks which, being symbols, do qualify as terms."
 	 (msg "Predicates: ~A~%" predicates)
 	 (msg "Functions: ~A~%" functions)
 	 (msg "Do you want to add to this?~%")
-	 (ecase (read-symbol 'y 'n 'yes 'no)
-	   (n (go end))
-	   (no (go end))
-	   (y (msg "OK, returning to the first prompt...~%")
-	      (go constants))
-	   (yes (msg "OK, returning to the first prompt...~%")
-	       (go constants))))
+	 (with-yes-or-no
+	     :yes ((msg "OK, returning to the first prompt...~%")
+		   (go constants))
+	     :no ((go end))))
        (msg "No predicates have been entered; you won't be able to say anything!~%")
        (msg "Returning to the first prompt...~%")
-       (go constants)
+       (go start)
      end)
     (make-signature :predicates predicates
 		    :functions functions
