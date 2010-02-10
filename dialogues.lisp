@@ -564,7 +564,7 @@ attacks which, being symbols, do qualify as terms."
 (defvar rule-d13
   (make-offensive-rule
    :name d13
-   :condition (oddp current-position)
+   :condition (eq current-player 'o)
    :body (every-move #'(lambda (move)
 			 (or (proponent-move? move)
 			     (/= (move-reference move)
@@ -574,7 +574,7 @@ attacks which, being symbols, do qualify as terms."
 
 (defvar rule-e
   (make-rule :name e
-	     :condition (oddp current-position)
+	     :condition (eq current-player 'o)
 	     :body (= current-reference (1- current-position))
 	     :failure-message "Opponent must react to the most recent statement by Proponent."))
 
