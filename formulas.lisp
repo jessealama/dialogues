@@ -106,7 +106,7 @@
 		    (args (cdr x))
 		    (num-args (length args)))
 	       (and (function-of-arity signature function-symbol num-args))
-		    (every #'(lambda (arg) (term? signature arg))
+		    (every #'(lambda (arg) (term? arg signature))
 			   args))))))
 
 (defun function-symbol (complex-term)
