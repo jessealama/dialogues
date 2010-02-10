@@ -627,9 +627,11 @@ attacks which, being symbols, do qualify as terms."
 	(append (dialogue-plays dialogue) 
 		(list move))))
 
-(defun evaluate-rules (rules dialogue player turn-number statement stance index)
+(defun evaluate-rules (rules dialogue player turn-number statement stance index &optional messages)
   (if (null rules)
-      (values t nil)
+      (if messages
+	  (values nil messages)
+	  (values t nil))
       (let ((rule (car rules)))
 	(multiple-value-bind (result error-message)
 	    (funcall rule dialogue player turn-number statement stance index)
@@ -639,8 +641,15 @@ attacks which, being symbols, do qualify as terms."
 					  turn-number 
 					  statement 
 					  stance 
-					  index)
-	      (values nil error-message))))))
+					  index
+					  messages)
+	      (evaluate-rules (cdr rules) dialogue
+			                  player
+					  turn-number
+					  statement
+					  stance
+					  index
+					  (cons error-message messages)))))))
 
 (defvar *signature* nil)
 
@@ -899,12 +908,13 @@ attacks which, being symbols, do qualify as terms."
 	 (r (go start-move))
 	 (s (go statement-input)))
      evaluate-rules
-       (multiple-value-bind (rules-result message)
+       (multiple-value-bind (rules-result messages)
 	   (evaluate-rules rules dialogue player turn-number statement stance index)
 	 (when rules-result
 	   (go successful-turn))
-	 (msg "At least one of the dialogue rules is violated by your attack.~%")
-	 (msg "The rule says:~%~A~%" message)
+	 (msg "At least one of the dialogue rules is violated by your attack:~%")
+	 (dolist (message messages)
+	   (msg "* ~A~%" message))
 	 (msg "Restarting the move...~%")
 	 (go start-move))
      successful-turn
