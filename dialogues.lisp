@@ -671,9 +671,9 @@ attacks which, being symbols, do qualify as terms."
        (msg "Enter more constants?")
        (yes-or-no-go more-constants functions)
      more-constants
-       (msg "You've declared ~A constants so far ~A" (length constants)
-                                                     (comma-separated-list
-						      onstants))
+       (msg "You've declared ~A constants so far ~A" 
+	    (length constants)
+	    (comma-separated-list constants))
        (msg "Do you want to input any more?")
        (with-yes-or-no
 	   :yes ((msg "Input a symbol:")
