@@ -599,7 +599,7 @@ attacks which, being symbols, do qualify as terms."
 		rule-d01-composite
 		rule-d02-attack
 		rule-d10
-		rule-d11
+		;; rule-d11
 		;; rule-d12
 		rule-d13)))
 	
