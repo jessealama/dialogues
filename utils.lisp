@@ -111,7 +111,8 @@
   (let (response)
     (until (and response
 		(not (member response symbols)))
-      (setf response (read t nil nil)))))
+      (setf response (read t nil nil)))
+    response))
 
 (defun read-number-in-interval (a b)
   (let (response)    
