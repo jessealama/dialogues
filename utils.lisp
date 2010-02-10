@@ -90,10 +90,18 @@
 	  (setf response (read t nil nil))))
     response))
 
+(defmacro with-yes-or-no ((response-var) &key yes-forms no-forms)
+  `(let ((,response-var (read-symbol 'y 'yes 'n 'no)))
+     (ecase ,response-var
+       (y ,@yes-forms)
+       (yes ,@yes-forms)
+       (n ,@no-forms)
+       (no ,@no-forms))))
+
 (defun read-symbol-different-from (&rest symbols)
   (let (response)
     (until (and response
-		not (member response symbols))
+		(not (member response symbols)))(
       (setf response (read t nil nil)))))
 
 (defun read-number-in-interval (a b)
