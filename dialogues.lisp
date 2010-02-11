@@ -426,7 +426,7 @@ attacks which, being symbols, do qualify as terms."
    :name d02-negation
    :condition (with-original-statement (original-statement)
 		(negation? original-statement))
-   :body t
+   :body nil
    :failure-message "One cannot (directly) defend against an attack on a negation."))
 
 (defvar rule-d02-universal
