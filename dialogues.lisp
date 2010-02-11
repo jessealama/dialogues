@@ -730,12 +730,10 @@ attacks which, being symbols, do qualify as terms."
 	 (msg "Constants: ~A" (or constants "(none)"))
 	 (msg "Predicates: ~A" predicates)
 	 (msg "Functions: ~A" (or functions "(none)"))
-	 (with-simple-prompt (prompt)
-	     "Do you want to add any more constants, predicates, or functions to the signature?"
-	   (with-yes-or-no
-	       :yes ((msg "OK, returning to the first prompt...")
-		     (go constants))
-	       :no ((go end)))))
+	 (yes-or-no-go
+	     "Do you want to add anything else to the signature?"
+	     start
+	     end))
        (msg "No predicates have been entered; you won't be able to say anything!")
        (msg "Returning to the first prompt...")
        (go start)
