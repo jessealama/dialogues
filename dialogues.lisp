@@ -772,7 +772,24 @@ attacks which, being symbols, do qualify as terms."
 	 (a (go attack))
 	 (d (go defend)))
      print-next-moves-then-restart
-       (msg "This functionality doesn't exist yet, sorry!")
+       (let ((next-attacks (next-moves dialogue rules player 'a))
+	     (next-defenses (next-moves dialogue rules player 'd)))
+	 (cond (next-attacks
+		(msg "Possible attacks:")
+		(dolist (attack next-attacks)
+		  (let ((statement (first attack))
+			(reference (second attack)))
+		    (msg "Attack move ~A with the statement ~A" reference statement))))
+	       (t
+		(msg "No attacks are available.")))
+	 (cond (next-defenses
+		(msg "Possible defenses:")
+		(dolist (defense next-defenses)
+		  (let ((statement (first defense))
+			(reference (second defense)))
+		    (msg "Defend against the attack of move ~A with the statement ~A" reference statement))))
+	       (t
+		(msg "No defenses are available."))))
        (go start-move)
      print-open-attacks-then-start-move
        (let ((open (open-attack-indices dialogue)))
@@ -802,7 +819,15 @@ attacks which, being symbols, do qualify as terms."
        (msg-dialogue-so-far dialogue)
        (go statement-input)
      print-next-attacks-then-attack
-       (msg "This functionality doesn't exist yet, sorry!")
+       (let ((next-attacks (next-moves dialogue rules player 'a)))
+	 (cond (next-attacks
+		(msg "Possible attacks:")
+		(dolist (attack next-attacks)
+		  (let ((statement (first attack))
+			(reference (second attack)))
+		    (msg "Attack move ~A with the statement ~A" reference statement))))
+	       (t
+		(msg "No attacks are available."))))
        (go attack)
      attack
        (msg "Attack which move? Enter:")
@@ -824,7 +849,15 @@ attacks which, being symbols, do qualify as terms."
 	 (q (go quit))
 	 (r (go start-move)))
      print-next-defenses-then-defend
-       (msg "This functionality doesn't exist yet, sorry!")
+       (let ((next-defenses (next-moves dialogue rules player 'a)))
+	 (cond (next-defenses
+		(msg "Possible defenses:")
+		(dolist (defense next-defenses)
+		  (let ((statement (first defense))
+			(reference (second defense)))
+		    (msg "Defend against the attack of move ~A with the statement ~A" reference statement))))
+	       (t
+		(msg "No defenses are available."))))
        (go defend)
      defend
        (msg "Defend against which move? Enter:")
