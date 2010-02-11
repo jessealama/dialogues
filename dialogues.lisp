@@ -792,7 +792,10 @@ attacks which, being symbols, do qualify as terms."
 			(reference (second defense)))
 		    (msg "Defend against the attack of move ~A with the statement ~A" reference statement))))
 	       (t
-		(msg "No defenses are available."))))
+		(msg "No defenses are available.")))
+	 (when (and (null next-attacks)
+		    (null next-defenses))
+	   (msg "You lose.")))
        (go start-move)
      print-open-attacks-then-start-move
        (let ((open (open-attack-indices dialogue)))
@@ -828,10 +831,12 @@ attacks which, being symbols, do qualify as terms."
 		(dolist (attack next-attacks)
 		  (let ((statement (first attack))
 			(reference (second attack)))
-		    (msg "Attack move ~A with the statement ~A" reference statement))))
+		    (msg "Attack move ~A with the statement ~A" reference statement)))
+		(go attack))
 	       (t
-		(msg "No attacks are available."))))
-       (go attack)
+		(msg "No attacks are available.")
+		(msg "Perhaps you should consider defending...")
+		(go start-move))))
      attack
        (msg "Attack which move? Enter:")
        (msg "- An integer between 0 and ~A," (1- turn-number))
@@ -858,10 +863,12 @@ attacks which, being symbols, do qualify as terms."
 		(dolist (defense next-defenses)
 		  (let ((statement (first defense))
 			(reference (second defense)))
-		    (msg "Defend against the attack of move ~A with the statement ~A" reference statement))))
+		    (msg "Defend against the attack of move ~A with the statement ~A" reference statement)))
+		(go defend))
 	       (t
-		(msg "No defenses are available."))))
-       (go defend)
+		(msg "No defenses are available.")
+		(msg "Perhaps you should consider attacking...")
+		(go start-move))))
      defend
        (msg "Defend against which move? Enter:")
        (msg "- An integer between 0 and ~A," (1- turn-number))
