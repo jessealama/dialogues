@@ -731,16 +731,21 @@ or symbolic attack)."
        (msg "Enter:")
        (msg "- A to attack,")
        (msg "- D to defend,")
+       (msg "- N to calculate the list of possible moves,")
        (msg "- O to list the open attacks at this point,")
        (msg "- P to print the dialogue so far,")
        (msg "- Q to quit.")
        (format t "~A" prompt)
-       (ecase (read-symbol 'a 'd 'o 'p 'q)
+       (ecase (read-symbol 'a 'd 'n 'o 'p 'q)
+	 (n (go print-next-moves-then-restart))
 	 (q (go quit))
 	 (o (go print-open-attacks-then-start-move))
 	 (p (go print-then-restart))
 	 (a (go attack))
 	 (d (go defend)))
+     print-next-moves-then-restart
+       (msg "This functionality doesn't exist yet, sorry!")
+       (go start-move)
      print-open-attacks-then-start-move
        (let ((open (open-attack-indices dialogue)))
 	 (if open
@@ -768,26 +773,35 @@ or symbolic attack)."
      print-then-statement-input
        (msg-dialogue-so-far dialogue)
        (go statement-input)
+     print-next-attacks-then-attack
+       (msg "This functionality doesn't exist yet, sorry!")
+       (go attack)
      attack
        (msg "Attack which move? Enter:")
        (msg "- An integer between 0 and ~A," (1- turn-number))
+       (msg "- N to calculate  the list of possible attacks,")
        (msg "- P to print the dialogue so far and come back to this prompt,")
        (msg "- Q to quit,")
        (msg "- R to restart the move.")
        (format t "~A" prompt)
        (setf index (read-number-in-interval-or-symbol 
 		    0 (1- turn-number) 
-		    'p 'q 'r))
+		    'n 'p 'q 'r))
        (when (integerp index)
 	 (setf stance 'a)
 	 (go statement))
        (ecase index
+	 (n (go print-next-attacks-then-attack))
 	 (p (go print-then-attack))
 	 (q (go quit))
 	 (r (go start-move)))
+     print-next-defenses-then-defend
+       (msg "This functionality doesn't exist yet, sorry!")
+       (go defend)
      defend
        (msg "Defend against which move? Enter:")
        (msg "- An integer between 0 and ~A," (1- turn-number))
+       (msg "- N to calculuate list of possible defenses,")
        (msg "- O to list the open attacks at this point,")
        (msg "- P to print the dialogue so far and come back to this prompt,")
        (msg "- Q to quit,")
@@ -800,6 +814,7 @@ or symbolic attack)."
 	 (setf stance 'd)
 	 (go statement))
        (ecase index
+	 (n (go print-next-defenses-then-defend))
 	 (o (go print-open-attacks-then-defend))
 	 (p (go print-then-defend))
 	 (q (go quit))
