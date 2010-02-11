@@ -615,6 +615,10 @@ attacks which, being symbols, do qualify as terms."
 		;; rule-d11
 		;; rule-d12
 		rule-d13)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Dialogues
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
 (defstruct (dialogue
 	     (:print-function print-dialogue)
@@ -624,6 +628,15 @@ attacks which, being symbols, do qualify as terms."
 
 (defun dialogue-length (dialogue)
   (length (dialogue-plays dialogue)))
+
+(defun add-move-to-dialogue (dialogue move)
+  (setf (dialogue-plays dialogue)
+	(append (dialogue-plays dialogue) 
+		(list move))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Extensions of dialogues
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun next-moves (dialogue)
   "The set of moves by which DIALOGUE can be legally extended."
@@ -635,10 +648,12 @@ attacks which, being symbols, do qualify as terms."
     (when (evenp len)
       (null (next-moves dialogue)))))
 
-(defun add-move-to-dialogue (dialogue move)
-  (setf (dialogue-plays dialogue)
-	(append (dialogue-plays dialogue) 
-		(list move))))
+(defun opponent-wins? (dialogue)
+  (not (proponent-wins? dialogue)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Evaluating rules
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun evaluate-rules (rules dialogue player turn-number statement stance index &optional messages)
   (if (null rules)
