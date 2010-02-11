@@ -93,7 +93,7 @@
        (go constants)
      constants
        (yes-or-no-go "Do you want to input any constant symbols?"
-		     *prompt*
+		     prompt
 		     read-constant
 		     functions)
      read-constant
@@ -101,12 +101,12 @@
 	 "Input a symbol for the new constant:"
 	 (push (read-symbol) constants))
        (yes-or-no-go "Enter more constants?"
-		     *prompt*
+		     prompt
 		     read-constant
 		     functions)
      functions
        (yes-or-no-go "Do you want to input any function symbols?"
-		     *prompt*
+		     prompt
 		     read-function
 		     predicates)
      read-function
@@ -119,12 +119,12 @@
 	 (setf arity (read-natural-number))
 	 (push (cons func-sym arity) functions)
 	 (yes-or-no-go "Enter more function symbols?"
-		       *prompt*
+		       prompt
 		       read-function
 		       predicates))
      predicates
        (yes-or-no-go "Do you want to input any predicates?"
-		     *prompt*
+		     prompt
 		     read-predicate
 		     check)
      read-predicate
@@ -137,7 +137,7 @@
 	 (setf arity (read-natural-number))
 	 (push (cons pred-sym arity) predicates)
 	 (yes-or-no-go "Enter more predicates?"
-		       *prompt*
+		       prompt
 		       read-predicate
 		       check))
      check
@@ -147,7 +147,7 @@
 	 (msg "Predicates: ~A" predicates)
 	 (msg "Functions: ~A" (or functions "(none)"))
 	 (yes-or-no-go "Do you want to add anything else to the signature?"
-		       *prompt*
+		       prompt
 		       start
 		       end))
        (msg "No predicates have been entered; you won't be able to say anything!")
