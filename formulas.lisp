@@ -147,6 +147,7 @@
 	 (msg "Predicates: ~A" predicates)
 	 (msg "Functions: ~A" (or functions "(none)"))
 	 (yes-or-no-go "Do you want to add anything else to the signature?"
+		       *prompt*
 		       start
 		       end))
        (msg "No predicates have been entered; you won't be able to say anything!")
