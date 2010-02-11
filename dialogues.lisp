@@ -104,25 +104,6 @@
     (make-dialogue-int :plays (list first-move)
 		       :signature signature)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Dialogue utilities
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defun some-move (predicate dialogue)
-  (some predicate (dialogue-plays dialogue)))
-
-(defun every-move (predicate dialogue)
-  (every predicate (dialogue-plays dialogue)))
-
-(defun nth-move (dialogue n)
-  (nth n (dialogue-plays dialogue)))
-
-(defun last-move (dialogue)
-  (nth-move dialogue (1- (dialogue-length dialogue))))
-
-(defun nth-statement (dialogue n)
-  (move-statement (nth-move dialogue n)))
-
 (defvar *prompt* "> ")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -634,44 +615,50 @@ attacks which, being symbols, do qualify as terms."
 	(append (dialogue-plays dialogue) 
 		(list move))))
 
+(defun some-move (predicate dialogue)
+  (some predicate (dialogue-plays dialogue)))
+
+(defun every-move (predicate dialogue)
+  (every predicate (dialogue-plays dialogue)))
+
+(defun nth-move (dialogue n)
+  (nth n (dialogue-plays dialogue)))
+
+(defun initial-statement (dialogue)
+  (move-statement (nth-move dialogue 0)))
+
+(defun last-move (dialogue)
+  (nth-move dialogue (1- (dialogue-length dialogue))))
+
+(defun nth-statement (dialogue n)
+  (move-statement (nth-move dialogue n)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Extensions of dialogues
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun next-attacks (dialogue rules)
-  "The set of attacks by which DIALOGUE can be legally extended.  The value is a list of statements (formulas, terms, or symbolic attacks)."
-  (declare (ignore dialogue rules))
-  nil)
-
-(defun next-defenses (dialogue rules)
-  "The set of defenses by which DIALOGUE can be legally extended.  The
-value is a list of statements (formulas, terms, or symbolic attacks)."
-  (declare (ignore dialogue rules))
-  nil)
-
-(defun next-moves (dialogue rules)
-  "The set of moves by which DIALOGUE can be legally extended.  The
-result is a list of pairs (X . S), where X is either A or D (for
-attack and defend, respectively), and S is a statement (formula, term,
-or symbolic attack)."
-  (append (mapcar #'(lambda (a) (cons 'A a))
-		  (next-attacks dialogue rules))
-	  (mapcar #'(lambda (d) (cons 'D d))
-		  (next-defenses dialogue rules))))
-
-(defun proponent-wins? (dialogue)
-  (let ((len (dialogue-length dialogue)))
-    (when (evenp len)
-      (null (next-moves dialogue)))))
-
-(defun opponent-wins? (dialogue)
-  (not (proponent-wins? dialogue)))
-
+(defun next-moves (dialogue rules player stance)
+  (let (result)
+    (let* ((subformulas (proper-subformulas (initial-statement dialogue)))
+	   (length (dialogue-length dialogue))
+	   (turn-number length))
+      (dotimes (index length)
+	(dolist (subformula subformulas)
+	  (when (every-rule-passes rules 
+				   dialogue
+				   player
+				   turn-number
+				   subformula
+				   stance
+				   index)
+	    (push (list subformula index)
+		  result)))))))
+      
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Evaluating rules
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun evaluate-rules (rules dialogue player turn-number statement stance index &optional messages)
+(defun evaluate-all-rules (rules dialogue player turn-number statement stance index &optional messages)
   (if (null rules)
       (if messages
 	  (values nil messages)
@@ -679,16 +666,34 @@ or symbolic attack)."
       (let ((rule (car rules)))
 	(multiple-value-bind (result error-message)
 	    (funcall rule dialogue player turn-number statement stance index)
-	  (evaluate-rules (cdr rules)
-			  dialogue
-			  player
-			  turn-number 
-			  statement 
-			  stance 
-			  index
-			  (if result
-			      messages
-			      (cons error-message messages)))))))
+	  (evaluate-all-rules (cdr rules)
+			      dialogue
+			      player
+			      turn-number 
+			      statement 
+			      stance 
+			      index
+			      (if result
+				  messages
+				  (cons error-message messages)))))))
+
+(defun every-rule-passes (rules dialogue player turn-number statement stance index)
+  (or (null rules)
+      (let ((rule (car rules)))
+	(let ((result (funcall rule dialogue 
+			            player
+				    turn-number
+				    statement
+				    stance
+				    index)))
+	  (when result
+	    (every-rule-passes (cdr rules)
+			       dialogue
+			       player
+			       turn-number
+			       statement
+			       stance
+			       index))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Playing games
@@ -868,7 +873,7 @@ or symbolic attack)."
 	 (s (go statement-input)))
      evaluate-rules
        (multiple-value-bind (rules-result messages)
-	   (evaluate-rules rules dialogue player turn-number statement stance index)
+	   (evaluate-all-rules rules dialogue player turn-number statement stance index)
 	 (when rules-result
 	   (go successful-turn))
 	 (msg "At least one of the dialogue rules is violated by your attack:")
