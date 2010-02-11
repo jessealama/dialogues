@@ -588,7 +588,7 @@ in TERM or FORMULA."
 ;;; Named formulas
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defparameter perice-formula (make-implication 
+(defparameter peirce-formula (make-implication 
 			      (make-implication
 			       (make-implication 'p 'q)
 			       'p)
