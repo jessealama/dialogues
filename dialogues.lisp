@@ -663,18 +663,17 @@ attacks which, being symbols, do qualify as terms."
 (defun next-moves (dialogue rules player stance)
   (let (result)
     (let* ((subformulas (proper-subformulas (initial-statement dialogue)))
-	   (length (dialogue-length dialogue))
-	   (turn-number length))
-      (dotimes (index length)
-	(dolist (subformula subformulas)
-	  (when (every-rule-passes rules 
+	   (turn-number (dialogue-length dialogue)))
+      (dotimes (index turn-number result)
+	(dolist (statement (append subformulas symbolic-attacks))
+	  (when (every-rule-passes rules
 				   dialogue
 				   player
 				   turn-number
-				   subformula
+				   statement
 				   stance
 				   index)
-	    (push (list subformula index)
+	    (push (list statement index)
 		  result)))))))
       
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
