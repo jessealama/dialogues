@@ -762,7 +762,7 @@ attacks which, being symbols, do qualify as terms."
        (msg "Enter:")
        (msg "- A to attack,")
        (msg "- D to defend,")
-       (msg "- N to calculate the list of possible moves,")
+       (msg "- N to see all possible attacks and defenses,")
        (msg "- O to list the open attacks at this point,")
        (msg "- P to print the dialogue so far,")
        (msg "- Q to quit.")
@@ -840,7 +840,7 @@ attacks which, being symbols, do qualify as terms."
      attack
        (msg "Attack which move? Enter:")
        (msg "- An integer between 0 and ~A," (1- turn-number))
-       (msg "- N to calculate  the list of possible attacks,")
+       (msg "- N to see all possible attacks,")
        (msg "- P to print the dialogue so far and come back to this prompt,")
        (msg "- Q to quit,")
        (msg "- R to restart the move.")
@@ -872,7 +872,7 @@ attacks which, being symbols, do qualify as terms."
      defend
        (msg "Defend against which move? Enter:")
        (msg "- An integer between 0 and ~A," (1- turn-number))
-       (msg "- N to calculuate list of possible defenses,")
+       (msg "- N to see all possible defenses,")
        (msg "- O to list the open attacks at this point,")
        (msg "- P to print the dialogue so far and come back to this prompt,")
        (msg "- Q to quit,")
