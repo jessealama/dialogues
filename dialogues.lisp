@@ -359,14 +359,18 @@ attacks which, being symbols, do qualify as terms."
 (defvar rule-d02-alternating
   (make-defensive-rule
    :name d02-alternating
-   :body (and (not (eq current-player
-		       (move-player (nth-move dialogue current-reference))))
-	      (eq current-player
-		  (move-player
-		   (nth-move dialogue
-			     (move-reference
-			      (nth-move dialogue
-					current-reference))))))
+   :body (let ((attack (nth-move dialogue current-reference)))
+	   (when attack
+	     (let ((attacking-player (move-player attack)))
+	       (when attacking-player
+		 (let ((attack-reference (move-reference attack)))
+		   (when attack-reference
+		     (let ((attacked-play (nth-move dialogue attack-reference)))
+		       (when attacked-play
+			 (let ((attacked-player (move-player attacked-play)))
+			   (when attacked-player
+			     (and (not (eq current-player attacking-player))
+				  (eq current-player attacked-player))))))))))))
    :failure-message "You can defend only against the other player's attacks,~%which themselves are supposed to be against your statements."))
 
 (defvar rule-d02-formula
