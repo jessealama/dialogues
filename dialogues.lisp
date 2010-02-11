@@ -638,26 +638,26 @@ attacks which, being symbols, do qualify as terms."
 ;;; Extensions of dialogues
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun next-attacks (dialogue)
+(defun next-attacks (dialogue rules)
   "The set of attacks by which DIALOGUE can be legally extended.  The value is a list of statements (formulas, terms, or symbolic attacks)."
-  (declare (ignore dialogue))
+  (declare (ignore dialogue rules))
   nil)
 
-(defun next-defenses (dialogue)
+(defun next-defenses (dialogue rules)
   "The set of defenses by which DIALOGUE can be legally extended.  The
 value is a list of statements (formulas, terms, or symbolic attacks)."
-  (declare (ignore dialogue))
+  (declare (ignore dialogue rules))
   nil)
 
-(defun next-moves (dialogue)
+(defun next-moves (dialogue rules)
   "The set of moves by which DIALOGUE can be legally extended.  The
 result is a list of pairs (X . S), where X is either A or D (for
 attack and defend, respectively), and S is a statement (formula, term,
 or symbolic attack)."
   (append (mapcar #'(lambda (a) (cons 'A a))
-		  (next-attacks dialogue))
+		  (next-attacks dialogue rules))
 	  (mapcar #'(lambda (d) (cons 'D d))
-		  (next-defenses dialogue))))
+		  (next-defenses dialogue rules))))
 
 (defun proponent-wins? (dialogue)
   (let ((len (dialogue-length dialogue)))
