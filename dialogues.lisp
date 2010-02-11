@@ -239,6 +239,14 @@ attacks which, being symbols, do qualify as terms."
 		   (when ,original-statement
 		     ,@body))))))))))
 
+(defvar rule-d01-alternating
+  (make-offensive-rule
+   :name d01-alternating
+   :condition t
+   :body (not (eq current-player
+		  (move-player (nth-move dialogue current-reference))))
+   :failure-message "You cannot attack yourself."))
+
 (defvar rule-d01-conjunction
   (make-offensive-rule
    :name d01-conjunction
@@ -348,6 +356,19 @@ attacks which, being symbols, do qualify as terms."
 	     (universal? (nth-statement dialogue current-reference)))
    :failure-message "When the attacking statement is a formula,~%the statement being attacked must be either~%an implication or a negation."))
 
+(defvar rule-d02-alternating
+  (make-defensive-rule
+   :name d02-alternating
+   :body (and (not (eq current-player
+		       (move-player (nth-move dialogue current-reference))))
+	      (eq current-player
+		  (move-player
+		   (nth-move dialogue
+			     (move-reference
+			      (nth-move dialogue
+					current-reference))))))
+   :failure-message "You can defend only against the other player's attacks,~%which themselves are supposed to be against your statements."))
+
 (defvar rule-d02-formula
   (make-defensive-rule
    :name d02-formula
@@ -431,7 +452,8 @@ attacks which, being symbols, do qualify as terms."
 				    (dialogue-signature dialogue)))
    :failure-message "The asserted statement is not an instance of the original existential generalization."))
 
-(defvar argumentation-forms (list rule-d01-conjunction
+(defvar argumentation-forms (list rule-d01-alternating
+				  rule-d01-conjunction
 				  rule-d01-left-conjunct
 				  rule-d01-right-conjunct
 				  rule-d01-disjunction
@@ -443,6 +465,7 @@ attacks which, being symbols, do qualify as terms."
 				  rule-d01-which-instance
 				  rule-d01-existential
 				  rule-d01-formula
+				  rule-d02-alternating
 				  rule-d02-formula
 				  rule-d02-left-conjunct
 				  rule-d02-right-conjunct
