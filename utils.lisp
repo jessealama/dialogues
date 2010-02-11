@@ -148,6 +148,12 @@
 (defun msg (format-string &rest args)
   (apply #'format t (concatenate 'string format-string "~%") args))
 
+(defmacro with-simple-prompt ((prompt) question &body body)
+  `(progn
+     (msg ,question)
+     (format t "~A" ,prompt)
+     ,@body))
+
 (provide 'utils)
 
 ;;; utils.lisp ends here

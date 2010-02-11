@@ -659,11 +659,9 @@ attacks which, being symbols, do qualify as terms."
 			      messages
 			      (cons error-message messages)))))))
 
-(defmacro with-simple-prompt ((prompt) question &body body)
-  `(progn
-     (msg ,question)
-     (format t "~A" ,prompt)
-     ,@body))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Playing games
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun play-dialogue-game (rules &optional signature)
   (let ((dialogue nil)
