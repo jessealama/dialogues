@@ -725,7 +725,7 @@ attacks which, being symbols, do qualify as terms."
 ;;; Playing games
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun play-dialogue-game (rules &optional signature)
+(defun play-dialogue-game (rules &optional signature initial-formula)
   (let ((dialogue nil)
 	(turn-number 0)
 	(player nil)
@@ -736,19 +736,41 @@ attacks which, being symbols, do qualify as terms."
     (tagbody (go greetings)
      greetings
        (msg "Let's play a dialogue game!")
-       (if signature
-	   (go initial-move)
-	   (go signature))
+       (go check-arguments)
+     check-arguments
+       (cond ((and signature
+		   initial-formula 
+		   (formula? initial-formula signature))
+	      (setf dialogue (make-dialogue initial-formula
+					    signature))
+	      (go initial-move))
+	     ((and signature initial-formula)
+	      (msg "The given initial formula is not a formula according to~%the given signature.")
+	      (yes-or-no-go
+	       "Would you like to enter a different signature?"
+	       prompt
+	       signature
+	       initial-move))
+	     (signature
+	      (go initial-move))
+	     (initial-formula
+	      (msg "The given signature is empty, but a non-trivial formula was given.")
+	      (go signature-then-check-arguments)))
+     signature-then-check-arguments
+       (msg "Please supply a signature in which the given formula~%~%  ~A~%~%is actually a formula." initial-formula)
+       (setf signature (read-signature prompt))
+       (go check-arguments)
      signature
        (msg "Please supply a signature in which the sentences will be written.")
        (setf signature (read-signature prompt))
-       (go initial-move)
-     initial-move
+       (go read-initial-formula)
+     read-initial-formula
        (msg "Proponent starts by playing a composite formula.")
        (msg "Input a composite formula:")
        (format t "~A" prompt)
        (setf dialogue (make-dialogue (read-composite-formula signature)
 				     signature))
+     initial-move
        (msg "Game on!")
        (incf turn-number)
        (go start-move)
@@ -956,14 +978,14 @@ attacks which, being symbols, do qualify as terms."
        (msg "Thanks for playing, I hope you had fun."))
     dialogue))
 
-(defun play-d-dialogue-game (&optional signature)
-  (play-dialogue-game d-dialogue-rules signature))
+(defun play-d-dialogue-game (&optional signature initial-formula)
+  (play-dialogue-game d-dialogue-rules signature initial-formula))
 
-(defun play-e-dialogue-game (&optional signature)
-  (play-dialogue-game e-dialogue-rules signature))
+(defun play-e-dialogue-game (&optional signature initial-formula)
+  (play-dialogue-game e-dialogue-rules signature initial-formula))
 
-(defun play-classical-dialogue-game (&optional signature)
-  (play-dialogue-game classical-dialogue-rules signature))
+(defun play-classical-dialogue-game (&optional signature initial-formula)
+  (play-dialogue-game classical-dialogue-rules signature initial-formula))
 
 (provide 'dialogues)
 
