@@ -220,7 +220,9 @@
   (eq (car formula) contradiction))
 
 (defun negation? (formula)
-  (eq (car formula) 'not))
+  (when formula
+    (when (listp formula)
+      (eq (car formula) 'not))))
 
 (defun unnegate (negation)
   (second negation))
@@ -229,7 +231,9 @@
   (list 'not formula))
 
 (defun implication? (formula)
-  (eq (car formula) 'implies))
+  (when formula
+    (when (listp formula)
+      (eq (car formula) 'implies))))
 
 (defun antecedent (implication)
   (cadr implication))
@@ -241,10 +245,20 @@
   (list 'implies antecedent consequent))
 
 (defun equivalence? (formula)
-  (eq (car formula) 'iff))
+  (when formula
+    (when (listp formula)
+      (eq (car formula) 'iff))))
+
+(defun lhs (equivalence)
+  (second equivalence))
+
+(defun rhs (equivalence)
+  (third equivalence))
 
 (defun disjunction? (formula)
-  (eq (car formula) 'or))
+  (when formula
+    (when (listp formula)
+      (eq (car formula) 'or))))
 
 (defun disjuncts (disjunction)
   (cdr disjunction))
@@ -259,7 +273,9 @@
   (caddr disjunction))
 
 (defun conjunction? (formula)
-  (eq (car formula) 'and))
+  (when formula
+    (when (listp formula)
+      (eq (car formula) 'and))))
 
 (defun conjuncts (conjunction)
   (cdr conjunction))
@@ -274,13 +290,17 @@
   (cons 'and conjuncts))
 
 (defun universal? (formula)
-  (eq (car formula) 'all))
+  (when formula
+    (when (listp formula)
+      (eq (car formula) 'all))))
 
 (defun make-universal (var formula)
   (list 'all var formula))
 
 (defun existential? (formula)
-  (eq (car formula) 'exists))
+  (when formula
+    (when (listp formula)
+      (eq (car formula) 'exists))))
 
 (defun make-existential (var formula)
   (list 'exists var formula))
@@ -352,6 +372,46 @@
 (defun binary-statement-second-arg (binary-statement)
   (caddr binary-statement))
 
+(defun proper-subformulas (formula)
+  (labels 
+      ((proper (f)
+	 (cond ((disjunction? f)
+		(let ((left (left-disjunct f))
+		      (right (right-disjunct f)))
+		  (append (list left right)
+			  (proper-subformulas left)
+			  (proper-subformulas right))))
+	       ((conjunction? f)
+		(let ((left (left-conjunct f))
+		      (right (right-conjunct f)))
+		  (append (list left right)
+			  (proper-subformulas left)
+			  (proper-subformulas right))))
+	       ((implication? f)
+		(let ((a (antecedent f))
+		      (c (consequent f)))
+		  (append (list a c)
+			  (proper-subformulas a)
+			  (proper-subformulas c))))
+	       ((equivalence? f)
+		(let ((lhs (lhs f))
+		      (rhs (rhs f)))
+		  (append (list lhs rhs)
+			  (proper-subformulas lhs)
+			  (proper-subformulas rhs))))
+	       ((negation? f)
+		(cons (unnegate f)
+		      (proper-subformulas (unnegate f))))
+	       ((universal? f)
+		(cons (matrix f)
+		      (proper-subformulas (matrix f))))
+	       ((existential? f)
+		(cons (matrix f)
+		      (proper-subformulas (matrix f))))
+	       (t ;; atomic case
+		nil))))
+    (remove-duplicates (proper formula) :test #'equal-formulas?)))
+	 
 (defun subst-term-for-var-in-term (term variable target-term)
   (if (variable? target-term)
       (if (equal-variables? variable target-term)
