@@ -242,7 +242,6 @@ attacks which, being symbols, do qualify as terms."
 (defvar rule-d01-alternating
   (make-offensive-rule
    :name d01-alternating
-   :condition t
    :body (not (eq current-player
 		  (move-player (nth-move dialogue current-reference))))
    :failure-message "You cannot attack yourself."))
