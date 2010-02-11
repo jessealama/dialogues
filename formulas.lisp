@@ -589,37 +589,37 @@ in TERM or FORMULA."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defparameter perice-formula (make-implication 
-			     (make-implication
-			      (make-implication 'p 'q)
-			      'p)
-			     'p))
+			      (make-implication
+			       (make-implication 'p 'q)
+			       'p)
+			      'p))
 
 (defparameter excluded-middle (make-disjunction 'p (negate 'p)))
 
 (defparameter markov-formula (make-implication (negate (negate 'p))
-					      'p))
+					       'p))
 
 (defparameter double-negation-intro (make-implication 'p
-						     (negate (negate 'p))))
+						      (negate (negate 'p))))
 
 (defparameter k-formula (make-implication 'p
-					 (make-implication 'q 'p)))
+					  (make-implication 'q 'p)))
 
 (defparameter b-formula (make-implication
-			(make-implication 'p 'q)
-			(make-implication
-			 (make-implication 'r 'p)
-			 (make-implication 'r 'q))))
+			 (make-implication 'p 'q)
+			 (make-implication
+			  (make-implication 'r 'p)
+			  (make-implication 'r 'q))))
 
 (defparameter c-formula (make-implication
-			(make-implication 'p
-					  (make-implication 'q 'r))
-			(make-implication 'q
-					  (make-implication 'p 'r))))
+			 (make-implication 'p
+					   (make-implication 'q 'r))
+			 (make-implication 'q
+					   (make-implication 'p 'r))))
 
 (defparameter w-formula (make-implication
-			(make-implication 'p
-			 (make-implication 'p 'q))
-			(make-implication 'p 'q)))
+			 (make-implication 'p
+					   (make-implication 'p 'q))
+			 (make-implication 'p 'q)))
 
 ;;; formulas.lisp ends here
