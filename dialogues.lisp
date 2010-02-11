@@ -648,21 +648,16 @@ attacks which, being symbols, do qualify as terms."
       (let ((rule (car rules)))
 	(multiple-value-bind (result error-message)
 	    (funcall rule dialogue player turn-number statement stance index)
-	  (if result
-	      (evaluate-rules (cdr rules) dialogue
-			                  player
-					  turn-number 
-					  statement 
-					  stance 
-					  index
-					  messages)
-	      (evaluate-rules (cdr rules) dialogue
-			                  player
-					  turn-number
-					  statement
-					  stance
-					  index
-					  (cons error-message messages)))))))
+	  (evaluate-rules (cdr rules)
+			  dialogue
+			  player
+			  turn-number 
+			  statement 
+			  stance 
+			  index
+			  (if result
+			      messages
+			      (cons error-message messages)))))))
 
 (defmacro with-simple-prompt ((prompt) question &body body)
   `(progn
