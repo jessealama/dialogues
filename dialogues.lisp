@@ -259,8 +259,9 @@ attacks which, being symbols, do qualify as terms."
   (make-offensive-rule
    :name d01-left-conjunct
    :condition (eq current-statement 'attack-left-conjunct)
-   :body (and (non-symbolic-attack-formula? current-statement
-					    (dialogue-signature dialogue))
+   :body (and (non-symbolic-attack-formula?
+	       (nth-statement dialogue current-reference)
+	       (dialogue-signature dialogue))
 	      (conjunction? (nth-statement dialogue current-reference)))
    :failure-message "One cannot attack the left conjunct of a formula~%that isn't a conjunction."))
 
