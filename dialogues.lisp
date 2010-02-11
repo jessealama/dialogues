@@ -902,7 +902,7 @@ attacks which, being symbols, do qualify as terms."
        (format t "~A" prompt)
        (setf index (read-number-in-interval-or-symbol 
 		    0 (1- turn-number) 
-		    'o 'p 'q 'r))
+		    'n 'o 'p 'q 'r))
        (when (integerp index)
 	 (setf stance 'd)
 	 (go statement))
