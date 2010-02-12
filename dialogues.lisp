@@ -642,6 +642,22 @@ attacks which, being symbols, do qualify as terms."
 	(append (dialogue-plays dialogue) 
 		(list move))))
 
+(defun extend-dialogue (dialogue player stance statement reference)
+  (add-move-to-dialogue dialogue
+			(make-move player statement stance reference))
+  dialogue)
+
+(defun copy-dialogue (dialogue)
+  (make-dialogue-int :signature (dialogue-signature dialogue)
+		     :plays (copy-list (dialogue-plays dialogue))))
+
+(defun freshly-extend-dialogue (dialogue player stance statement reference)
+  (extend-dialogue (copy-dialogue dialogue)
+		   player
+		   stance
+		   statement
+		   reference))
+
 (defun some-move (predicate dialogue)
   (some predicate (dialogue-plays dialogue)))
 
@@ -656,6 +672,9 @@ attacks which, being symbols, do qualify as terms."
 
 (defun last-move (dialogue)
   (nth-move dialogue (1- (dialogue-length dialogue))))
+
+(defun last-player (dialogue)
+  (move-player (last-move dialogue)))
 
 (defun nth-statement (dialogue n)
   (move-statement (nth-move dialogue n)))
@@ -679,6 +698,22 @@ attacks which, being symbols, do qualify as terms."
 				   index)
 	    (push (list statement index)
 		  result)))))))
+
+(defun proponent-wins? (dialogue rules)
+  (and (eq (last-player dialogue) 'p)
+       (null (next-moves dialogue rules 'o 'a))
+       (null (next-moves dialogue rules 'o 'd))))
+
+(defun opponent-wins? (dialogue rules)
+  (and (eq (last-player dialogue) 'o)
+       (null (next-moves dialogue rules 'p 'a))
+       (null (next-moves dialogue rules 'p 'd))))
+
+(defun proponent-loses? (dialogue rules)
+  (not (proponent-wins? dialogue rules)))
+
+(defun opponent-loses? (dialogue rules)
+  (not (opponent-wins? dialogue rules)))
       
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Evaluating rules
