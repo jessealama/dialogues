@@ -560,13 +560,13 @@ in TERM or FORMULA."
       (format stream "~A => ~A" lhs-as-string rhs-as-string))))
 
 (defun make-sequent (signature lhs rhs)
-  (if (formula? signature lhs)
-      (if (formula? signature rhs)
+  (if (formula? lhs signature)
+      (if (formula? rhs signature)
 	  (make-seq :lhs (list lhs)
 		    :rhs (list rhs))
 	  (make-seq :lhs (list lhs)
 		    :rhs rhs))
-      (if (formula? signature rhs)
+      (if (formula? rhs signature)
 	  (make-seq :lhs lhs
 		    :rhs (list rhs))
 	  (make-seq :lhs lhs
