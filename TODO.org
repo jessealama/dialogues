@@ -2,3 +2,16 @@
 * DONE Provide a breadth-first search procedure for enumerating dialogues.
   CLOSED: [2010-02-12 Fri 15:53]
   Use continuations?
+* TODO Enter Rahman and Tulenheimo's dialogue rules
+  Their rules are not the same as Felscher's.  Rahman and Tulenheimo
+  include a rule that restricts repetitions, which is a source of
+  problems for Felscher's rules.
+* TODO Learn how to make a pre-commit script to check for compiler errors.
+  My git commits are often incoherent and lead to ill-formed code
+  because some changes are committed piecemeal when they should be
+  committed as a unit.
+
+  One idea for a pre-commit script: have a temporary repo into which I
+  actually do a commit; do a fresh pull from HEAD of this temporary
+  repo into a temporary directory; try compiling everything.  If
+  something goes wrong, bail out of the pre-commit script.
