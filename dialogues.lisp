@@ -1022,6 +1022,40 @@ attacks which, being symbols, do qualify as terms."
 (defun play-classical-dialogue-game (&optional signature initial-formula)
   (play-dialogue-game classical-dialogue-rules signature initial-formula))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Concrete dialogues
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defparameter pqrs-signature
+  (make-signature :predicates '((p . 0)
+				(q . 0)
+				(r . 0)
+				(s . 0))))
+
+(defparameter peirce-dialogue
+  (make-dialogue peirce-formula pqrs-signature))
+
+(defparameter excluded-middle-dialogue
+  (make-dialogue excluded-middle pqrs-signature))
+
+(defparameter markov-dialogue
+  (make-dialogue markov-formula pqrs-signature))
+
+(defparameter double-negation-dialogue
+  (make-dialogue double-negation-intro pqrs-signature))
+
+(defparameter k-dialogue
+  (make-dialogue k-formula pqrs-signature))
+
+(defparameter b-dialogue
+  (make-dialogue b-formula pqrs-signature))
+
+(defparameter c-dialogue
+  (make-dialogue c-formula pqrs-signature))
+
+(defparameter w-dialogue
+  (make-dialogue w-formula pqrs-signature))
+
 (provide 'dialogues)
 
 ;;; dialogues.lisp ends here
