@@ -1026,12 +1026,6 @@ attacks which, being symbols, do qualify as terms."
 ;;; Concrete dialogues
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defparameter pqrs-signature
-  (make-signature :predicates '((p . 0)
-				(q . 0)
-				(r . 0)
-				(s . 0))))
-
 (defparameter peirce-dialogue
   (make-dialogue peirce-formula pqrs-signature))
 
