@@ -100,9 +100,11 @@
   (msg "~A" dialogue))
 
 (defun make-dialogue (initial-statement signature)
-  (let ((first-move (make-proponent-move initial-statement nil nil)))
-    (make-dialogue-int :plays (list first-move)
-		       :signature signature)))
+  (if (formula? initial-statement signature)
+      (let ((first-move (make-proponent-move initial-statement nil nil)))
+	(make-dialogue-int :plays (list first-move)
+			   :signature signature))
+      (error "The given formula~%~%  ~A~%~%is not a formula according to the given signature~%~%  ~A~%" initial-statement signature)))
 
 (defvar *prompt* "> ")
 
