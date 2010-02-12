@@ -12,6 +12,11 @@
   (predicates nil :type list)
   (functions nil :type list))
 
+(defun make-signature-with-equality (&key constants predicates functions)
+  (make-signature :constants constants
+		  :predicates (cons '= predicates)
+		  :functions functions))
+
 (defun functions-of-arity (signature arity)
   (let (result)
     (dolist (symbol-and-arity (signature-functions signature) result)
@@ -162,11 +167,18 @@
 ;;; Concrete signatures
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defparameter pqrs-signature
+(defparameter pqrs-propositional-signature
   (make-signature :predicates '((p . 0)
 				(q . 0)
 				(r . 0)
 				(s . 0))))
+
+(defparameter unary-pqrs-signature-with-equality
+  (make-signature-with-equality :predicates '((p . 1)
+					      (q . 1)
+					      (r . 1)
+					      (s . 1))))
+  
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Terms
