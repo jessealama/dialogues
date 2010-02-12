@@ -1027,28 +1027,28 @@ attacks which, being symbols, do qualify as terms."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defparameter peirce-dialogue
-  (make-dialogue peirce-formula pqrs-signature))
+  (make-dialogue peirce-formula pqrs-propositional-signature))
 
 (defparameter excluded-middle-dialogue
-  (make-dialogue excluded-middle pqrs-signature))
+  (make-dialogue excluded-middle pqrs-propositional-signature))
 
 (defparameter markov-dialogue
-  (make-dialogue markov-formula pqrs-signature))
+  (make-dialogue markov-formula pqrs-propositional-signature))
 
 (defparameter double-negation-dialogue
-  (make-dialogue double-negation-intro pqrs-signature))
+  (make-dialogue double-negation-intro pqrs-propositional-signature))
 
 (defparameter k-dialogue
-  (make-dialogue k-formula pqrs-signature))
+  (make-dialogue k-formula pqrs-propositional-signature))
 
 (defparameter b-dialogue
-  (make-dialogue b-formula pqrs-signature))
+  (make-dialogue b-formula pqrs-propositional-signature))
 
 (defparameter c-dialogue
-  (make-dialogue c-formula pqrs-signature))
+  (make-dialogue c-formula pqrs-propositional-signature))
 
 (defparameter w-dialogue
-  (make-dialogue w-formula pqrs-signature))
+  (make-dialogue w-formula pqrs-propositional-signature))
 
 (provide 'dialogues)
 
