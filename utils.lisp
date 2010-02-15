@@ -7,6 +7,9 @@
 (defmacro until (condition &body body)
   `(do nil (,condition) ,@body))
 
+(defmacro while (condition &body body)
+  `(do nil ((not ,condition)) ,@body))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Conditions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
