@@ -15,3 +15,7 @@
   actually do a commit; do a fresh pull from HEAD of this temporary
   repo into a temporary directory; try compiling everything.  If
   something goes wrong, bail out of the pre-commit script.
+* TODO A more general search procedure
+  I'll be doing search in spaces made up of things other than dialogues.
+* TODO Implement a tableaux search procedure
+  What's a reference?
