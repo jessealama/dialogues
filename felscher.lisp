@@ -412,12 +412,13 @@
 		   :content content
 		   :label 'right-implication-0
 		   :parents (list
-			     (make-figure :content
-					  (make-sequent pqrs-signature
-							parent-lhs
-							implication)
-					  :label 'right-implication-1
-					  :parents (mapcar #'lj->lj-prime parents)))))))
+			     (make-figure
+			      :content
+			      (make-sequent pqrs-propositional-signature
+					    parent-lhs
+					    implication)
+			      :label 'right-implication-1
+			      :parents (mapcar #'lj->lj-prime parents)))))))
 	    (make-figure :content content
 			 :label rule
 			 :parents (mapcar #'lj->lj-prime parents))))))
@@ -438,14 +439,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defparameter deduct-1
-  (make-figure :content (make-sequent pqrs-signature
+  (make-figure :content (make-sequent pqrs-propositional-signature
 				      'q (make-implication 'p 'q))
 	       :label 'right-implication
 	       :parents (list 
-			 (make-figure :content (make-sequent pqrs-signature
-							     (list 'p 'q)
-							     'p)
-				      :label 'axiom
-				      :parents nil))))
+			 (make-figure 
+			  :content (make-sequent pqrs-propositional-signature
+						 (list 'p 'q)
+						 'p)
+			  :label 'axiom
+			  :parents nil))))
 
 ;;; felscher.lisp ends here
