@@ -2,8 +2,7 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (require 'utils "utils.lisp")
-  (require 'formulas "formulas.lisp")
-  (require 'rules "rules.lisp"))
+  (require 'formulas "formulas.lisp"))
 
 (defun print-move (move stream depth)
   (declare (ignore depth))
@@ -188,11 +187,13 @@ attacks which, being symbols, do qualify as terms."
 		     :plays (copy-list (dialogue-plays dialogue))))
 
 (defun freshly-extend-dialogue (dialogue player stance statement reference)
-  (extend-dialogue (copy-dialogue dialogue)
-		   player
-		   stance
-		   statement
-		   reference))
+  (let ((copy (copy-dialogue dialogue)))
+    (extend-dialogue copy
+		     player
+		     stance
+		     statement
+		     reference)
+    copy))
 
 (defun some-move (predicate dialogue)
   (some predicate (dialogue-plays dialogue)))
