@@ -106,6 +106,22 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 	 (if (goal-test problem node) (return node))
 	 (funcall queueing-function nodes (expand node problem))))))
 
+(defun general-search-for-bottom (problem queueing-function)
+  "Expand nodes according to the specification of PROBLEM until we
+find a node with no successors or we run out of nodes to expand.  The
+QUEUING-FN decides which nodes to look at first."
+  (let ((nodes (make-initial-queue (problem-initial-state problem)
+				   :queueing-function queueing-function)))
+    (let (node)
+      (loop (if (empty-queue? nodes) (return nil))
+	 (setf node (remove-front nodes))
+	 (if (goal-test problem node) (return node))
+	 (let ((successors (expand node problem)))
+	   (if successors
+	       (funcall queueing-function nodes successors)
+	       (return node)))))))
+
+
 (defun explain-solution (node)
   "Give the sequence of actions that produced NODE.  When NODE is a
 solution to a search problem, this function gives a \"printout\" of
@@ -119,6 +135,10 @@ how the node was obtained, starting from an initial node."
 (defun breadth-first-search (problem)
   "Search the shallowest nodes in the search tree first."
   (general-search problem #'enqueue-at-end))
+
+(defun breadth-first-search-for-bottom (problem)
+  "Search the shallowest nodes in the search tree first."
+  (general-search-for-bottom problem #'enqueue-at-end))
 
 (defun depth-first-search (problem)
   "Search the deepest nodes in the search tree first."
