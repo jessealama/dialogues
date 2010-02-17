@@ -29,18 +29,13 @@
 			    next-moves)
 		    extensions)))))))
 
-(defmethod goal-test ((dsp dialogue-search-problem) node)
-  (let ((successors (successors dsp node)))
-    (setf (node-successors node) successors)
-    (null successors)))
-
 (defun dialogue-search (rules initial-statement signature)
   (if (formula? initial-statement signature)
       (let* ((initial-state (make-dialogue initial-statement signature))
 	     (problem (make-dialogue-search-problem :initial-state initial-state
 						    :signature signature
 						    :rules rules)))
-	(breadth-first-search problem))
+	(breadth-first-search-for-bottom problem))
       (error "The initial statement ~A is not a formula according to the given signature ~A" initial-statement signature)))
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
