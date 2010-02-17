@@ -1,5 +1,14 @@
-;;; search.lisp: Nodes, search trees, informed and uninformed search strategies
-;;
+;;; search.lisp: Problems, nodes, search trees, search strategies
+
+(defstruct problem
+  "A problem is defined by the initial state, and the type of problem it is.
+We will be defining subtypes of PROBLEM later on.  For bookkeeping, we
+count the number of nodes expanded."
+  (initial-state)  ; A state in the domain.
+  (goal)           ; Optionally store the desired state here.
+  (num-expanded 0) ; Number of nodes expanded in search for solution.
+  )
+
 (defstruct node
   "Node for generic search.  A node contains a state, a
 domain-specific representation of a point in the search space.  It
@@ -10,10 +19,38 @@ also contains some bookkeeping information."
   (successors nil)          ; list of successor nodes
   (depth 0)                 ; depth of node in tree (root = 0)
   (expanded? nil)           ; any successors examined?
-  (g-cost 0)                ; path cost from root to node
-  (h-cost 0)                ; estimated distance from state to goal
-  (f-cost 0)                ; g-cost + h-cost
   )
+
+;;; When we define a new subtype of problem, we need to define a SUCCESSORS
+;;; method. We may need to define methods for GOAL-TEST, H-COST, and
+;;; EDGE-COST, but they have default methods which may be appropriate.
+
+(defmethod successors ((problem problem) node)
+  "Return an alist of (action . state) pairs, reachable from this state."
+  (declare (ignore node))
+  (error "You need to define a SUCCESSORS method for ~A" problem))
+
+(defmethod goal-test ((problem problem) (node node))
+  "Return true or false: is this a goal node?  This default method
+checks if the state is equal to the state stored in the problem-goal
+slot.  You will need to define your own method if there are multiple
+goals, or if you need to compare them with something other than
+EQUAL."
+  (equal (node-state node) (problem-goal problem)))
+
+(defmethod h-cost ((problem problem) state) 
+  "The estimated cost from state to a goal for this problem.  
+  If you don't overestimate, then A* will always find optimal solutions.
+  The default estimate is always 0, which certainly doesn't overestimate."
+  (declare (ignore state))
+  0)
+
+(defmethod edge-cost ((problem problem) node action state)
+  "The cost of going from one node to the next state by taking action.
+  This default method counts 1 for every action.  Provide a method for this if 
+  your subtype of problem has a different idea of the cost of a step."
+  (declare (ignore node action state))
+  1)
 
 (defun node-ancestors (node)
   "The ancestors of NODE, starting with its most distant
@@ -32,72 +69,42 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
   (declare (ignore n a s))
   1)
 
-(defun expand (node &key successor-function
-	                 (edge-cost-function #'always-one)
-	                 (heuristic-function #'always-zero))
-  "Generate a list of all the nodes that can be reached from NODE.
-SUCCESSOR-FUNCTION should be a unary function on nodes that evaluates
-to a list of (action . state) pairs.  Return a list of nodes for
-further consideration.  If NODE has already been expanded, return the
-empty list.  One can optionally specify an edge-cost function and a
-heuristic function."
+(defun expand (node problem)
   (unless (node-expanded? node)
     (setf (node-expanded? node) t)
-    (let ((nodes nil)
-	  (successors (funcall successor-function node)))
-      (setf (node-successors node) successors)
-      (dolist (successor successors nodes)
-	(let ((successor-action (car successor))
-	      (successor-state (cdr successor)))
-	  (let ((g (+ (node-g-cost node) 
-		      (funcall edge-cost-function node 
-			                          successor-action
-						  successor-state)))
-		(h (funcall heuristic-function successor-state)))
-	    (let ((new-node
-		   (make-node :state successor-state
-			      :parent node
-			      :action successor-action
-			      :depth (1+ (node-depth node))
-			      :g-cost g
-			      :h-cost h
-			      :f-cost (max (node-f-cost node) (+ g h)))))
-	    (push new-node nodes))))))))
+    (incf (problem-num-expanded problem))
+    (let ((nodes nil))
+      (loop for successor in (successors problem node) do
+	   (destructuring-bind (action . state)
+	       successor
+	     (push (make-node :parent node 
+			      :action action 
+			      :state state
+			      :depth (1+ (node-depth node)))
+		   nodes)))
+      nodes)))
 
-(defun make-initial-queue (initial-state &key queueing-function)
+(defun create-start-node (problem)
+  "Make the starting node, corresponding to the problem's initial state."
+  (make-node :state (problem-initial-state problem)))
+
+(defun make-initial-queue (initial-state 
+			   &key (queueing-function #'enqueue-at-end))
   (let ((q (make-empty-queue)))
     (funcall queueing-function q (list (make-node :state initial-state)))
     q))
 
-(defun general-search (initial-state &key queueing-function 
-		                          goal-test 
-		                          successor-function
-		                          (edge-cost-function #'always-one)
-		                          (heuristic-function #'always-zero))
-  "Expand nodes using SUCCESSOR-FUNCTION until we find a solution that
-satisfies GOAL-TEST or run out of nodes to expand.  QUEUING-FUNCTION
-decides which nodes to look at first. EDGE-COST-FUNCTION is a function
-of three arguments: a node, an action, and a state; it is indended to
-represent the cost of going from the node to the next state by taking
-the action.  By default, it is the constant function 1.
-HEURISTIC-FUNCTION, is a unary function that takes a state and
-estimates the number of steps it is from a goal state.  By default, it
-is the constant function 0."
-  (let ((nodes-to-process (make-initial-queue
-			   initial-state
-			   :queueing-function queueing-function))
-	(node nil))
-    (loop (if (empty-queue? nodes-to-process) (return nil))
-	  (setf node (remove-front nodes-to-process))
-	  (if (funcall goal-test node) (return node))
-          (funcall queueing-function 
-		   nodes-to-process
-		   (expand 
-		    node 
-		    :successor-function successor-function
-		    :edge-cost-function edge-cost-function
-		    :heuristic-function heuristic-function)))))
-				      
+(defun general-search (problem queueing-function)
+  "Expand nodes according to the specification of PROBLEM until we find
+  a solution or run out of nodes to expand.  The QUEUING-FN decides which
+  nodes to look at first."
+  (let ((nodes (make-initial-queue (problem-initial-state problem)
+				   :queueing-function queueing-function)))
+    (let (node)
+      (loop (if (empty-queue? nodes) (return nil))
+	 (setf node (remove-front nodes))
+	 (if (goal-test problem node) (return node))
+	 (funcall queueing-function nodes (expand node problem))))))
 
 (defun explain-solution (node)
   "Give the sequence of actions that produced NODE.  When NODE is a
@@ -108,47 +115,32 @@ how the node was obtained, starting from an initial node."
 	       (cons (node-action n)
 		     (explain-backwards (node-parent n))))))
     (reverse (explain-backwards node))))
+
+(defun breadth-first-search (problem)
+  "Search the shallowest nodes in the search tree first."
+  (general-search problem #'enqueue-at-end))
+
+(defun depth-first-search (problem)
+  "Search the deepest nodes in the search tree first."
+  (general-search problem #'enqueue-at-front))
+
+(defun iterative-deepening-search (problem)
+  "Do a series of depth-limited searches, increasing depth each time."
+  (loop for depth = 0 do
+       (let ((solution (depth-limited-search problem depth)))
+	 (unless (eq solution :cut-off) (return solution)))))
+
+(defun depth-limited-search (problem &optional limit
+                                     (node (create-start-node problem)))
+  "Search depth-first, but only up to LIMIT branches deep in the tree."
+  (cond ((goal-test problem node) node)
+        ((and (integerp limit)
+	      (>= (node-depth node) limit))
+	 :cut-off)
+        (t (loop for n in (expand node problem) do
+		(let ((solution (depth-limited-search problem limit n)))
+		  (when solution (return solution)))))))
 						       
-(defun depth-first-search (initial-state &key goal-test successor-function)
-  (general-search initial-state :goal-test goal-test
-		                :successor-function successor-function
-				:queueing-function #'enqueue-at-front))
-
-(defun breadth-first-search (initial-state &key goal-test successor-function)
-  (general-search initial-state :goal-test goal-test
-		                :successor-function successor-function
-				:queueing-function #'enqueue-at-end))
-
-(defun depth-limited-search (initial-state limit &key goal-test 
-			                              successor-function)
-  (depth-limited-search-helper (make-node :state initial-state)
-			       limit
-			       :goal-test goal-test
-			       :successor-function successor-function))
-
-(defun depth-limited-search-helper (node limit &key goal-test
-				                    successor-function)
-  (cond ((funcall goal-test node) node)
-        ((>= (node-depth node) limit) nil)
-        (t (loop 
-	      for n in (expand node :successor-function successor-function) do
-		(let ((solution (depth-limited-search-helper 
-				 n
-				 limit
-				 :goal-test goal-test
-				 :successor-function successor-function)))
-		  (when solution
-		    (return solution)))))))
-
-(defun iterative-deepening-search (initial-state &key goal-test
-				                      successor-function)
-  (loop for depth from 1 do
-       (let ((solution (depth-limited-search initial-state depth
-		          :goal-test goal-test
-			  :successor-function successor-function)))
-	 (unless (eq solution 'cutoff)
-	   (return solution)))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Avoiding repeated states
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -190,83 +182,48 @@ the path."
 	  (setf (gethash state node-table) node)))
    result))
 
-(defun no-cycles-depth-first-search (initial-state &key successor-function
-				                        goal-test)
+(defun no-cycles-depth-first-search (problem)
   "Do depth-first search, but eliminate paths with repeated states."
-  (general-search initial-state
-		  :successor-function successor-function
-		  :queueing-function 
-  		    #'(lambda (old-q nodes)
-			(enqueue-at-front old-q 
-					  (eliminate-cycles nodes)))
-		  :goal-test goal-test))
+  (general-search problem
+		  #'(lambda (old-q nodes)
+		      (enqueue-at-front old-q 
+					(eliminate-cycles nodes)))))
 
-(defun no-returns-breadth-first-search (initial-state &key successor-function
-					                   goal-test)
+(defun no-returns-breadth-first-search (problem)
   "Do breadth-first search, but eliminate immediate returns to a prior
 state."
-  (general-search initial-state
-		  :successor-function successor-function
-		  :queueing-function
-  		    #'(lambda (old-q nodes)
-			(enqueue-at-end old-q (eliminate-returns nodes)))
-		  :goal-test goal-test))
+  (general-search problem
+		  #'(lambda (old-q nodes)
+		      (enqueue-at-end old-q (eliminate-returns nodes)))))
 			      
-(defun no-duplicates-breadth-first-search (initial-state 
-					   &key successor-function
-					        goal-test)
+(defun no-duplicates-breadth-first-search (problem)
   "Do breadth-first search, but eliminate all duplicate states."
   (let ((table (make-hash-table :test #'equal)))
-    (general-search initial-state
-		    :successor-function successor-function
-		    :queueing-function
-		      #'(lambda (old-q nodes)
-			  (enqueue-at-end old-q (eliminate-all-duplicates
-						 nodes table)))
-		    :goal-test goal-test)))
+    (general-search problem
+		    #'(lambda (old-q nodes)
+			(enqueue-at-end old-q (eliminate-all-duplicates
+					       nodes table))))))
 
 ;;; Heuristic search
 
-(defun best-first-search (initial-state evaluation-function
-			  &key successor-function
-			       goal-test
-			       heuristic-function
-			       (edge-cost-function #'(lambda (n a s)
-						       (declare (ignore n a s))
-						       1)))
-  "Search the nodes with the best evaluation first. [p 93]"
-  (general-search initial-state
-		  :successor-function successor-function
-		  :goal-test goal-test
-		  :queueing-function 
-		    #'(lambda (old-q nodes) 
-			(enqueue-by-priority old-q nodes evaluation-function))
-		  :edge-cost-function edge-cost-function
-		  :heuristic-function heuristic-function))
+(defun best-first-search (problem evaluation-function)
+  "Search the nodes with the best evaluation first."
+  (general-search problem
+		  #'(lambda (old-q nodes) 
+		      (enqueue-by-priority old-q nodes evaluation-function))))
 
-(defun greedy-search (initial-state heuristic-function &key successor-function 
-		                                            goal-test)
-  "Best-first search using H (heuristic distance to goal). [p 93]"
-  (best-first-search initial-state #'node-h-cost
-		     :successor-function successor-function
-		     :goal-test goal-test
-		     :heuristic-function heuristic-function))
+(defun greedy-search (problem)
+  "Best-first search using H (heuristic distance to goal)."
+  (best-first-search problem #'node-h-cost))
 
-(defun tree-a*-search (initial-state heuristic-function
-		       &key successor-function goal-test)
-  "Best-first search using estimated total cost, or (F = G + H). [p 97]"
-  (best-first-search initial-state #'node-f-cost
-		     :successor-function successor-function
-		     :goal-test goal-test
-		     :heuristic-function heuristic-function))
+(defun tree-a*-search (problem)
+  "Best-first search using estimated total cost, or (F = G + H)."
+  (best-first-search problem #'node-f-cost))
 
-(defun uniform-cost-search (initial-state 
-			    &key successor-function 
-			         goal-test)
-  "Best-first search using the node's depth as its cost.  Discussion on [p 75]"
-  (best-first-search initial-state #'node-depth
-		     :successor-function successor-function
-		     :goal-test goal-test))
+(defun uniform-cost-search (problem)
+  "Best-first search using the node's depth as its cost."
+  (best-first-search problem
+		     #'node-depth))
 
 (defun make-eliminating-queuing-fn (evaluation-function)
   (let ((table (make-hash-table :test #'equal)))
@@ -292,21 +249,10 @@ state."
 	   (nreverse result))
 	 evaluation-function))))
 
-(defun A*-search (initial-state heuristic-function
-		  &key goal-test 
-		       successor-function
-		       (edge-cost-function #'(lambda (n a s)
-					       (declare (ignore n a s))
-					       1)))
+(defun A*-search (problem)
   "Starting from INITIAL-STATE, search the nodes with the best f cost
   first.  If a node is ever reached by two different paths, keep only
   the better path."
-  (general-search 
-   initial-state
-   :goal-test goal-test
-   :successor-function successor-function
-   :queueing-function (make-eliminating-queuing-fn #'node-f-cost)
-   :heuristic-function heuristic-function
-   :edge-cost-function edge-cost-function))
+  (general-search problem (make-eliminating-queuing-fn #'node-f-cost)))
      
 ;;; search.lisp ends here
