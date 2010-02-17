@@ -4,7 +4,8 @@
   (require 'utils "utils.lisp")
   (require 'formulas "formulas.lisp")
   (require 'figure "figure.lisp")
-  (require 'dialogues "dialogues.lisp"))
+  (require 'dialogues "dialogues.lisp")
+  (require 'dialogue-search "dialogue-search.lisp"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Argumentation forms
@@ -374,6 +375,16 @@
 
 (defun play-classical-dialogue-game (&optional signature initial-formula)
   (play-dialogue-game classical-dialogue-rules signature initial-formula))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Search for dialogues and for strategies
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun d-dialogue-search (initial-statement signature)
+  (dialogue-search d-dialogue-rules initial-statement signature))
+
+(defun e-dialogue-search (initial-statement signature)
+  (dialogue-search e-dialogue-rules initial-statement signature))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Felscher's transformations
