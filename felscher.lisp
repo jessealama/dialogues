@@ -68,7 +68,8 @@
 					    (dialogue-signature dialogue))
 	      (equal-formulas? current-statement
 			       (antecedent
-				(nth-statement dialogue current-reference))))
+				(nth-statement dialogue current-reference))
+			       (dialogue-signature dialogue)))
    :failure-message "To attack an implication, one must assert the antecdent."))
 
 (defvar rule-d01-negation
@@ -79,7 +80,8 @@
 					    (dialogue-signature dialogue))
 	      (equal-formulas? current-statement
 			       (unnegate
-				(nth-statement dialogue current-reference))))
+				(nth-statement dialogue current-reference))
+			       (dialogue-signature dialogue)))
    :failure-message "To attack a negation, one must assert the \"unnegation\" of the negation."))
 
 (defvar rule-d01-universal
@@ -159,7 +161,8 @@
 		  'attack-left-conjunct)
   :body (with-original-statement (original-statement)
 	  (equal-formulas? current-statement
-			   (left-conjunct original-statement)))
+			   (left-conjunct original-statement)
+			   (dialogue-signature dialogue)))
   :failure-message "To defend against the ATTACK-LEFT-CONJUNCT attack,~% assert the left conjunct of the original conjunction."))
 
 (defvar rule-d02-right-conjunct
@@ -169,7 +172,8 @@
 		  'attack-right-conjunct)
    :body (with-original-statement (original-statement)
 	   (equal-formulas? current-statement
-			    (right-conjunct original-statement)))
+			    (right-conjunct original-statement)
+			    (dialogue-signature dialogue)))
    :failure-message "To defend against the ATTACK-RIGHT-CONJUNCT attack,~% assert the right conjunct of the original conjunction."))
 
 (defvar rule-d02-which-disjunct
@@ -178,9 +182,11 @@
    :condition (eq (nth-statement dialogue current-reference) 'which-disjunct?)
    :body (with-original-statement (original-statement)
 	   (or (equal-formulas? current-statement
-				(left-disjunct original-statement))
+				(left-disjunct original-statement)
+				(dialogue-signature dialogue))
 	       (equal-formulas? current-statement
-				(right-disjunct original-statement))))
+				(right-disjunct original-statement)
+				(dialogue-signature dialogue))))
    :failure-message "To defend against the WHICH-DISJUNCT? attack,~%assert either the left or the right disjunct~%of the original disjunction."))
 
 (defvar rule-d02-implication
@@ -190,7 +196,8 @@
 		(implication? original-statement))
    :body (with-original-statement (original-statement)
 	   (equal-formulas? current-statement
-			    (consequent original-statement)))
+			    (consequent original-statement)
+			    (dialogue-signature dialogue)))
    :failure-message "To defend against an attack on an implication, assert its consequent."))
 
 (defvar rule-d02-negation
@@ -214,7 +221,8 @@
 		(var (bound-variable original-statement))
 		(matrix (matrix original-statement)))
 	   (equal-formulas? current-statement
-			    (instantiate instance var matrix)))
+			    (instantiate instance var matrix)
+			    (dialogue-signature dialogue)))
    :failure-message "The asserted statement is not the required instance of the original universal generalization."))
 
 (defvar rule-d02-existential
@@ -298,7 +306,8 @@
 	     :body (some-move #'(lambda (move)
 				  (when (opponent-move? move)
 				    (equal-formulas? (move-statement move)
-						     current-statement)))
+						     current-statement
+						     (dialogue-signature dialogue))))
 			      dialogue)
 	     :failure-message "Proponent cannot assert an atomic formula before opponent has asserted it."))
 
