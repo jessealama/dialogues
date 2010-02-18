@@ -227,55 +227,6 @@ state."
 			(enqueue-at-end old-q (eliminate-all-duplicates
 					       nodes table))))))
 
-;;; Heuristic search
-
-(defun best-first-search (problem evaluation-function)
-  "Search the nodes with the best evaluation first."
-  (general-search problem
-		  #'(lambda (old-q nodes) 
-		      (enqueue-by-priority old-q nodes evaluation-function))))
-
-(defun greedy-search (problem)
-  "Best-first search using H (heuristic distance to goal)."
-  (best-first-search problem #'node-h-cost))
-
-(defun tree-a*-search (problem)
-  "Best-first search using estimated total cost, or (F = G + H)."
-  (best-first-search problem #'node-f-cost))
-
-(defun uniform-cost-search (problem)
-  "Best-first search using the node's depth as its cost."
-  (best-first-search problem
-		     #'node-depth))
-
-(defun make-eliminating-queuing-fn (evaluation-function)
-  (let ((table (make-hash-table :test #'equal)))
-    #'(lambda (old-q nodes)
-	(enqueue-by-priority
-	 old-q
-	 (let ((result nil))
-	   (loop for node in nodes do
-		(let ((old-node (gethash (node-state node) table)))
-		  (cond
-		    ((null old-node)
-		     ;; First time we've reached state; just return node
-		     (setf (gethash (node-state node) table) node)
-		     (push node result))
-		    ((<= (funcall evaluation-function old-node)
-			 (funcall evaluation-function node))
-		     ;; If the old node is better, discard the new node
-		     nil)
-		    (t ;; Otherwise, discard the old node
-		     (setf (node-expanded? old-node) t)
-		     (setf (gethash (node-state node) table) node)
-		     (push node result)))))
-	   (nreverse result))
-	 evaluation-function))))
-
-(defun A*-search (problem)
-  "Starting from INITIAL-STATE, search the nodes with the best f cost
-  first.  If a node is ever reached by two different paths, keep only
-  the better path."
-  (general-search problem (make-eliminating-queuing-fn #'node-f-cost)))
+(provide 'search)
      
 ;;; search.lisp ends here
