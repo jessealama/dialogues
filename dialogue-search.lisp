@@ -29,7 +29,7 @@
 			    next-moves)
 		    extensions)))))))
 
-(defun dialogue-search (rules initial-statement signature)
+(defun dialogue-search-bfs (rules initial-statement signature)
   (if (formula? initial-statement signature)
       (let* ((initial-state (make-dialogue initial-statement signature))
 	     (problem (make-dialogue-search-problem :initial-state initial-state
