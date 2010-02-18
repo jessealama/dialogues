@@ -213,7 +213,7 @@ attacks which, being symbols, do qualify as terms."
 (defun equal-dialogues? (dialogue-1 dialogue-2)
   (let ((signature-1 (dialogue-signature dialogue-1))
 	(signature-2 (dialogue-signature dialogue-2)))
-    (and (equal-signatures? signature-1 signature-2)(
+    (and (equal-signatures? signature-1 signature-2)
 	 (equal-length? (dialogue-plays dialogue-1)
 			(dialogue-plays dialogue-2))
 	 (every-pair #'(lambda (move-1 move-2)
