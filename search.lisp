@@ -157,32 +157,38 @@ how the node was obtained, starting from an initial node."
 ;;; Avoiding repeated states
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun looping-node? (node &optional depth)
+(defun looping-node? (node &optional depth (test #'equal))
   "Did this node's state appear previously in the path?"
   (let ((n (node-parent node)))
     (if depth
 	(loop for i from 1 to depth do
-	     (when (null n) (return nil))
-	     (when (equal (node-state node) (node-state n)) (return t))
+	     (when (null n)
+	       (return nil))
+	     (when (funcall test (node-state node) (node-state n))
+	       (return t))
 	     (setf n (node-parent n)))
 	(loop for i = 1 do
-	     (when (null n) (return nil))
-	     (when (equal (node-state node) (node-state n)) (return t))
+	     (when (null n)
+	       (return nil))
+	     (when (funcall test (node-state node) (node-state n))
+	       (return t))
 	     (setf n (node-parent n))))))
 
-(defun return-node? (node)
+(defun return-node? (node &optional (test #'equal))
   "Is this a node that returns to the state it just came from?"
-  (looping-node? node 2))
+  (looping-node? node 2 test))
 
 (defun eliminate-returns (nodes)
   "Get rid of nodes that return to the state they just came from,
 i.e., where the last two actions just undo each other."
   (remove-if #'return-node? nodes))
 
-(defun eliminate-cycles (nodes)
+(defun eliminate-cycles (nodes &optional (test #'equal))
   "Get rid of nodes that end in a state that has appeared before in
 the path."
-  (remove-if #'looping-node? nodes))
+  (remove-if #'(lambda (node)
+		 (looping-node? node nil test))
+	     nodes))
 
 (defun eliminate-all-duplicates (nodes node-table)
   "Get rid of all nodes that have been seen before in any path."
@@ -194,12 +200,21 @@ the path."
 	  (setf (gethash state node-table) node)))
    result))
 
-(defun no-cycles-depth-first-search (problem)
+(defun no-cycles-depth-first-search (problem &optional (test #'equal))
   "Do depth-first search, but eliminate paths with repeated states."
   (general-search problem
 		  #'(lambda (old-q nodes)
 		      (enqueue-at-front old-q 
-					(eliminate-cycles nodes)))))
+					(eliminate-cycles nodes
+							  test)))))
+
+(defun no-cycles-depth-first-search-for-bottom (problem &optional (test #'equal))
+  "Do depth-first search, but eliminate paths with repeated states."
+  (general-search-for-bottom problem
+			     #'(lambda (old-q nodes)
+				 (enqueue-at-front old-q 
+						   (eliminate-cycles nodes
+								     test)))))
 
 (defun no-returns-breadth-first-search (problem)
   "Do breadth-first search, but eliminate immediate returns to a prior
