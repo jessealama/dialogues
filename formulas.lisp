@@ -12,6 +12,17 @@
   (predicates nil :type list)
   (functions nil :type list))
 
+(defun equal-signatures? (signature-1 signature-2)
+  (and (equal-sets? (signature-constants signature-1)
+		    (signature-constants signature-2)
+		    :test #'eq)
+       (equal-sets? (signature-predicates signature-1)
+		    (signature-predicates signature-2)
+		    :test #'equal) 
+       (equal-sets? (signature-functions signature-1)
+		    (signature-functions signature-2)
+		    :test #'equal)))
+
 (defun make-signature-with-equality (&key constants predicates functions)
   (make-signature :constants constants
 		  :predicates (cons '= predicates)
@@ -212,7 +223,8 @@
 (defun make-complex-term (function &rest args)
   (cons function args))
 
-(defun equal-terms? (term-1 term-2)
+(defun equal-terms? (term-1 term-2 signature)
+  (declare (ignore signature))
   (equalp term-1 term-2))
 
 (defun bare-variable? (variable)
@@ -377,8 +389,9 @@
 (defun make-atomic-formula (predicate &rest arguments)
   (cons predicate arguments))
 
-(defun equal-formulas? (form-1 form-2)
+(defun equal-formulas? (form-1 form-2 signature)
   "Determine whether formulas FORM-1 and FORM-2 are equal."
+  (declare (ignore signature)) ;; A bit unsatisfactory, but it'll do for now
   (equalp form-1 form-2))
 
 (defun equation? (formula)
@@ -431,7 +444,9 @@
 		      (proper-subformulas (matrix f))))
 	       (t ;; atomic case
 		nil))))
-    (remove-duplicates (proper formula) :test #'equal-formulas?)))
+    (remove-duplicates (proper formula) 
+		       :test #'(lambda (form-1 form-2)
+				 (equal-formulas? form-1 form-2 nil)))))
 	 
 (defun subst-term-for-var-in-term (term variable target-term)
   (if (variable? target-term)
@@ -512,7 +527,7 @@ in TERM or FORMULA."
 			  (let ((instance-var (bound-variable formula-1))
 				(instance-matrix (matrix formula-1)))
 			    (if (equal-variables? bound-variable instance-var)
-				(equal-formulas? formula-2 instance-matrix)
+				(equal-formulas? formula-2 instance-matrix signature)
 				(and (universal? formula-2)
 				     (instance-helper instance-matrix formula-2))))))
 		       ((existential? formula-1)
@@ -520,7 +535,7 @@ in TERM or FORMULA."
 			  (let ((instance-var (bound-variable formula-1))
 				(instance-matrix (matrix formula-1)))
 			    (if (equal-variables? bound-variable instance-var)
-				(equal-formulas? formula-2 instance-matrix)
+				(equal-formulas? formula-2 instance-matrix signature)
 				(and (universal? formula-2)
 				     (instance-helper instance-matrix formula-2))))))
 		       (t ;; atomic case
@@ -531,11 +546,11 @@ in TERM or FORMULA."
 					   (if (variable? term-2)
 					       (if (equal-variables? term-2 bound-variable)
 						   (if instance-term
-						       (equal-terms? term-1 instance-term)
+						       (equal-terms? term-1 instance-term signature)
 						       (setf instance-term term-1))
 						   (and (variable? term-1)
 							(equal-variables? term-1 term-2)))
-					       (equal-terms? term-1 term-2)))
+					       (equal-terms? term-1 term-2 signature)))
 				       (arguments formula-1)
 				       (arguments formula-2)))))))
 	(values (instance-helper instantiated matrix)
