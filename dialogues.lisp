@@ -118,6 +118,11 @@
 			   :signature signature))
       (error "The given formula~%~%  ~A~%~%is not a formula according to the given signature~%~%  ~A~%" initial-statement signature)))
 
+(defun truncate-dialogue (dialogue cutoff)
+  (make-dialogue-int :signature (dialogue-signature dialogue)
+		     :plays (subseq (dialogue-plays dialogue)
+				    0 cutoff)))
+
 (defvar *prompt* "> ")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -528,15 +533,37 @@ attacks which, being symbols, do qualify as terms."
        (msg "- N to see all possible attacks and defenses,")
        (msg "- O to list the open attacks at this point,")
        (msg "- P to print the dialogue so far,")
-       (msg "- Q to quit.")
+       (msg "- Q to quit,")
+       (msg "- R to rewind to a previous state.")
        (format t "~A" prompt)
-       (ecase (read-symbol 'a 'd 'n 'o 'p 'q)
+       (ecase (read-symbol 'a 'd 'n 'o 'p 'q 'r)
 	 (n (go print-next-moves-then-restart))
 	 (q (go quit))
 	 (o (go print-open-attacks-then-start-move))
 	 (p (go print-then-restart))
 	 (a (go attack))
-	 (d (go defend)))
+	 (d (go defend))
+	 (r (go rewind)))
+     rewind
+       (msg "It is now move #~A.  Rewind to which previous move?" (1- turn-number))
+       (msg "Enter:")
+       (msg "- a number between 1 and ~A," (1- turn-number))
+       (msg "- P to print the dialogue so far and return to this prompt,")
+       (msg "- Q to quit,")
+       (msg " -R to restart the move.")
+       (format t "~A" prompt)
+       (let ((response (read-number-in-interval-or-symbol 1 (1- turn-number) 'p 'r)))
+	 (when (integerp response)
+	   (setf dialogue (truncate-dialogue dialogue response))
+	   (setf turn-number response)
+	   (go start-move))
+	 (ecase response
+	   (p (go print-then-rewind))
+	   (q (go quit))
+	   (r (go start-move))))
+     print-then-rewind
+       (msg-dialogue-so-far dialogue)
+       (go rewind)
      print-next-moves-then-restart
        (let ((next-attacks (next-moves dialogue rules player 'a))
 	     (next-defenses (next-moves dialogue rules player 'd)))

@@ -1,4 +1,5 @@
-* TODO Provide a "rewind" feature when playing dialogue games.
+* DONE Provide a "rewind" feature when playing dialogue games.
+  CLOSED: [2010-02-18 Thu 15:55]
 * DONE Provide a breadth-first search procedure for enumerating dialogues.
   CLOSED: [2010-02-12 Fri 15:53]
   Use continuations?
