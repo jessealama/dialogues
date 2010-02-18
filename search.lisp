@@ -24,10 +24,6 @@ also contains some bookkeeping information."
   (expanded? nil)           ; any successors examined?
   )
 
-;;; When we define a new subtype of problem, we need to define a SUCCESSORS
-;;; method. We may need to define methods for GOAL-TEST, H-COST, and
-;;; EDGE-COST, but they have default methods which may be appropriate.
-
 (defmethod successors ((problem problem) node)
   "Return an alist of (action . state) pairs, reachable from this state."
   (declare (ignore node))
