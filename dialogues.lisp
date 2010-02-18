@@ -45,6 +45,18 @@
   stance
   reference)
 
+(defun equal-moves? (move-1 move-2 signature)
+  (and (eq (move-player move-1) (move-player move-2))
+       (eq (move-stance move-1) (move-stance move-2))
+       (let ((ref-1 (move-reference move-1))
+	     (ref-2 (move-reference move-2)))
+	 (if (integerp ref-1)
+	     (and (integerp ref-2) (= ref-1 ref-2))
+	     (and (null ref-1) (null ref-2))))
+       (equal-statements? (move-statement move-1)
+			  (move-statement move-2)
+			  signature)))
+
 (defun attacking-move? (move)
   (eq (move-stance move) 'A))
 
@@ -159,6 +171,13 @@ attacks which, being symbols, do qualify as terms."
   (and (not (symbolic-attack? obj))
        (formula? obj signature)))
 
+(defun equal-statements? (statement-1 statement-2 signature)
+  (if (symbolic-attack? statement-1)
+      (eq statement-1 statement-2)
+      (if (term? statement-1 signature)
+	  (equal-terms? statement-1 statement-2 signature)
+	  (equal-formulas? statement-1 statement-2 signature))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Dialogues
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -194,6 +213,17 @@ attacks which, being symbols, do qualify as terms."
 		     statement
 		     reference)
     copy))
+
+(defun equal-dialogues? (dialogue-1 dialogue-2)
+  (let ((signature-1 (dialogue-signature dialogue-1))
+	(signature-2 (dialogue-signature dialogue-2)))
+    (and (equal-signatures? signature-1 signature-2)(
+	 (equal-length? (dialogue-plays dialogue-1)
+			(dialogue-plays dialogue-2))
+	 (every-pair #'(lambda (move-1 move-2)
+			 (equal-moves? move-1 move-2 signature-1))
+		     (dialogue-plays dialogue-1)
+		     (dialogue-plays dialogue-2)))))
 
 (defun some-move (predicate dialogue)
   (some predicate (dialogue-plays dialogue)))
