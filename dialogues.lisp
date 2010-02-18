@@ -201,10 +201,6 @@ attacks which, being symbols, do qualify as terms."
 			(make-move player statement stance reference))
   dialogue)
 
-(defun copy-dialogue (dialogue)
-  (make-dialogue-int :signature (dialogue-signature dialogue)
-		     :plays (copy-list (dialogue-plays dialogue))))
-
 (defun freshly-extend-dialogue (dialogue player stance statement reference)
   (let ((copy (copy-dialogue dialogue)))
     (extend-dialogue copy
