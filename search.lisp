@@ -91,6 +91,17 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 	 (if (goal-test problem node) (return node))
 	 (funcall queueing-function nodes (expand node problem))))))
 
+
+(defun general-search-with-nodes (problem queueing-function &optional queue)
+  (let ((nodes (or queue
+		   (make-initial-queue (problem-initial-state problem)
+				       :queueing-function queueing-function))))
+    (let (node)
+      (loop (if (empty-queue? nodes) (return (values nil nil)))
+	 (setf node (remove-front nodes))
+	 (if (goal-test problem node) (return (values node nodes)))
+	 (funcall queueing-function nodes (expand node problem))))))
+
 (defun general-search-for-bottom (problem queueing-function)
   "Expand nodes according to the specification of PROBLEM until we
 find a node with no successors or we run out of nodes to expand.  The
@@ -124,6 +135,10 @@ how the node was obtained, starting from an initial node."
 (defun breadth-first-search-for-bottom (problem)
   "Search the shallowest nodes in the search tree first."
   (general-search-for-bottom problem #'enqueue-at-end))
+
+(defun breadth-first-search-with-nodes (problem &optional queue)
+  "Search the shallowest nodes in the search tree first."
+  (general-search-with-nodes problem #'enqueue-at-end queue))
 
 (defun depth-first-search (problem)
   "Search the deepest nodes in the search tree first."
