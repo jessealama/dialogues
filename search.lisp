@@ -41,20 +41,6 @@ goals, or if you need to compare them with something other than
 EQUAL."
   (equal (node-state node) (problem-goal problem)))
 
-(defmethod h-cost ((problem problem) state) 
-  "The estimated cost from state to a goal for this problem.  
-  If you don't overestimate, then A* will always find optimal solutions.
-  The default estimate is always 0, which certainly doesn't overestimate."
-  (declare (ignore state))
-  0)
-
-(defmethod edge-cost ((problem problem) node action state)
-  "The cost of going from one node to the next state by taking action.
-  This default method counts 1 for every action.  Provide a method for this if 
-  your subtype of problem has a different idea of the cost of a step."
-  (declare (ignore node action state))
-  1)
-
 (defun node-ancestors (node)
   "The ancestors of NODE, starting with its most distant
 ancestor (i.e., the ancestor of NODE whose parent is NIL)."
