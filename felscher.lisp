@@ -389,11 +389,20 @@
 ;;; Search for dialogues and for strategies
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun d-dialogue-search (initial-statement signature)
-  (dialogue-search d-dialogue-rules initial-statement signature))
+(defun d-dialogue-search-bfs (initial-statement signature)
+  (dialogue-search-bfs d-dialogue-rules initial-statement signature))
 
-(defun e-dialogue-search (initial-statement signature)
-  (dialogue-search e-dialogue-rules initial-statement signature))
+(defun e-dialogue-search-bfs (initial-statement signature)
+  (dialogue-search-bfs e-dialogue-rules initial-statement signature))
+
+(defun d-dialogue-search-dfs (initial-statement signature)
+  (dialogue-search-dfs d-dialogue-rules initial-statement signature))
+
+(defun e-dialogue-search-dfs (initial-statement signature)
+  (dialogue-search-dfs e-dialogue-rules initial-statement signature))
+
+(defun d-dialogue-search-dfs-no-cycles (initial-statement signature)
+  (dialogue-search-dfs-no-cycles d-dialogue-rules initial-statement signature))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Felscher's transformations
