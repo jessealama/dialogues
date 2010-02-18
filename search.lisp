@@ -29,7 +29,7 @@ also contains some bookkeeping information."
   (declare (ignore node))
   (error "You need to define a SUCCESSORS method for ~A" problem))
 
-(defmethod goal-test ((problem problem) (node node))
+(defmethod goal-test ((problem problem) node)
   "Return true or false: is this a goal node?  This default method
 checks if the state is equal to the state stored in the problem-goal
 slot.  You will need to define your own method if there are multiple
