@@ -37,6 +37,24 @@
 						    :rules rules)))
 	(breadth-first-search-for-bottom problem))
       (error "The initial statement ~A is not a formula according to the given signature ~A" initial-statement signature)))
+
+(defun dialogue-search-dfs (rules initial-statement signature)
+  (if (formula? initial-statement signature)
+      (let* ((initial-state (make-dialogue initial-statement signature))
+	     (problem (make-dialogue-search-problem :initial-state initial-state
+						    :signature signature
+						    :rules rules)))
+	(depth-first-search-for-bottom problem))
+      (error "The initial statement ~A is not a formula according to the given signature ~A" initial-statement signature)))
+
+(defun dialogue-search-dfs-no-cycles (rules initial-statement signature)
+  (if (formula? initial-statement signature)
+      (let* ((initial-state (make-dialogue initial-statement signature))
+	     (problem (make-dialogue-search-problem :initial-state initial-state
+						    :signature signature
+						    :rules rules)))
+	(no-cycles-depth-first-search-for-bottom problem #'equal-dialogues?))
+      (error "The initial statement ~A is not a formula according to the given signature ~A" initial-statement signature)))
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Searching for strategies
