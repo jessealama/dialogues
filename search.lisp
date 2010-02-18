@@ -139,7 +139,7 @@ how the node was obtained, starting from an initial node."
 	 (unless (eq solution :cut-off) (return solution)))))
 
 (defun depth-limited-search (problem &optional limit
-                                     (node (create-start-node problem)))
+			              (node (create-start-node problem)))
   "Search depth-first, but only up to LIMIT branches deep in the tree."
   (cond ((goal-test problem node) node)
         ((and (integerp limit)
