@@ -147,6 +147,9 @@ how the node was obtained, starting from an initial node."
   "Search the deepest nodes in the search tree first."
   (general-search problem #'enqueue-at-front))
 
+(defun depth-first-search-for-bottom (problem)
+  (general-search-for-bottom problem #'enqueue-at-front))
+
 (defun iterative-deepening-search (problem)
   "Do a series of depth-limited searches, increasing depth each time."
   (loop for depth = 0 do
