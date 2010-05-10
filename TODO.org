@@ -1,3 +1,4 @@
+
 * DONE Provide a "rewind" feature when playing dialogue games.
   CLOSED: [2010-02-18 Thu 15:55]
 * DONE Provide a breadth-first search procedure for enumerating dialogues.
@@ -21,3 +22,4 @@
 * TODO Implement a tableaux search procedure
   What's a reference? http://en.wikipedia.org/wiki/Semantic_tableaux
   
+* DONE An ASDF system definition

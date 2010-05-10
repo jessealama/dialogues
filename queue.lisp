@@ -15,9 +15,6 @@
 ;;; and simple and O(log n), but not super efficient.  Consider a Fibonacci
 ;;; heap [Page 420 CL&R] if you really have large queues to deal with.
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (require 'utils "utils.lisp"))
-
 (defstruct q
   (key #'identity)
   (last nil)
@@ -131,7 +128,5 @@
 	 (while (> (length heap) 0) do 
 	   (push (heap-extract-min heap key) result))
 	 (reverse result))))
-
-(provide 'queue)
 
 ;;; queue.lisp ends here

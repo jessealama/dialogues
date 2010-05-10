@@ -178,6 +178,4 @@
      (format t "~A" ,prompt)
      ,@body))
 
-(provide 'utils)
-
 ;;; utils.lisp ends here

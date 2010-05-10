@@ -1,8 +1,5 @@
 ;;; search.lisp: Problems, nodes, search trees, search strategies
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (require 'queue "queue.lisp"))
-
 (defstruct problem
   "A problem is defined by the initial state, and the type of problem it is.
 We will be defining subtypes of PROBLEM later on.  For bookkeeping, we
@@ -242,6 +239,4 @@ state."
 			(enqueue-at-end old-q (eliminate-all-duplicates
 					       nodes table))))))
 
-(provide 'search)
-     
 ;;; search.lisp ends here

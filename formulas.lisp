@@ -1,8 +1,5 @@
 ;;; formulas.lisp A representation for first-order formulas
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (require 'utils "utils.lisp"))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Signatures
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -617,8 +614,6 @@ in TERM or FORMULA."
     (until (composite-formula? response signature)
       (setf response (read t nil nil)))
     response))
-
-(provide 'formulas)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Named formulas

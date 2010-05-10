@@ -1,10 +1,5 @@
 ;;; dialogue-search.lisp Dialogue games as search trees
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (require 'utils "utils.lisp")
-  (require 'dialogues "dialogues.lisp")
-  (require 'search "search.lisp"))
-
 (defstruct (dialogue-search-problem
 	     (:include problem))
   (rules nil :type list)
@@ -68,7 +63,5 @@
 (defun strategy-successors (strategy rules)
   (declare (ignore strategy rules))
   nil)
-
-(provide 'dialogue-search)
 
 ;;; dialogue-search.lisp ends here

@@ -1,12 +1,5 @@
 ;;; felscher.lisp W. Felscher's transformations between dialogues and proofs
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (require 'utils "utils.lisp")
-  (require 'formulas "formulas.lisp")
-  (require 'figure "figure.lisp")
-  (require 'dialogues "dialogues.lisp")
-  (require 'dialogue-search "dialogue-search.lisp"))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Argumentation forms
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
