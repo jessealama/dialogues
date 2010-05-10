@@ -1,5 +1,7 @@
 ;;; queue.lisp: Queues as heaps.
 
+(in-package :dialogues)
+
 ;;; We can remove elements form the front of a queue.  We can add elements in
 ;;; three ways: to the front, to the back, or ordered by some numeric score.
 ;;; This is done with the following enqueing functions, which make use of the

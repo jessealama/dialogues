@@ -1,5 +1,7 @@
 ;;; dialogues.lisp Play Lorenzen dialogue games
 
+(in-package :dialogues)
+
 (defun print-move (move stream depth)
   (declare (ignore depth))
   (let ((stance (move-stance move))
@@ -742,4 +744,4 @@ attacks which, being symbols, do qualify as terms."
        (msg "Thanks for playing, I hope you had fun."))
     dialogue))
 
-;;; dialogues.lisp ends here
+;;; dialogues.lisp ends hered

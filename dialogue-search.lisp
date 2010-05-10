@@ -1,5 +1,7 @@
 ;;; dialogue-search.lisp Dialogue games as search trees
 
+(in-package :dialogues)
+
 (defstruct (dialogue-search-problem
 	     (:include problem))
   (rules nil :type list)

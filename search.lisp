@@ -1,5 +1,7 @@
 ;;; search.lisp: Problems, nodes, search trees, search strategies
 
+(in-package :dialogues)
+
 (defstruct problem
   "A problem is defined by the initial state, and the type of problem it is.
 We will be defining subtypes of PROBLEM later on.  For bookkeeping, we
