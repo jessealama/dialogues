@@ -23,3 +23,4 @@
   What's a reference? http://en.wikipedia.org/wiki/Semantic_tableaux
   
 * DONE An ASDF system definition
+* TODO Bug: if a number is given when a formula is requested, the program dies
