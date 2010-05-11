@@ -33,6 +33,7 @@ returning NIL."
     ("S-formula" "s-formula" s-formula)))
 
 (define-xhtml-handler start-page ()
+  (start-session)
   (with-title "Let's play a dialogue game"
     (:h1 "It's your move, Proponent.")
     (:p "To get started, enter a formula in the text box (" (:a :href "format-for-formulas" "learn about the required format for formulas") ") or choose one of formulas from the menu (" (:a :href "some-famous-formulas" "learn about the formulas in this list") ").")
