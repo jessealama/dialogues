@@ -29,13 +29,13 @@
 			    next-moves)
 		    extensions)))))))
 
-(defun dialogue-search-bfs (rules initial-statement signature)
+(defun dialogue-search-bfs (rules initial-statement signature &optional more-nodes)
   (if (formula? initial-statement signature)
       (let* ((initial-state (make-dialogue initial-statement signature))
 	     (problem (make-dialogue-search-problem :initial-state initial-state
 						    :signature signature
 						    :rules rules)))
-	(breadth-first-search-for-bottom problem))
+	(breadth-first-search-for-bottom-with-nodes problem more-nodes))
       (error "The initial statement ~A is not a formula according to the given signature ~A" initial-statement signature)))
 
 (defun dialogue-search-dfs (rules initial-statement signature)
