@@ -368,6 +368,46 @@
 		rule-d13)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Some variants of Felscher's rules
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar rule-d12-two-times
+  (make-defensive-rule
+   :name d12
+   :body (every-move #'(lambda (move)
+			 (or (initial-move? move)
+			     (attacking-move? move)
+			     (/= (move-reference move)
+				 current-reference)))
+		     dialogue)
+   :failure-message "Attacks may be answered at most twice."))
+
+
+(defvar d-dialogue-rules-minus-d11
+  (append argumentation-forms
+	  (list rule-d00-atomic
+		rule-d00-proponent
+		rule-d00-opponent
+		rule-d01-composite
+		rule-d02-attack
+		rule-d10
+		;; rule-d11
+		rule-d12
+		rule-d13)))
+
+(defvar d-dialogue-rules-minus-d12
+  (append argumentation-forms
+	  (list rule-d00-atomic
+		rule-d00-proponent
+		rule-d00-opponent
+		rule-d01-composite
+		rule-d02-attack
+		rule-d10
+		rule-d11
+		;; rule-d12
+		rule-d13)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Playing games with Felscher's rules
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
