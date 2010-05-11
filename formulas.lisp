@@ -629,11 +629,17 @@ in TERM or FORMULA."
 
 (defparameter excluded-middle (make-disjunction 'p (negate 'p)))
 
+(defparameter dummett-formula (make-disjunction (make-implication 'p 'q)
+						(make-implication 'q 'p)))
+
 (defparameter markov-formula (make-implication (negate (negate 'p))
 					       'p))
 
 (defparameter double-negation-intro (make-implication 'p
 						      (negate (negate 'p))))
+
+(defparameter double-negation-elimination (make-implication (negate (negate 'p))
+							    'p))
 
 (defparameter k-formula (make-implication 'p
 					  (make-implication 'q 'p)))
@@ -654,5 +660,16 @@ in TERM or FORMULA."
 			 (make-implication 'p
 					   (make-implication 'p 'q))
 			 (make-implication 'p 'q)))
+
+(defparameter weak-excluded-middle (make-disjunction
+				    (negate 'p)
+				    (negate (negate 'p))))
+
+(defparameter scott-formula (make-implication (make-implication double-negation-elimination
+								excluded-middle)
+					      weak-excluded-middle))
+
+(defparameter smetanich-formula (make-implication (make-implication (negate 'q) 'p)
+						  peirce-formula))
 
 ;;; formulas.lisp ends here
