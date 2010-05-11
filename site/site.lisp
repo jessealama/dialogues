@@ -4,6 +4,9 @@
 
 ;; Logging
 
+(setq *message-log-pathname* "/tmp/dialogue-messages")
+(setq *access-log-pathname* "/tmp/dialogue-access")
+
 ;; Dispatching
 
 (defvar dialogue-dispatch-table
