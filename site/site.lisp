@@ -10,7 +10,8 @@
 ;; Dispatching
 
 (defvar dialogue-dispatch-table
-  (list (create-static-page-dispatcher "/" 'start-page)))
+  (list (create-static-page-dispatcher "/" 'start-page)
+	(create-static-page-dispatcher "/play" 'play-page)))
 
 (defun dialogue-request-dispatcher (request)
   "Selects a request handler based on a list of individual request
@@ -21,7 +22,6 @@ returning NIL."
         when action return (funcall action)
         finally (setf (return-code *reply*) +http-not-found+)))
 
-(define-xhtml-handler start-page ()
 (defvar named-formulas
   `(("Peirce's formula" "peirce-formula" peirce-formula)
     ("Excluded middle" "excluded-middlge" excluded-middle)
@@ -30,8 +30,44 @@ returning NIL."
     ("K-formula" "k-formula" k-formula)
     ("S-formula" "s-formula" s-formula)))
 
+(define-xhtml-handler start-page ()
   (with-title "Let's play a dialogue game"
-    (:p "Like this one:")))
+    (:h1 "It's your move, Proponent.")
+    (:p "To get started, enter a formula in the text box (" (:a :href "format-for-formulas" "learn about the required format for formulas") ") or choose one of formulas from the menu (" (:a :href "some-famous-formulas" "learn about the formulas in this list") ").")
+    (:form :action "play"
+	   :enctype "multipart/form-data"
+	   :method "post"
+     (:input :type "text"
+	     :name "input-formula")
+     (:select :type "radio"
+	      :name "famous-formula"
+	      :size 1
+       (dolist (named-formula named-formulas)
+	 (destructuring-bind (name short-name formula)
+	     named-formula
+	   (declare (ignore formula))
+	   (htm (:option :value name 
+			 :name short-name
+			 (str name))))))
+     (:input :type "submit"
+	     :value "Start"))))
+
+(define-xhtml-handler play-page ()
+  (multiple-value-bind (famous-formula input-formula)
+      (fetch-post-parameters "famous-formula" "input-formula")
+    (cond ((and (not (empty-string? famous-formula))
+		(not (empty-string? input-formula)))
+	   (with-title "Improper input"
+	     (:p "I'm not sure how to interpret your intention for starting the game: you selected a \"named\" formula with which to start the game (namely, " (str famous-formula) "), but you also entered another formula in the text box (namely, " (str input-formula) ").")
+    	     (:p "Please return to " (:a :href "/" "the start page") " and try again.")))
+    	  ((and (empty-string? famous-formula)
+    		(empty-string? input-formula))
+    	   (with-title "Improper input"
+    	     (:p "I'm not sure how to interpret your intention for starting the game: you selected neither one of the \"named\" formulas, nor did you enter your own formula.")
+    	     (:p "Please return to " (:a :href "/" "the start page") " and try again.")))
+    	  (t 
+    	   (with-title "Play"
+    	     (:p "OK, you gave me sensible input.  Let's roll."))))))
 
 (defvar current-acceptor nil
   "The current hunchentoot acceptor object that's handling our requests.
