@@ -22,6 +22,14 @@ returning NIL."
         finally (setf (return-code *reply*) +http-not-found+)))
 
 (define-xhtml-handler start-page ()
+(defvar named-formulas
+  `(("Peirce's formula" "peirce-formula" peirce-formula)
+    ("Excluded middle" "excluded-middlge" excluded-middle)
+    ("Weak excluded middle" "weak-excluded-middle" weak-excluded-middle)
+    ("I-formula" "i-formula" i-formula)
+    ("K-formula" "k-formula" k-formula)
+    ("S-formula" "s-formula" s-formula)))
+
   (with-title "Let's play a dialogue game"
     (:p "Like this one:")))
 
