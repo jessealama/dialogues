@@ -22,6 +22,8 @@ returning NIL."
         when action return (funcall action)
         finally (setf (return-code *reply*) +http-not-found+)))
 
+(defvar session->game (make-hash-table))
+
 (defvar named-formulas
   `(("Peirce's formula" "peirce-formula" peirce-formula)
     ("Excluded middle" "excluded-middlge" excluded-middle)
