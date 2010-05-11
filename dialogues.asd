@@ -21,6 +21,7 @@
   :depends-on (:hunchentoot
 	       :hunchentoot-utils
 	       :cl-who-kryukov
+	       :parenscript
 	       :usocket)
   :components ((:file "packages")
 	       (:file "utils")
