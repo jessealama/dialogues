@@ -202,6 +202,16 @@
   (and (symbolp term)
        (eq (aref (symbol-name term) 0) #\?)))
 
+(defun make-variable (symbol-or-string)
+  (let ((name (if (symbolp symbol-or-string 
+			   (symbol-name symbol-or-string)
+			   symbol-or-string))))
+    (cond ((string= name "")
+	   (error "One cannot make a variable with an empty name"))
+	  ((char= (char name 0) \#?)
+	   (error "Variables already begin with a question mark; unclear how to proceed"))
+	  (t (make-symbol (concatenate 'string "?" name))))))
+
 (defun term? (x signature)
   (when x
     (or (variable? x)
@@ -397,6 +407,9 @@
 (defun equation? (formula)
   (eq (car formula) '=))
 
+(defun make-equation (lhs rhs)
+  (list '= lhs rhs))
+
 (defun unary-statement-argument (unary-statement)
   (cadr unary-statement))
 
@@ -405,6 +418,23 @@
 
 (defun binary-statement-second-arg (binary-statement)
   (caddr binary-statement))
+
+(defun account-for-extension (constants predicate)
+  "Make a formula saying that the extension of PREDICATE is exhausted
+by the list CONSTANTS of constant symbols.  E.g, 
+
+\(ACCOUNT-FOR-EXTENSION '(A B C) 'VERTEX\)
+
+should return the formula
+
+\(ALL ?X (IMPLIES (VERTEX ?X) (OR (= ?X A) (= ?X B) (= ?X C)))\)"
+  (let ((var (make-variable "x")))
+    (make-universal var
+		    (make-implication
+		     (make-atomic-statement vertex-predicate var)
+		    (apply #'make-disjunction
+			   (mapcar #'(lambda (constant)
+				       (make-equation var constant))))))))
 
 (defun proper-subformulas (formula)
   (labels 
