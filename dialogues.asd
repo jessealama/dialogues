@@ -17,8 +17,11 @@
   :description "A system for working with and exploring Lorenzen dialogue games"
   :author "Jesse Alama <jesse.alama@gmail.com>"
   :maintainer "Jesse Alama <jesse.alama@gmail.com>"
-  :depends-on (:hunchentoot :cl-who-kryukov)
   :serial t
+  :depends-on (:hunchentoot
+	       :hunchentoot-utils
+	       :cl-who-kryukov
+	       :usocket)
   :components ((:file "packages")
 	       (:file "utils")
 	       (:file "formulas")

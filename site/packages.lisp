@@ -2,4 +2,4 @@
 (in-package :cl-user)
 
 (defpackage :dialogue-site
-  (:use :cl :dialogues :hunchentoot :cl-who))
+  (:use :cl :dialogues :hunchentoot :cl-who :usocket :hunchentoot-utils))
