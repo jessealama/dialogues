@@ -202,9 +202,9 @@
        (eq (aref (symbol-name term) 0) #\?)))
 
 (defun make-variable (symbol-or-string)
-  (let ((name (if (symbolp symbol-or-string 
+  (let ((name (if (symbolp symbol-or-string)
 			   (symbol-name symbol-or-string)
-			   symbol-or-string))))
+			   symbol-or-string)))
     (cond ((string= name "")
 	   (error "One cannot make a variable with an empty name"))
 	  ((char= (char name 0) \#?)
