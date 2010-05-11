@@ -1,5 +1,7 @@
 ;;; queue.lisp: Queues as heaps.
 
+(in-package :dialogues)
+
 ;;; We can remove elements form the front of a queue.  We can add elements in
 ;;; three ways: to the front, to the back, or ordered by some numeric score.
 ;;; This is done with the following enqueing functions, which make use of the
@@ -14,9 +16,6 @@
 ;;; up the constant factors of this implementation.  It is meant to be clear
 ;;; and simple and O(log n), but not super efficient.  Consider a Fibonacci
 ;;; heap [Page 420 CL&R] if you really have large queues to deal with.
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (require 'utils "utils.lisp"))
 
 (defstruct q
   (key #'identity)
@@ -131,7 +130,5 @@
 	 (while (> (length heap) 0) do 
 	   (push (heap-extract-min heap key) result))
 	 (reverse result))))
-
-(provide 'queue)
 
 ;;; queue.lisp ends here

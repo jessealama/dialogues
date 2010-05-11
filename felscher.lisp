@@ -1,11 +1,6 @@
 ;;; felscher.lisp W. Felscher's transformations between dialogues and proofs
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (require 'utils "utils.lisp")
-  (require 'formulas "formulas.lisp")
-  (require 'figure "figure.lisp")
-  (require 'dialogues "dialogues.lisp")
-  (require 'dialogue-search "dialogue-search.lisp"))
+(in-package :dialogues)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Argumentation forms
@@ -317,7 +312,7 @@
    :body (let ((most-recent (most-recent-open-attack dialogue)))
 	   (or (null most-recent)
 	       (= most-recent current-reference)))
-   :failure-message "You must defend against only the most recent open attack."))
+   :failure-message "You must defend against the most recent open attack."))
 
 (defvar rule-d12
   (make-defensive-rule
@@ -369,6 +364,46 @@
 		rule-d02-attack
 		rule-d10
 		;; rule-d11
+		;; rule-d12
+		rule-d13)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Some variants of Felscher's rules
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar rule-d12-two-times
+  (make-defensive-rule
+   :name d12
+   :body (every-move #'(lambda (move)
+			 (or (initial-move? move)
+			     (attacking-move? move)
+			     (/= (move-reference move)
+				 current-reference)))
+		     dialogue)
+   :failure-message "Attacks may be answered at most twice."))
+
+
+(defvar d-dialogue-rules-minus-d11
+  (append argumentation-forms
+	  (list rule-d00-atomic
+		rule-d00-proponent
+		rule-d00-opponent
+		rule-d01-composite
+		rule-d02-attack
+		rule-d10
+		;; rule-d11
+		rule-d12
+		rule-d13)))
+
+(defvar d-dialogue-rules-minus-d12
+  (append argumentation-forms
+	  (list rule-d00-atomic
+		rule-d00-proponent
+		rule-d00-opponent
+		rule-d01-composite
+		rule-d02-attack
+		rule-d10
+		rule-d11
 		;; rule-d12
 		rule-d13)))
 

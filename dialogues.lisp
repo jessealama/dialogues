@@ -1,8 +1,6 @@
 ;;; dialogues.lisp Play Lorenzen dialogue games
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (require 'utils "utils.lisp")
-  (require 'formulas "formulas.lisp"))
+(in-package :dialogues)
 
 (defun print-move (move stream depth)
   (declare (ignore depth))
@@ -746,6 +744,4 @@ attacks which, being symbols, do qualify as terms."
        (msg "Thanks for playing, I hope you had fun."))
     dialogue))
 
-(provide 'dialogues)
-
-;;; dialogues.lisp ends here
+;;; dialogues.lisp ends hered

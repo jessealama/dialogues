@@ -1,7 +1,6 @@
 ;;; search.lisp: Problems, nodes, search trees, search strategies
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (require 'queue "queue.lisp"))
+(in-package :dialogues)
 
 (defstruct problem
   "A problem is defined by the initial state, and the type of problem it is.
@@ -242,6 +241,4 @@ state."
 			(enqueue-at-end old-q (eliminate-all-duplicates
 					       nodes table))))))
 
-(provide 'search)
-     
 ;;; search.lisp ends here

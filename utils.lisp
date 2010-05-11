@@ -1,5 +1,7 @@
 ;;; utils.lisp For stuff that doesn't fit any where else
 
+(in-package :dialogues)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Iteration
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -177,7 +179,5 @@
      (msg ,question)
      (format t "~A" ,prompt)
      ,@body))
-
-(provide 'utils)
 
 ;;; utils.lisp ends here
