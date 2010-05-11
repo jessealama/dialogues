@@ -312,7 +312,7 @@
    :body (let ((most-recent (most-recent-open-attack dialogue)))
 	   (or (null most-recent)
 	       (= most-recent current-reference)))
-   :failure-message "You must defend against only the most recent open attack."))
+   :failure-message "You must defend against the most recent open attack."))
 
 (defvar rule-d12
   (make-defensive-rule
