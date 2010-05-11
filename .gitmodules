@@ -1,0 +1,3 @@
+[submodule "/Users/alama/research/dialogues/lisp/site/cl-who"]
+	path = /Users/alama/research/dialogues/lisp/site/cl-who
+	url = ./site/cl-who
