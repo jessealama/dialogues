@@ -4,18 +4,21 @@
 (defpackage :dialogues
   (:use :cl)
   (:export ; utils
-           "EMPTY-STRING?" ; funny: this has nothing to do with dialogues
+           #:EMPTY-STRING? ; funny: this has nothing to do with dialogues
+
+	   #:PQRS-PROPOSITIONAL-SIGNATURE
+	   #:MAKE-DIALOGUE
 	   ; named formulas
-	   "peirce-formula"
-	   "excluded-middle"
-	   "dummett-formula"
-	   "markov-formula"
-	   "double-negation-intro"
-	   "double-negation-elimination"
-	   "k-formula"
-	   "b-formula"
-	   "c-formula"
-	   "w-formula"
-	   "weak-excluded-middle"
-	   "scott-formula"
-	   "smetanich-formula"))
+	   #:PEIRCE-FORMULA
+	   #:EXCLUDED-MIDDLE
+	   #:DUMMETT-FORMULA
+	   #:MARKOV-FORMULA
+	   #:DOUBLE-NEGATION-INTRO
+	   #:DOUBLE-NEGATION-ELIMINATION
+	   #:K-FORMULA
+	   #:B-FORMULA
+	   #:C-FORMULA
+	   #:W-FORMULA
+	   #:WEAK-EXCLUDED-MIDDLE
+	   #:SCOTT-FORMULA
+	   #:SMETANICH-FORMULA))
