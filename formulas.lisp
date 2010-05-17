@@ -418,6 +418,9 @@
 (defun binary-statement-second-arg (binary-statement)
   (caddr binary-statement))
 
+(defun make-atomic-statement (predicate &rest args)
+  (cons predicate args))
+
 (defun account-for-extension (constants predicate)
   "Make a formula saying that the extension of PREDICATE is exhausted
 by the list CONSTANTS of constant symbols.  E.g, 
@@ -430,10 +433,11 @@ should return the formula
   (let ((var (make-variable "x")))
     (make-universal var
 		    (make-implication
-		     (make-atomic-statement vertex-predicate var)
+		     (make-atomic-statement predicate var)
 		    (apply #'make-disjunction
 			   (mapcar #'(lambda (constant)
-				       (make-equation var constant))))))))
+				       (make-equation var constant))
+				   constants))))))
 
 (defun proper-subformulas (formula)
   (labels 
