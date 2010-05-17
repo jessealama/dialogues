@@ -55,30 +55,31 @@ own hands many of the problems that are solved for us automaticaly by
 UCW."
   :author "Jesse Alama <jesse.alama@gmail.com>"
   :maintainer "Jesse Alama <jesse.alama@gmail.com>"
-  :serial t ;; for the sake of simplicity
   :depends-on (:dialogues :ucw)
-  :pathname "site"
-  :components ((:file "packages")
-	       (:file "ucw-site")))
+  :components 
+  ((:module :site
+      :serial t ;; for the sake of simplicity
+      :components ((:file "packages")
+		   (:file "ucw-site")))))
 
-(defsystem :dialogue-site-hunchentoot
-  :description "A dynamic website for playing dialogue games"
-  :long-description "This system is intended to be a pace where one
-can explore logic through Lorenzen dialogue games.
+;; (defsystem :dialogue-site-hunchentoot
+;;   :description "A dynamic website for playing dialogue games"
+;;   :long-description "This system is intended to be a pace where one
+;; can explore logic through Lorenzen dialogue games.
 
-It is based on the hunchentoot web server.  By using this system are
-responsible for more of the site's functionality than with other
-high-level site frameworks, such as UnCommon Web or weblocks.  But
-with more responsibility comes more freedom, and greater control.  It
-is not clear to me, as I write this site, that we really need all the
-high-level features of, say, UCW, nor is it clear to me that
-high-level frameworks can deliver to us what we want.
+;; It is based on the hunchentoot web server.  By using this system are
+;; responsible for more of the site's functionality than with other
+;; high-level site frameworks, such as UnCommon Web or weblocks.  But
+;; with more responsibility comes more freedom, and greater control.  It
+;; is not clear to me, as I write this site, that we really need all the
+;; high-level features of, say, UCW, nor is it clear to me that
+;; high-level frameworks can deliver to us what we want.
 
-Another system with the same aims, based on UCW, is defined by
-DIALOGUE-SITE-UCW."
-  :author "Jesse Alama <jesse.alama@gmail.com>"
-  :maintainer "Jesse Alama <jesse.alama@gmail.com>"
-  :serial t ;; for the sake of simplicity
-  :pathname "site"
-  :components ((:file "packages")
-	       (:file "hunchentoot-site")))
+;; Another system with the same aims, based on UCW, is defined by
+;; DIALOGUE-SITE-UCW."
+;;   :author "Jesse Alama <jesse.alama@gmail.com>"
+;;   :maintainer "Jesse Alama <jesse.alama@gmail.com>"
+;;   :serial t ;; for the sake of simplicity
+;;   :pathname "site"
+;;   :components ((:file "packages")
+;; 	       (:file "hunchentoot-site")))
