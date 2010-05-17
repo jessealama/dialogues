@@ -28,7 +28,7 @@
 	       (:file "figure")
 	       (:file "felscher")))
 
-(defsystem :dialogue-site-ucw
+(defsystem :dialogue-site
   :description "A dynamic website for playing dialogue games"
   :long-description "This system is intended to offer a web site where
 one can explore logic through Lorenzen dialogue games.  (It may also
