@@ -207,7 +207,7 @@
 			   symbol-or-string)))
     (cond ((string= name "")
 	   (error "One cannot make a variable with an empty name"))
-	  ((char= (char name 0) \#?)
+	  ((char= (char name 0) #\?)
 	   (error "Variables already begin with a question mark; unclear how to proceed"))
 	  (t (make-symbol (concatenate 'string "?" name))))))
 
