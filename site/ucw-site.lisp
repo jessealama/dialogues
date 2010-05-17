@@ -25,7 +25,7 @@
 
 ;;;; The definiton of the dialogue
 
-(defclass dialogue-application (standard-application cookie-session-application)
+(defclass dialogue-application (standard-application cookie-session-application-mixin)
   ()
   (:default-initargs
    :url-prefix "/"
@@ -62,36 +62,42 @@
 
 (defclass game-manipulator ()
   ((game :accessor game
-	 :initarg :game
-	 :backtrack t)))
+	 :initarg :game)))
 
-(defmethod/cc start-game ((self game-manipulator) initial-formula)
+(defaction start-game ((self game-manipulator) initial-formula)
+  (let ((new-game (make-dialogue initial-formula pqrs-signature)))
+    (setf (game game-manipulator) new-game))
+  (answer))
+
+(defcomponent game-manipulator-component (game-manipulator)
+  ())
+
+(defmethod render ((self game-manipulator-component))
+  ()
+  (<:p "Here's the game:" (<:br)
+       (<:as-html (format nil "~A" (game self)))))
 
 (defmethod render ((self initial-formula-window))
-  (<:h1 "It's your turn")
-  (<:form :method "POST"
-	  :target "play"
-    (<:p (<:as-html "Enter a formula in the text box ")
-	 (<:input :type "text" :name "input-formula")
-	 (<:as-html " or select a famous formula from the menu: ")
-	 (<:select :name "selected-formula" :size 1
-	    (dolist (famous-formula famous-formulas)
-	      (destructuring-bind (long-name short-name formula)
-		  famous-formula
-		(declare (ignore formula))
-		(<:option :id short-name (<:as-html long-name)))))
-	 (<:input :type "submit"
-		  :value "Let's play"))))
-
-;;; Game presentation component
-
-(defcomponent play-window-component
-    ())
-
-(defmethod render ((self play-window-component))
-
-(defentry-point "play" (:application *dialogue-application*)
-    ((initial-formula (make-dialogue)
-  (call 'play-window-component))
+  (let (input-formula selected-formula)
+    (<:h1 "It's your turn")
+    (<ucw:form :method "POST"
+	       :action (call 'game-manipulator-component :game (make-dialogue (or input-formula
+										  selected-formula)
+									      pqrs-propositional-signature))
+      (<:p (<:label :for "input-formula" "Enter a formula in the text box")
+	   (<ucw:input :type "text" :accessor input-formula :id "input-formula")
+	   (<:label :for "selected-formula" "or select a famous formula from the menu")
+	   (<ucw:select :id "selected-formula" :size 1 :accessor selected-formula
+	     (dolist (famous-formula famous-formulas)
+	       (destructuring-bind (long-name short-name formula)
+		   famous-formula
+		 (declare (ignore formula))
+		 (<ucw:option :id short-name :value long-name (<:as-html long-name)))))
+	   (<ucw:submit :action (call 'game-manipulator-component 
+				      :game (make-dialogue (if (empty-string? input-formula)
+							       excluded-middle
+							       markov-formula)
+							   pqrs-propositional-signature))
+			:value "Let's play")))))
 
 ;;; ucw-site.lisp ends here
