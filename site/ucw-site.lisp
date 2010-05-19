@@ -81,25 +81,23 @@
   (let (input-formula selected-formula)
     (<:h1 "It's your turn")
     (<ucw:form :method "POST"
-	       :action (call 'game-manipulator-component 
-			     :game (make-dialogue (or input-formula
-						      selected-formula)
-						  pqrs-propositional-signature))
       (<:p (<:label :for "input-formula" "Enter a formula in the text box")
 	   (<ucw:input :type "text" :accessor input-formula :id "input-formula")
 	   (<:label :for "selected-formula" "or select a famous formula from the menu")
-	   (<ucw:select :id "selected-formula" :size 1 :accessor selected-formula
+	   (<ucw:select :id "selected-formula" 
+			:size 1 
+			:accessor selected-formula
 	     (dolist (famous-formula famous-formulas)
 	       (destructuring-bind (long-name short-name formula)
 		   famous-formula
-		 (declare (ignore formula))
-		 (<ucw:option :id short-name :value long-name (<:as-html long-name))))))
+		 (declare (ignore short-name))
+		 (<ucw:option :value formula (<:as-html long-name))))))
       (<:p
        (<:as-html "If the text box is not empty, its contents will be the initial formula.  If the text box is empty, then the selected \"famous formula\" will be used."))
       (<:p
        (<ucw:submit :action (call 'game-manipulator-component 
 				  :game (make-dialogue (if (empty-string? input-formula)
-							   excluded-middle
+							   selected-formula
 							   markov-formula)
 						       pqrs-propositional-signature))
 		    :value "Let's play")))))
