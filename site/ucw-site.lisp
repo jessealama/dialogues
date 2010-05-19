@@ -81,9 +81,10 @@
   (let (input-formula selected-formula)
     (<:h1 "It's your turn")
     (<ucw:form :method "POST"
-	       :action (call 'game-manipulator-component :game (make-dialogue (or input-formula
-										  selected-formula)
-									      pqrs-propositional-signature))
+	       :action (call 'game-manipulator-component 
+			     :game (make-dialogue (or input-formula
+						      selected-formula)
+						  pqrs-propositional-signature))
       (<:p (<:label :for "input-formula" "Enter a formula in the text box")
 	   (<ucw:input :type "text" :accessor input-formula :id "input-formula")
 	   (<:label :for "selected-formula" "or select a famous formula from the menu")
