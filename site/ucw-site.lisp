@@ -92,12 +92,15 @@
 	       (destructuring-bind (long-name short-name formula)
 		   famous-formula
 		 (declare (ignore formula))
-		 (<ucw:option :id short-name :value long-name (<:as-html long-name)))))
-	   (<ucw:submit :action (call 'game-manipulator-component 
-				      :game (make-dialogue (if (empty-string? input-formula)
-							       excluded-middle
-							       markov-formula)
-							   pqrs-propositional-signature))
-			:value "Let's play")))))
+		 (<ucw:option :id short-name :value long-name (<:as-html long-name))))))
+      (<:p
+       (<:as-html "If the text box is not empty, its contents will be the initial formula.  If the text box is empty, then the selected \"famous formula\" will be used."))
+      (<:p
+       (<ucw:submit :action (call 'game-manipulator-component 
+				  :game (make-dialogue (if (empty-string? input-formula)
+							   excluded-middle
+							   markov-formula)
+						       pqrs-propositional-signature))
+		    :value "Let's play")))))
 
 ;;; ucw-site.lisp ends here
