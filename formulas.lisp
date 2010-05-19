@@ -627,17 +627,77 @@ in TERM or FORMULA."
 (defun contains-formula? (lst formula)
   (member formula lst :test #'equal-formulas?))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Reading terms and formulas
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defun read-term ()
   (let (response)
     (until (symbolp response)
       (setq response (read t nil nil)))
     response))
 
-(defun read-formula (signature)
-  (let (response)
-    (until (formula? response signature)
-      (setf response (read t nil nil)))
-    response))
+(define-condition malformed-formula-error (error)
+  ((text :initarg :text 
+	 :reader malformed-formula-error-text)
+   (signature :initarg :signature 
+	      :reader malformed-formula-error-signature))
+  (:report (lambda (condition stream)
+	     (let ((text (malformed-formula-error-text condition))
+		   (sig (malformed-formula-error-signature condition)))
+	       (if sig
+		   (if text
+		       (format stream 
+			       "The given text,~%~%  ~A,~%~%is not a formula according to the signature~%~%  ~A~%"
+			       text sig)
+		       (format stream
+			       "Although a signature,~%~%  ~A~%~%was supplied, no text was given.~%"
+			       sig))
+		   (if text
+		       (format stream
+			       "Unable to determine whether the given text,~%~%  ~A,~%~%is a formula because no signature was supplied.~%"
+			       text)
+		       (format stream
+			       "Neither a signature nor a text were supplied.~%")))))))
+
+(defun try-another-formula (c)
+  (declare (ignore c))
+  (let ((restart (find-restart 'try-another-formula)))
+    (when restart
+      (invoke-restart 'try-another-formula))))
+
+(defun read-formula (&optional (stream t) 
+		               (signature pqrs-propositional-signature))
+  (let ((input (read stream nil nil)))
+    (if (formula? input signature)
+	input
+	(error 'malformed-formula-error :text input
+	                                :signature signature))))
+
+(defun read-new-formula ()
+  (format t "Enter a new formula: ")
+  (multiple-value-list (read-formula)))
+
+;; The original READ-FORMULA.
+;;
+;; This function combines reading input and validating it.  It seems
+;; more elegant, and more flexible, for this function to signal an
+;; error when the input is not a formula (according to the signature).
+;; The function then does just one thing: read a formula.  If the
+;; input is not well-formed by its lights, it signals a condition; it
+;; does not adopt its own policy for what to do when its input is
+;; malformed.  Other, higher-level code can set a policy for what to
+;; do when READ-FORMULA is asked to process malformed input.  (One
+;; policy would be to prompt the user to enter new input until a vaid
+;; formula is read, as this function now does.  Another would be to
+;; really signal an error if the input is malformed.  Perhaps another
+;; policy would be to use a specific formula.)
+;;
+;; (defun read-formula (signature)
+;;   (let (response)
+;;     (until (formula? response signature)
+;;       (setf response (read t nil nil)))
+;;     response))
 
 (defun read-atomic-formula (signature)
   (let (response)
@@ -645,11 +705,41 @@ in TERM or FORMULA."
       (setf response (read t nil nil)))
     response))
 
-(defun read-composite-formula (signature)
-  (let (response)
-    (until (composite-formula? response signature)
-      (setf response (read t nil nil)))
-    response))
+(define-condition non-atomic-formula-error (error)
+  ((text :initarg :text 
+	 :reader non-atomic-formula-error-text)
+   (signature :initarg :signature
+	      :reader non-atomic-formula-error-signature))
+  (:report (lambda (condition stream)
+	     (let ((text (non-atomic-formula-error-text condition))
+		   (sig (non-atomic-formula-error-signature condition)))
+	       (if text
+		   (if sig
+		       (format stream 
+			       "The given text,~%~%  ~A,~%~%is not a non-atomic formula according to the signature~%~%  ~A.~%"
+			       text
+			       sig)
+		       (format stream
+			       "Unable to determine whether the given text,~%~%  ~A,~%~%is a non-atomic formula because no signature was supplied.~%"
+			       text))
+		   (if sig
+		       (format stream
+			       "No text was given, though a signature~%~%~A~%~%was.~%"
+			       sig)
+		       (format stream
+			       "Neither a text nor a signature was given.~%")))))))
+
+(defun read-composite-formula (&optional (stream t)
+			                 (signature pqrs-propositional-signature))
+  (let ((input (read stream nil nil)))
+    (if (formula? input signature)
+	(if (atomic-formula? input signature)
+	    (error 'non-atomic-formula-error :text input
+		                             :signature signature)
+	    input)
+	(error 'malformed-formula-error :text input
+   	                                :signature signature))))
+	    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Named formulas
