@@ -138,29 +138,6 @@
       (symbolic-attack? obj)
       (term? signature obj)))
 
-(defun read-statement (signature)
-  (let (response)
-    (until (statement? response signature)
-      (format t "~A" *prompt*)
-      (setf response (read t nil nil)))
-    response))
-
-(defun read-statement-or-symbols (signature &rest symbols)
-  (let (response)
-    (until (or (statement? signature response)
-	       (member response symbols))
-      (format t "~A" *prompt*)
-      (setf response (read t nil nil)))
-    response))
-
-(defun read-formula-or-term (signature)
-  (let (response)
-    (until (or (formula? signature response)
-	       (term? signature response))
-      (format t "~A" *prompt*)
-      (setf response (read t nil nil)))
-    response))
-
 (defun non-symbolic-attack-term? (obj signature)
   "Determine whether OBJ is a term different from the symbolic
 attacks which, being symbols, do qualify as terms."
@@ -496,24 +473,32 @@ attacks which, being symbols, do qualify as terms."
 	       signature
 	       initial-move))
 	     (signature
-	      (go initial-move))
+	      (go read-initial-formula))
 	     (initial-formula
 	      (msg "The given signature is empty, but a non-trivial formula was given.")
-	      (go signature-then-check-arguments)))
+	      (go signature-then-check-arguments))
+	     (t
+	      (go signature)))
      signature-then-check-arguments
        (msg "Please supply a signature in which the given formula~%~%  ~A~%~%is actually a formula." initial-formula)
        (setf signature (read-signature prompt))
        (go check-arguments)
      signature
-       (msg "Please supply a signature in which the sentences will be written.")
+       (msg "Please supply a signature in which the statements of the game will be written.")
        (setf signature (read-signature prompt))
        (go read-initial-formula)
      read-initial-formula
        (msg "Proponent starts by playing a composite formula.")
        (msg "Input a composite formula:")
        (format t "~A" prompt)
-       (setf dialogue (make-dialogue (read-composite-formula signature)
-				     signature))
+       (setf statement nil)
+       (until (composite-formula? statement signature)
+	 (restart-case (setf statement (read-composite-formula t signature))
+	   (try-another-formula (new-formula) 
+	     :report "Enter another formula"
+	     :interactive read-new-formula
+	     (setf statement new-formula))))
+       (setf dialogue (make-dialogue statement signature))
      initial-move
        (msg "Game on!")
        (incf turn-number)
@@ -681,7 +666,13 @@ attacks which, being symbols, do qualify as terms."
      formula-input
        (msg "Enter a formula:")
        (format t "~A" prompt)
-       (setf statement (read-formula (dialogue-signature dialogue)))
+       (setf statement nil)
+       (until (formula? statement signature)
+	 (restart-case (setf statement (read-formula t signature))
+	   (try-another-formula (new-formula) 
+	     :report "Enter a different formula."
+	     :interactive read-new-formula
+	     (setf statement new-formula))))
        (go evaluate-rules)
      term-input
        (msg "Enter a term:")
