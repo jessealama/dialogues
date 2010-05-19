@@ -75,7 +75,7 @@
 (defmethod render ((self game-manipulator-component))
   ()
   (<:p "Here's the game:" (<:br)
-       (<:as-html (format nil "~A" (game self)))))
+       (<:as-html (format nil "~A" (game self)))
 
 (defmethod render ((self initial-formula-window))
   (let (input-formula selected-formula)
