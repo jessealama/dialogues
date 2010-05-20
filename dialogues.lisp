@@ -22,10 +22,12 @@
   (make-move player statement 'd reference))
 
 (defun proponent-move? (move)
-  (eq (move-player move) 'p))
+  (let ((player (move-player move)))
+    (string= player "P")))
 
 (defun opponent-move? (move)
-  (eq (move-player move) 'o))
+  (let ((player (move-player move)))
+    (string= player "O")))
 
 (defclass move ()
   ((player :initarg :player
@@ -432,12 +434,12 @@ attacks which, being symbols, do qualify as terms."
 		  result)))))))
 
 (defun proponent-wins? (dialogue rules)
-  (and (eq (last-player dialogue) 'p)
+  (and (proponent-move? (last-player dialogue))
        (null (next-moves dialogue rules 'o 'a))
        (null (next-moves dialogue rules 'o 'd))))
 
 (defun opponent-wins? (dialogue rules)
-  (and (eq (last-player dialogue) 'o)
+  (and (opponent-move? (last-player dialogue))
        (null (next-moves dialogue rules 'p 'a))
        (null (next-moves dialogue rules 'p 'd))))
 

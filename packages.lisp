@@ -2,7 +2,7 @@
 (in-package :cl-user)
 
 (defpackage :dialogues
-  (:use :cl)
+  (:use :cl :ucw :ucw-core)
   (:export ; utils
            #:EMPTY-STRING? ; funny: this has nothing to do with dialogues
 
@@ -11,6 +11,21 @@
 	   #:MAKE-MOVE
 	   #:DIALOGUE-PLAYS
 	   #:EXTEND-DIALOGUE
+	   #:ADD-MOVE-TO-DIALOGUE
+	   #:EVALUATE-ALL-RULES
+	   #:DIALOGUE-LENGTH
+	   #:PARSE-FORMULA
+
+	   ;; conditions
+	   #:MALFORMED-FORMULA-ERROR
+	   #:MALFORMED-FORMULA-ERROR-TEXT
+	   #:MALFORMED-FORMULA-ERROR-SIGNATURE
+	   #:NON-ATOMIC-FORMULA-ERROR
+	   #:NON-ATOMIC-FORMULA-ERROR-TEXT
+	   #:NON-ATOMIC-FORMULA-ERROR-SIGNATURE
+
+	   ; rule sets
+	   #:D-DIALOGUE-RULES
 	   
 	   ;; slots
 
@@ -23,6 +38,7 @@
 	   ; dialogue class
 	   #:SIGNATURE
 	   #:PLAYS
+	   #:DIALOGUE-SIGNATURE
 	   
 	   ; named formulas
 	   #:PEIRCE-FORMULA

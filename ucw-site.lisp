@@ -1,6 +1,6 @@
 ;;; ucw-site.lisp A UCW-based dialogue site
 
-(in-package :dialogue-site)
+(in-package :dialogues)
 
 ;; Boring server configuration
 
@@ -59,6 +59,50 @@
     ("W formula" "w-formulas" ,w-formula)
     ("Scott's formula" "scott-formula" ,scott-formula)
     ("Smetanich's formula" "smetanich-formula" ,smetanich-formula)))
+
+(defcomponent number-corrector (standard-window-component)
+  ((num :initarg :number
+	:accessor number-corrector-num)))
+
+(defmethod render ((self number-corrector))
+  (let (input-number) ;; annoying that I have to lexically bind this 
+    (symbol-macrolet (($take-action (let ((parsed-number (parse-integer input-number :junk-allowed t)))
+				      (if (null parsed-number)
+					  (answer (call 'number-corrector :number input-number))
+					  (answer parsed-number)))))
+      
+      (<:h1 "Invalid number supplied")
+      (<:p "We are unable to make sense of the number, \"" (<:as-html (number-corrector-num self)) "\"that you supplied.  Please try again.")
+      (<ucw:form :method "POST"
+		 :action $take-action
+      (<:label :for "number-input" "Enter a non-negative integer")
+      (<ucw:input :type "text"
+		  :id "number-input"
+		  :accessor input-number)
+      (<ucw:submit :value "Use this number"
+		   :action $take-action)))))
+
+(defcomponent formula-corrector (standard-window-component)
+  ((text :initarg :text :accessor formula-corrector-text)
+   (signature :initarg :signature :accessor formula-corrector-signature)))
+
+(defmethod render ((self formula-corrector))
+  (let (input-formula)
+    (symbol-macrolet (($take-action (handler-case (answer (parse-formula input-formula))
+				      (malformed-formula-error () (call 'formula-corrector input-formula)))))
+      (<:h1 "Invalid number supplied")
+      (<:p "We are unable to make sense of the formula, \"" (<:as-html (formula-corrector-text self)) "\"that you supplied.  The signature with respect to which you should enter a formula is:")
+      (<:blockquote
+       (<:as-html (formula-corrector-signature self)))
+      (<:p "Please try again.")
+      (<ucw:form :method "POST"
+	       :action $take-action
+        (<:label :for "formula-input" "Enter a formula in the above signature.")
+	(<ucw:input :type "text"
+		    :id "formula-input"
+		    :accessor input-formula)
+	(<ucw:submit :value "Use this formula"
+		     :action $take-action)))))
 
 (defcomponent game-viewer (standard-window-component)
   ((player :accessor player
@@ -119,81 +163,122 @@
 (defmethod render ((self game-viewer))
   (with-slots (player statement stance reference game)
       self
-    (if (and player statement stance reference)
-	(progn
-	  (<:h1 "Thanks for filling out the form.  I will consider what you said.")
-	  (<:p "Here's what you gave me:")
-	  (<:ul
-	   (<:li "Player: " (<:as-html player))
-	   (<:li "Statement: " (<:as-html statement))
-	   (<:li "Stance: " (<:as-html stance))
-	   (<:li "Reference: " (<:as-html reference))))
-	(let (attack-option defend-option
-	      proponent-option opponent-option
-	      input-reference input-statement)
-	  (symbol-macrolet (($take-action (call 'game-viewer
-						:player (or player
-							    (cond (proponent-option 'p)
-								  (opponent-option 'o)
-								  (t nil)))
-						:statement (or statement
-							       input-statement)
-						:stance (or stance
-							    (if attack-option 'a 
-								(when defend-option
-								  'd)))
-						:reference (or reference
-							       input-reference)
-						:game game)))
-	    (<:h1 "The game so far")
-	    (<:div :style "frame-border:1px;"
-	      (pretty-print-game game))
-	    (<ucw:form :method "POST"
-		       :action $take-action
-	    (cond ((not stance)
-		   (<:p "Enter A or D to attack or defend.")
-		   (<:label :for "attack-option" "Attack")
-		   (<:label :for "defend-option" "Defend")
-		   (<ucw:input :type "radio"
-			       :accessor attack-option
-			       :id "attack-option"
-			       :value "Attack")
-		   (<ucw:input :type "radio"
-			       :accessor defend-option
-			       :id "defend-option"
-			       :value "Defend")
-		   (<ucw:submit :value "Make a move"
-				:action $take-action))
-		  ((not player)
-		   (<:p "Which player will move?")
-		   (<:label :for "proponent-option" "Proponent")
-		   (<:label :for "opponent-option" "Opponent")
-		   (<ucw:input :type "radio"
-			       :accessor proponent-option
-			       :id "proponent-action"
-			       :value "Proponent")
-		   (<ucw:input :type "radio"
-			       :accessor opponent-option
-			       :id "opponent-action"
-			       :value "Opponent")
-		   (<ucw:submit :value "Choose sides"
-				:action $take-action))
-		  ((not reference)
-		   (if attack-option
-		       (<:p "Which statement do you want to attack?")
-		       (<:p "Against which attack do you want to defend?"))
-		   (<ucw:input :type "text"
-			       :accessor input-reference)
-		   (<ucw:submit :value "This is my choice"
-				:action $take-action))
-		(t ;; we have to get a statement
-		 (if attack-option
-		     (<:p "How do you want to attack?")
-		     (<:p "How do you want to defend?"))
-		 (<ucw:input :type "text"
-			     :accessor input-statement)
-		 (<ucw:submit :value "This is my claim"
-			      :action $take-action)))))))))
+    (when (and player statement stance reference)
+      (multiple-value-bind (rules-result messages)
+	  (evaluate-all-rules d-dialogue-rules 
+			      game 
+			      player 
+			      (dialogue-length game)
+			      statement 
+			      stance
+			      reference)
+	(if rules-result
+	    (progn
+	      (add-move-to-dialogue (game self)
+				    (make-move player
+					       statement
+					       stance
+					       reference))
+	      (setf (player self) nil
+		    (statement self) nil
+		    (stance self) nil
+		    (reference self) nil))
+	    (progn
+	      (<:h1 "Problem!")
+	      (<:p "The game at this point:")
+	      (<:p
+	       (pretty-print-game game))
+	      (<:p "The length of the game is " (<:as-html (dialogue-length game)))
+	      (<:p "Your proposed move:")
+	      (<:ul
+	       (<:li "Player: " (<:as-html player))
+	       (<:li "Statement: " (<:as-html statement))
+	       (<:li "Stance: " (<:as-html stance))
+	       (<:li "Reference: " (<:as-html reference)))
+	      (<:p "At least one of the dialogue rules is violated by your proposed move:")
+	      (<:ul
+	       (dolist (message messages)
+		 (<:li (<:as-html message))))
+	      (<ucw:form :method "POST"
+			 :action (call 'game-viewer :game game)
+	        (<ucw:submit :value "Edit this move"
+			     :action (call 'game-viewer :game game)))))))
+    (let (attack-option defend-option
+	  proponent-option opponent-option
+	  input-reference input-statement)
+      (symbol-macrolet (($take-action (progn
+					(if input-statement
+					    (handler-case (setf statement (parse-formula input-statement))
+					      (malformed-formula-error () (setf statement
+										(call 'formula-corrector
+										      :text input-statement
+										      :signature (dialogue-signature game)))))
+					    
+					    (if input-reference
+						(let ((parsed-integer (parse-integer input-reference :junk-allowed t)))
+						  (if (null parsed-integer)
+						      (setf reference (call 'number-corrector :number input-reference))
+						      (setf reference parsed-integer)))))
+					(call 'game-viewer
+					      :player (or player
+							  (cond (proponent-option 'p)
+								(opponent-option 'o)
+								(t nil)))
+					      :statement (or statement
+							     input-statement)
+					      :stance (or stance
+							  (if attack-option 'a 
+							      (when defend-option
+								'd)))
+					      :reference (or reference
+							     input-reference)
+					      :game game))))
+	(<:h1 "The game so far")
+	(<:div :style "frame-border:1px;"
+	       (pretty-print-game game))
+	(<ucw:form :method "POST"
+		   :action $take-action
+		   (cond ((not stance)
+			  (<:p "Enter A or D to attack or defend.")
+			  (<:label :for "attack-option" "Attack")
+			  (<:label :for "defend-option" "Defend")
+			  (<ucw:input :type "radio"
+				      :accessor attack-option
+				      :id "attack-option"
+				      :value "Attack")
+			  (<ucw:input :type "radio"
+				      :accessor defend-option
+				      :id "defend-option"
+				      :value "Defend")
+			  (<ucw:submit :value "Make a move"
+				       :action $take-action))
+			 ((not player)
+			  (<:p "Which player will move?")
+			  (<:label :for "proponent-option" "Proponent")
+			  (<:label :for "opponent-option" "Opponent")
+			  (<ucw:input :type "radio"
+				      :accessor proponent-option
+				      :id "proponent-action"
+				      :value "Proponent")
+			  (<ucw:input :type "radio"
+				      :accessor opponent-option
+				      :id "opponent-action"
+				      :value "Opponent")
+			  (<ucw:submit :value "Choose sides"
+				       :action $take-action))
+			 ((not reference)
+			  (<:p "To which statement do you want to respond?")
+			  (<ucw:input :type "text"
+				      :accessor input-reference)
+			  (<ucw:submit :value "This is my choice"
+				       :action $take-action))
+			 (t ;; we have to get a statement
+			  (<:label :for "input-statement" "Enter your assertion")
+			  (<ucw:input :type "text"
+				      :id "input-statement"
+				      :accessor input-statement)
+			  (<ucw:submit :value "This is my claim"
+				       :action $take-action))))))))
 
 ;; I'm confused about what to do here.  I want the user to indicate,
 ;; first of all, whether they should attack or defend something.  I
@@ -202,24 +287,20 @@
 ;; same component that displays the game?  Do I need to define a
 ;; new entry point?
 
-(defaction start-game ((self game-component) initial-formula)
-  (let ((new-game (make-dialogue initial-formula pqrs-signature)))
-    (setf (game game-component) new-game))
-  (answer))
-
 (defun pretty-print-game (game)
   (<:table
    (loop with plays = (dialogue-plays game)
       with len = (length plays)
       for play in plays
-      for i from 1 upto len
+      for i from 0 upto len
       do
 	(with-slots (player statement stance reference)
 	    play
 	  (<:tr 
+	   (<:td (<:as-html i))
 	   (<:td (<:as-html player))
 	   (<:td (<:as-html statement))
-	   (if (= i 1)
+	   (if (= i 0)
 	       (<:td)
 	       (<:td "[" (<:as-html stance) "," (<:as-html reference) "]")))))))
 
