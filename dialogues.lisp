@@ -2,17 +2,9 @@
 
 (in-package :dialogues)
 
-(defun print-move (move stream depth)
-  (declare (ignore depth))
-  (let ((stance (move-stance move))
-	(ref (move-reference move))
-	(statement (move-statement move)))
-    (if (and stance ref) ; a non-initial move
-	(format stream "[~A,~A] ~A" stance ref statement)
-	(format stream "~A (initial move)" statement))))
-
 (defun make-move (player statement stance reference)
-  (make-move-int :player player
+  (make-instance 'move
+		 :player player
 		 :statement statement
 		 :stance stance
 		 :reference reference))
@@ -35,13 +27,22 @@
 (defun opponent-move? (move)
   (eq (move-player move) 'o))
 
-(defstruct (move
-	     (:print-function print-move)
-	     (:constructor make-move-int))
-  player
-  statement
-  stance
-  reference)
+(defclass move ()
+  ((player :initarg :player
+	   :accessor move-player)
+   (statement :initarg :statement
+	      :accessor move-statement)
+   (stance :initarg :stance
+	   :accessor move-stance)
+   (reference :initarg :reference
+	      :accessor move-reference)))
+
+(defun pretty-print-move (move stream)
+  (with-slots (stance reference statement)
+      move
+    (if (and stance reference) ; a non-initial move
+	(format stream "[~A,~A] ~A" stance reference statement)
+	(format stream "~A (initial move)" statement))))
 
 (defun equal-moves? (move-1 move-2 signature)
   (and (eq (move-player move-1) (move-player move-2))
@@ -65,61 +66,14 @@
   (and (null (move-stance move))
        (null (move-reference move))))
 
-(defun print-initial-move (dialogue stream)
-  (let ((first-move (first (dialogue-plays dialogue)))
-	 (num-moves (dialogue-length dialogue)))
-    (if (= num-moves 1)
-	(format stream "0 ~A ~A" (move-player first-move)
-		                 (move-statement first-move))
-	(let* ((num-digits (ceiling (log num-moves 10)))
-	       (padding (make-string (+ 5 num-digits) :initial-element #\Space)))
-	  (format stream (concatenate 'string "0 ~A " padding "~A~%")
-		         (move-player first-move)
-		         (move-statement first-move))))))
-
-(defun print-move-at-position (position move stream)
-  (let ((statement (move-statement move))
-	(stance (move-stance move))
-	(ref-index (move-reference move)))
-    (if (evenp position)
-	(format stream "~A P [~A,~A] ~A" position
-		                         stance
-					 ref-index
-					 statement)
-	(format stream "~A O [~A,~A] ~A" position 
-	                                 stance
-					 ref-index
-					 statement))))
-
-(defun print-dialogue (dialogue stream depth)
-  (declare (ignore depth))
-  (let ((plays (dialogue-plays dialogue)))
-    (cond ((null plays) (format stream ""))
-	  (t 
-	   (print-initial-move dialogue stream)
-	   (when (cdr plays)
-	     (do ((i 1 (1+ i))
-		  (moves (cddr plays) (cdr moves))
-		  (move (second plays) (car moves)))
-		 ((null moves) (print-move-at-position i move stream))
-	       (print-move-at-position i move stream)
-	       (format stream "~%")))))))
-
 (defun msg-dialogue-so-far (dialogue)
   (msg "The dialogue so far looks like this:")
   (msg "~A" dialogue))
 
-(defun make-dialogue (initial-statement signature)
-  (if (formula? initial-statement signature)
-      (let ((first-move (make-proponent-move initial-statement nil nil)))
-	(make-dialogue-int :plays (list first-move)
-			   :signature signature))
-      (error "The given formula~%~%  ~A~%~%is not a formula according to the given signature~%~%  ~A~%" initial-statement signature)))
-
 (defun truncate-dialogue (dialogue cutoff)
-  (make-dialogue-int :signature (dialogue-signature dialogue)
-		     :plays (subseq (dialogue-plays dialogue)
-				    0 cutoff)))
+  (make-instance 'dialogue
+		 :signature (dialogue-signature dialogue)
+		 :plays (subseq (dialogue-plays dialogue) 0 cutoff)))
 
 (defvar *prompt* "> ")
 
@@ -162,11 +116,57 @@ attacks which, being symbols, do qualify as terms."
 ;;; Dialogues
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
-(defstruct (dialogue
-	     (:print-function print-dialogue)
-	     (:constructor make-dialogue-int))
-  (signature nil :type signature)
-  (plays nil :type list))
+(defclass dialogue ()
+  ((signature :accessor dialogue-signature
+	      :initform nil
+	      :initarg :signature)
+   (plays :accessor dialogue-plays 
+	  :initform nil
+	  :initarg :plays)))
+
+(defun make-dialogue (formula signature)
+  (make-instance 'dialogue
+		 :signature signature
+		 :plays (list (make-move 'p formula nil nil))))
+
+(defun print-initial-move (dialogue stream)
+  (let ((first-move (first (dialogue-plays dialogue)))
+	 (num-moves (dialogue-length dialogue)))
+    (if (= num-moves 1)
+	(format stream "0 ~A ~A" (move-player first-move)
+		                 (move-statement first-move))
+	(let* ((num-digits (ceiling (log num-moves 10)))
+	       (padding (make-string (+ 5 num-digits) :initial-element #\Space)))
+	  (format stream (concatenate 'string "0 ~A " padding "~A~%")
+		         (move-player first-move)
+		         (move-statement first-move))))))
+
+(defun print-move-at-position (position move stream)
+  (let ((statement (move-statement move))
+	(stance (move-stance move))
+	(ref-index (move-reference move)))
+    (if (evenp position)
+	(format stream "~A P [~A,~A] ~A" position
+		                         stance
+					 ref-index
+					 statement)
+	(format stream "~A O [~A,~A] ~A" position 
+	                                 stance
+					 ref-index
+					 statement))))
+
+(defun pretty-print-dialogue (dialogue stream)
+  (let ((plays (dialogue-plays dialogue)))
+    (cond ((null plays) (format stream ""))
+	  (t 
+	   (print-initial-move dialogue stream)
+	   (when (cdr plays)
+	     (do ((i 1 (1+ i))
+		  (moves (cddr plays) (cdr moves))
+		  (move (second plays) (car moves)))
+		 ((null moves) (print-move-at-position i move stream))
+	       (print-move-at-position i move stream)
+	       (format stream "~%")))))))
 
 (defun dialogue-length (dialogue)
   (length (dialogue-plays dialogue)))
@@ -180,6 +180,11 @@ attacks which, being symbols, do qualify as terms."
   (add-move-to-dialogue dialogue
 			(make-move player statement stance reference))
   dialogue)
+
+(defun copy-dialogue (dialogue)
+  (make-instance 'dialogue
+		 :signature (dialogue-signature dialogue)
+		 :plays (copy-list (dialogue-plays dialogue))))
 
 (defun freshly-extend-dialogue (dialogue player stance statement reference)
   (let ((copy (copy-dialogue dialogue)))
