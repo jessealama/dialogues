@@ -55,7 +55,8 @@
   (some #'(lambda (symbol-and-arity)
 	    (let ((symbol (car symbol-and-arity))
 		  (num-args (cdr symbol-and-arity)))
-	      (when (eq symbol relation-symbol)
+	      (when (string= (symbol-name symbol)
+			     (symbol-name relation-symbol))
 		(= arity num-args))))
 	(signature-predicates signature)))
 
@@ -264,7 +265,9 @@
 (defun negation? (formula)
   (when formula
     (when (listp formula)
-      (eq (car formula) 'not))))
+      (let ((s (car formula)))
+	(and (symbolp s)
+	     (string= s "NOT"))))))
 
 (defun unnegate (negation)
   (second negation))
@@ -275,7 +278,9 @@
 (defun implication? (formula)
   (when formula
     (when (listp formula)
-      (eq (car formula) 'implies))))
+      (let ((s (car formula)))
+      (and (symbolp s)
+	   (string= (symbol-name s) "IMPLIES"))))))
 
 (defun antecedent (implication)
   (cadr implication))
@@ -289,7 +294,9 @@
 (defun equivalence? (formula)
   (when formula
     (when (listp formula)
-      (eq (car formula) 'iff))))
+      (let ((s (car formula)))
+	(and (symbolp s)
+	     (string= (symbol-name s) "IFF"))))))
 
 (defun lhs (equivalence)
   (second equivalence))
@@ -300,7 +307,9 @@
 (defun disjunction? (formula)
   (when formula
     (when (listp formula)
-      (eq (car formula) 'or))))
+      (let ((s (car formula)))
+	(and (symbolp s)
+	     (string= (symbol-name s) "OR"))))))
 
 (defun disjuncts (disjunction)
   (cdr disjunction))
@@ -317,7 +326,9 @@
 (defun conjunction? (formula)
   (when formula
     (when (listp formula)
-      (eq (car formula) 'and))))
+      (let ((s (car formula)))
+	(and (symbolp s)
+	     (string= (symbol-name s) "AND"))))))
 
 (defun conjuncts (conjunction)
   (cdr conjunction))
@@ -334,7 +345,9 @@
 (defun universal? (formula)
   (when formula
     (when (listp formula)
-      (eq (car formula) 'all))))
+      (let ((s (car formula)))
+	(and (symbolp s)
+	     (string= (symbol-name s) "ALL"))))))
 
 (defun make-universal (var formula)
   (list 'all var formula))
@@ -342,7 +355,9 @@
 (defun existential? (formula)
   (when formula
     (when (listp formula)
-      (eq (car formula) 'exists))))
+      (let ((s (car formula)))
+	(and (symbolp s)
+	     (string= (symbol-name s) "EXISTS"))))))
 
 (defun make-existential (var formula)
   (list 'exists var formula))
@@ -357,12 +372,13 @@
   (when x
     (if (symbolp x)
 	(predicate-of-arity signature x 0)
-	(let* ((pred (car x))
-	       (args (cdr x))
-	       (num-args (length args)))
-	  (and (predicate-of-arity signature pred num-args)
-	       (every #'(lambda (arg) (term? signature arg))
-		      args))))))
+	(when (listp x)
+	  (let* ((pred (car x))
+		 (args (cdr x))
+		 (num-args (length args)))
+	    (and (predicate-of-arity signature pred num-args)
+		 (every #'(lambda (arg) (term? signature arg))
+			args)))))))
 
 (defun formula? (x signature)
   (when x
