@@ -8,6 +8,22 @@
 
 	   #:PQRS-PROPOSITIONAL-SIGNATURE
 	   #:MAKE-DIALOGUE
+	   #:MAKE-MOVE
+	   #:DIALOGUE-PLAYS
+	   #:EXTEND-DIALOGUE
+	   
+	   ;; slots
+
+	   ; move class
+	   #:PLAYER
+	   #:STATEMENT
+	   #:STANCE
+	   #:REFERENCE
+
+	   ; dialogue class
+	   #:SIGNATURE
+	   #:PLAYS
+	   
 	   ; named formulas
 	   #:PEIRCE-FORMULA
 	   #:EXCLUDED-MIDDLE
