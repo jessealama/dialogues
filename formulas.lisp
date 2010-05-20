@@ -690,6 +690,10 @@ in TERM or FORMULA."
 	(error 'malformed-formula-error :text input
 	                                :signature signature))))
 
+(defun parse-formula (str &optional (signature pqrs-propositional-signature))
+  (with-input-from-string (s str)
+    (read-formula s signature)))
+
 (defun read-new-formula ()
   (format t "Enter a new formula: ")
   (multiple-value-list (read-formula)))
