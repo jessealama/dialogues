@@ -4,7 +4,7 @@
 ;;;; Author:  William Bruschi
 ;;;; Date:    02-14-2009
 ;;;;
-;;;; Starts Hunchentoot and Swank, then listens for a shutdown
+;;;; Starts the dialogue server and swank, then listens for a shutdown
 ;;;; command on the specified port.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
