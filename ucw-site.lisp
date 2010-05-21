@@ -11,7 +11,7 @@
   (make-backend
    :httpd
    :host "127.0.0.1"
-   :port dialogue-server-port))
+   :port *dialogue-server-port*))
 
 (defun make-dialogue-server ()
   (make-instance
