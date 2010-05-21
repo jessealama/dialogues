@@ -4,16 +4,16 @@
 
 ;; Boring server configuration
 
-(defun make-dialogue-backend ()
+(defun make-dialogue-backend (&optional (port 8080))
   (make-backend
    :httpd
-   :host "localhost"
-   :port 9090))
+   :host "0.0.0.0"
+   :port port))
 
-(defun make-dialogue-server ()
+(defun make-dialogue-server (&optional (port 8080))
   (make-instance
    'standard-server
-   :backend (make-dialogue-backend)))
+   :backend (make-dialogue-backend port)))
 
 (defvar *dialogue-server* (make-dialogue-server))
 
