@@ -11,7 +11,7 @@
 (require 'asdf)
 (require 'sb-bsd-sockets)
 
-(push "/home/jesse/src/dialogues" asdf:*central-registry*)
+(push "/home/jesse/src/dialogues/" asdf:*central-registry*)
 (asdf:oos 'asdf:load-op "dialogues")
 
 (in-package :dialogues)
