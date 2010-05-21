@@ -234,50 +234,56 @@
 							     input-reference)
 					      :game game))))
 	(<:h1 "The game so far")
-	(<:div :style "frame-border:1px;"
+	(<:div :style "border:1px solid"
 	       (pretty-print-game game))
 	(<ucw:form :method "POST"
 		   :action $take-action
-		   (cond ((not stance)
-			  (<:p "Enter A or D to attack or defend.")
-			  (<:label :for "attack-option" "Attack")
-			  (<:label :for "defend-option" "Defend")
-			  (<ucw:input :type "radio"
-				      :accessor attack-option
-				      :id "attack-option"
-				      :value "Attack")
-			  (<ucw:input :type "radio"
-				      :accessor defend-option
-				      :id "defend-option"
-				      :value "Defend")
-			  (<ucw:submit :value "Make a move"
-				       :action $take-action))
-			 ((not player)
+		   (cond ((not player)
 			  (<:p "Which player will move?")
-			  (<:label :for "proponent-option" "Proponent")
-			  (<:label :for "opponent-option" "Opponent")
 			  (<ucw:input :type "radio"
 				      :accessor proponent-option
 				      :id "proponent-action"
-				      :value "Proponent")
+				      :name "propnent-or-opponent")
+			  (<:label :for "proponent-option" "Proponent")
 			  (<ucw:input :type "radio"
 				      :accessor opponent-option
 				      :id "opponent-action"
-				      :value "Opponent")
+				      :name "proponent-or-opponent")
+			  (<:label :for "opponent-option" "Opponent")
+			  (<:br)
 			  (<ucw:submit :value "Choose sides"
 				       :action $take-action))
+			 ((not stance)
+			  (<:p "Choose whether to attack or defend.")
+			  (<ucw:input :type "radio"
+				      :accessor attack-option
+				      :id "attack-option"
+				      :name "attack-or-defend")
+			  (<:label :for "attack-option" "Attack")
+			  (<ucw:input :type "radio"
+				      :accessor defend-option
+				      :id "defend-option"
+				      :name "attack-or-defend")
+			  (<:label :for "defend-option" "Defend")
+			  (<:br)
+			  (<ucw:submit :value "Make a move"
+				       :action $take-action))
+
 			 ((not reference)
-			  (<:p "To which statement do you want to respond?")
+			  (<:p "To which statement do you want to respond? (Your answer should be a non-negative integer.)")
 			  (<ucw:input :type "text"
+				      :id "input-reference"
 				      :accessor input-reference)
-			  (<ucw:submit :value "This is my choice"
+			  (<:br)
+			  (<ucw:submit :value "Respond"
 				       :action $take-action))
 			 (t ;; we have to get a statement
-			  (<:label :for "input-statement" "Enter your assertion")
+			  (<:p "What do you want to assert? ")
 			  (<ucw:input :type "text"
 				      :id "input-statement"
 				      :accessor input-statement)
-			  (<ucw:submit :value "This is my claim"
+			  (<:br)
+			  (<ucw:submit :value "Make a claim"
 				       :action $take-action))))))))
 
 ;; I'm confused about what to do here.  I want the user to indicate,
