@@ -4,7 +4,8 @@
 
 ;; Server configuration
 
-(defparameter *dialogue-server-port* 8000)
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defparameter *dialogue-server-port* 8000))
 
 (defun make-dialogue-backend ()
   (make-backend
