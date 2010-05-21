@@ -2,27 +2,6 @@
 
 (in-package :dialogues)
 
-;; Boring server configuration
-
-(defun make-dialogue-backend (&optional (port 8080))
-  (make-backend
-   :httpd
-   :host "0.0.0.0"
-   :port port))
-
-(defun make-dialogue-server (&optional (port 8080))
-  (make-instance
-   'standard-server
-   :backend (make-dialogue-backend port)))
-
-(defvar *dialogue-server* (make-dialogue-server))
-
-(defun startup-dialogue-server ()
-  (startup-server *dialogue-server*))
-
-(defun shutdown-dialogue-server ()
- (shutdown-server *dialogue-server*))
-
 ;;;; The definiton of the dialogue
 
 (defclass dialogue-application (standard-application cookie-session-application-mixin)
