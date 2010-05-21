@@ -53,4 +53,7 @@
 	   #:W-FORMULA
 	   #:WEAK-EXCLUDED-MIDDLE
 	   #:SCOTT-FORMULA
-	   #:SMETANICH-FORMULA))
+	   #:SMETANICH-FORMULA
+
+	   ;; server configuration
+	   #:*DIALOGUE-SERVER-PORT*))

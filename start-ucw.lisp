@@ -24,7 +24,7 @@
 ;;; Start the hunchentoot server
 
 (startup-dialogue-server)
-(princ "Dialogue server started on port ") (princ *hunchentoot-port*) (terpri)
+(princ "Dialogue server started on port ") (princ *dialogue-server-port*) (terpri)
 
 ;;; Start swank
 (load *swank-loader*)
