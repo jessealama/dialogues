@@ -17,27 +17,6 @@
 
 (in-package :dialogues)
 
-(defparameter *dialogue-server-port* 8000)
-
-(defun make-dialogue-backend ()
-  (make-backend
-   :httpd
-   :host "127.0.0.1"
-   :port dialogue-server-port))
-
-(defun make-dialogue-server ()
-  (make-instance
-   'standard-server
-   :backend (make-dialogue-backend)))
-
-(defvar *dialogue-server* (make-dialogue-server))
-
-(defun startup-dialogue-server ()
-  (startup-server *dialogue-server*))
-
-(defun shutdown-dialogue-server ()
- (shutdown-server *dialogue-server*))
-
 (defparameter *shutdown-port* 6440)
 (defparameter *swank-loader* "/home/jesse/src/clbuild/source/slime/swank-loader.lisp")
 (defparameter *swank-port* 4006)
