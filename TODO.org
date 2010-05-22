@@ -30,3 +30,4 @@
 * DONE Permit editing of the signature
   CLOSED: [2010-05-22 Sat 19:14]
   At least before the game has begun.
+* TODO Permit deleting entries from the signature
