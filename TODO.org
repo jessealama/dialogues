@@ -23,4 +23,8 @@
   What's a reference? http://en.wikipedia.org/wiki/Semantic_tableaux
   
 * DONE An ASDF system definition
-* TODO Bug: if a number is given when a formula is requested, the program dies
+* DONE Bug: if a number is given when a formula is requested, the program dies
+  CLOSED: [2010-05-22 Sat 16:21]
+* IN-PROGRESS Show the signature being used
+* TODO Permit editing of the signature
+  At least before the game has begun.
