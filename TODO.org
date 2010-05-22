@@ -25,6 +25,8 @@
 * DONE An ASDF system definition
 * DONE Bug: if a number is given when a formula is requested, the program dies
   CLOSED: [2010-05-22 Sat 16:21]
-* IN-PROGRESS Show the signature being used
-* TODO Permit editing of the signature
+* DONE Show the signature being used
+  CLOSED: [2010-05-22 Sat 19:14]
+* DONE Permit editing of the signature
+  CLOSED: [2010-05-22 Sat 19:14]
   At least before the game has begun.

@@ -38,12 +38,247 @@
 
 (register-application *dialogue-server* *dialogue-application*)
 
+;; adding functions
+
+(defcomponent add-a-function (standard-window-component)
+  ((signature :initarg :signature :accessor signature)
+   (proposed-name :initarg :name :accessor proposed-name :initform nil)
+   (proposed-arity :initarg :arity :accessor proposed-arity :initform nil)))
+
+(defmethod render ((self add-a-function))
+  (symbol-macrolet (($do-over (answer (call 'add-a-function :signature (signature self)
+					                    :arity input-function-arity
+							    :name input-function-name)))
+		    ($take-action (if input-function-name
+				      (if (empty-string? input-function-name)
+					  $do-over
+					  (if (contains-whitespace? input-function-name)
+					      $do-over
+					      (let ((input-function-as-symbol (make-symbol input-function-name)))
+						(if (function? (signature self) input-function-as-symbol)
+						    $do-over
+						    (let ((parsed-arity (parse-integer input-function-arity :junk-allowed t)))
+						      (if (null parsed-arity)
+							  $do-over
+							  (if (plusp parsed-arity)
+							      (answer (progn
+									(add-function (signature self) input-function-as-symbol parsed-arity)
+									(signature self)))
+							      $do-over)))))))
+				      $do-over)))
+    (let ((new-name (proposed-name self))
+	  (new-arity (proposed-arity self))
+	  (sig (signature self))
+	  input-function-arity input-function-name)
+      (<:p "The current signature is:")
+      (<:blockquote
+       (<:as-html sig))
+      (<:p "The new function name should be different from the names of all currently existing functions, constants, and predicates.  It should be different from the empty string and should not contain any whitespace characters.")
+  (if (and new-name
+	   (not (empty-string? new-name)))
+      (if (contains-whitespace? new-name)
+	  (progn
+	    (<:p "The function name that you gave previously, ")
+	    (<:blockquote
+	     (<:as-html new-name) ",")
+	    (<:p "contains a whitespace character and is unacceptable.  Please try again."))
+	  (let ((input-function-as-symbol (make-symbol new-name)))
+	    (if (function? sig input-function-as-symbol)
+		(progn
+		  (<:p "The function name that you gave previously, ")
+		  (<:blockquote
+		   (<:as-html new-name) ",")
+		  (<:p "is already defined in the given signature and cannot be overwritten.  Please try again."))))))
+  (if new-arity
+      (let ((parsed-arity (parse-integer new-arity :junk-allowed t)))
+	(if (null parsed-arity)
+	    (progn
+	      (<:p "The arity")
+	      (<:blockquote
+	       (<:as-html new-arity))
+	      (<:p "that you specified for the new function " (<:as-html new-name) " could not be understood as a number.  Please try again."))
+	    (unless (plusp parsed-arity)
+	      (<:p "The arity")
+	      (<:blockquote
+	       (<:as-html new-arity))
+	      (<:p "that you specified for the new function " (<:as-html new-name) " is not a positive integer.  Please try again.")))))
+  (<ucw:form :method "POST"
+	     :action $take-action
+    (<:label :for "new-function-name" "New function name")
+    (<ucw:input :type "text"
+		:id "new-function-name"
+		:accessor input-function-name)
+    (<:br)
+    (<:label :for "new-function-arity" "New function arity")
+    (<ucw:input :type "text"
+		:id "new-function-arity"
+		:accessor input-function-arity)
+    (<:br)
+    (<ucw:submit :value "Add this function"
+		 :action $take-action)))))
+
+;; adding a predicate
+
+(defcomponent add-a-predicate (standard-window-component)
+  ((signature :initarg :signature :accessor signature)
+   (proposed-name :initarg :name :accessor proposed-name :initform nil)
+   (proposed-arity :initarg :arity :accessor proposed-arity :initform nil)))
+
+(defmethod render ((self add-a-predicate))
+  (symbol-macrolet (($do-over (answer (call 'add-a-predicate :signature (signature self)
+					                    :arity input-predicate-arity
+							    :name input-predicate-name)))
+		    ($take-action (if input-predicate-name
+				      (if (empty-string? input-predicate-name)
+					  $do-over
+					  (if (contains-whitespace? input-predicate-name)
+					      $do-over
+					      (let ((input-predicate-as-symbol (make-symbol input-predicate-name)))
+						(if (predicate? (signature self) input-predicate-as-symbol)
+						    $do-over
+						    (let ((parsed-arity (parse-integer input-predicate-arity :junk-allowed t)))
+						      (if (null parsed-arity)
+							  $do-over
+							  (if (plusp parsed-arity)
+							      (answer (progn
+									(add-predicate (signature self) input-predicate-as-symbol parsed-arity)
+									(signature self)))
+							      $do-over)))))))
+				      $do-over)))
+    (let ((new-name (proposed-name self))
+	  (new-arity (proposed-arity self))
+	  (sig (signature self))
+	  input-predicate-arity input-predicate-name)
+      (<:p "The current signature is:")
+      (<:blockquote
+       (<:as-html sig))
+      (<:p "The new predicate name should be different from the names of all currently existing predicates, constants, and predicates.  It should be different from the empty string and should not contain any whitespace characters.")
+  (if (and new-name
+	   (not (empty-string? new-name)))
+      (if (contains-whitespace? new-name)
+	  (progn
+	    (<:p "The predicate name that you gave previously, ")
+	    (<:blockquote
+	     (<:as-html new-name) ",")
+	    (<:p "contains a whitespace character and is unacceptable.  Please try again."))
+	  (let ((input-predicate-as-symbol (make-symbol new-name)))
+	    (if (predicate? sig input-predicate-as-symbol)
+		(progn
+		  (<:p "The predicate name that you gave previously, ")
+		  (<:blockquote
+		   (<:as-html new-name) ",")
+		  (<:p "is already defined in the given signature and cannot be overwritten.  Please try again."))))))
+  (if new-arity
+      (let ((parsed-arity (parse-integer new-arity :junk-allowed t)))
+	(if (null parsed-arity)
+	    (progn
+	      (<:p "The arity")
+	      (<:blockquote
+	       (<:as-html new-arity))
+	      (<:p "that you specified for the new predicate " (<:as-html new-name) " could not be understood as a number.  Please try again."))
+	    (unless (plusp parsed-arity)
+	      (<:p "The arity")
+	      (<:blockquote
+	       (<:as-html new-arity))
+	      (<:p "that you specified for the new predicate " (<:as-html new-name) " is not a positive integer.  Please try again.")))))
+  (<ucw:form :method "POST"
+	     :action $take-action
+    (<:label :for "new-predicate-name" "New predicate name")
+    (<ucw:input :type "text"
+		:id "new-predicate-name"
+		:accessor input-predicate-name)
+    (<:br)
+    (<:label :for "new-predicate-arity" "New predicate arity")
+    (<ucw:input :type "text"
+		:id "new-predicate-arity"
+		:accessor input-predicate-arity)
+    (<:br)
+    (<ucw:submit :value "Add this predicate"
+		 :action $take-action)))))
+
+;; adding a constant
+
+(defcomponent add-a-constant (standard-window-component)
+  ((signature :initarg :signature :accessor signature)
+   (proposed-name :initarg :name :accessor proposed-name :initform nil)))
+
+(defmethod render ((self add-a-constant))
+  (symbol-macrolet (($do-over (answer (call 'add-a-constant :signature (signature self)
+							    :name input-constant-name)))
+		    ($take-action (if input-constant-name
+				      (if (empty-string? input-constant-name)
+					  $do-over
+					  (if (contains-whitespace? input-constant-name)
+					      $do-over
+					      (let ((input-constant-as-symbol (make-symbol input-constant-name)))
+						(if (constant? (signature self) input-constant-as-symbol)
+						    $do-over
+						    (answer (progn
+							      (add-constant (signature self) input-constant-as-symbol)
+							      (signature self)))))))
+				      $do-over)))
+    (let ((new-name (proposed-name self))
+	  (sig (signature self))
+	  input-constant-name)
+      (<:p "The current signature is:")
+      (<:blockquote
+       (<:as-html sig))
+      (<:p "The new constant name should be different from the names of all currently existing constants, constants, and predicates.  It should be different from the empty string and should not contain any whitespace characters.")
+  (if (and new-name
+	   (not (empty-string? new-name)))
+      (if (contains-whitespace? new-name)
+	  (progn
+	    (<:p "The constant name that you gave previously, ")
+	    (<:blockquote
+	     (<:as-html new-name) ",")
+	    (<:p "contains a whitespace character and is unacceptable.  Please try again."))
+	  (let ((input-constant-as-symbol (make-symbol new-name)))
+	    (if (constant? sig input-constant-as-symbol)
+		(progn
+		  (<:p "The constant name that you gave previously, ")
+		  (<:blockquote
+		   (<:as-html new-name) ",")
+		  (<:p "is already defined in the given signature and cannot be overwritten.  Please try again."))))))
+  (<ucw:form :method "POST"
+	     :action $take-action
+    (<:label :for "new-constant-name" "New constant name")
+    (<ucw:input :type "text"
+		:id "new-constant-name"
+		:accessor input-constant-name)
+    (<:br)
+    (<ucw:submit :value "Add this constant"
+		 :action $take-action)))))
+
+(defcomponent signature-editor (standard-window-component)
+  ((signature :initarg :signature
+	      :accessor signature)))
+
+(defmethod render ((self signature-editor))
+  (<:p "The signature that will be used during the game looks like this:")
+  (<:blockquote
+   (<:as-html (signature self)))
+  (<:p "You can " (<ucw:a :action (call 'add-a-function :signature (signature self)) "add a function") ", "
+       (<ucw:a :action (call 'add-a-constant :signature (signature self))  "add a constant") ", or "
+       (<ucw:a :action (call 'add-a-predicate :signature (signature self)) "add a predicate.")
+  (<:p
+   "When you're satisfisfied with the signature, you may "
+   (<ucw:a :action (answer (signature self))
+	   "proceed."))))
+
+(defcomponent signature-component ()
+  ((signature :initarg :signature
+	      :initform pqrs-propositional-signature
+	      :accessor signature)))
+
+(defmethod render ((self signature-component))
+  (<:as-html (format nil "~A" (signature self))))
+
 (defentry-point "" (:application *dialogue-application*)
     ()
-  (call 'initial-formula-window))
+  (call 'initial-formula-window :signature pqrs-propositional-signature))
 
 (defcomponent initial-formula-window (standard-window-component)
-  ()
+  ((signature :initarg :signature :accessor signature))
   (:default-initargs
       :title "the game is about to begin"
       :styesheet nil))
@@ -99,7 +334,7 @@
        (<:as-html (formula-corrector-signature self)))
       (<:p "Please try again.")
       (<ucw:form :method "POST"
-	       :action $take-action
+		 :action $take-action
         (<:label :for "formula-input" "Enter a formula in the above signature.")
 	(<ucw:input :type "text"
 		    :id "formula-input"
@@ -338,23 +573,31 @@
 								   markov-formula)
 							       pqrs-propositional-signature))))
       (<:h1 "It's your turn")
+      (<:p "To get started, enter a formula in the text box below or
+      choose a famous formula from the menu.  The signature in which
+      formulas are to be written is")
+      (<:blockquote
+       (<:as-html (signature self)))
+      (<:p "You can " (<ucw:a :action (call 'signature-editor :signature (signature self))
+			      (<:as-html "edit the signature"))
+	   " (you will come back here when you're done).")
       (<ucw:form :method "POST"
 		 :action $take-action
-      (<:p (<:label :for "input-formula" "Enter a formula in the text box")
-	   (<ucw:input :type "text" :accessor input-formula :id "input-formula")
-	   (<:label :for "selected-formula" "or select a famous formula from the menu")
-	   (<ucw:select :id "selected-formula" 
-			:size 1 
-			:accessor selected-formula
-	     (dolist (famous-formula famous-formulas)
-	       (destructuring-bind (long-name short-name formula)
-		   famous-formula
-		 (declare (ignore short-name))
-		 (<ucw:option :value formula (<:as-html long-name))))))
+       (<:label :for "input-formula" "Enter a formula")
+       (<ucw:input :type "text" :accessor input-formula :id "input-formula")
+       (<:label :for "selected-formula" "or select a famous formula from the menu")
+       (<ucw:select :id "selected-formula" 
+		    :size 1 
+		    :accessor selected-formula
+         (dolist (famous-formula famous-formulas)
+	   (destructuring-bind (long-name short-name formula)
+	       famous-formula
+	     (declare (ignore short-name))
+	     (<ucw:option :value formula (<:as-html long-name))))))
       (<:p
        (<:as-html "If the text box is not empty, its contents will be the initial formula.  If the text box is empty, then the selected \"famous formula\" will be used."))
       (<:p
        (<ucw:submit :action $take-action
-		    :value "Let's play"))))))
+		    :value "Let's play")))))
 
 ;;; ucw-site.lisp ends here
