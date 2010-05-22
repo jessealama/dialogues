@@ -188,4 +188,7 @@
   (when (stringp str)
     (string= str "")))
 
+(defun contains-whitespace? (str)
+  (cl-ppcre:scan "\\s" str))
+
 ;;; utils.lisp ends here
