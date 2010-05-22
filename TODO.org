@@ -1,4 +1,4 @@
-
+#+TODO: TODO IN-PROGRESS | DONE CANCELED
 * DONE Provide a "rewind" feature when playing dialogue games.
   CLOSED: [2010-02-18 Thu 15:55]
 * DONE Provide a breadth-first search procedure for enumerating dialogues.
