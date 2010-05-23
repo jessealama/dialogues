@@ -42,3 +42,5 @@
 
   (This is a pretty embarassing gap...)
 * TODO Show when one player wins or loses.
+* TODO Following the "Let's play" button does nothing.			:bug:
+  Uh, why?
