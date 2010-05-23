@@ -6,10 +6,24 @@
 ;;; Signatures
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defstruct signature
-  (constants nil :type list)
-  (predicates nil :type list)
-  (functions nil :type list))
+;; (defstruct signature
+;;   (constants nil :type list)
+;;   (predicates nil :type list)
+;;   (functions nil :type list))
+
+(defclass signature ()
+  ((constants :initarg :constants
+	      :initform nil
+	      :type list
+	      :accessor signature-constants)
+   (predicates :initarg :predicates
+	       :initform nil
+	       :type list
+	       :accessor signature-predicates)
+   (functions :initarg :functions
+	      :initform nil
+	      :type list
+	      :accessor signature-functions)))
 
 (defun equal-signatures? (signature-1 signature-2)
   (and (equal-sets? (signature-constants signature-1)
@@ -23,9 +37,10 @@
 		    :test #'equal)))
 
 (defun make-signature-with-equality (&key constants predicates functions)
-  (make-signature :constants constants
-		  :predicates (cons '= predicates)
-		  :functions functions))
+  (make-instance 'signature 
+		 :constants constants
+		 :predicates (cons '= predicates)
+		 :functions functions))
 
 (defun functions-of-arity (signature arity)
   (let (result)
@@ -170,19 +185,21 @@
        (msg "Returning to the first prompt...")
        (go start)
      end)
-    (make-signature :predicates predicates
-		    :functions functions
-		    :constants constants)))
+    (make-instance 'signature
+		   :predicates predicates
+		   :functions functions
+		   :constants constants)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Concrete signatures
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defparameter pqrs-propositional-signature
-  (make-signature :predicates '((p . 0)
-				(q . 0)
-				(r . 0)
-				(s . 0))))
+  (make-instance 'signature
+		 :predicates '((p . 0)
+			       (q . 0)
+			       (r . 0)
+			       (s . 0))))
 
 (defparameter unary-pqrs-signature-with-equality
   (make-signature-with-equality :predicates '((p . 1)
