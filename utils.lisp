@@ -191,4 +191,7 @@
 (defun contains-whitespace? (str)
   (cl-ppcre:scan "\\s" str))
 
+(defun symbolify (str &optional (package *package*))
+  (intern (string-upcase str) package))
+
 ;;; utils.lisp ends here
