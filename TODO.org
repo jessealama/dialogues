@@ -55,3 +55,9 @@
   I think I need to use PRINT-UNREADABLE-OBJECT.  It would help to improve on errors like this:
 
   "The given text, (IMPLIES (IMPLIES P Q) P), is not a formula according to the signature #<SIGNATURE {100322B7C1}>"
+* TODO Provide a way of going back to the beginning when an error is generated.
+  As it stands now, when an error is generated, UCW generates a page
+  that provides no way of going back, or restarting.  It would be nice
+  if there were at least some kind of way to restart the game.  Even
+  better would be a way to go back to the page/continuation state
+  where one was immediately before the error was generated.
