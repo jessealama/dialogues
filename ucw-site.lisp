@@ -324,12 +324,12 @@
     (render sig)
     (<:p "You can:")
     (<:ul
-     (<:li (<ucw:a :action (call 'add-a-function :signature sig) "add a function") ", ")
-     (<:li (<ucw:a :action (call 'delete-a-function :signature sig) "delete a function") ", ")
-     (<:li (<ucw:a :action (call 'add-a-constant :signature sig)  "add a constant") ", or ")
-     (<:li (<ucw:a :action (call 'delete-a-constant :signature sig)  "delete a constant") ", or ")
-     (<:li (<ucw:a :action (call 'add-a-predicate :signature sig) "add a predicate") ".")
-     (<:li (<ucw:a :action (call 'delete-a-predicate :signature sig) "delete a predicate") ", or "))
+     (<:li (<ucw:a :action (call 'add-a-function :signature sig) "add a function") ",")
+     (<:li (<ucw:a :action (call 'delete-a-function :signature sig) "delete a function") ",")
+     (<:li (<ucw:a :action (call 'add-a-constant :signature sig)  "add a constant") ",")
+     (<:li (<ucw:a :action (call 'delete-a-constant :signature sig)  "delete a constant") ",")
+     (<:li (<ucw:a :action (call 'add-a-predicate :signature sig) "add a predicate") ", or")
+     (<:li (<ucw:a :action (call 'delete-a-predicate :signature sig) "delete a predicate") "."))
     (<:p
      "When you're satisfisfied with the signature, you may "
      (<ucw:a :action (answer sig) "proceed."))))
