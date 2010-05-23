@@ -688,11 +688,11 @@
 	      (destructuring-bind (long-name short-name formula)
 		  famous-formula
 		(declare (ignore short-name))
-		(<ucw:option :value formula (<:as-html long-name))))))
-	(<:p
-	 (<:as-html "If the text box is not empty, its contents will be the initial formula.  If the text box is empty, then the selected \"famous formula\" will be used."))
-	(<:p
-	 (<ucw:submit :action $take-action
-		      :value "Let's play"))))))
+		(<ucw:option :value formula (<:as-html long-name)))))
+	  (<:p
+	   (<:as-html "If the text box is not empty, its contents will be the initial formula.  If the text box is empty, then the selected \"famous formula\" will be used."))
+	  (<:p
+	   (<ucw:submit :action $take-action
+			:value "Let's play")))))))
 
 ;;; ucw-site.lisp ends here
