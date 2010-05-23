@@ -675,7 +675,7 @@
       choose a famous formula from the menu.")
 	(<:p "Formulas are written in a signature, which, currently, is:")
 	(render sig)
-	(<:p "You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you edit the signature, you'll come back here when you're finished.)")
+	(<:p "You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)")
 	(<ucw:form :method "POST"
 		   :action $take-action
           (<:label :for "input-formula" "Enter a formula")
