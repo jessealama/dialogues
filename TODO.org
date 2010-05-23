@@ -49,3 +49,9 @@
   Thus, Peirce's formua is printed "IMPLIES (IMPLIES (IMPLIES P Q) P) P".
 * TODO Provide some kind method for checking whether the input formula is correct according to the signature
   Currently, the REPL is thrown into the debugger.  But the debug output should go to the web page.
+* TODO Make sure that page titles are generated
+  Currently, apparently none are generated.  I must be misusing UCW somehow.
+* TODO Make sure that signatures are printed in a coherent way.
+  I think I need to use PRINT-UNREADABLE-OBJECT.  It would help to improve on errors like this:
+
+  "The given text, (IMPLIES (IMPLIES P Q) P), is not a formula according to the signature #<SIGNATURE {100322B7C1}>"
