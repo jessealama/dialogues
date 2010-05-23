@@ -332,7 +332,7 @@
      (<:li (<ucw:a :action (call 'delete-a-predicate :signature sig) "delete a predicate") "."))
     (<:p
      "When you're satisfisfied with the signature, you may "
-     (<ucw:a :action (answer sig) "proceed."))))
+     (<ucw:a :action (answer sig) "proceed") " (you will return to wherever you were before you arrived here at the signature editor).")))
 
 (defmethod render ((self signature))
   (with-slots (constants functions predicates)
