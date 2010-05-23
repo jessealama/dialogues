@@ -32,7 +32,7 @@
   At least before the game has begun.
 * DONE Permit deleting entries from the signature
   CLOSED: [2010-05-23 Sun 21:22]
-* TODO Document the accepted syntax for inputting formulas.
+* IN-PROGRESS Document the accepted syntax for inputting formulas.
   It's lispy.
 * TODO Provide a way to list all available moves.
 * TODO Provide a way of quitting the game.
