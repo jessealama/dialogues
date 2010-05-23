@@ -6,11 +6,6 @@
 ;;; Signatures
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; (defstruct signature
-;;   (constants nil :type list)
-;;   (predicates nil :type list)
-;;   (functions nil :type list))
-
 (defclass signature ()
   ((constants :initarg :constants
 	      :initform nil
