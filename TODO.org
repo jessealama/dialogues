@@ -30,4 +30,5 @@
 * DONE Permit editing of the signature
   CLOSED: [2010-05-22 Sat 19:14]
   At least before the game has begun.
-* IN-PROGRESS Permit deleting entries from the signature
+* DONE Permit deleting entries from the signature
+  CLOSED: [2010-05-23 Sun 21:22]
