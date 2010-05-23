@@ -21,8 +21,11 @@
 	      :accessor signature-functions)))
 
 (defgeneric add-constant (signature new-name))
+(defgeneric delete-constant (signature name))
 (defgeneric add-function (signature new-name new-arity))
+(defgeneric delete-function (signature name))
 (defgeneric add-predicate (signature new-name new-arity))
+(defgeneric delete-predicate (signature name))
 
 (defun equal-signatures? (signature-1 signature-2)
   (and (equal-sets? (signature-constants signature-1)
@@ -103,6 +106,10 @@
 	 (error "The symbol ~A is already a constant in the given signature" constant))
 	(t (push constant (signature-constants sig)))))
 
+(defmethod delete-constant ((sig signature) constant)
+  (setf (signature-constants sig)
+	(remove constant (signature-constants sig))))
+
 (defmethod add-predicate ((sig signature) pred-sym arity)
   (cond ((constant? sig pred-sym)
 	 (error "The symbol ~A is already reserved as a constant in the the given signature" pred-sym))
@@ -114,6 +121,11 @@
 	 (error "The symbol ~A is already a constant in the given signature" pred-sym))
 	(t (push (cons pred-sym arity) (signature-predicates sig)))))
 
+(defmethod delete-predicate ((sig signature) pred-sym)
+  (setf (signature-predicates sig)
+	(remove (find pred-sym (signature-predicates sig) :key #'first)
+		(signature-predicates sig))))
+
 (defmethod add-function ((sig signature) func-sym arity)
   (cond ((constant? sig func-sym)
 	 (error "The symbol ~A is already reserved as a constant in the the given signature" func-sym))
@@ -124,6 +136,11 @@
 	((constant? sig func-sym)
 	 (error "The symbol ~A is already a constant in the given signature" func-sym))
 	(t (push (cons func-sym arity) (signature-functions sig)))))
+
+(defmethod delete-function ((sig signature) func-sym)
+  (setf (signature-functions sig)
+	(remove (find func-sym (signature-functions sig) :key #'first)
+		(signature-functions sig))))
 
 (defun read-signature (prompt)
   (let (constants predicates functions)

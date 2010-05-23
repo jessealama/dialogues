@@ -115,6 +115,33 @@
 	  (<ucw:submit :value "Add this function"
 		       :action $take-action))))))
 
+;; deleting functions
+
+(defcomponent delete-a-function (standard-window-component)
+  ((signature :initarg :signature
+	      :accessor signature)))
+
+(defmethod render ((self delete-a-function))
+  (let (selected-function)
+    (symbol-macrolet (($take-action (answer (delete-function (signature self) selected-function))))
+      (with-slots ((sig signature))
+	  self
+	(<:h1 "Deleting a function")
+	(if (signature-functions sig)
+	    (<ucw:form :method "POST"
+		       :action $take-action
+	      (<:p "Choose a function to be deleted from the signature:")
+	      (<ucw:select :size 1
+			   :accessor selected-function
+	        (dolist (function-and-arity (signature-functions sig))
+		  (let ((function (first function-and-arity)))
+		    (<ucw:option :value function
+				 (<:as-html function)))))
+	      (<ucw:submit :value "Delete this function"
+			   :action $take-action))
+	    (<:p "There are no functions in the signature; none can be deleted. " (<ucw:a :action (answer (signature self))
+											  "Proceed") "."))))))
+
 ;; adding a predicate
 
 (defcomponent add-a-predicate (standard-window-component)
@@ -186,6 +213,33 @@
 	  (<ucw:submit :value "Add this predicate"
 		       :action $take-action))))))
 
+;; deleting a predicate
+
+(defcomponent delete-a-predicate (standard-window-component)
+  ((signature :initarg :signature
+	      :accessor signature)))
+
+(defmethod render ((self delete-a-predicate))
+  (let (selected-predicate)
+    (symbol-macrolet (($take-action (answer (delete-predicate (signature self) selected-predicate))))
+      (with-slots ((sig signature))
+	  self
+	(<:h1 "Deleting a predicate")
+	(if (signature-predicates sig)
+	    (<ucw:form :method "POST"
+		       :action $take-action
+	      (<:p "Choose a predicate to be deleted from the signature:")
+	      (<ucw:select :size 1
+			   :accessor selected-predicate
+	        (dolist (predicate-and-arity (signature-predicates sig))
+		  (let ((pred (first predicate-and-arity)))
+		    (<ucw:option :value pred
+				 (<:as-html pred)))))
+	      (<ucw:submit :value "Delete this predicate"
+			   :action $take-action))
+	    (<:p "There are no predicates in the signature; none can be deleted. " (<ucw:a :action (answer (signature self))
+											  "Proceed") "."))))))
+
 ;; adding a constant
 
 (defcomponent add-a-constant (standard-window-component)
@@ -233,6 +287,32 @@
 	  (<ucw:submit :value "Add this constant"
 		       :action $take-action))))))
 
+;; deleting a constant
+
+(defcomponent delete-a-constant (standard-window-component)
+  ((signature :initarg :signature
+	      :accessor signature)))
+
+(defmethod render ((self delete-a-constant))
+  (let (selected-constant)
+    (symbol-macrolet (($take-action (answer (delete-constant (signature self) selected-constant))))
+      (with-slots ((sig signature))
+	  self
+	(<:h1 "Deleting a constant")
+	(if (signature-constants sig)
+	    (<ucw:form :method "POST"
+		       :action $take-action
+	      (<:p "Choose a constant to be deleted from the signature:")
+	      (<ucw:select :size 1
+			   :accessor selected-constant
+	        (dolist (constant (signature-constants sig))
+		  (<ucw:option :value constant
+			       (<:as-html constant))))
+	      (<ucw:submit :value "Delete this predicate"
+			   :action $take-action))
+	    (<:p "There are no constants in the signature; none can be deleted. " (<ucw:a :action (answer (signature self))
+											  "Proceed") "."))))))
+
 (defcomponent signature-editor ()
   ((signature :initarg :signature
 	      :accessor signature)))
@@ -245,8 +325,11 @@
     (<:p "You can:")
     (<:ul
      (<:li (<ucw:a :action (call 'add-a-function :signature sig) "add a function") ", ")
+     (<:li (<ucw:a :action (call 'delete-a-function :signature sig) "delete a function") ", ")
      (<:li (<ucw:a :action (call 'add-a-constant :signature sig)  "add a constant") ", or ")
-     (<:li (<ucw:a :action (call 'add-a-predicate :signature sig) "add a predicate") "."))
+     (<:li (<ucw:a :action (call 'delete-a-constant :signature sig)  "delete a constant") ", or ")
+     (<:li (<ucw:a :action (call 'add-a-predicate :signature sig) "add a predicate") ".")
+     (<:li (<ucw:a :action (call 'delete-a-predicate :signature sig) "delete a predicate") ", or "))
     (<:p
      "When you're satisfisfied with the signature, you may "
      (<ucw:a :action (answer sig) "proceed."))))
