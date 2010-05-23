@@ -32,7 +32,7 @@
   ()
   (:default-initargs
    :url-prefix "/"
-    :debug-on-error t))
+    :debug-on-error nil))
 
 (defvar *dialogue-application* (make-instance 'dialogue-application))
 
