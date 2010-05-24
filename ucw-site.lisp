@@ -162,7 +162,7 @@
 					    (if (predicate? (signature self) input-predicate-as-symbol)
 						$do-over
 						(let ((parsed-arity (parse-integer input-predicate-arity :junk-allowed t)))
-						  (if (and parsed-arity) (plusp parsed-arity)
+						  (if (and parsed-arity (not (minusp parsed-arity)))
 						      (answer (add-predicate (signature self) input-predicate-as-symbol parsed-arity))
 						      $do-over))))
 					  $do-over))))
@@ -193,11 +193,11 @@
 		    (<:blockquote
 		     (<:as-html new-arity))
 		    (<:p "that you specified for the new predicate " (<:as-html new-name) " could not be understood as a number.  Please try again."))
-		  (unless (plusp parsed-arity)
+		  (unless (minusp parsed-arity)
 		    (<:p "The arity")
 		    (<:blockquote
 		     (<:as-html new-arity))
-		    (<:p "that you specified for the new predicate " (<:as-html new-name) " is not a positive integer.  Please try again.")))))
+		    (<:p "that you specified for the new predicate " (<:as-html new-name) " is not a natural number.  Please try again.")))))
 	(<ucw:form :method "POST"
 		   :action $take-action
           (<:label :for "new-predicate-name" "New predicate name")
