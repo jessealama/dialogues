@@ -520,8 +520,7 @@
 			 :action (call 'game-viewer :game game)
 	        (<ucw:submit :value "Edit this move"
 			     :action (call 'game-viewer :game game)))))))
-    (let (attack-option defend-option
-	  proponent-option opponent-option
+    (let (stance-option player-option
 	  input-reference input-statement)
       (symbol-macrolet (($take-action (progn
 					(if input-statement
@@ -537,16 +536,10 @@
 						      (setf reference (call 'number-corrector :number input-reference))
 						      (setf reference parsed-integer)))))
 					(call 'game-viewer
-					      :player (or player
-							  (cond (proponent-option 'p)
-								(opponent-option 'o)
-								(t nil)))
+					      :player (or player player-option)
 					      :statement (or statement
 							     input-statement)
-					      :stance (or stance
-							  (if attack-option 'a 
-							      (when defend-option
-								'd)))
+					      :stance (or stance stance-option)
 					      :reference (or reference
 							     input-reference)
 					      :game game))))
@@ -557,32 +550,18 @@
 		   :action $take-action
 		   (cond ((not player)
 			  (<:p "Which player will move?")
-			  (<ucw:input :type "radio"
-				      :accessor proponent-option
-				      :id "proponent-action"
-				      :name "propnent-or-opponent")
-			  (<:label :for "proponent-option" "Proponent")
-			  (<ucw:input :type "radio"
-				      :accessor opponent-option
-				      :id "opponent-action"
-				      :name "proponent-or-opponent")
-			  (<:label :for "opponent-option" "Opponent")
-			  (<:br)
+			  (<ucw:select :accessor player-option
+				       :size 1
+			    (<ucw:option :value 'p "Proponent")
+			    (<ucw:option :value 'o "Opponent"))
 			  (<ucw:submit :value "Choose sides"
 				       :action $take-action))
 			 ((not stance)
 			  (<:p "Choose whether to attack or defend.")
-			  (<ucw:input :type "radio"
-				      :accessor attack-option
-				      :id "attack-option"
-				      :name "attack-or-defend")
-			  (<:label :for "attack-option" "Attack")
-			  (<ucw:input :type "radio"
-				      :accessor defend-option
-				      :id "defend-option"
-				      :name "attack-or-defend")
-			  (<:label :for "defend-option" "Defend")
-			  (<:br)
+			  (<ucw:select :accessor stance-option
+				       :size 1
+			    (<ucw:option :value 'a "Attack")
+			    (<ucw:option :value 'd "Defend"))
 			  (<ucw:submit :value "Make a move"
 				       :action $take-action))
 
