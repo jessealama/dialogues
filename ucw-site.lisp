@@ -407,7 +407,7 @@
 					  (answer parsed-number)))))
       
       (<:h1 "Invalid number supplied")
-      (<:p "We are unable to make sense of the number, \"" (<:as-html (number-corrector-num self)) "\"that you supplied.  Please try again.")
+      (<:p "We are unable to make sense of the number, \"" (<:as-html (number-corrector-num self)) "\" that you supplied.  Please try again.")
       (<ucw:form :method "POST"
 		 :action $take-action
       (<:label :for "number-input" "Enter a non-negative integer")
@@ -442,7 +442,7 @@
 									:text input-formula
 									:signature (formula-corrector-signature self))))))
       (<:h1 "Invalid formula supplied")
-      (<:p "We are unable to make sense of the formula, \"" (<:as-html (formula-corrector-text self)) "\"that you supplied.  The signature with respect to which you should enter a formula is:")
+      (<:p "We are unable to make sense of the formula, \"" (<:as-html (formula-corrector-text self)) "\" that you supplied.  The signature with respect to which you should enter a formula is:")
       (render (formula-corrector-signature self))
       (formula-guide)
       (<:p "Please try again.")
