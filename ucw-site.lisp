@@ -478,41 +478,6 @@
   ((game :accessor game
 	 :initarg :game)))
 
-;; OK, now what to do, since we can get all the proper inputs?
-;;
-;; Well, I say "proper inputs", but we haven't checked that all the
-;; inputs are sensible.  The choice of proponent or opponent, and the
-;; choice of attack or defend, are correctly set.  But so far we have
-;; not checked whether the reference, for example, is a string that
-;; represents a number; nor do we check that the input formula is
-;; actually a formula.  That needs to be done at some point.  I
-;; suppose we should do that when we are accepting the inputs, so that
-;; we can approach the task of evaluating the rules with the knowledge
-;; that what we are evaluating is sensible.
-;;
-;; How shall we make sure that the inputs are well-formed?
-;; Conditions/restarts?
-;;
-;; OK, assuming that we have sensible inputs, what do we do?  (By the
-;; way, "sensible" is ambiguous.  When entering a formula, we are
-;; given strings, I think.  Thus, we might get the string "p".  But in
-;; our universe, formulas are not strings (they are either symbols or
-;; lists or a certain kind).  The same goes for the reference numbers.
-;; Those are given to use as strings, not as numbers.
-;;
-;; This is what we do in the state machine tagbody, when we have all
-;; the right inputs:
-;;
-;; (multiple-value-bind (rules-result messages)
-;;     (evaluate-all-rules rules dialogue player turn-number statement stance index)
-;;   (when rules-result
-;;     (go successful-turn))
-;;   (msg "At least one of the dialogue rules is violated by your attack:")
-;;   (dolist (message messages)
-;;     (msg "* ~A" message))
-;;   (msg "Restarting the move...")
-;;   (go start-move))
-
 (defmethod render ((self game-viewer))
   (with-slots (player statement stance reference game)
       self
