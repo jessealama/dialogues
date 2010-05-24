@@ -421,6 +421,20 @@
   ((text :initarg :text :accessor formula-corrector-text)
    (signature :initarg :signature :accessor formula-corrector-signature)))
 
+(defun formula-guide ()
+  (<:p "Non-atomic formulas are written in prefix notation, with parentheses
+      around the outside.  Thus, an implication whose antecdent is " (<:as-is "&phi;") " and whose consequent is " (<:as-is "&psi;") " would be entered as")
+  (<:blockquote
+   (<:pre "(implies " (<:as-is "&phi;") " " (<:as-is "&psi;") ")"))
+  (<:p "The available connectives are")
+  (<:ul
+   (<:li (<:tt "implies") ",")
+   (<:li (<:tt "iff") ",")
+   (<:li (<:tt "and") ",")
+   (<:li (<:tt "or") ", and")
+   (<:li (<:tt "not") "."))
+  (<:p "Atomic formulas are to be constructed according to the signature."))
+
 (defmethod render ((self formula-corrector))
   (let (input-formula)
     (symbol-macrolet (($take-action (handler-case (answer (parse-formula input-formula))
@@ -429,6 +443,7 @@
       (<:p "We are unable to make sense of the formula, \"" (<:as-html (formula-corrector-text self)) "\"that you supplied.  The signature with respect to which you should enter a formula is:")
       (<:blockquote
        (<:as-html (formula-corrector-signature self)))
+      (formula-guide)
       (<:p "Please try again.")
       (<ucw:form :method "POST"
 		 :action $take-action
@@ -671,16 +686,15 @@
       (with-slots ((sig signature))
 	  self
 	(<:h1 "It's your turn")
-	(<:p "To get started, enter a formula in the text box below or
-      choose a famous formula from the menu.")
-	(<:p "Formulas are written in a signature, which, currently, is:")
+	(<:p "To get started, enter a formula in the text box below or choose a famous formula from the menu.")
+	(formula-guide)
 	(render sig)
 	(<:p "You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)")
 	(<ucw:form :method "POST"
 		   :action $take-action
-          (<:label :for "input-formula" "Enter a formula")
+	  (<:p "Enter a formula ")
 	  (<ucw:input :type "text" :accessor input-formula :id "input-formula")
-	  (<:label :for "selected-formula" "or select a famous formula from the menu")
+	  (<:p " or select a famous formula from the menu ")
 	  (<ucw:select :id "selected-formula" 
 		       :size 1 
 		       :accessor selected-formula
@@ -690,7 +704,7 @@
 		(declare (ignore short-name))
 		(<ucw:option :value formula (<:as-html long-name)))))
 	  (<:p
-	   (<:as-html "If the text box is not empty, its contents will be the initial formula.  If the text box is empty, then the selected \"famous formula\" will be used."))
+	   (<:as-html "(If you have deleted some elements from the signature but wish to choose one of the pre-selected formulas, you should be aware that the formula you choose might not actually be a formula in a diminished sgnature.)  If the text box is not empty, its contents will be the initial formula.  If the text box is empty, then the selected \"famous formula\" will be used."))
 	  (<:p
 	   (<ucw:submit :action $take-action
 			:value "Let's play")))))))
