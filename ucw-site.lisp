@@ -678,11 +678,20 @@
 
 (defmethod render ((self initial-formula-window))
   (let (input-formula selected-formula)
-    (symbol-macrolet (($take-action (call 'game-viewer
-					  :game (make-dialogue (if (empty-string? input-formula)
-								   selected-formula
-								   markov-formula)
-							       (signature self)))))
+    (symbol-macrolet (($take-action (let ((sig (signature self)))
+				      (if (empty-string? input-formula)
+					  (if (formula? selected-formula (signature self))
+					      (call 'game-viewer
+						    :game (make-dialogue selected-formula sig))
+					      (call 'formula-corrector
+						    :text selected-formula
+						    :signature sig))
+					(if (formula? input-formula sig)
+					    (call 'game-viewer
+						  :game (make-dialogue input-formula sig))
+					    (call 'formula-corrector
+						  :text input-formula
+						  :signature sig))))))
       (with-slots ((sig signature))
 	  self
 	(<:h1 "It's your turn")
