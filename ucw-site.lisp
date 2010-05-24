@@ -371,14 +371,14 @@
 
 (defentry-point "" (:application *dialogue-application*)
     ()
-  (call 'initial-formula-window :signature pqrs-propositional-signature))
+  (let* ((default-fec (make-instance 'formula-entry-component :signature pqrs-propositional-signature))
+	 (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
+    (call 'initial-formula-window :body default-sgc)))
 
 (defcomponent initial-formula-window (standard-window-component)
-  ((signature :accessor signature
-	      :initarg :signature))
+  ()
   (:default-initargs
-      :title "the game is about to begin"
-      :styesheet nil))
+      :title "the game is about to begin"))
 
 (defvar famous-formulas
   `(("Peirce's formula" "peirce-formula" ,peirce-formula)
@@ -458,7 +458,12 @@
 	(<ucw:submit :value "Use this formula"
 		     :action $take-action)))))
 
-(defcomponent game-viewer (standard-window-component)
+(defcomponent game-viewer (standard-window-component) 
+  ()
+  (:default-initargs
+      :title "let's play"))
+
+(defcomponent turn-editor ()
   ((player :accessor player
 	   :initarg :player
 	   :initform nil)
@@ -478,7 +483,7 @@
   ((game :accessor game
 	 :initarg :game)))
 
-(defmethod render ((self game-viewer))
+(defmethod render ((self turn-editor))
   (with-slots (player statement stance reference game)
       self
     (when (and player statement stance reference)
@@ -517,70 +522,51 @@
 	       (dolist (message messages)
 		 (<:li (<:as-html message))))
 	      (<ucw:form :method "POST"
-			 :action (call 'game-viewer :game game)
+			 :action (call 'game-viewer :body (make-instance 'turn-editor :game game))
 	        (<ucw:submit :value "Edit this move"
-			     :action (call 'game-viewer :game game)))))))
-    (let (stance-option player-option
-	  input-reference input-statement)
-      (symbol-macrolet (($take-action (progn
-					(if input-statement
-					    (handler-case (setf statement (parse-formula input-statement))
-					      (malformed-formula-error () (setf statement
-										(call 'formula-corrector
-										      :text input-statement
-										      :signature (dialogue-signature game)))))
-					    
-					    (if input-reference
-						(let ((parsed-integer (parse-integer input-reference :junk-allowed t)))
-						  (if (null parsed-integer)
-						      (setf reference (call 'number-corrector :number input-reference))
-						      (setf reference parsed-integer)))))
-					(call 'game-viewer
-					      :player (or player player-option)
-					      :statement (or statement
-							     input-statement)
-					      :stance (or stance stance-option)
-					      :reference (or reference
-							     input-reference)
-					      :game game))))
+			     :action (call 'turn-editor :game game)))))))
+    (let (stance-option player-option reference-option input-statement)
+      (symbol-macrolet (($take-action (if input-statement
+					  (setf statement
+						(handler-case (parse-formula input-statement 
+									     (dialogue-signature game))
+						  (malformed-formula-error () (call 'formula-corrector
+										    :text input-statement
+										    :signature (dialogue-signature game)))))
+					  (call 'game-viewer
+						:body (make-instance 'game-viewer
+								     :player (or player player-option)
+								     :stance (or stance stance-option)
+								     :reference (or reference reference-option)
+								     :statement nil
+								     :game game)))))
 	(<:h1 "The game so far")
 	(<:div :style "border:1px solid"
 	       (pretty-print-game game))
 	(<ucw:form :method "POST"
 		   :action $take-action
-		   (cond ((not player)
-			  (<:p "Which player will move?")
-			  (<ucw:select :accessor player-option
-				       :size 1
-			    (<ucw:option :value 'p "Proponent")
-			    (<ucw:option :value 'o "Opponent"))
-			  (<ucw:submit :value "Choose sides"
-				       :action $take-action))
-			 ((not stance)
-			  (<:p "Choose whether to attack or defend.")
-			  (<ucw:select :accessor stance-option
-				       :size 1
-			    (<ucw:option :value 'a "Attack")
-			    (<ucw:option :value 'd "Defend"))
-			  (<ucw:submit :value "Make a move"
-				       :action $take-action))
-
-			 ((not reference)
-			  (<:p "To which statement do you want to respond? (Your answer should be a non-negative integer.)")
-			  (<ucw:input :type "text"
-				      :id "input-reference"
-				      :accessor input-reference)
-			  (<:br)
-			  (<ucw:submit :value "Respond"
-				       :action $take-action))
-			 (t ;; we have to get a statement
-			  (<:p "What do you want to assert? ")
-			  (<ucw:input :type "text"
-				      :id "input-statement"
-				      :accessor input-statement)
-			  (<:br)
-			  (<ucw:submit :value "Make a claim"
-				       :action $take-action))))))))
+	  (<:p "Which player will move?")
+	  (<ucw:select :accessor player-option
+		       :size 1
+	    (<ucw:option :value 'p "Proponent")
+	    (<ucw:option :value 'o "Opponent"))
+	  (<:p "Attack or defend?")
+	  (<ucw:select :accessor stance-option
+		       :size 1
+	    (<ucw:option :value 'a "Attack")
+	    (<ucw:option :value 'd "Defend"))
+	  (<:p "Choose the statement to which the selected player is responding.")
+	  (<ucw:select :accessor reference-option
+		       :size 1
+	    (loop for i from 0 upto (1- (dialogue-length game))
+		 do (<ucw:option :value i (<:as-html i))))
+	  (<:p "What do you want to assert?")
+	  (<ucw:input :type "text"
+		      :id "input-statement"
+		      :accessor input-statement)
+	  (<:br)
+	  (<ucw:submit :value "Make a move"
+		       :action $take-action))))))
 
 ;; I'm confused about what to do here.  I want the user to indicate,
 ;; first of all, whether they should attack or defend something.  I
@@ -635,46 +621,60 @@
 		   (<:td (<:em "(initial move)"))
 		   (<:td "[" (<:as-html stance) "," (<:as-html reference) "]")))))))))
 
-(defmethod render ((self initial-formula-window))
+(defcomponent start-game-component ()
+  ((formula-entry-component :component t
+			    :initarg :formula-entry-component
+			    :accessor formula-entry-component)))
+
+(defcomponent formula-entry-component ()
+  ((signature :initarg :signature
+	      :accessor signature)))
+
+(defmethod render ((self formula-entry-component))
   (let (input-formula selected-formula)
-    (symbol-macrolet (($take-action (let ((sig (signature self)))
-				      (if (empty-string? input-formula)
-					  (if (formula? selected-formula sig)
-					      (call 'game-viewer
-						    :game (make-dialogue selected-formula sig))
-					      (call 'formula-corrector
-						    :text (format nil "~A" selected-formula)
-						    :signature sig))
-					  (handler-case (call 'game-viewer
-							      :game (make-dialogue (parse-formula input-formula sig)
-										   sig))
-					    (malformed-formula-error (call 'formula-corrector
-								      :text input-formula
-								      :signature sig)))))))
-      (with-slots ((sig signature))
-	  self
-	(<:h1 "It's your turn")
-	(<:p "To get started, enter a formula in the text box below or choose a famous formula from the menu.")
-	(formula-guide)
-	(render sig)
-	(<:p "You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)")
-	(<ucw:form :method "POST"
-		   :action $take-action
-	  (<:p "Enter a formula ")
-	  (<ucw:input :type "text" :accessor input-formula :id "input-formula")
-	  (<:p " or select a famous formula from the menu ")
-	  (<ucw:select :id "selected-formula" 
-		       :size 1 
-		       :accessor selected-formula
-            (dolist (famous-formula famous-formulas)
-	      (destructuring-bind (long-name short-name formula)
-		  famous-formula
-		(declare (ignore short-name))
-		(<ucw:option :value formula (<:as-html long-name)))))
-	  (<:p
-	   (<:as-html "(If you have deleted some elements from the signature but wish to choose one of the pre-selected formulas, you should be aware that the formula you choose might not actually be a formula in a diminished sgnature.)  If the text box is not empty, its contents will be the initial formula.  If the text box is empty, then the selected \"famous formula\" will be used."))
-	  (<:p
-	   (<ucw:submit :action $take-action
-			:value "Let's play")))))))
+  (symbol-macrolet (($take-action (let ((sig (signature self)))
+				    (if (empty-string? input-formula)
+					(if (formula? selected-formula sig)
+					    (call 'game-viewer
+						  :body (make-instance 'turn-editor
+								       :game (make-dialogue selected-formula sig)))
+					    (call 'formula-corrector
+						  :text (format nil "~A" selected-formula)
+						  :signature sig))
+					(handler-case (call 'game-viewer
+							    :body (make-instance 'turn-editor
+										 :game (make-dialogue (parse-formula input-formula sig) sig)))
+					  (malformed-formula-error (call 'formula-corrector
+								    :text input-formula
+								    :signature sig)))))))
+    (let ((sig (signature self)))
+      (<:p "To get started, enter a formula in the text box below or choose a famous formula from the menu.")
+      (formula-guide)
+      (render sig)
+      (<:p "You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)")
+      (<ucw:form :method "POST"
+		 :action $take-action
+        (<:p "Enter a formula ")
+	(<ucw:input :type "text" :accessor input-formula :id "input-formula")
+	(<:p " or select a famous formula from the menu ")
+	(<ucw:select :id "selected-formula" 
+		     :size 1 
+		     :accessor selected-formula
+          (dolist (famous-formula famous-formulas)
+	    (destructuring-bind (long-name short-name formula)
+		famous-formula
+	      (declare (ignore short-name))
+	      (<ucw:option :value formula (<:as-html long-name)))))
+	(<:p
+	 (<:as-html "(If you have deleted some elements from the signature but wish to choose one of the pre-selected formulas, you should be aware that the formula you choose might not actually be a formula in a diminished sgnature.)  If the text box is not empty, its contents will be the initial formula.  If the text box is empty, then the selected \"famous formula\" will be used."))
+	(<:p
+	 (<ucw:submit :action $take-action
+		      :value "Let's play")))))))
+
+(defmethod render ((self start-game-component))
+  (with-slots ((sig signature))
+      self
+    (<:h1 "It's your turn")
+    (render (formula-entry-component self))))
 
 ;;; ucw-site.lisp ends here
