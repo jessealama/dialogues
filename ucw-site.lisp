@@ -593,10 +593,10 @@
   (unless (zerop (dialogue-length game))
     (<:table
      (<:thead
-      (<:th "Move Number")
+      (<:th "Move")
       (<:th "Player")
       (<:th "Assertion")
-      (<:th "Stance and Reference"))
+      (<:th "Stance, Reference"))
      (loop with plays = (dialogue-plays game)
 	with len = (length plays)
 	for play in plays
@@ -617,10 +617,10 @@
     (unless (zerop (dialogue-length game))
       (<:table
        (<:thead
-	(<:th "Move Number")
+	(<:th "Move")
 	(<:th "Player")
 	(<:th "Assertion")
-	(<:th "Stance and Reference"))
+	(<:th "Stance, Reference"))
        (loop with plays = (dialogue-plays game)
 	     with len = (length plays)
 	     for play in plays
