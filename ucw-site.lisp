@@ -607,7 +607,7 @@
 	    (<:tr 
 	     (<:td (<:as-html i))
 	     (<:td (<:as-html player))
-	     (<:td (<:as-html statement))
+	     (<:td (<:as-is statement))
 	     (if (= i 0)
 		 (<:td (<:em "(initial move)"))
 		 (<:td "[" (<:as-html stance) "," (<:as-html reference) "]"))))))))
@@ -630,7 +630,7 @@
 		play
 	      (<:tr 
 	       (<:td (<:as-html player))
-	       (<:td (<:as-html statement))
+	       (<:td (<:as-is statement))
 	       (if (= i 1)
 		   (<:td (<:em "(initial move)"))
 		   (<:td "[" (<:as-html stance) "," (<:as-html reference) "]")))))))))
