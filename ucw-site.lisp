@@ -439,7 +439,7 @@
   (let (input-formula)
     (symbol-macrolet (($take-action (handler-case (answer (parse-formula input-formula))
 				      (malformed-formula-error () (call 'formula-corrector input-formula)))))
-      (<:h1 "Invalid number supplied")
+      (<:h1 "Invalid formula supplied")
       (<:p "We are unable to make sense of the formula, \"" (<:as-html (formula-corrector-text self)) "\"that you supplied.  The signature with respect to which you should enter a formula is:")
       (<:blockquote
        (<:as-html (formula-corrector-signature self)))
