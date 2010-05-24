@@ -437,17 +437,21 @@
 
 (defmethod render ((self formula-corrector))
   (let (input-formula)
-    (symbol-macrolet (($take-action (handler-case (answer (parse-formula input-formula))
-				      (malformed-formula-error () (call 'formula-corrector input-formula)))))
+    (symbol-macrolet (($take-action (handler-case (answer (parse-formula input-formula (formula-corrector-signature self)))
+				      (malformed-formula-error () (call 'formula-corrector 
+									:text input-formula
+									:signature (formula-corrector-signature self))))))
       (<:h1 "Invalid formula supplied")
       (<:p "We are unable to make sense of the formula, \"" (<:as-html (formula-corrector-text self)) "\"that you supplied.  The signature with respect to which you should enter a formula is:")
-      (<:blockquote
-       (<:as-html (formula-corrector-signature self)))
+      (render (formula-corrector-signature self))
       (formula-guide)
       (<:p "Please try again.")
       (<ucw:form :method "POST"
 		 :action $take-action
-        (<:label :for "formula-input" "Enter a formula in the above signature.")
+	(<:p "Enter a formula in the above signature.  If you wish, you can " (<ucw:a :action (let ((new-signature (call 'signature-editor :signature (formula-corrector-signature self))))
+												(handler-case (answer (parse-formula (formula-corrector-text self) new-signature))
+												    (malformed-formula-error () (answer (call 'formula-corrector :text input-formula)))))
+										      "edit the signature") ". (If edit the signature and the formula that you provided becomes well-formed in the new signature, then you will go back to where you were before you came here.  If, after editing the signature, the formula is still not valid, you will come back to this page.)")
 	(<ucw:input :type "text"
 		    :id "formula-input"
 		    :accessor input-formula)
@@ -537,7 +541,6 @@
 	      (<:p "The game at this point:")
 	      (<:p
 	       (pretty-print-game game))
-	      (<:p "The length of the game is " (<:as-html (dialogue-length game)))
 	      (<:p "Your proposed move:")
 	      (<:ul
 	       (<:li "Player: " (<:as-html player))
@@ -684,7 +687,7 @@
 					      (call 'game-viewer
 						    :game (make-dialogue selected-formula sig))
 					      (call 'formula-corrector
-						    :text selected-formula
+						    :text (format nil "~A" selected-formula)
 						    :signature sig))
 					(if (formula? input-formula sig)
 					    (call 'game-viewer

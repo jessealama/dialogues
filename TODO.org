@@ -48,7 +48,8 @@
   Uh, why?
 * TODO Initial parenthesis of formulas is missing			:bug:
   Thus, Peirce's formua is printed "IMPLIES (IMPLIES (IMPLIES P Q) P) P".
-* TODO Provide some kind method for checking whether the input formula is correct according to the signature
+* DONE Provide some kind method for checking whether the input formula is correct according to the signature
+  CLOSED: [2010-05-24 Mon 02:15]
   Currently, the REPL is thrown into the debugger.  But the debug output should go to the web page.
 * TODO Make sure that page titles are generated
   Currently, apparently none are generated.  I must be misusing UCW somehow.
