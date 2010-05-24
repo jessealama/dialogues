@@ -433,7 +433,7 @@
    (<:li (<:tt "and") ",")
    (<:li (<:tt "or") ", and")
    (<:li (<:tt "not") "."))
-  (<:p "Atomic formulas are to be constructed according to the signature."))
+  (<:p "Atomic formulas are to be constructed according to the signature.  The case you use to write connectives and atomic formulas doesn't matter (anything you enter will be upcased)."))
 
 (defmethod render ((self formula-corrector))
   (let (input-formula)
