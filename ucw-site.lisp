@@ -436,11 +436,11 @@
   (<:p "Atomic formulas are to be constructed according to the signature.  The case you use to write connectives and atomic formulas doesn't matter (anything you enter will be upcased)."))
 
 (defmethod render ((self formula-corrector))
-  (let (input-formula)
-    (symbol-macrolet (($take-action (handler-case (answer (parse-formula input-formula (formula-corrector-signature self)))
-				      (malformed-formula-error () (call 'formula-corrector 
-									:text input-formula
-									:signature (formula-corrector-signature self))))))
+  (symbol-macrolet (($take-action (handler-case (answer (parse-formula input-formula (formula-corrector-signature self)))
+				    (malformed-formula-error () (call 'formula-corrector 
+								      :text input-formula
+								      :signature (formula-corrector-signature self))))))
+    (let (input-formula)
       (<:h1 "Invalid formula supplied")
       (<:p "We are unable to make sense of the formula, \"" (<:as-html (formula-corrector-text self)) "\" that you supplied.  The signature with respect to which you should enter a formula is:")
       (render (formula-corrector-signature self))
@@ -639,18 +639,18 @@
   (let (input-formula selected-formula)
     (symbol-macrolet (($take-action (let ((sig (signature self)))
 				      (if (empty-string? input-formula)
-					  (if (formula? selected-formula (signature self))
+					  (if (formula? selected-formula sig)
 					      (call 'game-viewer
 						    :game (make-dialogue selected-formula sig))
 					      (call 'formula-corrector
 						    :text (format nil "~A" selected-formula)
 						    :signature sig))
-					(if (formula? input-formula sig)
-					    (call 'game-viewer
-						  :game (make-dialogue input-formula sig))
-					    (call 'formula-corrector
-						  :text input-formula
-						  :signature sig))))))
+					  (handler-case (call 'game-viewer
+							      :game (make-dialogue (parse-formula input-formula sig)
+										   sig))
+					    (malformed-formula-error (call 'formula-corrector
+								      :text input-formula
+								      :signature sig)))))))
       (with-slots ((sig signature))
 	  self
 	(<:h1 "It's your turn")
