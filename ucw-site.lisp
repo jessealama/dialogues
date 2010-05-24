@@ -346,7 +346,7 @@
      (if (null functions)
 	 (<:dd (<:em "(none)"))
 	 (<:dd (<:table
-		(<:tr
+		(<:thead
 		 (<:th "Name")
 		 (<:th "Arity"))
 		(dolist (name-and-arity functions)
@@ -359,7 +359,7 @@
      (if (null predicates)
 	 (<:dd (<:em "(none)"))
 	 (<:dd (<:table
-		(<:tr
+		(<:thead
 		 (<:th "Name")
 		 (<:th "Arity"))
 		(dolist (name-and-arity predicates)
@@ -590,38 +590,50 @@
 ;; new entry point?
 
 (defun pretty-print-game (game)
-  (<:table
-   (loop with plays = (dialogue-plays game)
-      with len = (length plays)
-      for play in plays
-      for i from 0 upto len
-      do
-	(with-slots (player statement stance reference)
-	    play
-	  (<:tr 
-	   (<:td (<:as-html i))
-	   (<:td (<:as-html player))
-	   (<:td (<:as-html statement))
-	   (if (= i 0)
-	       (<:td)
-	       (<:td "[" (<:as-html stance) "," (<:as-html reference) "]")))))))
-
-(defmethod render ((self game-component))
-  (let ((game (game self)))
+  (unless (zerop (dialogue-length game))
     (<:table
+     (<:thead
+      (<:th "Move Number")
+      (<:th "Player")
+      (<:th "Assertion")
+      (<:th "Stance and Reference"))
      (loop with plays = (dialogue-plays game)
-	   with len = (length plays)
-	   for play in plays
-	   for i from 1 upto len
-	  do
+	with len = (length plays)
+	for play in plays
+	for i from 0 upto len
+	do
 	  (with-slots (player statement stance reference)
 	      play
 	    (<:tr 
+	     (<:td (<:as-html i))
 	     (<:td (<:as-html player))
 	     (<:td (<:as-html statement))
-	     (if (= i 1)
-		 (<:td)
+	     (if (= i 0)
+		 (<:td (<:em "(initial move)"))
 		 (<:td "[" (<:as-html stance) "," (<:as-html reference) "]"))))))))
+
+(defmethod render ((self game-component))
+  (let ((game (game self)))
+    (unless (zerop (dialogue-length game))
+      (<:table
+       (<:thead
+	(<:th "Move Number")
+	(<:th "Player")
+	(<:th "Assertion")
+	(<:th "Stance and Reference"))
+       (loop with plays = (dialogue-plays game)
+	     with len = (length plays)
+	     for play in plays
+	     for i from 1 upto len
+	  do
+	    (with-slots (player statement stance reference)
+		play
+	      (<:tr 
+	       (<:td (<:as-html player))
+	       (<:td (<:as-html statement))
+	       (if (= i 1)
+		   (<:td (<:em "(initial move)"))
+		   (<:td "[" (<:as-html stance) "," (<:as-html reference) "]")))))))))
 
 (defmethod render ((self initial-formula-window))
   (let (input-formula selected-formula)
