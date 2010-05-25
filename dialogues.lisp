@@ -39,6 +39,15 @@
    (reference :initarg :reference
 	      :accessor move-reference)))
 
+(defmethod print-object ((move move) stream)
+  (print-unreadable-object (move stream :type t)
+    (with-slots (player statement stance reference) move
+      (format stream "player: ~A stance: ~A statement: ~A (in reference to move ~A)"
+	      (or player "(unset)")
+	      (or stance "(unset)")
+	      (or statement "(unset)")
+	      (or reference "(unset)")))))
+
 (defun pretty-print-move (move stream)
   (with-slots (stance reference statement)
       move
@@ -125,6 +134,12 @@ attacks which, being symbols, do qualify as terms."
    (plays :accessor dialogue-plays 
 	  :initform nil
 	  :initarg :plays)))
+
+(defmethod print-object ((game dialogue) stream)
+  (print-unreadable-object (game stream :type t)
+    (with-slots (signature plays) game
+      (format stream "signature: ~A moves: ~A"
+	      signature plays))))
 
 (defun make-dialogue (formula signature)
   (make-instance 'dialogue

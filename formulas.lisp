@@ -20,6 +20,16 @@
 	      :type list
 	      :accessor signature-functions)))
 
+(defmethod print-object ((sig signature) stream)
+  (print-unreadable-object (sig stream :type t)
+    (with-slots (constants predicates functions) sig
+      (format stream "constants: ~A, functions: ~A, predicates: ~A" 
+	      (if constants
+		  (comma-separated-list constants)
+		  "(none)")
+	      (or functions "(none)")
+	      (or predicates "(none)")))))
+
 (defgeneric add-constant (signature new-name))
 (defgeneric delete-constant (signature name))
 (defgeneric add-function (signature new-name new-arity))

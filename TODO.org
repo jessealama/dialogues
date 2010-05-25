@@ -74,7 +74,8 @@
    and then have ... (defgeneric component-title (component)) (which returns nil for anything that is not a t-s-c-mixin)
    [11:57pm] unknown_lamer:
    and then have a custom window class that added an :around method to window-component.title to return (or (component-title (window-body self)) (call-next-method))  
-* TODO Make sure that signatures are printed in a coherent way.
+* DONE Make sure that signatures are printed in a coherent way.
+  CLOSED: [2010-05-25 Tue 20:46]
   I think I need to use PRINT-UNREADABLE-OBJECT.  It would help to improve on errors like this:
 
   "The given text, (IMPLIES (IMPLIES P Q) P), is not a formula according to the signature #<SIGNATURE {100322B7C1}>"
