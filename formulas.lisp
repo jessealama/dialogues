@@ -96,11 +96,11 @@
 
 (defmethod predicate? ((s signature) pred-sym)
   (some #'(lambda (sym) (eq sym pred-sym))
-	(mapcar #'cdr (signature-predicates s))))
+	(mapcar #'car (signature-predicates s))))
 
 (defmethod function? ((s signature) func-sym)
   (some #'(lambda (sym) (eq sym func-sym))
-	(mapcar #'cdr (signature-functions s))))
+	(mapcar #'car (signature-functions s))))
 
 (defun valid-identifier-name? (str)
   (and str
