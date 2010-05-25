@@ -2,6 +2,10 @@
 
 (in-package :dialogues)
 
+;; Utils
+
+(defun current-window () (context.window-component *context*))
+
 ;; Server configuration
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -48,7 +52,13 @@
 		  :initform nil)
    (proposed-arity :initarg :arity 
 		   :accessor proposed-arity
-		   :initform nil)))
+		   :initform nil))
+  (:default-initargs
+      :title "add a function to the signature"))
+
+;; (defmethod render :around ((self add-a-function))
+;;   (setf (ucw:window-component.title (current-window)) "add a function")
+;;   (call-next-method))
 
 (defmethod render ((self add-a-function))
   (let (input-function-name input-function-arity)
@@ -121,6 +131,10 @@
   ((signature :initarg :signature
 	      :accessor signature)))
 
+;; (defmethod render :around ((self delete-a-function))
+;;   (setf (ucw:window-component.title (current-window)) "delete a function from the signature")
+;;   (call-next-method))
+
 (defmethod render ((self delete-a-function))
   (let (selected-function)
     (symbol-macrolet (($take-action (answer (delete-function (signature self) selected-function))))
@@ -148,7 +162,13 @@
   ((signature :initarg :signature
 	      :accessor signature)
    (proposed-name :initarg :name :accessor proposed-name :initform nil)
-   (proposed-arity :initarg :arity :accessor proposed-arity :initform nil)))
+   (proposed-arity :initarg :arity :accessor proposed-arity :initform nil))
+  (:default-initargs
+      :title "add a predicate to the signature"))
+
+;; (defmethod render :around ((self add-a-predicate))
+;;   (setf (ucw:window-component.title (current-window)) "add a predicate to the signature")
+;;   (call-next-method))
 
 (defmethod render ((self add-a-predicate))
   (let (input-predicate-name input-predicate-arity)
@@ -217,7 +237,9 @@
 
 (defcomponent delete-a-predicate (standard-window-component)
   ((signature :initarg :signature
-	      :accessor signature)))
+	      :accessor signature))
+  (:default-initargs
+      :title "delete a predicate from the signature"))
 
 (defmethod render ((self delete-a-predicate))
   (let (selected-predicate)
@@ -245,7 +267,9 @@
 (defcomponent add-a-constant (standard-window-component)
   ((signature :initarg :signature
 	      :accessor signature)
-   (proposed-name :initarg :name :accessor proposed-name :initform nil)))
+   (proposed-name :initarg :name :accessor proposed-name :initform nil))
+  (:default-initargs
+      :title "add a constant to the signature"))
 
 (defmethod render ((self add-a-constant))
   (let (input-constant-name)
@@ -291,7 +315,9 @@
 
 (defcomponent delete-a-constant (standard-window-component)
   ((signature :initarg :signature
-	      :accessor signature)))
+	      :accessor signature))
+  (:default-initargs
+      :title "delete a constant from the signature"))
 
 (defmethod render ((self delete-a-constant))
   (let (selected-constant)
@@ -316,6 +342,10 @@
 (defcomponent signature-editor ()
   ((signature :initarg :signature
 	      :accessor signature)))
+
+;; (defmethod render :around ((self signature-editor))
+;;   (setf (ucw:window-component.title (current-window)) "edit the signature")
+;;   (call-next-method))
 
 (defmethod render ((self signature-editor))
   (with-slots ((sig signature))
@@ -397,7 +427,9 @@
 
 (defcomponent formula-corrector (standard-window-component)
   ((text :initarg :text :accessor formula-corrector-text)
-   (signature :initarg :signature :accessor formula-corrector-signature)))
+   (signature :initarg :signature :accessor formula-corrector-signature))
+  (:default-initargs
+      :title "correct a formula"))
 
 (defun formula-guide ()
   (<:p "Non-atomic formulas are written in prefix notation, with parentheses
@@ -442,6 +474,14 @@
       :title "let's play"))
 
 (defcomponent turn-editor ()
+  ((game :accessor game
+	 :initarg :game)))
+
+(defcomponent game-component ()
+  ((game :accessor game
+	 :initarg :game)))
+
+(defcomponent turn-evaluator ()
   ((player :accessor player
 	   :initarg :player
 	   :initform nil)
@@ -457,11 +497,7 @@
    (game :accessor game
 	 :initarg :game)))
 
-(defcomponent game-component ()
-  ((game :accessor game
-	 :initarg :game)))
-
-(defmethod render ((self turn-editor))
+(defmethod render ((self turn-evaluator))
   (with-slots (player statement stance reference game)
       self
     (if (and player statement stance reference)
