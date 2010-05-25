@@ -39,7 +39,8 @@
   CLOSED: [2010-05-25 Tue 20:00]
 * DONE Provide a way of quitting the game.
   CLOSED: [2010-05-25 Tue 20:19]
-* IN-PROGRESS Provide a way of rewinding the game to a previous spot.
+* DONE Provide a way of rewinding the game to a previous spot.
+  CLOSED: [2010-05-25 Tue 20:32]
 * DONE Provide for symbolic attacks
   CLOSED: [2010-05-25 Tue 20:12]
   Not every assertion in a dialogue game is a logical formula.

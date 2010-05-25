@@ -542,7 +542,7 @@
 			       :action (call 'turn-editor :game game)))))))))
 
 (defmethod render ((self turn-editor))
-  (let (stance-option player-option reference-option input-statement selected-symbolic-attack)
+  (let (stance-option player-option reference-option input-statement selected-symbolic-attack rewind-point)
     (let ((game (game self)))
     (symbol-macrolet 
 	(($take-action 
@@ -635,6 +635,16 @@
 	(<ucw:submit :value "Make a move"
 		     :action $take-action)
 	(<:br)
+	(let ((length (dialogue-length game)))
+	  (when (> length 1)
+	    (<:p "or")
+	    (<ucw:select :size 1
+			 :accessor rewind-point
+	      (loop for i from 1 upto (1- (dialogue-length game))
+		 do (<ucw:option :value i (<:as-html i))))
+	    (<ucw:submit :value "Rewind the game to this turn"
+			 :action (call 'turn-editor
+				       :game (truncate-dialogue game rewind-point)))))
 	(<:p "or")
 	(<ucw:submit :value "Quit"
 		     :action (let* ((default-fec (make-instance 'formula-entry-component :signature pqrs-propositional-signature))
