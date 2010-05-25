@@ -559,6 +559,46 @@
       (<:h1 "The game so far")
       (<:div :style "border:1px solid"
 	     (pretty-print-game game))
+      (let ((next-proponent-attacks (next-moves game d-dialogue-rules 'p 'a))
+	    (next-proponent-defenses (next-moves game d-dialogue-rules 'p 'd))
+	    (next-opponent-attacks (next-moves game d-dialogue-rules 'o 'a))
+	    (next-opponent-defenses (next-moves game d-dialogue-rules 'o 'd)))
+	(if (or next-proponent-attacks next-proponent-defenses)
+	    (progn
+	      (<:p "Available moves for " (<:b "Proponent") ":")
+	      (if next-proponent-attacks
+		  (<:ul
+		   (dolist (next-proponent-attack next-proponent-attacks)
+		     (destructuring-bind (next-statement next-reference)
+			 next-proponent-attack
+		       (<:li "Attack move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))
+		  (<:p (<:em "(no attacks are availabe)")))
+	      (if next-proponent-defenses
+		  (<:ul
+		   (dolist (next-proponent-defense next-proponent-defenses)
+		     (destructuring-bind (next-statement next-reference)
+			 next-proponent-defense
+		       (<:li "Defend against the attack of move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))
+		  (<:p (<:em "(no defenses are availabe)"))))
+	    (<:p (<:em "(no moves for Proponent are available)")))
+	(if (or next-opponent-attacks next-opponent-defenses)
+	    (progn
+	      (<:p "Available moves for " (<:b "Opponent") ":")
+	      (if next-opponent-attacks
+		  (<:ul
+		   (dolist (next-opponent-attack next-opponent-attacks)
+		     (destructuring-bind (next-statement next-reference)
+			 next-opponent-attack
+		       (<:li "Attack move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))
+		  (<:p (<:em "(no attacks are availabe)")))
+	      (if next-opponent-defenses
+		  (<:ul
+		   (dolist (next-opponent-defense next-opponent-defenses)
+		     (destructuring-bind (next-statement next-reference)
+			 next-opponent-defense
+		       (<:li "Defense against the attack of move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))
+		  (<:p (<:em "(no defenses are availabe)"))))
+	    (<:p (<:em "(no moves for Opponent are available)"))))
       (<ucw:form :method "POST"
 		 :action $take-action
         (<:p "Which player will move?")
