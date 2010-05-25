@@ -542,19 +542,24 @@
 			       :action (call 'turn-editor :game game)))))))))
 
 (defmethod render ((self turn-editor))
-  (let (stance-option player-option reference-option input-statement)
+  (let (stance-option player-option reference-option input-statement selected-symbolic-attack)
     (let ((game (game self)))
     (symbol-macrolet 
 	(($take-action 
-	  (let ((formula (handler-case (parse-formula input-statement (dialogue-signature game))
-			   (malformed-formula-error () (call 'formula-corrector
-							     :text input-statement
-							     :signature (dialogue-signature game))))))
+	  (let (new-statement)
+	    (if (empty-string? input-statement)
+		(setf new-statement selected-symbolic-attack)
+		(setf new-statement (handler-case (parse-formula input-statement 
+								 (dialogue-signature game))
+				      (malformed-formula-error () 
+					(call 'formula-corrector
+					      :text input-statement
+					      :signature (dialogue-signature game))))))
 	    (call 'turn-evaluator
 		  :player player-option
 		  :stance stance-option
 		  :reference reference-option
-		  :statement formula
+		  :statement new-statement
 		  :game game))))
       (<:h1 "The game so far")
       (<:div :style "border:1px solid"
@@ -616,10 +621,16 @@
 		     :size 1
 	  (loop for i from 0 upto (1- (dialogue-length game))
 	     do (<ucw:option :value i (<:as-html i))))
-	(<:p "What do you want to assert?")
+	(<:p "What do you want to assert? Enter a formula or choose a symbolic attack.  (If you enter a formula, it will be your proposed assertion; otherwise, the selected symbolic attack will be.)")
 	(<ucw:input :type "text"
 		    :id "input-statement"
 		    :accessor input-statement)
+	(<ucw:select :accessor selected-symbolic-attack
+		     :size 1
+	  (<ucw:option :value 'attack-left-conjunct "Attack the left conjunct")
+	  (<ucw:option :value 'attack-right-conjunct "Attack the right conjunct")
+	  (<ucw:option :value 'which-disjunct? "Request that a disjunct be chosen"))
+		      
 	(<:br)
 	(<ucw:submit :value "Make a move"
 		     :action $take-action))))))
