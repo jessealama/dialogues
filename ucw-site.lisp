@@ -213,7 +213,7 @@
 		    (<:blockquote
 		     (<:as-html new-arity))
 		    (<:p "that you specified for the new predicate " (<:as-html new-name) " could not be understood as a number.  Please try again."))
-		  (if (minusp parsed-arity)
+		  (when (minusp parsed-arity)
 		    (<:p "The arity")
 		    (<:blockquote
 		     (<:as-html new-arity))
