@@ -176,7 +176,8 @@ attacks which, being symbols, do qualify as terms."
 (defun add-move-to-dialogue (dialogue move)
   (setf (dialogue-plays dialogue)
 	(append (dialogue-plays dialogue) 
-		(list move))))
+		(list move)))
+  dialogue)
 
 (defun extend-dialogue (dialogue player stance statement reference)
   (add-move-to-dialogue dialogue
