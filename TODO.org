@@ -54,6 +54,21 @@
   Currently, the REPL is thrown into the debugger.  But the debug output should go to the web page.
 * IN-PROGRESS Make sure that page titles are generated
   Currently, apparently none are generated.  I must be misusing UCW somehow.
+** 2010/05/24 A tip from the #ucw channel on irc.freenode.net
+   alama:
+   how does one normally set tittes dynamically?
+   [11:43pm] alama:
+   (in ucw, that is)
+   [11:55pm] unknown_lamer:
+   there is no one way
+   [11:55pm] unknown_lamer:
+   that would be an app specific thing
+   [11:56pm] unknown_lamer:
+   I'd probably do a ... title-setting-component-mixin with a title slot
+   [11:56pm] unknown_lamer:
+   and then have ... (defgeneric component-title (component)) (which returns nil for anything that is not a t-s-c-mixin)
+   [11:57pm] unknown_lamer:
+   and then have a custom window class that added an :around method to window-component.title to return (or (component-title (window-body self)) (call-next-method))  
 * TODO Make sure that signatures are printed in a coherent way.
   I think I need to use PRINT-UNREADABLE-OBJECT.  It would help to improve on errors like this:
 
