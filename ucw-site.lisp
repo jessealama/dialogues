@@ -401,7 +401,7 @@
 
 (defentry-point "" (:application *dialogue-application*)
     ()
-  (let* ((default-fec (make-instance 'formula-entry-component :signature pqrs-propositional-signature))
+  (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
 	 (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
     (call 'initial-formula-window :body default-sgc)))
 
@@ -647,7 +647,7 @@
 				       :game (truncate-dialogue game rewind-point)))))
 	(<:p "or")
 	(<ucw:submit :value "Quit"
-		     :action (let* ((default-fec (make-instance 'formula-entry-component :signature pqrs-propositional-signature))
+		     :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
 				    (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
 			       (call 'initial-formula-window :body default-sgc))))))))
 

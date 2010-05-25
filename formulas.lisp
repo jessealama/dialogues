@@ -20,6 +20,12 @@
 	      :type list
 	      :accessor signature-functions)))
 
+(defun copy-signature (signature)
+  (make-instance 'signature
+		 :constants (copy-list (signature-constants signature))
+		 :predicates (copy-list (signature-predicates signature))
+		 :functions (copy-list (signature-functions signature))))
+
 (defmethod print-object ((sig signature) stream)
   (print-unreadable-object (sig stream :type t)
     (with-slots (constants predicates functions) sig
