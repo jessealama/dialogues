@@ -464,87 +464,87 @@
 (defmethod render ((self turn-editor))
   (with-slots (player statement stance reference game)
       self
-    (when (and player statement stance reference)
-      (multiple-value-bind (rules-result messages)
-	  (evaluate-all-rules d-dialogue-rules 
-			      game 
-			      player 
-			      (dialogue-length game)
-			      statement 
-			      stance
-			      reference)
-	(if rules-result
-	    (progn
-	      (add-move-to-dialogue (game self)
-				    (make-move player
-					       statement
-					       stance
-					       reference))
-	      (setf (player self) nil
-		    (statement self) nil
-		    (stance self) nil
-		    (reference self) nil))
-	    (progn
-	      (<:h1 "Problem!")
-	      (<:p "The game at this point:")
-	      (<:p
-	       (pretty-print-game game))
-	      (<:p "Your proposed move:")
-	      (<:ul
-	       (<:li "Player: " (<:as-html player))
-	       (<:li "Statement: " (<:as-html statement))
-	       (<:li "Stance: " (<:as-html stance))
-	       (<:li "Reference: " (<:as-html reference)))
-	      (<:p "At least one of the dialogue rules is violated by your proposed move:")
-	      (<:ul
-	       (dolist (message messages)
-		 (<:li (<:as-html message))))
-	      (<ucw:form :method "POST"
-			 :action (call 'game-viewer :body (make-instance 'turn-editor :game game))
-	        (<ucw:submit :value "Edit this move"
-			     :action (call 'turn-editor :game game)))))))
-    (let (stance-option player-option reference-option input-statement)
-      (symbol-macrolet (($take-action (if input-statement
-					  (setf statement
-						(handler-case (parse-formula input-statement 
-									     (dialogue-signature game))
-						  (malformed-formula-error () (call 'formula-corrector
-										    :text input-statement
-										    :signature (dialogue-signature game)))))
-					  (call 'game-viewer
-						:body (make-instance 'game-viewer
-								     :player (or player player-option)
-								     :stance (or stance stance-option)
-								     :reference (or reference reference-option)
-								     :statement nil
-								     :game game)))))
-	(<:h1 "The game so far")
-	(<:div :style "border:1px solid"
-	       (pretty-print-game game))
-	(<ucw:form :method "POST"
-		   :action $take-action
-	  (<:p "Which player will move?")
-	  (<ucw:select :accessor player-option
-		       :size 1
-	    (<ucw:option :value 'p "Proponent")
-	    (<ucw:option :value 'o "Opponent"))
-	  (<:p "Attack or defend?")
-	  (<ucw:select :accessor stance-option
-		       :size 1
-	    (<ucw:option :value 'a "Attack")
-	    (<ucw:option :value 'd "Defend"))
-	  (<:p "Choose the statement to which the selected player is responding.")
-	  (<ucw:select :accessor reference-option
-		       :size 1
-	    (loop for i from 0 upto (1- (dialogue-length game))
-		 do (<ucw:option :value i (<:as-html i))))
-	  (<:p "What do you want to assert?")
-	  (<ucw:input :type "text"
-		      :id "input-statement"
-		      :accessor input-statement)
-	  (<:br)
-	  (<ucw:submit :value "Make a move"
-		       :action $take-action))))))
+    (if (and player statement stance reference)
+	(multiple-value-bind (rules-result messages)
+	    (evaluate-all-rules d-dialogue-rules 
+				game 
+				player 
+				(dialogue-length game)
+				statement 
+				stance
+				reference)
+	  (if rules-result
+	      (progn
+		(<:h1 "Success!")
+		(<:p "Your move was accepted. " (<ucw:a :action (call 'turn-editor
+								      :game (add-move-to-dialogue (game self)
+												  (make-move player
+													     statement
+													     stance
+													     reference)))
+							"Proceed") "."))
+	      (progn
+		(<:h1 "Problem!")
+		(<:p "The game at this point:")
+		(<:p
+		 (pretty-print-game game))
+		(<:p "Your proposed move:")
+		(<:ul
+		 (<:li "Player: " (<:as-html player))
+		 (<:li "Statement: " (<:as-html statement))
+		 (<:li "Stance: " (<:as-html stance))
+		 (<:li "Reference: " (<:as-html reference)))
+		(<:p "At least one of the dialogue rules is violated by your proposed move:")
+		(<:ul
+		 (dolist (message messages)
+		   (<:li (<:as-html message))))
+		(<ucw:form :method "POST"
+			   :action (call 'turn-editor :game game)
+		  (<ucw:submit :value "Edit this move"
+			       :action (call 'turn-editor :game game)))))))))
+
+(defmethod render ((self turn-editor))
+  (let (stance-option player-option reference-option input-statement)
+    (let ((game (game self)))
+    (symbol-macrolet 
+	(($take-action 
+	  (let ((formula (handler-case (parse-formula input-statement (dialogue-signature game))
+			   (malformed-formula-error () (call 'formula-corrector
+							     :text input-statement
+							     :signature (dialogue-signature game))))))
+	    (call 'turn-evaluator
+		  :player player-option
+		  :stance stance-option
+		  :reference reference-option
+		  :statement formula
+		  :game game))))
+      (<:h1 "The game so far")
+      (<:div :style "border:1px solid"
+	     (pretty-print-game game))
+      (<ucw:form :method "POST"
+		 :action $take-action
+        (<:p "Which player will move?")
+	(<ucw:select :accessor player-option
+		     :size 1
+	  (<ucw:option :value 'p "Proponent")
+	  (<ucw:option :value 'o "Opponent"))
+	(<:p "Attack or defend?")
+	(<ucw:select :accessor stance-option
+		     :size 1
+	  (<ucw:option :value 'a "Attack")
+	  (<ucw:option :value 'd "Defend"))
+	(<:p "Choose the statement to which the selected player is responding.")
+	(<ucw:select :accessor reference-option
+		     :size 1
+	  (loop for i from 0 upto (1- (dialogue-length game))
+	     do (<ucw:option :value i (<:as-html i))))
+	(<:p "What do you want to assert?")
+	(<ucw:input :type "text"
+		    :id "input-statement"
+		    :accessor input-statement)
+	(<:br)
+	(<ucw:submit :value "Make a move"
+		     :action $take-action))))))
 
 ;; I'm confused about what to do here.  I want the user to indicate,
 ;; first of all, whether they should attack or defend something.  I
