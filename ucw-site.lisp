@@ -747,7 +747,6 @@
 (defmethod render ((self start-game-component))
   (with-slots ((sig signature))
       self
-    (<:h1 "It's your turn")
     (render (formula-entry-component self))))
 
 ;;; ucw-site.lisp ends here
