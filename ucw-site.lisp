@@ -40,7 +40,7 @@
 
 ;; adding functions
 
-(defcomponent add-a-function (standard-window-component)
+(defcomponent add-a-function ()
   ((signature :initarg :signature
 	      :accessor signature)
    (proposed-name :initarg :name 
@@ -117,7 +117,7 @@
 
 ;; deleting functions
 
-(defcomponent delete-a-function (standard-window-component)
+(defcomponent delete-a-function ()
   ((signature :initarg :signature
 	      :accessor signature)))
 
@@ -394,28 +394,6 @@
     ("W formula" "w-formulas" ,w-formula)
     ("Scott's formula" "scott-formula" ,scott-formula)
     ("Smetanich's formula" "smetanich-formula" ,smetanich-formula)))
-
-(defcomponent number-corrector (standard-window-component)
-  ((num :initarg :number
-	:accessor number-corrector-num)))
-
-(defmethod render ((self number-corrector))
-  (let (input-number) ;; annoying that I have to lexically bind this 
-    (symbol-macrolet (($take-action (let ((parsed-number (parse-integer input-number :junk-allowed t)))
-				      (if (null parsed-number)
-					  (answer (call 'number-corrector :number input-number))
-					  (answer parsed-number)))))
-      
-      (<:h1 "Invalid number supplied")
-      (<:p "We are unable to make sense of the number, \"" (<:as-html (number-corrector-num self)) "\" that you supplied.  Please try again.")
-      (<ucw:form :method "POST"
-		 :action $take-action
-      (<:label :for "number-input" "Enter a non-negative integer")
-      (<ucw:input :type "text"
-		  :id "number-input"
-		  :accessor input-number)
-      (<ucw:submit :value "Use this number"
-		   :action $take-action)))))
 
 (defcomponent formula-corrector (standard-window-component)
   ((text :initarg :text :accessor formula-corrector-text)
