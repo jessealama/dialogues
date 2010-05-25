@@ -79,3 +79,4 @@
   if there were at least some kind of way to restart the game.  Even
   better would be a way to go back to the page/continuation state
   where one was immediately before the error was generated.
+* TODO Ensure that entering dupication functions, constants, and predicates is blocked
