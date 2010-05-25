@@ -35,7 +35,7 @@
 * DONE Document the accepted syntax for inputting formulas.
   CLOSED: [2010-05-24 Mon 01:32]
   It's lispy.
-* TODO Provide a way to list all available moves.
+* IN-PROGRESS Provide a way to list all available moves.
 * TODO Provide a way of quitting the game.
 * TODO Provide a way of rewinding the game to a previous spot.
 * TODO Provide for symbolic attacks
