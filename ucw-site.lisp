@@ -633,7 +633,13 @@
 		      
 	(<:br)
 	(<ucw:submit :value "Make a move"
-		     :action $take-action))))))
+		     :action $take-action)
+	(<:br)
+	(<:p "or")
+	(<ucw:submit :value "Quit"
+		     :action (let* ((default-fec (make-instance 'formula-entry-component :signature pqrs-propositional-signature))
+				    (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
+			       (call 'initial-formula-window :body default-sgc))))))))
 
 ;; I'm confused about what to do here.  I want the user to indicate,
 ;; first of all, whether they should attack or defend something.  I

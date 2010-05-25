@@ -37,7 +37,8 @@
   It's lispy.
 * DONE Provide a way to list all available moves.
   CLOSED: [2010-05-25 Tue 20:00]
-* IN-PROGRESS Provide a way of quitting the game.
+* DONE Provide a way of quitting the game.
+  CLOSED: [2010-05-25 Tue 20:19]
 * TODO Provide a way of rewinding the game to a previous spot.
 * DONE Provide for symbolic attacks
   CLOSED: [2010-05-25 Tue 20:12]
