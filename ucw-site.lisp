@@ -447,9 +447,9 @@
 
 (defmethod render ((self formula-corrector))
   (symbol-macrolet (($take-action (handler-case (answer (parse-formula input-formula (formula-corrector-signature self)))
-				    (malformed-formula-error () (call 'formula-corrector 
-								      :text input-formula
-								      :signature (formula-corrector-signature self))))))
+				    (malformed-formula-error () (answer (call 'formula-corrector 
+									      :text input-formula
+									      :signature (formula-corrector-signature self)))))))
     (let (input-formula)
       (<:h1 "Invalid formula supplied")
       (<:p "We are unable to make sense of the formula, \"" (<:as-html (formula-corrector-text self)) "\" that you supplied.  The signature with respect to which you should enter a formula is:")
@@ -460,7 +460,9 @@
 		 :action $take-action
 	(<:p "Enter a formula in the above signature.  If you wish, you can " (<ucw:a :action (let ((new-signature (call 'signature-editor :signature (formula-corrector-signature self))))
 												(handler-case (answer (parse-formula (formula-corrector-text self) new-signature))
-												    (malformed-formula-error () (answer (call 'formula-corrector :text input-formula)))))
+												    (malformed-formula-error () (answer (call 'formula-corrector 
+																	      :text input-formula
+																	      :signature (formula-corrector-signature self))))))
 										      "edit the signature") ". (If edit the signature and the formula that you provided becomes well-formed in the new signature, then you will go back to where you were before you came here.  If, after editing the signature, the formula is still not valid, you will come back to this page.)")
 	(<ucw:input :type "text"
 		    :id "formula-input"
