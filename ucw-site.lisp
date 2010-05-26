@@ -158,7 +158,7 @@
 
 ;; adding a predicate
 
-(defcomponent add-a-predicate (standard-window-component)
+(defcomponent add-a-predicate ()
   ((signature :initarg :signature
 	      :accessor signature)
    (proposed-name :initarg :name :accessor proposed-name :initform nil)
@@ -235,7 +235,7 @@
 
 ;; deleting a predicate
 
-(defcomponent delete-a-predicate (standard-window-component)
+(defcomponent delete-a-predicate ()
   ((signature :initarg :signature
 	      :accessor signature))
   (:default-initargs
@@ -264,7 +264,7 @@
 
 ;; adding a constant
 
-(defcomponent add-a-constant (standard-window-component)
+(defcomponent add-a-constant ()
   ((signature :initarg :signature
 	      :accessor signature)
    (proposed-name :initarg :name :accessor proposed-name :initform nil))
@@ -313,7 +313,7 @@
 
 ;; deleting a constant
 
-(defcomponent delete-a-constant (standard-window-component)
+(defcomponent delete-a-constant ()
   ((signature :initarg :signature
 	      :accessor signature))
   (:default-initargs
@@ -425,7 +425,7 @@
     ("Scott's formula" "scott-formula" ,scott-formula)
     ("Smetanich's formula" "smetanich-formula" ,smetanich-formula)))
 
-(defcomponent formula-corrector (standard-window-component)
+(defcomponent formula-corrector ()
   ((text :initarg :text :accessor formula-corrector-text)
    (signature :initarg :signature :accessor formula-corrector-signature))
   (:default-initargs
@@ -470,7 +470,7 @@
 	(<ucw:submit :value "Use this formula"
 		     :action $take-action)))))
 
-(defcomponent game-viewer (standard-window-component) 
+(defcomponent game-viewer () 
   ()
   (:default-initargs
       :title "let's play"))
