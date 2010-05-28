@@ -51,4 +51,7 @@ UCW."
 	       (:file "dialogue-search")
 	       (:file "figure")
 	       (:file "felscher")
+	       (:file "ucw-utils")
+	       (:file "ucw-server")
+	       (:file "ucw-applications")
 	       (:file "ucw-site")))

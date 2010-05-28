@@ -2,46 +2,6 @@
 
 (in-package :dialogues)
 
-;; Utils
-
-(defun current-window () (context.window-component *context*))
-
-;; Server configuration
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defparameter *dialogue-server-port* 8000))
-
-(defun make-dialogue-backend ()
-  (make-backend
-   :httpd
-   :host "127.0.0.1"
-   :port *dialogue-server-port*))
-
-(defun make-dialogue-server ()
-  (make-instance
-   'standard-server
-   :backend (make-dialogue-backend)))
-
-(defvar *dialogue-server* (make-dialogue-server))
-
-(defun startup-dialogue-server ()
-  (startup-server *dialogue-server*))
-
-(defun shutdown-dialogue-server ()
- (shutdown-server *dialogue-server*))
-
-;;;; The definiton of the dialogue
-
-(defclass dialogue-application (standard-application cookie-session-application-mixin)
-  ()
-  (:default-initargs
-   :url-prefix "/"
-    :debug-on-error nil))
-
-(defvar *dialogue-application* (make-instance 'dialogue-application))
-
-(register-application *dialogue-server* *dialogue-application*)
-
 ;; adding functions
 
 (defcomponent add-a-function ()
