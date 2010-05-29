@@ -122,7 +122,7 @@
 (defcomponent initial-formula-window (standard-window-component)
   ()
   (:default-initargs
-      :title "the game is about to begin"))
+      :title "play a lorenzen dialogue game"))
 
 (defvar famous-formulas
   `(("Peirce's formula" "peirce-formula" ,peirce-formula)
