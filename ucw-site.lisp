@@ -15,66 +15,73 @@
       self
     (<:p "The signature that will be used during the game is:")
     (render sig)
-    (<:p "You can:")
-    (<:ul
-     (<:li (<ucw:a :action (call 'add-a-predicate 
-				 :signature sig
-				 :name nil) "add a predicate") ", or")
-     (<:li (<ucw:a :action (call 'delete-a-predicate :signature sig) "delete a predicate") "."))
     (<:p
-     "When you're satisfisfied with the signature, you may "
-     (<ucw:a :action (answer sig) "proceed") " (you will return to wherever you were before you arrived here at the signature editor).")))
+     "[" (<ucw:a :action (call 'add-a-predicate
+			       :signature sig
+			       :name nil)
+		 "add a predicate") 
+     "]"
+     " "
+     "["
+     (<ucw:a :action (call 'delete-a-predicate :signature sig)
+	     "delete a predicate")
+     "]"
+     " "
+     "["
+     (<ucw:a :action (answer sig) "proceed")
+     "]")))
 
 ;; adding a predicate
+
+(defun fix-unacceptable-predicate-name ())
 
 (defcomponent add-a-predicate ()
   ((signature :initarg :signature
 	      :accessor signature)
-   (proposed-name :initarg :name :accessor proposed-name :initform nil))
-  (:default-initargs
-      :title "add a predicate to the signature"))
+   (proposed-name :initarg :name 
+		  :accessor proposed-name 
+		  :initform nil)
+   (validation-error-message :initarg :error-message
+			     :accessor validation-error-message
+			     :initform nil)))
 
 (defmethod render ((self add-a-predicate))
-  (let (input-predicate-name)
-    (symbol-macrolet 
-	(($do-over (answer (call 'add-a-predicate 
-				 :signature (signature self)
-				 :name input-predicate-name)))
-	 ($take-action (let ((new-name input-predicate-name))
-			 (if (valid-identifier-name? new-name)
-			     (let ((input-predicate-as-symbol (symbolify new-name)))
-			       (if (predicate? (signature self) input-predicate-as-symbol)
-				   $do-over
-				   (answer (add-predicate (signature self) input-predicate-as-symbol 0))))
-			     
-			     $do-over))))
-      (with-slots ((new-name proposed-name) (sig signature)) self
+  (symbol-macrolet 
+      (($take-action 
+	(handler-case (answer 
+		       (add-predicate (signature self) input-predicate-name 0))
+	  (unacceptable-identifier-name-error (c)
+	    (let ((text (unacceptable-identifier-name-error-text c)))
+	      (answer
+	       (call 'add-a-predicate
+		     :signature (signature self)
+		     :error-message (format nil "The predicate name that you gave previously, \"~A\", contains a whitespace character and is thus unacceptable.." text)
+		     :name text))))
+	  (symbol-already-present-error (c)
+	    (let ((text (symbol-already-present-error-symbol c)))
+	      (answer
+	       (call 'add-a-predicate
+		     :signature (signature self)
+		     :error-message (format nil "The predicate name that you gave previously, \"~A\", already belongs to the signature." text)
+		     :name text)))))))
+    (let (input-predicate-name)
+      (with-slots ((new-name proposed-name) 
+		   (sig signature) 
+		   (message validation-error-message))
+	  self
+	(when message
+	  (<:div :class "error-message"
+	    (<:p (<:as-html message) "Please try again.")))
 	(<:p "The current signature is:")
 	(render sig)
 	(<:p "The new predicate name should be different from the names of currently existing predicates.  It should be different from the empty string and should not contain any whitespace characters.")
-	(if (and new-name (not (empty-string? new-name)))
-	    (if (contains-whitespace? new-name)
-		(progn
-		  (<:p "The predicate name that you gave previously, ")
-		  (<:blockquote
-		   (<:as-html new-name) ",")
-		  (<:p "contains a whitespace character and is thus unacceptable.  Please try again."))
-		(let ((input-predicate-as-symbol (symbolify new-name)))
-		  (if (predicate? sig input-predicate-as-symbol)
-		      (progn
-			(<:p "The predicate name that you gave previously, ")
-			(<:blockquote
-			 (<:as-html new-name) ",")
-			(<:p "is already defined in the given signature and cannot be overwritten.  Please try again."))))))
 	(<ucw:form :method "POST"
 		   :action $take-action
-          (<:label :for "new-predicate-name" "New predicate name")
-	  (<ucw:input :type "text"
+	  (<:label :for "new-predicate-name" "New predicate name")
+	  (<ucw:input :type "text" 
 		      :id "new-predicate-name"
 		      :accessor input-predicate-name)
-	  (<:br)
-	  (<ucw:submit :value "Add this predicate"
-		       :action $take-action))))))
+	  (<ucw:submit :value "Add this predicate" :action $take-action))))))
 
 ;; deleting a predicate
 

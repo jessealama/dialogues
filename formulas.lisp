@@ -25,10 +25,16 @@
 	 :reader unacceptable-identifier-name-error-text))
   (:report (lambda (condition stream)
 	     (let ((text (unacceptable-identifier-name-error-text condition)))
-	       (format stream "The given string,~%~%  ~A,~%~%is an unacceptable as the name of an identifier.")))))	     
+	       (format stream "The given string,~%~%  ~A,~%~%is an unacceptable as the name of an identifier." text)))))
+
+(defun try-another-identifier (c)
+  (declare (ignore c))
+  (let ((restart (find-restart 'try-another-identifier)))
+    (when restart
+      (invoke-restart 'try-another-identifier))))
 
 (define-condition symbol-already-present-error (error)
-  ((symbol :initarg :text 
+  ((symbol :initarg :symbol
 	   :reader symbol-already-present-error-symbol)
    (signature :initarg :signature 
 	      :reader symbol-already-present-error-signature))
@@ -41,7 +47,7 @@
 			       "The given symbol,~%~%  ~A,~%~%already belongs to the signature~%~%  ~A~%"
 			       symbol sig)
 		       (format stream
-			       "Weird: although a signature,~%~%  ~A~%~%was supplied, no symbol was given (or, more precisely, the given symbol is NIL).  It would seem that this error condition was not properly initialized by the calling code.~%"
+			       "Weird: although a signature,~%~%  ~A~%~%was supplied, no symbol was given (or possibly what was given was the symbol NIL).  It would seem that this error condition was not properly initialized by the calling code.~%"
 			       sig))
 		   (if symbol
 		       (format stream
@@ -49,7 +55,6 @@
 			       symbol)
 		       (format stream
 			       "Weird: neither a signature nor a text were supplied. It would seem that this error condition was not properly initialized by the calling code.~%")))))))
-  
 
 (defun copy-signature (signature)
   (make-instance 'signature
@@ -210,8 +215,8 @@
 (defmethod add-function ((sig signature) (func-str string) (arity integer))
   (if (valid-identifier-name? func-str)
       (add-function sig (symbolify func-str) arity)
-      (error 'unacceptable-identifier-name-error
-	     :text pred-str)))      
+      (error 'unaccepptable-identifier-name-error
+	     :symbol (symbolify func-str))))
 
 (defmethod delete-function ((sig signature) func-sym)
   (setf (signature-functions sig)
