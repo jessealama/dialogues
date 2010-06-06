@@ -100,3 +100,4 @@
 * DONE Allow choosing which dialogue rules to use
   CLOSED: [2010-06-06 Sun 19:18]
   
+* TODO Ensure that symbols are printed without their package prefix
