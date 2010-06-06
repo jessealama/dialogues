@@ -240,7 +240,7 @@
       self
     (if (and player statement stance reference)
 	(multiple-value-bind (rules-result messages)
-	    (evaluate-all-rules d-dialogue-rules 
+	    (evaluate-all-rules (dialogue-rules game)
 				game 
 				player 
 				(dialogue-length game)
@@ -301,10 +301,10 @@
       (<:div :style "border:1px solid"
 	     (pretty-print-game game))
       (<:h1 "Choose from the available moves...")
-      (let* ((next-proponent-attacks (next-moves game d-dialogue-rules 'p 'a))
-	     (next-proponent-defenses (next-moves game d-dialogue-rules 'p 'd))
-	     (next-opponent-attacks (next-moves game d-dialogue-rules 'o 'a))
-	     (next-opponent-defenses (next-moves game d-dialogue-rules 'o 'd)))
+      (let* ((next-proponent-attacks (next-moves game 'p 'a))
+	     (next-proponent-defenses (next-moves game 'p 'd))
+	     (next-opponent-attacks (next-moves game 'o 'a))
+	     (next-opponent-defenses (next-moves game 'o 'd)))
 	(<:p "Available moves for " (<:b "Proponent") ":")
 	(if (or next-proponent-attacks next-proponent-defenses)
 	    (<:ul
@@ -467,23 +467,27 @@ way to explore the meaning of the dialogue rules.")
 	      :accessor signature)))
 
 (defmethod render ((self formula-entry-component))
-  (let (input-formula selected-formula)
+  (let (input-formula selected-formula selected-rules)
   (symbol-macrolet 
-      (($take-action (let ((sig (signature self)))
-		       (if (empty-string? input-formula)
-			   (if (formula? selected-formula sig)
-			       (call 'turn-editor
-				     :game (make-dialogue selected-formula 
-							  sig))
-			       (call 'formula-corrector
-				     :text (format nil "~A" selected-formula)
-				     :signature sig))
-			   (handler-case (call 'turn-editor
-					       :game (make-dialogue 
-						      (parse-formula input-formula sig) sig))
-			     (malformed-formula-error (call 'formula-corrector
-						       :text input-formula
-						       :signature sig)))))))
+      (($take-action 
+	(let ((sig (signature self)))
+	  (if (empty-string? input-formula)
+	      (if (formula? selected-formula sig)
+		  (call 'turn-editor
+			:game (make-dialogue selected-formula 
+					     sig
+					     selected-rules))
+		  (call 'formula-corrector
+			:text (format nil "~A" selected-formula)
+			:signature sig))
+	      (handler-case (call 'turn-editor
+				  :game (make-dialogue 
+					 (parse-formula input-formula sig) 
+					 sig
+					 selected-rules))
+		(malformed-formula-error (call 'formula-corrector
+					  :text input-formula
+					  :signature sig)))))))
     (let ((sig (signature self)))
       (<:p "To get started, enter a formula in the text box below or choose a famous formula from the menu.")
       (formula-guide)
@@ -504,9 +508,20 @@ way to explore the meaning of the dialogue rules.")
 	      (<ucw:option :value formula (<:as-html long-name)))))
 	(<:p
 	 (<:as-html "(If you have deleted some elements from the signature but wish to choose one of the pre-selected formulas, you should be aware that the formula you choose might not actually be a formula in a diminished sgnature.)  If the text box is not empty, its contents will be the initial formula.  If the text box is empty, then the selected \"famous formula\" will be used."))
+	(<:p "Choose which dialogue rules to use.  The D-dialogue
+	rules are the basic dialogue rules.  The E-dialogue rules
+	extend the D-dialogue rules and are more strict: they require
+	that Opponent always respond to the immediately prior
+	assertion of Proponent.")
+	(<ucw:select :id "selected-rules"
+		     :size 1
+		     :accessor selected-rules
+	  (<ucw:option :value d-dialogue-rules
+		       "D rules")
+	  (<ucw:option :value e-dialogue-rules
+		       "E rules"))
 	(<:p
-	 (<ucw:submit :action $take-action
-		      :value "Let's play")))))))
+	 (<:submit :value "Let's play")))))))
 
 (defmethod render ((self start-game-component))
   (with-slots ((sig signature))

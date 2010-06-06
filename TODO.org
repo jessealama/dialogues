@@ -97,5 +97,6 @@
   that can be created during a session.
 * TODO "fancy" printing of formulas
   E.g., use the rarr entity to print implications.
-* IN-PROGRESS Allow choosing which dialogue rules to use
+* DONE Allow choosing which dialogue rules to use
+  CLOSED: [2010-06-06 Sun 19:18]
   
