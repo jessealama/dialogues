@@ -96,3 +96,5 @@
   that can be created during a session.
 * TODO "fancy" printing of formulas
   E.g., use the rarr entity to print implications.
+* TODO Allow choosing which dialogue rules to use
+  
