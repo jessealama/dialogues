@@ -194,4 +194,7 @@
 (defun symbolify (str &optional (package *package*))
   (intern (string-upcase str) package))
 
+(defun intern-in-dialogue-package (name)
+  (intern name *dialogue-package*))
+
 ;;; utils.lisp ends here
