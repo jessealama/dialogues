@@ -99,8 +99,8 @@
 	    (tail (cdr lst)))
 	(concatenate 'string 
 		     (if tail
-			 (format nil "~S, " head)
-			 (format nil "~S" head))
+			 (format nil "~A, " head)
+			 (format nil "~A" head))
 		     (comma-separated-list tail)))
       ""))
 
