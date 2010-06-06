@@ -2,6 +2,8 @@
 
 (in-package :dialogues)
 
+(defvar *maintainer-email* "jesse.alama@gmail.com")
+
 (defcomponent signature-editor ()
   ((signature :initarg :signature
 	      :accessor signature)))
@@ -45,15 +47,27 @@
 			     :accessor validation-error-message
 			     :initform nil)))
 
-;; (defmethod handle-toplevel-condition ((app (eql *dialogue-application*))
-;; 				      (condition unacceptable-identifier-name-error)
-;; 				      (action standard-action))
-;;   (if (typep *source-component* 'add-a-predicate)
-;;       (let ((sig (signature *source-component*)))
-;; 	(call 'add-a-predicate
-;; 	      :signature sig
-;; 	      :error-message "The predicate name that you gave previously contains a whitespace character and is thus unacceptable."))
-;;       (error "Unable to determine how to proceed: we are asked to handle a condition of type UNACCEPTABLE-IDENTIFIER-NAME-ERROR, but we are not editing the signature.")))
+(defmethod handle-toplevel-condition ((app (eql *dialogue-application*))
+				      condition
+				      action)
+  (<:h1 "Oops, something went wrong")
+  (<:p "Something went wrong, I'm afraid.  Here is the precise error
+  that was generated:")
+  (<:blockquote
+   (<:as-html condition))
+  (<:p "You're welcome to " (<:a :href (concatenate 'string
+						    "mailto:"
+						    *maintainer-email*)
+				 "notify the site maintainer") " about this.")
+  (<:p "What next?  You can either "
+       (<ucw:a :action *source-component*
+	       "go back to where you were before the error occured")
+       " or simply " 
+       (<ucw:a :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
+			      (default-sgc (make-instance 'start-game-component 
+							  :formula-entry-component default-fec)))
+			 (call 'initial-formula-window :body default-sgc))
+	       "quit and start over") "."))
 
 (defaction insert-predicate (signature pred-name)
   (ucw-handler-case (add-predicate signature pred-name 0)
