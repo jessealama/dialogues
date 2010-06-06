@@ -7,7 +7,9 @@
 	      :accessor signature)))
 
 (defaction save-signature ((self signature-editor) new-predicate-symbol)
-  (add-predicate (signature self) new-predicate-symbol 0)
+  (add-predicate (signature self) 
+		 (intern-in-dialogue-package new-predicate-symbol)
+		 0)
   (answer (signature self)))
 
 (defmethod render ((self signature-editor))
@@ -33,8 +35,6 @@
 
 ;; adding a predicate
 
-(defun fix-unacceptable-predicate-name ())
-
 (defcomponent add-a-predicate ()
   ((signature :initarg :signature
 	      :accessor signature)
@@ -45,51 +45,61 @@
 			     :accessor validation-error-message
 			     :initform nil)))
 
+;; (defmethod handle-toplevel-condition ((app (eql *dialogue-application*))
+;; 				      (condition unacceptable-identifier-name-error)
+;; 				      (action standard-action))
+;;   (if (typep *source-component* 'add-a-predicate)
+;;       (let ((sig (signature *source-component*)))
+;; 	(call 'add-a-predicate
+;; 	      :signature sig
+;; 	      :error-message "The predicate name that you gave previously contains a whitespace character and is thus unacceptable."))
+;;       (error "Unable to determine how to proceed: we are asked to handle a condition of type UNACCEPTABLE-IDENTIFIER-NAME-ERROR, but we are not editing the signature.")))
+
+(defaction insert-predicate (signature pred-name)
+  (ucw-handler-case (add-predicate signature pred-name 0)
+    (unacceptable-identifier-name-error (c)
+      (let ((text (unacceptable-identifier-name-error-text c)))
+	(answer
+	 (call 'add-a-predicate
+	       :signature signature
+	       :error-message (format nil "The predicate name that you gave previously, \"~A\", contains a whitespace character and is thus unacceptable." text)
+	       :name text))))
+    (symbol-already-present-error (c)
+      (let ((text (symbol-already-present-error-symbol c)))
+	(answer
+	 (call 'add-a-predicate
+	       :signature signature
+	       :error-message (format nil "The predicate name that you gave previously, \"~A\", already belongs to the signature." text)
+	       :name text))))
+    (:no-error (result)
+	       (answer result))))
+
 (defmethod render ((self add-a-predicate))
-  (symbol-macrolet 
-      (($take-action 
-	(handler-case (answer 
-		       (add-predicate (signature self) input-predicate-name 0))
-	  (unacceptable-identifier-name-error (c)
-	    (let ((text (unacceptable-identifier-name-error-text c)))
-	      (answer
-	       (call 'add-a-predicate
-		     :signature (signature self)
-		     :error-message (format nil "The predicate name that you gave previously, \"~A\", contains a whitespace character and is thus unacceptable.." text)
-		     :name text))))
-	  (symbol-already-present-error (c)
-	    (let ((text (symbol-already-present-error-symbol c)))
-	      (answer
-	       (call 'add-a-predicate
-		     :signature (signature self)
-		     :error-message (format nil "The predicate name that you gave previously, \"~A\", already belongs to the signature." text)
-		     :name text)))))))
-    (let (input-predicate-name)
-      (with-slots ((new-name proposed-name) 
-		   (sig signature) 
-		   (message validation-error-message))
-	  self
-	(when message
-	  (<:div :class "error-message"
-	    (<:p (<:as-html message) "Please try again.")))
-	(<:p "The current signature is:")
-	(render sig)
-	(<:p "The new predicate name should be different from the names of currently existing predicates.  It should be different from the empty string and should not contain any whitespace characters.")
-	(<ucw:form :method "POST"
-		   :action $take-action
-	  (<:label :for "new-predicate-name" "New predicate name")
-	  (<ucw:input :type "text" 
-		      :id "new-predicate-name"
-		      :accessor input-predicate-name)
-	  (<ucw:submit :value "Add this predicate" :action $take-action))))))
+  (let (input-predicate-name)
+    (with-slots ((new-name proposed-name) 
+		 (sig signature) 
+		 (message validation-error-message))
+	self
+      (when message
+	(<:div :class "error-message"
+	  (<:p (<:as-html message) " " "Please try again.")))
+      (<:p "The current signature is:")
+      (render sig)
+      (<:p "The new predicate name should be different from the names of currently existing predicates.  It should be different from the empty string and should not contain any whitespace characters.")
+      (<ucw:form :method "POST"
+		 :action (answer (insert-predicate (signature self)
+						   input-predicate-name))
+        (<:label :for "new-predicate-name" "New predicate name")
+	(<ucw:input :type "text" 
+		    :id "new-predicate-name"
+		    :accessor input-predicate-name)
+	(<:submit :value "Add this predicate")))))
 
 ;; deleting a predicate
 
 (defcomponent delete-a-predicate ()
   ((signature :initarg :signature
-	      :accessor signature))
-  (:default-initargs
-      :title "delete a predicate from the signature"))
+	      :accessor signature)))
 
 (defmethod render ((self delete-a-predicate))
   (let (selected-predicate)
@@ -122,8 +132,10 @@
 
 (defentry-point "" (:application *dialogue-application*)
     ()
-  (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
-	 (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
+  (let* ((default-fec (make-instance 'formula-entry-component 
+				     :signature (copy-signature pqrs-propositional-signature)))
+	 (default-sgc (make-instance 'start-game-component 
+				     :formula-entry-component default-fec)))
     (call 'initial-formula-window :body default-sgc)))
 
 (defcomponent initial-formula-window (standard-window-component)
@@ -148,9 +160,7 @@
 
 (defcomponent formula-corrector ()
   ((text :initarg :text :accessor formula-corrector-text)
-   (signature :initarg :signature :accessor formula-corrector-signature))
-  (:default-initargs
-      :title "correct a formula"))
+   (signature :initarg :signature :accessor formula-corrector-signature)))
 
 (defun formula-guide ()
   (<:p "Non-atomic formulas are written in prefix notation, with parentheses
@@ -190,11 +200,6 @@
 		    :accessor input-formula)
 	(<ucw:submit :value "Use this formula"
 		     :action $take-action)))))
-
-(defcomponent game-viewer () 
-  ()
-  (:default-initargs
-      :title "let's play"))
 
 (defcomponent turn-editor ()
   ((game :accessor game
@@ -285,72 +290,89 @@
       (<:h1 "The game so far")
       (<:div :style "border:1px solid"
 	     (pretty-print-game game))
-      (let ((next-proponent-attacks (next-moves game d-dialogue-rules 'p 'a))
-	    (next-proponent-defenses (next-moves game d-dialogue-rules 'p 'd))
-	    (next-opponent-attacks (next-moves game d-dialogue-rules 'o 'a))
-	    (next-opponent-defenses (next-moves game d-dialogue-rules 'o 'd)))
+      (<:h1 "Choose from the available moves...")
+      (let* ((next-proponent-attacks (next-moves game d-dialogue-rules 'p 'a))
+	     (next-proponent-defenses (next-moves game d-dialogue-rules 'p 'd))
+	     (next-opponent-attacks (next-moves game d-dialogue-rules 'o 'a))
+	     (next-opponent-defenses (next-moves game d-dialogue-rules 'o 'd)))
+	(<:p "Available moves for " (<:b "Proponent") ":")
 	(if (or next-proponent-attacks next-proponent-defenses)
-	    (progn
-	      (<:p "Available moves for " (<:b "Proponent") ":")
-	      (if next-proponent-attacks
-		  (<:ul
-		   (dolist (next-proponent-attack next-proponent-attacks)
-		     (destructuring-bind (next-statement next-reference)
-			 next-proponent-attack
-		       (<:li "Attack move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))
-		  (<:p (<:em "(no attacks are availabe)")))
-	      (if next-proponent-defenses
-		  (<:ul
-		   (dolist (next-proponent-defense next-proponent-defenses)
-		     (destructuring-bind (next-statement next-reference)
-			 next-proponent-defense
-		       (<:li "Defend against the attack of move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))
-		  (<:p (<:em "(no defenses are availabe)"))))
-	    (<:p (<:em "(no moves for Proponent are available)")))
+	    (<:ul
+	     (if next-proponent-attacks
+		 (dolist (next-proponent-attack next-proponent-attacks)
+		   (destructuring-bind (next-statement next-reference)
+		       next-proponent-attack
+		     (<:li (<ucw:a 
+			    :action (add-move-to-dialogue game
+							  (make-move 'p next-statement 'a next-reference))
+			    "Attack move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))
+		 (dolist (next-proponent-defense next-proponent-defenses)
+		   (destructuring-bind (next-statement next-reference)
+		       next-proponent-defense
+		     (<:li 
+		      (<ucw:a :action (add-move-to-dialogue game
+							    (make-move 'p next-statement 'd next-reference))
+			      "Defend against the attack of move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))))
+	    (<:p (<:em "(no moves for Proponent are available.)")))
+	(<:p "Available moves for " (<:b "Opponent") ":")
 	(if (or next-opponent-attacks next-opponent-defenses)
-	    (progn
-	      (<:p "Available moves for " (<:b "Opponent") ":")
-	      (if next-opponent-attacks
-		  (<:ul
-		   (dolist (next-opponent-attack next-opponent-attacks)
-		     (destructuring-bind (next-statement next-reference)
-			 next-opponent-attack
-		       (<:li "Attack move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))
-		  (<:p (<:em "(no attacks are availabe)")))
-	      (if next-opponent-defenses
-		  (<:ul
-		   (dolist (next-opponent-defense next-opponent-defenses)
-		     (destructuring-bind (next-statement next-reference)
-			 next-opponent-defense
-		       (<:li "Defense against the attack of move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))
-		  (<:p (<:em "(no defenses are availabe)"))))
-	    (<:p (<:em "(no moves for Opponent are available)"))))
+	    (<:ul
+	     (if next-opponent-attacks
+		 (dolist (next-opponent-attack next-opponent-attacks)
+		   (destructuring-bind (next-statement next-reference)
+		       next-opponent-attack
+		     (<:li (<ucw:a 
+			    :action (add-move-to-dialogue game
+							  (make-move 'o next-statement 'a next-reference))
+			    "Attack move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))
+		 (dolist (next-opponent-defense next-opponent-defenses)
+		   (destructuring-bind (next-statement next-reference)
+		       next-opponent-defense
+		     (<:li 
+		      (<ucw:a :action (add-move-to-dialogue game
+							    (make-move 'o next-statement 'd next-reference))
+			      "Defend against the attack of move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))))
+	    (<:p (<:em "(no moves for Opponent are available.)"))))
+      (<:h1 "...or enter your move manually")
+      (<:p "The list in the previous section shows all moves that
+could be made, by either player, that adhere to the dialogue rules;
+follow the links there to make the corresponding moves.  Here, you can
+enter a move manually.  If the move you enter is different from any of
+the moves in the previous section, then it will inadmissible and you
+will see which of the rules are violated by your move.  This is a good
+way to explore the meaning of the dialogue rules.")
       (<ucw:form :method "POST"
 		 :action $take-action
-        (<:p "Which player will move?")
-	(<ucw:select :accessor player-option
-		     :size 1
-	  (<ucw:option :value 'p "Proponent")
-	  (<ucw:option :value 'o "Opponent"))
-	(<:p "Attack or defend?")
-	(<ucw:select :accessor stance-option
-		     :size 1
-	  (<ucw:option :value 'a "Attack")
-	  (<ucw:option :value 'd "Defend"))
-	(<:p "Choose the statement to which the selected player is responding.")
-	(<ucw:select :accessor reference-option
-		     :size 1
-	  (loop for i from 0 upto (1- (dialogue-length game))
-	     do (<ucw:option :value i (<:as-html i))))
-	(<:p "What do you want to assert? Enter a formula or choose a symbolic attack.  (If you enter a formula, it will be your proposed assertion; otherwise, the selected symbolic attack will be.)")
-	(<ucw:input :type "text"
-		    :id "input-statement"
-		    :accessor input-statement)
-	(<ucw:select :accessor selected-symbolic-attack
-		     :size 1
-	  (<ucw:option :value 'attack-left-conjunct "Attack the left conjunct")
-	  (<ucw:option :value 'attack-right-conjunct "Attack the right conjunct")
-	  (<ucw:option :value 'which-disjunct? "Request that a disjunct be chosen"))
+	(<:table :style "border:1px solid;"
+	 (<:tr 
+	  (<:td "Which player will move?")
+	  (<:td (<ucw:select :accessor player-option
+			     :size 1
+		  (<ucw:option :value 'p "Proponent")
+		  (<ucw:option :value 'o "Opponent"))))
+	 (<:tr
+	  (<:td "Attack or defend?")
+	  (<:td (<ucw:select :accessor stance-option
+			     :size 1
+		  (<ucw:option :value 'a "Attack")
+		  (<ucw:option :value 'd "Defend"))))
+	 (<:tr
+	  (<:td "Choose the statement to which the selected player is responding.")
+	  (<:td (<ucw:select :accessor reference-option
+			     :size 1
+		  (loop for i from 0 upto (1- (dialogue-length game))
+		     do (<ucw:option :value i (<:as-html i))))))
+	 (<:tr
+	  (<:td
+	   "What do you want to assert? Enter a formula or choose a symbolic attack.  (If you enter a formula, it will be your proposed assertion; otherwise, the displayed symbolic attack in the menu will be your move.)")
+	  (<:td (<ucw:input :type "text"
+			    :id "input-statement"
+			    :accessor input-statement)
+		(<ucw:select :accessor selected-symbolic-attack
+			     :size 1
+		  (<ucw:option :value 'attack-left-conjunct "Attack the left conjunct")
+		  (<ucw:option :value 'attack-right-conjunct "Attack the right conjunct")
+		  (<ucw:option :value 'which-disjunct? "Request that a disjunct be chosen")))))
 		      
 	(<:br)
 	(<ucw:submit :value "Make a move"
@@ -436,21 +458,22 @@
 
 (defmethod render ((self formula-entry-component))
   (let (input-formula selected-formula)
-  (symbol-macrolet (($take-action (let ((sig (signature self)))
-				    (if (empty-string? input-formula)
-					(if (formula? selected-formula sig)
-					    (call 'game-viewer
-						  :body (make-instance 'turn-editor
-								       :game (make-dialogue selected-formula sig)))
-					    (call 'formula-corrector
-						  :text (format nil "~A" selected-formula)
-						  :signature sig))
-					(handler-case (call 'game-viewer
-							    :body (make-instance 'turn-editor
-										 :game (make-dialogue (parse-formula input-formula sig) sig)))
-					  (malformed-formula-error (call 'formula-corrector
-								    :text input-formula
-								    :signature sig)))))))
+  (symbol-macrolet 
+      (($take-action (let ((sig (signature self)))
+		       (if (empty-string? input-formula)
+			   (if (formula? selected-formula sig)
+			       (call 'turn-editor
+				     :game (make-dialogue selected-formula 
+							  sig))
+			       (call 'formula-corrector
+				     :text (format nil "~A" selected-formula)
+				     :signature sig))
+			   (handler-case (call 'turn-editor
+					       :game (make-dialogue 
+						      (parse-formula input-formula sig) sig))
+			     (malformed-formula-error (call 'formula-corrector
+						       :text input-formula
+						       :signature sig)))))))
     (let ((sig (signature self)))
       (<:p "To get started, enter a formula in the text box below or choose a famous formula from the menu.")
       (formula-guide)
