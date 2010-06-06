@@ -84,7 +84,8 @@
 (defun truncate-dialogue (dialogue cutoff)
   (make-instance 'dialogue
 		 :signature (dialogue-signature dialogue)
-		 :plays (subseq (dialogue-plays dialogue) 0 cutoff)))
+		 :plays (subseq (dialogue-plays dialogue) 0 cutoff)
+		 :rules (dialogue-rules dialogue)))
 
 (defvar *prompt* "> ")
 
@@ -133,7 +134,10 @@ attacks which, being symbols, do qualify as terms."
 	      :initarg :signature)
    (plays :accessor dialogue-plays 
 	  :initform nil
-	  :initarg :plays)))
+	  :initarg :plays)
+   (rules :accessor dialogue-rules
+	  :initform nil
+	  :initarg :rules)))
 
 (defmethod print-object ((game dialogue) stream)
   (print-unreadable-object (game stream :type t)
@@ -141,10 +145,11 @@ attacks which, being symbols, do qualify as terms."
       (format stream "signature: ~A moves: ~A"
 	      signature plays))))
 
-(defun make-dialogue (formula signature)
+(defun make-dialogue (formula signature rules)
   (make-instance 'dialogue
 		 :signature signature
-		 :plays (list (make-move 'p formula nil nil))))
+		 :plays (list (make-move 'p formula nil nil))
+		 :rules rules))
 
 (defun print-initial-move (dialogue stream)
   (let ((first-move (first (dialogue-plays dialogue)))
@@ -271,34 +276,6 @@ attacks which, being symbols, do qualify as terms."
   (let ((open-attacks (open-attack-indices dialogue)))
     (when open-attacks
       (car open-attacks))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Concrete dialogues
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defparameter peirce-dialogue
-  (make-dialogue peirce-formula pqrs-propositional-signature))
-
-(defparameter excluded-middle-dialogue
-  (make-dialogue excluded-middle pqrs-propositional-signature))
-
-(defparameter markov-dialogue
-  (make-dialogue markov-formula pqrs-propositional-signature))
-
-(defparameter double-negation-dialogue
-  (make-dialogue double-negation-intro pqrs-propositional-signature))
-
-(defparameter k-dialogue
-  (make-dialogue k-formula pqrs-propositional-signature))
-
-(defparameter b-dialogue
-  (make-dialogue b-formula pqrs-propositional-signature))
-
-(defparameter c-dialogue
-  (make-dialogue c-formula pqrs-propositional-signature))
-
-(defparameter w-dialogue
-  (make-dialogue w-formula pqrs-propositional-signature))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Dialogue rules
@@ -433,13 +410,13 @@ attacks which, being symbols, do qualify as terms."
 ;;; Extensions of dialogues
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun next-moves (dialogue rules player stance)
+(defun next-moves (dialogue player stance)
   (let (result)
     (let* ((subformulas (proper-subformulas (initial-statement dialogue)))
 	   (turn-number (dialogue-length dialogue)))
       (dotimes (index turn-number result)
 	(dolist (statement (append subformulas symbolic-attacks))
-	  (when (every-rule-passes rules
+	  (when (every-rule-passes (dialogue-rules dialogue)
 				   dialogue
 				   player
 				   turn-number
@@ -449,21 +426,21 @@ attacks which, being symbols, do qualify as terms."
 	    (push (list statement index)
 		  result)))))))
 
-(defun proponent-wins? (dialogue rules)
+(defun proponent-wins? (dialogue)
   (and (proponent-move? (last-player dialogue))
-       (null (next-moves dialogue rules 'o 'a))
-       (null (next-moves dialogue rules 'o 'd))))
+       (null (next-moves dialogue 'o 'a))
+       (null (next-moves dialogue 'o 'd))))
 
-(defun opponent-wins? (dialogue rules)
+(defun opponent-wins? (dialogue)
   (and (opponent-move? (last-player dialogue))
-       (null (next-moves dialogue rules 'p 'a))
-       (null (next-moves dialogue rules 'p 'd))))
+       (null (next-moves dialogue 'p 'a))
+       (null (next-moves dialogue 'p 'd))))
 
-(defun proponent-loses? (dialogue rules)
-  (not (proponent-wins? dialogue rules)))
+(defun proponent-loses? (dialogue)
+  (not (proponent-wins? dialogue)))
 
-(defun opponent-loses? (dialogue rules)
-  (not (opponent-wins? dialogue rules)))
+(defun opponent-loses? (dialogue)
+  (not (opponent-wins? dialogue)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Playing games
@@ -486,7 +463,8 @@ attacks which, being symbols, do qualify as terms."
 		   initial-formula 
 		   (formula? initial-formula signature))
 	      (setf dialogue (make-dialogue initial-formula
-					    signature))
+					    signature
+					    rules))
 	      (go initial-move))
 	     ((and signature initial-formula)
 	      (msg "The given initial formula is not a formula according to~%the given signature.")
@@ -521,7 +499,7 @@ attacks which, being symbols, do qualify as terms."
 	     :report "Enter another formula"
 	     :interactive read-new-formula
 	     (setf statement new-formula))))
-       (setf dialogue (make-dialogue statement signature))
+       (setf dialogue (make-dialogue statement signature rules))
      initial-move
        (msg "Game on!")
        (incf turn-number)
@@ -571,8 +549,8 @@ attacks which, being symbols, do qualify as terms."
        (msg-dialogue-so-far dialogue)
        (go rewind)
      print-next-moves-then-restart
-       (let ((next-attacks (next-moves dialogue rules player 'a))
-	     (next-defenses (next-moves dialogue rules player 'd)))
+       (let ((next-attacks (next-moves dialogue player 'a))
+	     (next-defenses (next-moves dialogue player 'd)))
 	 (cond (next-attacks
 		(msg "Possible attacks:")
 		(dolist (attack next-attacks)
@@ -621,7 +599,7 @@ attacks which, being symbols, do qualify as terms."
        (msg-dialogue-so-far dialogue)
        (go statement-input)
      print-next-attacks-then-attack
-       (let ((next-attacks (next-moves dialogue rules player 'a)))
+       (let ((next-attacks (next-moves dialogue player 'a)))
 	 (cond (next-attacks
 		(msg "Possible attacks:")
 		(dolist (attack next-attacks)
@@ -653,7 +631,7 @@ attacks which, being symbols, do qualify as terms."
 	 (q (go quit))
 	 (r (go start-move)))
      print-next-defenses-then-defend
-       (let ((next-defenses (next-moves dialogue rules player 'a)))
+       (let ((next-defenses (next-moves dialogue player 'a)))
 	 (cond (next-defenses
 		(msg "Possible defenses:")
 		(dolist (defense next-defenses)
