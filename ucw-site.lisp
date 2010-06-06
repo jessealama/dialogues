@@ -51,18 +51,14 @@
 				      condition
 				      action)
   (<:h1 "Oops, something went wrong")
-  (<:p "Something went wrong, I'm afraid.  Here is the precise error
-  that was generated:")
+  (<:p "Something went wrong, I'm afraid.  Here is the precise error that was generated:")
   (<:blockquote
    (<:as-html condition))
   (<:p "You're welcome to " (<:a :href (concatenate 'string
 						    "mailto:"
 						    *maintainer-email*)
 				 "notify the site maintainer") " about this.")
-  (<:p "What next?  You can either "
-       (<ucw:a :action *source-component*
-	       "go back to where you were before the error occured")
-       " or simply " 
+  (<:p "What next?  You can either go back with your browser or simply " 
        (<ucw:a :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
 			      (default-sgc (make-instance 'start-game-component 
 							  :formula-entry-component default-fec)))
