@@ -57,3 +57,7 @@
 
 	   ;; server configuration
 	   #:*DIALOGUE-SERVER-PORT*))
+
+(defvar *dialogue-package* (find-package :dialogues))
+
+;;; packages.lisp ends here
