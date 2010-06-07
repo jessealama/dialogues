@@ -6,13 +6,6 @@
 
 (in-package :dialogues-asd)
 
-;; (defsystem :cl-who-kryukov
-;;   :version "0.11.1-kryukov"
-;;   :serial t
-;;   :components ((:file "site/cl-who/packages")
-;;                (:file "site/cl-who/specials")
-;;                (:file "site/cl-who/who")))
-
 (defsystem :dialogues
   :description "A system for working with and exploring Lorenzen dialogue games"
   :long-description "This system is intended to offer a web site where
