@@ -6,166 +6,146 @@
 ;;; Formulas
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defconstant contradiction '⊥)
-(defconstant top '⊤)
+;;; Keywords
 
-(defun top? (formula)
-  (eq (car formula) top))
+(defclass formula ()
+  nil)
 
-(defun bottom? (formula)
-  (eq (car formula) contradiction))
-
-(defun negation? (formula)
-  (when formula
-    (when (listp formula)
-      (let ((s (car formula)))
-	(and (symbolp s)
-	     (string= s "NOT"))))))
-
-(defun unnegate (negation)
-  (second negation))
-
-(defun negate (formula)
-  (list 'not formula))
-
-(defun implication? (formula)
-  (when formula
-    (when (listp formula)
-      (let ((s (car formula)))
-      (and (symbolp s)
-	   (string= (symbol-name s) "IMPLIES"))))))
-
-(defun antecedent (implication)
-  (cadr implication))
-
-(defun consequent (implication)
-  (caddr implication))
-
-(defun make-implication (antecedent consequent)
-  (list 'implies antecedent consequent))
-
-(defun equivalence? (formula)
-  (when formula
-    (when (listp formula)
-      (let ((s (car formula)))
-	(and (symbolp s)
-	     (string= (symbol-name s) "IFF"))))))
-
-(defun lhs (equivalence)
-  (second equivalence))
-
-(defun rhs (equivalence)
-  (third equivalence))
-
-(defun disjunction? (formula)
-  (when formula
-    (when (listp formula)
-      (let ((s (car formula)))
-	(and (symbolp s)
-	     (string= (symbol-name s) "OR"))))))
-
-(defun disjuncts (disjunction)
-  (cdr disjunction))
-
-(defun make-disjunction (&rest disjuncts)
-  (cons 'or disjuncts))
-
-(defun left-disjunct (disjunction)
-  (cadr disjunction))
-
-(defun right-disjunct (disjunction)
-  (caddr disjunction))
-
-(defun conjunction? (formula)
-  (when formula
-    (when (listp formula)
-      (let ((s (car formula)))
-	(and (symbolp s)
-	     (string= (symbol-name s) "AND"))))))
-
-(defun conjuncts (conjunction)
-  (cdr conjunction))
-
-(defun left-conjunct (conjunction)
-  (cadr conjunction))
-
-(defun right-conjunct (conjunction)
-  (caddr conjunction))
-
-(defun make-conjunction (&rest conjuncts)
-  (cons 'and conjuncts))
-
-(defun universal? (formula)
-  (when formula
-    (when (listp formula)
-      (let ((s (car formula)))
-	(and (symbolp s)
-	     (string= (symbol-name s) "ALL"))))))
-
-(defun make-universal (var formula)
-  (list 'all var formula))
-
-(defun existential? (formula)
-  (when formula
-    (when (listp formula)
-      (let ((s (car formula)))
-	(and (symbolp s)
-	     (string= (symbol-name s) "EXISTS"))))))
-
-(defun make-existential (var formula)
-  (list 'exists var formula))
-
-(defun matrix (quantified-formula)
-  (caddr quantified-formula))
-
-(defun bound-variable (quantified-formula)
-  (cadr quantified-formula))
-
-(defun atomic-formula? (x signature)
-  (when x
-    (if (symbolp x)
-	(predicate-of-arity signature x 0)
-	(when (listp x)
-	  (let* ((pred (car x))
-		 (args (cdr x))
-		 (num-args (length args)))
-	    (and (predicate-of-arity signature pred num-args)
-		 (every #'(lambda (arg) (term? signature arg))
-			args)))))))
-
-(defun formula? (x signature)
-  (when x
-    (or (atomic-formula? x signature)
-	(and (conjunction? x) 
-	     (formula? (left-conjunct x) signature)
-	     (formula? (right-conjunct x) signature))
-	(and (disjunction? x)
-	     (formula? (left-disjunct x) signature)
-	     (formula? (right-disjunct x) signature))
-	(and (implication? x)
-	     (formula? (antecedent x) signature)
-	     (formula? (consequent x) signature))
-	(and (negation? x)
-	     (formula? (unnegate x) signature))
-	(and (universal? x)
-	     (variable? (bound-variable x))
-	     (formula? (matrix x) signature))
-	(and (existential? x)
-	     (variable? (bound-variable x))
-	     (formula? (matrix x) signature)))))
-
-(defun composite-formula? (x signature)
-  (and (formula? x signature)
-       (not (atomic-formula? x signature))))
-
-(defun predicate (atomic-formula)
-  (car atomic-formula))
-
-(defun arguments (atomic-formula)
-  (cdr atomic-formula))
+(defclass atomic-formula (formula)
+  ((predicate :initarg :predicate
+	      :accessor predicate)
+   (args :initarg :args
+	 :accessor arguments
+	 :type list)))
 
 (defun make-atomic-formula (predicate &rest arguments)
-  (cons predicate arguments))
+  (make-instance 'atomic-formula
+		 :predicate predicate
+		 :args arguments))
+
+(defvar contradiction (make-atomic-formula '⊥))
+(defvar top (make-atomic-formula '⊤))
+
+(defun make-equation (lhs rhs)
+  (make-atomic-formula '= lhs rhs))
+
+(defclass composite-formula (formula)
+  nil)
+
+(defclass negation (formula)
+  ((negated :initarg :negated
+	    :accessor unnegate
+	    :type formula)))
+
+(defgeneric negate (formula))
+
+(defmethod negate ((formula formula))
+  (make-instance 'negation :negated formula))
+
+(defclass implication (composite-formula)
+  ((antecedent :initarg :antecedent
+	       :accessor antecedent
+	       :type formula)
+   (consequent :initarg :consequent
+	       :accessor consequent
+	       :type formula)))
+
+(defun make-implication (antecedent consequent)
+  (make-instance 'implication
+		 :antecedent antecedent
+		 :consequent consequent))
+
+(defclass binary-connective-formula (composite-formula)
+  ((lhs :initarg :lhs
+	:accessor lhs
+	:type formula)
+   (rhs :initarg :rhs
+	:accessor rhs
+	:type formula)))
+
+(defclass multiple-arity-connective-formula (composite-formula)
+  ((items :initarg :items
+	  :accessor items
+	  :type list)))
+
+(defclass equivalence (binary-connective-formula)
+  nil)
+
+(defun make-equivalence (lhs rhs)
+  (make-instance 'equivalence
+		 :lhs lhs
+		 :rhs rhs))
+
+
+;;; disjunctions
+
+(defclass binary-disjunction (binary-connective-formula)
+  nil)
+
+(defclass multiple-arity-disjunction (multiple-arity-connective-formula)
+  nil)
+
+(defun make-binary-disjunction (lhs rhs)
+  (make-instance 'binary-disjunction
+		 :lhs lhs
+		 :rhs rhs))
+
+(defun make-multiple-arity-disjunction (&rest disjuncts)
+  (if disjuncts
+      (if (cdr disjuncts)
+	  (if (cddr disjuncts)
+	      (make-instance 'multiple-arity-disjunction
+			     :items disjuncts)
+	      (car disjuncts)))
+      top))
+
+;; conjunctions
+
+(defclass binary-conjunction (binary-connective-formula)
+  nil)
+
+(defclass multiple-arity-conjunction (multiple-arity-connective-formula)
+  nil)
+
+(defun make-binary-conjunction (lhs rhs)
+  (make-instance 'binary-conjunction
+		 :lhs lhs
+		 :rhs rhs))
+
+(defun make-multiple-arity-conjunction (&rest conjuncts)
+  (if conjuncts
+      (if (cdr conjuncts)
+	  (if (cddr conjuncts)
+	      (make-instance 'multiple-arity-conjunction
+			     :items conjuncts))
+	  (cadr conjuncts))
+      contradiction))
+
+;; quantifiers
+
+(defclass generalization (composite-formula)
+  ((bound-variable :initarg :bound-variable
+		   :accessor bound-variable
+		   :type variable)
+   (matrix :initarg :matrix
+	   :accessor matrix
+	   :type formula)))
+
+(defclass universal-generalization (generalization)
+  nil)
+
+(defclass existential-generalization (generalization)
+  nil)
+
+(defun make-universal (var formula)
+  (make-instance 'universal-generalization
+		 :bound-variable var
+		 :matrix formula))
+
+(defun make-existential (var formula)
+  (make-instance 'existential-generalization
+		 :bound-variable var
+		 :matrix formula))
 
 (defun equal-formulas? (form-1 form-2 signature)
   "Determine whether formulas FORM-1 and FORM-2 are equal."
@@ -174,21 +154,6 @@
 
 (defun equation? (formula)
   (eq (car formula) '=))
-
-(defun make-equation (lhs rhs)
-  (list '= lhs rhs))
-
-(defun unary-statement-argument (unary-statement)
-  (cadr unary-statement))
-
-(defun binary-statement-first-arg (binary-statement)
-  (cadr binary-statement))
-
-(defun binary-statement-second-arg (binary-statement)
-  (caddr binary-statement))
-
-(defun make-atomic-statement (predicate &rest args)
-  (cons predicate args))
 
 (defun account-for-extension (constants predicate)
   "Make a formula saying that the extension of PREDICATE is exhausted
@@ -203,17 +168,17 @@ should return the formula
     (make-universal var
 		    (make-implication
 		     (make-atomic-statement predicate var)
-		    (apply #'make-disjunction
-			   (mapcar #'(lambda (constant)
-				       (make-equation var constant))
-				   constants))))))
+		     (apply #'make-disjunction
+			    (mapcar #'(lambda (constant)
+					(make-equation var constant))
+				    constants))))))
 
 (defun proper-subformulas (formula)
   (labels 
       ((proper (f)
 	 (cond ((disjunction? f)
-		(let ((left (left-disjunct f))
-		      (right (right-disjunct f)))
+		(let ((left (lhs f))
+		      (right (rhs f)))
 		  (append (list left right)
 			  (proper-subformulas left)
 			  (proper-subformulas right))))
@@ -269,10 +234,10 @@ bound once the substitution is carried out: no renaming is done either
 in TERM or FORMULA."
   (cond ((disjunction? formula)
 	 (apply #'make-disjunction (mapcar #'(lambda (disjunct) (instantiate term variable disjunct))
-					   (disjuncts formula))))
+					   (items formula))))
 	((conjunction? formula)
 	 (apply #'make-conjunction (mapcar #'(lambda (conjunct) (instantiate term variable conjunct))
-					   (conjuncts formula))))
+					   (items formula))))
 	((negation? formula)
 	 (negate (instantiate term variable (unnegate formula))))
 	((implication? formula)
@@ -314,8 +279,8 @@ in TERM or FORMULA."
 					      (right-conjunct formula-2))))
 		       ((disjunction? formula-1)
 			(and (disjunction? formula-2)
-			     (instance-helper (left-disjunct formula-1)
-					      (left-disjunct formula-2))))
+			     (instance-helper (lhs formula-1)
+					      (rhs formula-2))))
 		       ((implication? formula-1)
 			(and (implication? formula-2)
 			     (instance-helper (antecedent formula-1)
