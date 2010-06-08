@@ -186,30 +186,37 @@
    (<:li (<:tt "not") "."))
   (<:p "Atomic formulas are to be constructed according to the signature.  The case you use to write connectives and atomic formulas doesn't matter (anything you enter will be upcased)."))
 
+(defaction parse-formula-action (formula-str signature)
+  (ucw-handler-case
+      (answer (parse-formula input-formula signature))
+    (malformed-formula-error ()
+      (answer (call 'formula-corrector
+		    :text input-formula
+		    :signature (formula-corrector-signature self))))))
+
 (defmethod render ((self formula-corrector))
-  (symbol-macrolet (($take-action (handler-case (answer (parse-formula input-formula (formula-corrector-signature self)))
-				    (malformed-formula-error () (answer (call 'formula-corrector 
-									      :text input-formula
-									      :signature (formula-corrector-signature self)))))))
-    (let (input-formula)
-      (<:h1 "Invalid formula supplied")
-      (<:p "We are unable to make sense of the formula, \"" (<:as-html (formula-corrector-text self)) "\" that you supplied.  The signature with respect to which you should enter a formula is:")
-      (render (formula-corrector-signature self))
-      (formula-guide)
-      (<:p "Please try again.")
-      (<ucw:form :method "POST"
-		 :action $take-action
-	(<:p "Enter a formula in the above signature.  If you wish, you can " (<ucw:a :action (let ((new-signature (call 'signature-editor :signature (formula-corrector-signature self))))
-												(handler-case (answer (parse-formula (formula-corrector-text self) new-signature))
-												    (malformed-formula-error () (answer (call 'formula-corrector 
-																	      :text input-formula
-																	      :signature (formula-corrector-signature self))))))
-										      "edit the signature") ". (If edit the signature and the formula that you provided becomes well-formed in the new signature, then you will go back to where you were before you came here.  If, after editing the signature, the formula is still not valid, you will come back to this page.)")
+  (let ((input-formula)
+	(sig (formula-corrector-signature self)))
+    (<:h1 "Invalid formula supplied")
+    (<:p "We are unable to make sense of the formula, \"" (<:as-html (formula-corrector-text self)) "\" that you supplied.  The signature with respect to which you should enter a formula is:")
+    (render sig)
+    (formula-guide)
+    (<:p "Please try again.")
+    (<ucw:form :method "POST"
+	       :action (parse-formula-action input-formula sig)
+      (<:p "Enter a formula in the above signature.  If you wish, you can "
+	   (<ucw:a :action (let ((new-signature (call 'signature-editor :signature sig)))
+	                     (ucw-handler-case
+				 (answer (parse-formula (formula-corrector-text self)
+							new-signature))
+			       (malformed-formula-error () (answer (call 'formula-corrector
+									 :text input-formula
+									 :signature sig)))))
+		   "edit the signature") ". (If edit the signature and the formula that you provided becomes well-formed in the new signature, then you will go back to where you were before you came here.  If, after editing the signature, the formula is still not valid, you will come back to this page.)")
 	(<ucw:input :type "text"
 		    :id "formula-input"
 		    :accessor input-formula)
-	(<ucw:submit :value "Use this formula"
-		     :action $take-action)))))
+	(<:submit :value "Use this formula"))))
 
 (defcomponent turn-editor ()
   ((game :accessor game
@@ -285,7 +292,7 @@
 	  (let (new-statement)
 	    (if (empty-string? input-statement)
 		(setf new-statement selected-symbolic-attack)
-		(setf new-statement (handler-case (parse-formula input-statement 
+		(setf new-statement (ucw-handler-case (parse-formula input-statement
 								 (dialogue-signature game))
 				      (malformed-formula-error () 
 					(call 'formula-corrector
@@ -543,14 +550,14 @@ way to explore the meaning of the dialogue rules.")
 		  (call 'formula-corrector
 			:text (format nil "~A" selected-formula)
 			:signature sig))
-	      (handler-case (call 'turn-editor
-				  :game (make-dialogue 
-					 (parse-formula input-formula sig) 
-					 sig
-					 selected-rules))
+	      (ucw-handler-case (call 'turn-editor
+				      :game (make-dialogue 
+					     (parse-formula input-formula sig) 
+					     sig
+					     selected-rules))
 		(malformed-formula-error (call 'formula-corrector
-					  :text input-formula
-					  :signature sig)))))))
+					       :text input-formula
+					       :signature sig)))))))
     (let ((sig (signature self)))
       (<:p "To get started, enter a formula in the text box below or choose a famous formula from the menu.")
       (formula-guide)
