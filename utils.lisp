@@ -171,6 +171,13 @@
       (setf response (read t nil nil)))
     response))
 
+(defun read-positive-integer ()
+  (let (response)
+    (until (and (integerp response)
+		(> 0 response))
+      (setf response (read t nil nil)))
+    response))
+
 (defun msg (format-string &rest args)
   (apply #'format t (concatenate 'string format-string "~%") args))
 

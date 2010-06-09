@@ -42,19 +42,6 @@
 (defmethod negate ((formula formula))
   (make-instance 'negation :negated formula))
 
-(defclass implication (composite-formula)
-  ((antecedent :initarg :antecedent
-	       :accessor antecedent
-	       :type formula)
-   (consequent :initarg :consequent
-	       :accessor consequent
-	       :type formula)))
-
-(defun make-implication (antecedent consequent)
-  (make-instance 'implication
-		 :antecedent antecedent
-		 :consequent consequent))
-
 (defclass binary-connective-formula (composite-formula)
   ((lhs :initarg :lhs
 	:accessor lhs
@@ -68,6 +55,23 @@
 	  :accessor items
 	  :type list)))
 
+(defclass implication (binary-connective-formula)
+  nil)
+
+(defun make-implication (antecedent consequent)
+  (make-instance 'implication
+		 :lhs antecedent
+		 :rhs consequent))
+
+(defgeneric antecedent (formula))
+(defgeneric consequent (formula))
+
+(defmethod antecedent ((implication implication))
+  (lhs implication))
+
+(defmethod consequent ((implication implication))
+  (rhs implication))
+
 (defclass equivalence (binary-connective-formula)
   nil)
 
@@ -75,7 +79,6 @@
   (make-instance 'equivalence
 		 :lhs lhs
 		 :rhs rhs))
-
 
 ;;; disjunctions
 
@@ -99,6 +102,29 @@
 	      (car disjuncts)))
       top))
 
+(defun binary-disjunction->multiple-arity-disjunction (binary-disjunction)
+  (make-instance 'multiple-arity-disjunction
+		 :items (list (lhs binary-disjunction)
+			      (rhs binary-disjunction))))
+
+(defun multiple-arity-disjunction->binary-disjunction (multiple-arity-disjunction)
+  (let ((disjuncts (items multiple-arity-disjunction)))
+    (if (null disjuncts)
+	(make-instance 'binary-disjunction
+		       :lhs top
+		       :rhs top)
+	(if (null (cdr disjuncts))
+	    (make-instance 'binary-disjunction
+			   :lhs (first disjuncts)
+			   :rhs contradiction)
+	    (labels ((make-disjunction (ds)
+		       (if (null (cddr ds))
+			   (make-binary-disjunction (first ds)
+						    (second ds))
+			   (make-binary-disjunction (first ds)
+						    (make-disjunction (cdr ds))))))
+	      (make-disjunction disjuncts))))))
+
 ;; conjunctions
 
 (defclass binary-conjunction (binary-connective-formula)
@@ -121,12 +147,33 @@
 	  (cadr conjuncts))
       contradiction))
 
+(defun binary-conjunction->multiple-arity-conjunction (binary-conjunction)
+  (make-instance 'multiple-arity-conjunction
+		 :items (list (lhs binary-conjunction)
+			      (rhs binary-conjunction))))
+
+(defun multiple-arity-conjunction->binary-conjunction (multiple-arity-conjunction)
+  (let ((conjuncts (items multiple-arity-conjunction)))
+    (if (null conjuncts)
+	(make-binary-conjunction contradiction contradiction)
+	(if (null (cdr conjuncts))
+	    (make-instance 'binary-conjunction
+			   :lhs (first conjuncts)
+			   :rhs top)
+	    (labels ((make-conjunction (ds)
+		       (if (null (cddr ds))
+			   (make-binary-conjunction (first ds) 
+						    (second ds))
+			   (make-binary-conjunction (first ds)
+						    (make-conjunction (cdr ds))))))
+	      (make-conjunction conjuncts))))))
+
 ;; quantifiers
 
 (defclass generalization (composite-formula)
   ((bound-variable :initarg :bound-variable
 		   :accessor bound-variable
-		   :type variable)
+		   :type variable-term)
    (matrix :initarg :matrix
 	   :accessor matrix
 	   :type formula)))
@@ -167,99 +214,184 @@ should return the formula
   (let ((var (make-variable "x")))
     (make-universal var
 		    (make-implication
-		     (make-atomic-statement predicate var)
-		     (apply #'make-disjunction
+		     (make-atomic-formula predicate var)
+		     (apply #'make-multiple-arity-disjunction
 			    (mapcar #'(lambda (constant)
 					(make-equation var constant))
 				    constants))))))
 
-(defun proper-subformulas (formula)
-  (labels 
-      ((proper (f)
-	 (cond ((disjunction? f)
-		(let ((left (lhs f))
-		      (right (rhs f)))
-		  (append (list left right)
-			  (proper-subformulas left)
-			  (proper-subformulas right))))
-	       ((conjunction? f)
-		(let ((left (left-conjunct f))
-		      (right (right-conjunct f)))
-		  (append (list left right)
-			  (proper-subformulas left)
-			  (proper-subformulas right))))
-	       ((implication? f)
-		(let ((a (antecedent f))
-		      (c (consequent f)))
-		  (append (list a c)
-			  (proper-subformulas a)
-			  (proper-subformulas c))))
-	       ((equivalence? f)
-		(let ((lhs (lhs f))
-		      (rhs (rhs f)))
-		  (append (list lhs rhs)
-			  (proper-subformulas lhs)
-			  (proper-subformulas rhs))))
-	       ((negation? f)
-		(cons (unnegate f)
-		      (proper-subformulas (unnegate f))))
-	       ((universal? f)
-		(cons (matrix f)
-		      (proper-subformulas (matrix f))))
-	       ((existential? f)
-		(cons (matrix f)
-		      (proper-subformulas (matrix f))))
-	       (t ;; atomic case
-		nil))))
-    (remove-duplicates (proper formula) 
-		       :test #'(lambda (form-1 form-2)
-				 (equal-formulas? form-1 form-2 nil)))))
-	 
-(defun subst-term-for-var-in-term (term variable target-term)
-  (if (variable? target-term)
-      (if (equal-variables? variable target-term)
-	  term
-	  target-term)
-      (let ((f (function-symbol target-term))
-	    (args (term-arguments target-term)))
-	(apply #'make-complex-term f
-	                           (mapcar #'(lambda (x) (subst-term-for-var-in-term term variable x))
-					   args)))))    
+(defgeneric proper-subformulas-1 (formula))
 
-(defun instantiate (term variable formula)
-  "Substitute TERM for free occurances of VARIBLE in FORMULA.
+(defmethod proper-subformulas-1 ((formula atomic-formula))
+  nil)
+
+(defmethod proper-subformulas-1 ((negation negation))
+  (let ((inside (unnegate negation)))
+    (cons inside (proper-subformulas-1 inside))))
+
+(defmethod proper-subformulas-1 ((formula binary-connective-formula))
+  (let ((lhs (lhs formula))
+	(rhs (rhs formula)))
+    (append (list lhs rhs)
+	    (proper-subformulas-1 lhs)
+	    (proper-subformulas-1 rhs))))
+
+(defmethod proper-subformulas-1 ((formula multiple-arity-connective-formula))
+  (let ((items (items formula)))
+    (append items
+	    (mapcar #'proper-subformulas-1 items))))
+
+(defmethod proper-subformulas-1 ((formula generalization))
+  (let ((matrix (matrix formula)))
+    (cons matrix (proper-subformulas-1 matrix))))
+
+(defun proper-subformulas (formula)
+  (remove-duplicates (proper-subformulas-1 formula) :test #'equal-formulas?))
+
+(define-condition incompatible-variable-kinds-error (error)
+  ()
+  (:report (lambda (condition stream)
+	     (format stream
+		     "One cannot treat one kind of variable (sorted or unsorted) as the other kind"))))
+
+(defgeneric subst-term-for-var-in-term (term var target-term))
+
+(defmethod subst-term-for-var-in-term ((term term)
+				       (var unsorted-variable)
+				       (target-term unsorted-variable))
+  (if (equal-variables? var target-term)
+      term
+      target-term))
+
+(defmethod subst-term-for-var-in-term ((term term)
+				       (var unsorted-variable)
+				       (target-term sorted-variable))
+  (error 'incompatible-variable-kinds-error))
+
+(defmethod subst-term-for-var-in-term ((term term)
+				       (var sorted-variable)
+				       (target-term unsorted-variable))
+  (error 'incompatible-variable-kinds-error))	 
+
+(defmethod subst-term-for-var-in-term ((term term)
+				       (var sorted-variable)
+				       (target-term sorted-variable))
+  (if (equal-variables? var target-term)
+      term
+      target-term))
+
+(defmethod subst-term-for-var-in-term ((term term)
+				       (var unsorted-variable)
+				       (taget-term function-term))
+  (let ((f (function-symbol target-term))
+	(args (arguments target-term)))
+    (apply #'make-function-term 
+	   f
+	   (mapcar #'(lambda (x) (subst-term-for-var-in-term term variable x))
+		   args))))
+
+(defgeneric instantiate (term variable formula)
+  (:documentation "Substitute TERM for free occurances of VARIBLE in FORMULA.
 
 WARNING: No regard is given to variables appearing in TERM that may become
 bound once the substitution is carried out: no renaming is done either
-in TERM or FORMULA."
-  (cond ((disjunction? formula)
-	 (apply #'make-disjunction (mapcar #'(lambda (disjunct) (instantiate term variable disjunct))
-					   (items formula))))
-	((conjunction? formula)
-	 (apply #'make-conjunction (mapcar #'(lambda (conjunct) (instantiate term variable conjunct))
-					   (items formula))))
-	((negation? formula)
-	 (negate (instantiate term variable (unnegate formula))))
-	((implication? formula)
-	 (make-implication (instantiate term variable (antecedent formula))
-			   (instantiate term variable (consequent formula))))
-	((universal? formula)
-	 (let ((bound-var (bound-variable formula))
-	       (matrix (matrix formula)))
-	   (if (equal bound-var variable)
-	       formula
-	       (make-universal bound-var (instantiate term variable matrix)))))
-	((existential? formula)
-	 (let ((bound-var (bound-variable formula))
-	       (matrix (matrix formula)))
-	   (if (equal bound-var variable)
-	       formula
-	       (make-existential bound-var (instantiate term variable matrix)))))
-	(t ;; atomic case
-	 (let ((predicate (predicate formula))
-	       (arguments (arguments formula)))
-	   (apply #'make-atomic-formula predicate
-  		                        (mapcar #'(lambda (arg) (subst-term-for-var-in-term term variable arg)) arguments))))))
+in TERM or FORMULA."))  
+
+(defmethod instantiate (term variable (formula atomic-formula))
+  (let ((pred (predicate formula))
+	(args (arguments formula)))
+    (apply #'make-atomic-formula
+	   pred
+	   (mapcar #'(lambda (arg) 
+		       (subst-term-for-var-in-term term variable arg)) 
+		   args))))
+
+(defmethod instantiate (term variable (formula binary-connective-formula))
+  (make-instance (class-of formula)
+		 :lhs (instantiate term variable (lhs formula))
+		 :rhs (instantiate term variable (rhs formula))))
+
+(defmethod instantiate (term variable (formula multiple-arity-connective-formula))
+  (make-instance (class-of formula)
+		 :items (mapcar #'(lambda (item)
+				    (instantiate term variable item))
+				(items formula))))
+
+(defmethod instantiate (term variable (formula generalization))
+  (let ((bound-var (bound-variable formula))
+	(matrix (matrix formula)))
+    (if (equal-variables? bound-var variable)
+	formula
+	(make-instance (class-of formula)
+		       :bound-var bound-var
+		       :matrix (instantiate term variable matrix)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Unification of formulas and terms
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defgeneric unify (formula-or-term-1 formula-or-term-2))
+
+(defmethod unify ((formula formula) (term term))
+  nil)
+
+(defmethod unify ((term term) (formula formula))
+  nil)
+
+(defmethod unify ((var-1 unsorted-variable) (var-2 unsorted-variable))
+  (cons var-1 var-2))
+
+(defmethod unify ((var-1 unsorted-variable) (var-2 sorted-variable))
+  (error 'incompatible-variable-kinds-error))
+
+(defmethod unify ((var-1 sorted-variable) (var-2 unsorted-variable))
+  (error 'incompatible-variable-kinds-error))  
+
+(defmethod unify ((var-1 sorted-variable) (var-2 sorted-variable))
+  (let ((sort-1 (variable-sort var-1))
+	(sort-2 (variable-sort var-2)))
+    (if (eql sort-1 sort-2)
+	(cons var-1 var-2)
+	:fail)))
+
+(defmethod unify ((var variable-term) (term function-term))
+  (if (occurs-in-term? var (arguments term))
+      :fail
+      (cons var term)))
+
+(defmethod unify ((term function-term) (var variable-term))
+  (if (occurs-in-term? var (arguments term))
+      :fail
+      (cons var term)))
+
+(defmethod unify ((term-1 function-term) (term-2 function-term))
+  (let ((func-1 (function-symbol term-1))
+	(args-1 (arguments term-1))
+	(func-2 (function-symbol term-2))
+	(args-2 (arguments term-2)))
+    (if (eql func-1 func-2)
+	(unify args-1 args-2)
+	:fail)))
+
+(defmethod unify ((list-1 list) (list-2 list))
+  (if (null list-1)
+      (if (null list-2)
+	  nil
+	  :fail)
+      (if (null list-2)
+	  :fail
+	  (let ((first-1 (car list-1))
+		(first-2 (car list-2)))
+	    (let ((mgu-head (unify first-1 first-2)))
+	      (if (eql mgu-head :fail)
+		  :fail
+		  (let ((new-tail-1 (apply-substitution mgu-head (cdr list-1)))
+			(new-tail-2 (apply-substitution mgu-head (cdr list-2))))
+		    (let ((mgu-tail (unify new-tail-1 new-tail-2)))
+		      (if (eql mgu-tail :fail)
+			  :fail
+			  (compose-substitutions mgu-head mgu-tail))))))))))
+	
 
 (defun instance-of-quantified? (signature instantiated quantified-statement)
   "Determine whether INSTANTIATED is obtained from

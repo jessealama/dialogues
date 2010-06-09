@@ -20,6 +20,17 @@
 	      :type list
 	      :accessor signature-functions)))
 
+(defclass finite-variable-signature (signature)
+  ((variables :initarg :variables
+	      :initform nil
+	      :type list
+	      :accessor signature-variables)))
+
+(defclass infinite-variable-signature (signature)
+  ((variable-test :initarg :variable-test-pred
+		  :type function
+		  :accessor variable-test-pred)))
+
 (define-condition unacceptable-identifier-name-error (error)
   ((text :initarg :text
 	 :reader unacceptable-identifier-name-error-text))
@@ -56,13 +67,35 @@
 		       (format stream
 			       "Weird: neither a signature nor a text were supplied. It would seem that this error condition was not properly initialized by the calling code.~%")))))))
 
-(defun copy-signature (signature)
-  (make-instance 'signature
-		 :constants (copy-list (signature-constants signature))
-		 :predicates (copy-list (signature-predicates signature))
-		 :functions (copy-list (signature-functions signature))))
+(defgeneric copy-signature (signature))
 
-(defmethod print-object ((sig signature) stream)
+(defmethod copy-signature ((sig infinite-variable-signature))
+  (make-instance 'infinite-variable-signature
+		 :constants (copy-list (signature-constants sig))
+		 :predicates (copy-list (signature-predicates sig))
+		 :functions (copy-list (signature-functions sig))))
+
+(defmethod copy-signature ((sig finite-variable-signature))
+  (make-instance 'finite-variable-signature
+		 :constants (copy-list (signature-constants sig))
+		 :predicates (copy-list (signature-predicates sig))
+		 :functions (copy-list (signature-functions sig))
+		 :variables (copy-list (signature-variables sig))))
+
+(defmethod print-object ((sig finite-variable-signature) stream)
+  (print-unreadable-object (sig stream :type t)
+    (with-slots (variables constants predicates functions) sig
+      (format stream "variables: ~A, constants: ~A, functions: ~A, predicates: ~A"
+	      (if variables
+		  (comma-separated-list variables)
+		  "(none)")
+	      (if constants
+		  (comma-separated-list constants)
+		  "(none)")
+	      (or functions "(none)")
+	      (or predicates "(none)")))))
+
+(defmethod print-object ((sig infinite-variable-signature) stream)
   (print-unreadable-object (sig stream :type t)
     (with-slots (constants predicates functions) sig
       (format stream "constants: ~A, functions: ~A, predicates: ~A" 
@@ -121,6 +154,9 @@
 	(when (= num-args arity)
 	  (push sym result))))))
 
+(defun unary-predicates (signature)
+  (predicates-of-arity signature 1))
+
 (defun predicate-of-arity (signature relation-symbol arity)
   (some #'(lambda (symbol-and-arity)
 	    (let ((symbol (car symbol-and-arity))
@@ -130,9 +166,21 @@
 		(= arity num-args))))
 	(signature-predicates signature)))
 
+(defun unary-predicate? (signature relation-symbol)
+  (predicate-of-arity signature relation-symbol 1))
+
 (defgeneric constant? (signature sym))
 (defgeneric function? (signature sym))
 (defgeneric predicate? (signature sym))
+
+(defmethod variable? ((sig infinite-variable-signature) (sym symbol))
+  (let ((var (make-variable sym))
+	(variable-tester (variable-test-pred sig)))
+    (funcall variable-tester var)))    
+
+(defmethod variable? ((sig finite-variable-signature) (sym symbol))
+  (let ((var (make-variable sym)))
+    (member var (signature-variables sig) :test #'equal-terms?)))
 
 (defmethod constant? ((s signature) sym)
   (member sym (signature-constants s)))
@@ -150,7 +198,13 @@
        (not (empty-string? str))
        (not (contains-whitespace? str))))
 
-(defmethod belongs-to-signature? ((sig signature) (sym symbol))
+(defmethod belongs-to-signature? ((sig finite-variable-signature) (sym symbol))
+  (or (variable? sig sym)
+      (constant? sig sym)
+      (predicate? sig sym)
+      (function? sig sym)))
+
+(defmethod belongs-to-signature? ((sig infinite-variable-signature) (sym symbol))
   (or (constant? sig sym) 
       (predicate? sig sym)
       (function? sig sym)))
