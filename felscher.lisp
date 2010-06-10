@@ -16,7 +16,7 @@
 (defvar rule-d01-conjunction
   (make-offensive-rule
    :name d01-conjunction
-   :condition (conjunction? (nth-statement dialogue current-reference))
+   :condition (binary-conjunction? (nth-statement dialogue current-reference))
    :body (or (eq current-statement 'attack-left-conjunct)
 	     (eq current-statement 'attack-right-conjunct))
    :failure-message "Only two attacks against conjunctions are permitted:~%ATTACK-LEFT-CONJUNCT and ATTACK-RIGHT-CONJUNCT."))
@@ -28,7 +28,7 @@
    :body (and (non-symbolic-attack-formula?
 	       (nth-statement dialogue current-reference)
 	       (dialogue-signature dialogue))
-	      (conjunction? (nth-statement dialogue current-reference)))
+	      (binary-conjunction? (nth-statement dialogue current-reference)))
    :failure-message "One cannot attack the left conjunct of a formula~%that isn't a conjunction."))
 
 (defvar rule-d01-right-conjunct
@@ -38,13 +38,13 @@
    :body (and (non-symbolic-attack-formula?
 	       (nth-statement dialogue current-reference)
 	       (dialogue-signature dialogue))
-	      (conjunction? (nth-statement dialogue current-reference)))
+	      (binary-conjunction? (nth-statement dialogue current-reference)))
    :failure-message "One cannot attack the right conjunct of a formula that isn't a conjunction."))
 
 (defvar rule-d01-disjunction
   (make-offensive-rule
    :name d01-disjunction
-   :condition (disjunction? (nth-statement dialogue current-reference))
+   :condition (binary-disjunction? (nth-statement dialogue current-reference))
    :body (eq current-statement 'which-disjunct?)
    :failure-message "WHICH-DISJUNCT? is the only permissible attack against a disjunction."))
 
@@ -52,7 +52,7 @@
   (make-offensive-rule
    :name d01-which-disjunct
    :condition (eq current-statement 'which-disjunct?)
-   :body (disjunction? (nth-statement dialogue current-reference))
+   :body (binary-disjunction? (nth-statement dialogue current-reference))
    :failure-message "The WHICH-DISJUNCT? attack applies only to disjunctions."))
 
 (defvar rule-d01-implication
@@ -82,7 +82,7 @@
 (defvar rule-d01-universal
   (make-offensive-rule
    :name d01-universal
-   :condition (universal? (nth-statement dialogue current-reference))
+   :condition (universal-generalization? (nth-statement dialogue current-reference))
    :body (non-symbolic-attack-term? current-statement
 				    (dialogue-signature dialogue))
    :failure-message "To attack a universal, one must assert a term."))
@@ -95,7 +95,7 @@
    :body (let ((s (nth-statement dialogue current-reference)))
 	   (and (non-symbolic-attack-formula? s
 					      (dialogue-signature dialogue))
-		(universal? s)))
+		(universal-generalization? s)))
    :failure-message "If one asserts a term as an attack, then the assertion being attacked must be a universal generalization."))
 
 (defvar rule-d01-which-instance
@@ -105,13 +105,13 @@
    :body (let ((s (nth-statement dialogue current-reference)))
 	   (and (non-symbolic-attack-formula? s
 					      (dialogue-signature dialogue))
-		(existential? s)))
+		(existential-generalization? s)))
    :failure-message "The WHICH-INSTANCE? attack applies only to existential generalizations."))
 
 (defvar rule-d01-existential
   (make-offensive-rule
    :name d01-existential
-   :condition (existential? (nth-statement dialogue current-reference))
+   :condition (existential-generalization? (nth-statement dialogue current-reference))
    :body (eq current-statement 'which-instance?)
    :failure-message "WHICH-INSTANCE? is the only permissible attack on existential generalizations."))
 
@@ -122,7 +122,7 @@
 					    (dialogue-signature dialogue))
    :body (or (implication? (nth-statement dialogue current-reference))
 	     (negation? (nth-statement dialogue current-reference))
-	     (universal? (nth-statement dialogue current-reference)))
+	     (universal-generalization? (nth-statement dialogue current-reference)))
    :failure-message "When the attacking statement is a formula,~%the statement being attacked must be either~%an implication or a negation."))
 
 (defvar rule-d02-alternating
@@ -156,7 +156,7 @@
 		  'attack-left-conjunct)
   :body (with-original-statement (original-statement)
 	  (equal-formulas? current-statement
-			   (left-conjunct original-statement)
+			   (lhs original-statement)
 			   (dialogue-signature dialogue)))
   :failure-message "To defend against the ATTACK-LEFT-CONJUNCT attack,~% assert the left conjunct of the original conjunction."))
 
@@ -167,7 +167,7 @@
 		  'attack-right-conjunct)
    :body (with-original-statement (original-statement)
 	   (equal-formulas? current-statement
-			    (right-conjunct original-statement)
+			    (rhs original-statement)
 			    (dialogue-signature dialogue)))
    :failure-message "To defend against the ATTACK-RIGHT-CONJUNCT attack,~% assert the right conjunct of the original conjunction."))
 
@@ -177,10 +177,10 @@
    :condition (eq (nth-statement dialogue current-reference) 'which-disjunct?)
    :body (with-original-statement (original-statement)
 	   (or (equal-formulas? current-statement
-				(left-disjunct original-statement)
+				(lhs original-statement)
 				(dialogue-signature dialogue))
 	       (equal-formulas? current-statement
-				(right-disjunct original-statement)
+				(rhs original-statement)
 				(dialogue-signature dialogue))))
    :failure-message "To defend against the WHICH-DISJUNCT? attack,~%assert either the left or the right disjunct~%of the original disjunction."))
 
@@ -207,7 +207,7 @@
   (make-defensive-rule
    :name d02-universal
    :condition (with-original-statement (original-statement)
-		(universal? original-statement))
+		(universal-generalization? original-statement))
    :body (let* ((attack (nth-move dialogue current-reference))
 		(attack-refers-to (move-reference attack))
 		(instance (move-statement attack))
@@ -224,11 +224,10 @@
   (make-defensive-rule
    :name d02-existential
    :condition (with-original-statement (original-statement)
-		(existential? original-statement))
+		(existential-generalization? original-statement))
    :body (with-original-statement (original-statement)
 	   (instance-of-quantified? current-statement
-				    original-statement
-				    (dialogue-signature dialogue)))
+				    original-statement))
    :failure-message "The asserted statement is not an instance of the original existential generalization."))
 
 (defvar argumentation-forms (list rule-d01-alternating
@@ -261,8 +260,7 @@
 (defvar rule-d00-atomic
   (make-rule :name d00-atomic
 	     :condition (zerop current-position)
-	     :body (composite-formula? current-statement
-				       (dialogue-signature dialogue))
+	     :body (composite-formula? current-statement)
 	     :failure-message "Dialogues must open with a composite formula."))
 
 (defvar rule-d00-proponent
@@ -281,8 +279,7 @@
   (make-offensive-rule
    :name d01-composite
    :body (composite-formula? (nth-statement dialogue 
-					    current-reference)
-			     (dialogue-signature dialogue))
+					    current-reference))
    :failure-message "Atomic formulas cannot be attacked."))
 
 (defvar rule-d02-attack
@@ -296,8 +293,7 @@
 	     :condition (and (evenp current-position) 
 			     (non-symbolic-attack-formula? current-statement
 							   (dialogue-signature dialogue))
-			     (atomic-formula? current-statement
-					      (dialogue-signature dialogue)))
+			     (atomic-formula? current-statement))
 	     :body (some-move #'(lambda (move)
 				  (when (opponent-move? move)
 				    (equal-formulas? (move-statement move)
@@ -478,8 +474,7 @@
 		   :parents (list
 			     (make-figure
 			      :content
-			      (make-sequent pqrs-propositional-signature
-					    parent-lhs
+			      (make-sequent parent-lhs
 					    implication)
 			      :label 'right-implication-1
 			      :parents (mapcar #'lj->lj-prime parents)))))))
@@ -497,21 +492,5 @@
   winning a dialogue game based on x."
   (declare (ignore d))
   nil)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Examples
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defparameter deduct-1
-  (make-figure :content (make-sequent pqrs-propositional-signature
-				      'q (make-implication 'p 'q))
-	       :label 'right-implication
-	       :parents (list 
-			 (make-figure 
-			  :content (make-sequent pqrs-propositional-signature
-						 (list 'p 'q)
-						 'p)
-			  :label 'axiom
-			  :parents nil))))
 
 ;;; felscher.lisp ends here

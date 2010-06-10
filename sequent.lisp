@@ -20,14 +20,14 @@
 	  (rhs-as-string (comma-separated-list rhs)))
       (format stream "~A => ~A" lhs-as-string rhs-as-string))))
 
-(defun make-sequent (signature lhs rhs)
-  (if (formula? lhs signature)
-      (if (formula? rhs signature)
+(defun make-sequent (lhs rhs)
+  (if (formula? lhs)
+      (if (formula? rhs)
 	  (make-seq :lhs (list lhs)
 		    :rhs (list rhs))
 	  (make-seq :lhs (list lhs)
 		    :rhs rhs))
-      (if (formula? rhs signature)
+      (if (formula? rhs)
 	  (make-seq :lhs lhs
 		    :rhs (list rhs))
 	  (make-seq :lhs lhs

@@ -40,6 +40,7 @@ UCW."
 	       (:file "signature")
 	       (:file "terms")
 	       (:file "formulas")
+	       (:file "famous-formulas")
 	       (:file "sequent")
 	       (:file "dialogues")
 	       (:file "queue")
