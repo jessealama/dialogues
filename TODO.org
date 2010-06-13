@@ -95,7 +95,8 @@
   
   We might even want to consider restricting the number of symbols
   that can be created during a session.
-* IN-PROGRESS "fancy" printing of formulas
+* DONE "fancy" printing of formulas
+  CLOSED: [2010-06-13 Sun 18:06]
   E.g., use the rarr entity to print implications.
 * DONE Allow choosing which dialogue rules to use
   CLOSED: [2010-06-06 Sun 19:18]

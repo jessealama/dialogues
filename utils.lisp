@@ -78,6 +78,13 @@
 	   (every-pair? pred (cdr lst-1) (cdr lst-2)))
       (null lst-2)))
 
+(defun first-n (n lst)
+  (loop 
+     for i from 1 upto n
+     for elt in lst
+     collect elt into result
+     finally (return result))) 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Numbers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

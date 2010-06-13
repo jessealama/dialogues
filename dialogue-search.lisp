@@ -28,7 +28,7 @@
 
 (defun dialogue-search-bfs (rules initial-statement signature &optional more-nodes)
   (if (formula? initial-statement signature)
-      (let* ((initial-state (make-dialogue initial-statement signature))
+      (let* ((initial-state (make-dialogue initial-statement signature rules))
 	     (problem (make-dialogue-search-problem :initial-state initial-state
 						    :signature signature
 						    :rules rules)))
@@ -37,7 +37,7 @@
 
 (defun dialogue-search-dfs (rules initial-statement signature)
   (if (formula? initial-statement signature)
-      (let* ((initial-state (make-dialogue initial-statement signature))
+      (let* ((initial-state (make-dialogue initial-statement signature rules))
 	     (problem (make-dialogue-search-problem :initial-state initial-state
 						    :signature signature
 						    :rules rules)))
@@ -46,7 +46,7 @@
 
 (defun dialogue-search-dfs-no-cycles (rules initial-statement signature)
   (if (formula? initial-statement signature)
-      (let* ((initial-state (make-dialogue initial-statement signature))
+      (let* ((initial-state (make-dialogue initial-statement signature rules))
 	     (problem (make-dialogue-search-problem :initial-state initial-state
 						    :signature signature
 						    :rules rules)))

@@ -2,63 +2,63 @@
 
 (in-package :dialogues)
 
-(defconstant peirce-formula 
-    (make-implication (make-implication (make-implication 'p 'q) 'p) 'p))
+(defconstant-if-unbound peirce-formula 
+  (make-implication (make-implication (make-implication 'p 'q) 'p) 'p))
 
-(defconstant excluded-middle 
+(defconstant-if-unbound excluded-middle 
     (make-binary-disjunction 'p (negate 'p)))
 
-(defconstant dummett-formula 
+(defconstant-if-unbound dummett-formula 
     (make-binary-disjunction (make-implication 'p 'q)
 			     (make-implication 'q 'p)))
 
-(defconstant markov-formula 
+(defconstant-if-unbound markov-formula 
     (make-implication (negate (negate 'p)) 
 		      'p))
 
-(defconstant double-negation-intro
+(defconstant-if-unbound double-negation-intro
     (make-implication 'p
 		      (negate (negate 'p))))
 
-(defconstant double-negation-elimination
+(defconstant-if-unbound double-negation-elimination
     (make-implication (negate (negate 'p))
 		      'p))
 
-(defconstant k-formula
+(defconstant-if-unbound k-formula
     (make-implication 'p
 		      (make-implication 'q 'p)))
 
-(defconstant b-formula
+(defconstant-if-unbound b-formula
     (make-implication
      (make-implication 'p 'q)
      (make-implication
       (make-implication 'r 'p)
       (make-implication 'r 'q))))
 
-(defconstant c-formula
+(defconstant-if-unbound c-formula
     (make-implication
      (make-implication 'p
 		       (make-implication 'q 'r))
      (make-implication 'q
 		       (make-implication 'p 'r))))
 
-(defconstant w-formula 
+(defconstant-if-unbound w-formula 
     (make-implication
      (make-implication 'p
 		       (make-implication 'p 'q))
      (make-implication 'p 'q)))
 
-(defconstant weak-excluded-middle
+(defconstant-if-unbound weak-excluded-middle
     (make-binary-disjunction
      (negate 'p)
      (negate (negate 'p))))
 
-(defconstant scott-formula 
+(defconstant-if-unbound scott-formula 
     (make-implication (make-implication double-negation-elimination
 					excluded-middle)
 		      weak-excluded-middle))
 
-(defconstant smetanich-formula 
+(defconstant-if-unbound smetanich-formula 
     (make-implication (make-implication (negate 'q) 'p)
 		      peirce-formula))
 

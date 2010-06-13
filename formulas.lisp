@@ -12,7 +12,7 @@
   nil)
 
 (defun formula? (thing)
-  (eql (class-of thing) 'formula))
+  (typep thing 'formula))
 
 (defclass atomic-formula (formula)
   ((predicate :initarg :predicate
@@ -20,6 +20,23 @@
    (args :initarg :args
 	 :accessor arguments
 	 :type list)))
+
+(defun atomic-formula? (thing)
+  (typep thing 'atomic-formula))
+
+(defmethod print-object ((atom atomic-formula) stream)
+  (let ((pred (predicate atom))
+	(args (arguments atom)))
+    (if (null args)
+	(format stream "~A" pred)
+	(progn
+	  (format stream "~A" pred)
+	  (format stream "(")
+	  (format stream "~A" (first args))
+	  (loop for arg in (cdr args)
+	     do
+	       (format stream ",~A" arg))
+	  (format stream ")")))))
 
 (defgeneric make-atomic-formula (predicate &rest arguments))
 
@@ -35,9 +52,6 @@
 	 (every #'(lambda (arg)
 		    (belongs-to-signature? sig arg))
 		args))))
-
-(defun atomic-formula? (formula)
-  (eql (class-of formula) 'atomic-formula))
 
 (unless (boundp 'contradiction)
   (defconstant contradiction (make-atomic-formula '⊥)))
@@ -61,7 +75,8 @@ COMPOSITE-FORMULA is defined only to provide a common superclass for
 further subclasses, such as BINARY-DISJUNCTION and
 UNIVERSAL-GENERALIZATION, that is intended to be disjoint from the
 class ATOMIC-FORMULA.  This function expresses that disjointedness."
-  (not (atomic-formula? formula)))
+  (and (formula? formula)
+       (not (atomic-formula? formula))))
 
 (defclass negation (formula)
   ((negated :initarg :negated
@@ -70,6 +85,9 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 
 (defun negation? (thing)
   (eql (class-of thing) 'negation))
+
+(defmethod print-object ((neg negation) stream)
+  (format stream "(¬~A)" (unnegate neg)))
 
 (defgeneric negate (thing))
 
@@ -104,7 +122,13 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   nil)
 
 (defun implication? (thing)
-  (eql (class-of thing) 'implication))
+  (typep thing 'implication))
+
+(defmethod print-object ((implication implication) stream)
+  (format stream 
+	  "(~A → ~A)"
+	  (antecedent implication)
+	  (consequent implication)))
 
 (defgeneric make-implication (antecedent consequent))
 
@@ -125,6 +149,15 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defclass equivalence (binary-connective-formula)
   nil)
 
+(defun equivalence? (thing)
+  (typep thing 'equivalence))
+
+(defmethod print-object ((equiv equivalence) stream)
+  (format stream
+	  "(~A ↔ ~A)"
+	  (lhs equiv)
+	  (rhs equiv)))
+
 (defun make-equivalence (lhs rhs)
   (make-instance 'equivalence
 		 :lhs lhs
@@ -136,12 +169,35 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   nil)
 
 (defun binary-disjunction? (thing)
-  (eql (class-of thing) 'binary-disjunction))
+  (typep thing 'binary-disjunction))
+
+(defmethod print-object ((bin-dis binary-disjunction) stream)
+  (format stream 
+	  "(~A ⋁ ~A)"
+	  (lhs bin-dis)
+	  (rhs bin-dis)))
 
 (defgeneric make-binary-disjunction (lhs rhs))
 
 (defclass multiple-arity-disjunction (multiple-arity-connective-formula)
   nil)
+
+(defun multiple-arity-disjunction? (thing)
+  (eql (class-of thing) 'multiple-arity-disjunction))
+
+(defmethod print-object ((mad multiple-arity-disjunction) stream)
+  (let ((items (items mad)))
+    (if (null items)
+	(format stream "⊤")
+	(if (null (cdr items))
+	    (format stream "~A" (car items))
+	    (progn
+	      (format stream "(")
+	      (format stream "~A" (car items))
+	      (loop for item in (cdr items)
+		   do
+		   (format stream " ⋁ ~A" item))
+	      (format stream ")"))))))
 
 (defgeneric make-multiple-arity-disjunction (&rest disjuncts))
 
@@ -188,13 +244,33 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   nil)
 
 (defun binary-conjunction? (thing)
-  (eql (class-of thing) 'binary-conjunction))
+  (typep thing 'binary-conjunction))
+
+(defmethod print-object ((con binary-conjunction) stream)
+  (format stream 
+	  "(~A ⋀ ~A)"
+	  (lhs con)
+	  (rhs con)))
 
 (defclass multiple-arity-conjunction (multiple-arity-connective-formula)
   nil)
 
 (defun multiple-arity-conjunction? (thing)
   (eql (class-of thing) 'multiple-arity-conjunction))
+
+(defmethod print-object ((mac multiple-arity-conjunction) stream)
+  (let ((items (items mac)))
+    (if (null items)
+	(format stream "⊥")
+	(if (null (cdr items))
+	    (format stream "~A" (car items))
+	    (progn
+	      (format stream "(")
+	      (format stream "~A" (car items))
+	      (loop for item in (cdr items)
+		   do
+		   (format stream " ⋁ ~A" item))
+	      (format stream ")"))))))
 
 (defun make-binary-conjunction (lhs rhs)
   (make-instance 'binary-conjunction
@@ -247,11 +323,29 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defun universal-generalization? (thing)
   (eql (class-of thing) 'universal-generalization))
 
+(defmethod print-object ((uni-gen universal-generalization) stream)
+  (let ((var (bound-variable uni-gen))
+	(matrix (matrix uni-gen)))
+    (if (unsorted-variable? var)
+	(format stream "(∀~A[~A])" var matrix)
+	(let ((sort (variable-sort var))
+	      (name (variable-name var)))
+	  (format stream "(∀~A:~A[~A])" name sort matrix)))))
+
 (defclass existential-generalization (generalization)
   nil)
 
 (defun existential-generalization? (thing)
   (eql (class-of thing) 'existential-generalization))
+
+(defmethod print-object ((exi-gen existential-generalization) stream)
+  (let ((var (bound-variable exi-gen))
+	(matrix (matrix exi-gen)))
+    (if (unsorted-variable? var)
+	(format stream "(∃~A[~A])" var matrix)
+	(let ((sort (variable-sort var))
+	      (name (variable-name var)))
+	  (format stream "(∀~A:~A[~A])" name sort matrix)))))
 
 (defun make-universal (var formula)
   (make-instance 'universal-generalization
@@ -262,11 +356,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (make-instance 'existential-generalization
 		 :bound-variable var
 		 :matrix formula))
-
-(defun equal-formulas? (form-1 form-2 signature)
-  "Determine whether formulas FORM-1 and FORM-2 are equal."
-  (declare (ignore signature)) ;; A bit unsatisfactory, but it'll do for now
-  (equalp form-1 form-2))
 
 (defun equation? (formula)
   (eq (car formula) '=))
@@ -316,6 +405,19 @@ should return the formula
 
 (defun proper-subformulas (formula)
   (remove-duplicates (proper-subformulas-1 formula) :test #'equal-formulas?))
+
+(define-condition expression-not-in-signature-error (error)
+  ((expression :initarg :expression
+	       :reader expression)
+   (signature :initarg :signature
+	      :reader signature))
+  (:report (lambda (condition stream)
+	     (let ((exp (expression condition))
+		   (sig (signature condition)))
+	       (format stream 
+		       "The parsed expression~%~%  ~A~%~%does not belong to the signature~%~%  ~A"
+		       exp
+		       sig)))))
 
 (define-condition incompatible-variable-kinds-error (error)
   ()
@@ -604,6 +706,190 @@ value."
 ;;; Sundry formula-related utilities
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defgeneric equal-formulas? (formula-1 formula-2))
+
+(defmethod equal-formulas? ((form-1 atomic-formula) (form-2 atomic-formula))
+  (and (eql (predicate form-1)
+	    (predicate form-2))
+       (every-pair #'(lambda (term-1 term-2)
+		       (equal-terms? term-1 term-2))
+		   (arguments form-1)
+		   (arguments form-2))))
+
+(defmethod equal-formulas? ((form-1 atomic-formula) (form-2 composite-formula))
+  nil)
+
+(defmethod equal-formulas? ((form-1 composite-formula) (form-2 atomic-formula))
+  nil)
+
+(defmethod equal-formulas? ((form-1 negation) (form-2 negation))
+  (equal-formulas? (unnegate form-1)
+		   (unnegate form-2)))
+
+(defmethod equal-formulas? ((form-1 negation)
+			    (form-2 binary-connective-formula))
+  nil)
+
+(defmethod equal-formulas? ((form-1 negation) 
+			    (form-2 multiple-arity-connective-formula))
+  nil)
+
+(defmethod equal-formulas? ((form-1 negation) 
+			    (form-2 generalization))
+  nil)
+
+(defmethod equal-formulas? ((form-1 binary-connective-formula)
+			    (form-2 negation))
+  nil)
+
+(defmethod equal-formulas? ((form-1 multiple-arity-connective-formula)
+			   (form-2 negation))
+  nil)
+
+(defmethod equal-formulas? ((form-1 generalization)
+			   (form-2 negation))
+  nil)
+
+(defmethod equal-formulas? ((form-1 binary-connective-formula)
+			    (form-2 multiple-arity-connective-formula))
+  nil)
+
+(defmethod equal-formulas? ((form-1 binary-connective-formula)
+			    (form-2 generalization))
+  nil)
+
+(defmethod equal-formulas? ((form-1 multiple-arity-connective-formula)
+			    (form-2 binary-connective-formula))
+  nil)
+
+(defmethod equal-formulas? ((form-1 multiple-arity-connective-formula)
+			    (form-2 generalization))
+  nil)
+
+(defmethod equal-formulas? ((form-1 generalization)
+			    (form-2 binary-connective-formula))
+  nil)
+
+(defmethod equal-formulas? ((form-1 generalization)
+			    (form-2 multiple-arity-connective-formula))
+  nil)
+
+;; subclasses of binary-connective-formula
+
+;; implication
+
+(defmethod equal-formulas? ((form-1 implication)
+			    (form-2 implication))
+  (and (equal-formulas? (antecedent form-1)
+			(antecedent form-2))
+       (equal-formulas? (consequent form-1)
+			(consequent form-2))))
+
+(defmethod equal-formulas? ((form-1 implication)
+			    (form-2 equivalence))
+  nil)
+
+(defmethod equal-formulas? ((form-1 implication)
+			    (form-2 equivalence))
+  nil)
+
+(defmethod equal-formulas? ((form-1 implication)
+			    (form-2 binary-disjunction))
+  nil)
+
+(defmethod equal-formulas? ((form-1 implication)
+			   (form-2 binary-conjunction))
+  nil)
+
+;; equivalence
+
+(defmethod equal-formulas? ((form-1 equivalence)
+			    (form-2 implication))
+  nil)
+
+(defmethod equal-formulas? ((form-1 equivalence)
+			    (form-2 equivalence))
+  (and (equal-formulas? (lhs form-1)
+			(lhs form-2))
+       (equal-formulas? (rhs form-1)
+			(rhs form-2))))
+
+(defmethod equal-formulas? ((form-1 equivalence)
+			    (form-2 binary-disjunction))
+  nil)
+
+(defmethod equal-formulas? ((form-1 equivalence)
+			    (form-2 binary-conjunction))
+  nil)
+
+;; binary-disjunction
+
+(defmethod equal-formulas? ((form-1 binary-disjunction)
+			    (form-2 implication))
+  nil)
+
+(defmethod equal-formulas? ((form-1 binary-disjunction)
+			    (form-2 equivalence))
+  nil)
+
+(defmethod equal-formulas? ((form-1 binary-disjunction)
+			    (form-2 binary-disjunction))
+  (and (equal-formulas? (lhs form-1)
+			(lhs form-2))
+       (equal-formulas? (rhs form-1)
+			(rhs form-2))))
+
+(defmethod equal-formulas? ((form-1 binary-disjunction)
+			    (form-2 binary-conjunction))
+  nil)
+
+;; binary-conjunction
+
+(defmethod equal-formulas? ((form-1 binary-conjunction)
+			    (form-2 implication))
+  nil)
+
+(defmethod equal-formulas? ((form-1 binary-conjunction)
+			    (form-2 equivalence))
+  nil)
+
+(defmethod equal-formulas? ((form-1 binary-conjunction)
+			    (form-2 binary-disjunction))
+  nil)
+
+(defmethod equal-formulas? ((form-1 binary-conjunction)
+			    (form-2 binary-conjunction))
+  (and (equal-formulas? (lhs form-1)
+			(lhs form-2))
+       (equal-formulas? (rhs form-1)
+			(rhs form-2))))
+
+;; multiple-arity-disjunction
+
+(defmethod equal-formulas? ((form-1 multiple-arity-disjunction)
+			(form-2 multiple-arity-disjunction))
+  (every-pair #'(lambda (item-1 item-2)
+		  (equal-formulas? item-1 item-2))
+	      (items form-1)
+	      (items form-2)))
+
+(defmethod equal-formulas? ((form-1 multiple-arity-disjunction)
+			    (form-2 multiple-arity-conjunction))
+  nil)
+
+;; multiple-arity-conjunction
+
+(defmethod equal-formulas? ((form-1 multiple-arity-conjunction)
+			    (form-2 multiple-arity-disjunction))
+  nil)
+
+(defmethod equal-formulas? ((form-1 multiple-arity-conjunction)
+			    (form-2 multiple-arity-conjunction))
+  (every-pair #'(lambda (item-1 item-2)
+		  (equal-formulas? item-1 item-2))
+	      (items form-1)
+	      (items form-2)))
+
 (defun contains-formula? (lst formula)
   (member formula lst :test #'equal-formulas?))
 
@@ -613,26 +899,15 @@ value."
 
 (define-condition malformed-formula-error (error)
   ((text :initarg :text 
-	 :reader malformed-formula-error-text)
-   (signature :initarg :signature 
-	      :reader malformed-formula-error-signature))
+	 :reader malformed-formula-error-text))
   (:report (lambda (condition stream)
-	     (let ((text (malformed-formula-error-text condition))
-		   (sig (malformed-formula-error-signature condition)))
-	       (if sig
-		   (if text
-		       (format stream 
-			       "The given text,~%~%  ~A,~%~%is not a formula according to the signature~%~%  ~A~%"
-			       text sig)
-		       (format stream
-			       "Although a signature,~%~%  ~A~%~%was supplied, no text was given.~%"
-			       sig))
-		   (if text
-		       (format stream
-			       "Unable to determine whether the given text,~%~%  ~A,~%~%is a formula because no signature was supplied.~%"
-			       text)
-		       (format stream
-			       "Neither a signature nor a text were supplied.~%")))))))
+	     (let ((text (malformed-formula-error-text condition)))
+	       (if (null text)
+		   (format stream
+			   "Weird: no text was given.~%")
+		   (format stream 
+			   "The given text,~%~%  ~A,~%~%is not a formula."
+			   text))))))
 
 (define-condition parse-form-empty-argument-list-error (error)
   ((op :initarg :op
@@ -775,8 +1050,8 @@ value."
 	  (error 'parse-form-at-least-two-args-expected-but-only-one-supplied-error
 		 :operator op)
 	  (if (null (cddr arguments))
-	      (let ((antecedent (form->formula (cadr arguments)))
-		    (consequent (form->formula (caddr arguments))))
+	      (let ((antecedent (form->formula (car arguments)))
+		    (consequent (form->formula (cadr arguments))))
 		(make-implication antecedent consequent))
 	      (error 'parse-form-exactly-two-args-expected-but-at-least-three-supplied-error
 		     :operator op
@@ -789,8 +1064,8 @@ value."
 	  (error 'parse-form-at-least-two-args-expected-but-only-one-supplied-error
 		 :operator op)
 	  (if (null (cddr arguments))
-	      (let ((lhs (form->formula (cadr arguments)))
-		    (rhs (form->formula (caddr arguments))))
+	      (let ((lhs (form->formula (car arguments)))
+		    (rhs (form->formula (cadr arguments))))
 		(make-equivalence lhs rhs))
 	      (error 'parse-form-exactly-two-args-expected-but-at-least-three-supplied-error
 		     :operator op)))))
@@ -919,9 +1194,9 @@ value."
 
 (defun read-formula (&optional (stream *standard-input*))
   (let ((input-form (read stream nil nil)))
-    (let ((formula-or-term (form->formula input-form)))
-      (if (formula? formula-or-term)
-	  formula-or-term
+    (let ((formula (form->formula input-form)))
+      (if (formula? formula)
+	  formula
 	  (error 'malformed-formula-error :text input-form)))))
 
 (defun parse-formula (str)
@@ -940,32 +1215,28 @@ value."
 
 (define-condition non-atomic-formula-error (error)
   ((text :initarg :text 
-	 :reader non-atomic-formula-error-text)
-   (signature :initarg :signature
-	      :reader non-atomic-formula-error-signature))
+	 :reader non-atomic-formula-error-text))
   (:report (lambda (condition stream)
-	     (let ((text (non-atomic-formula-error-text condition))
-		   (sig (non-atomic-formula-error-signature condition)))
-	       (if text
-		   (if sig
-		       (format stream 
-			       "The given text,~%~%  ~A,~%~%is not a non-atomic formula according to the signature~%~%  ~A.~%"
-			       text
-			       sig)
-		       (format stream
-			       "Unable to determine whether the given text,~%~%  ~A,~%~%is a non-atomic formula because no signature was supplied.~%"
-			       text))
-		   (if sig
-		       (format stream
-			       "No text was given, though a signature~%~%~A~%~%was.~%"
-			       sig)
-		       (format stream
-			       "Neither a text nor a signature was given.~%")))))))
+	     (let ((text (non-atomic-formula-error-text condition)))
+	       (if (null text)
+		   (format stream
+			   "Weird: no text was given (or text is simply NIL)")
+		   (format stream 
+			   "The given text,~%~%  ~A,~%~%is an atomic formula."
+			   text))))))
 
 (defun read-composite-formula (&optional (stream *standard-input*))
   (let ((input (read-formula stream)))
     (if (atomic-formula? input)
 	(error 'non-atomic-formula-error :text input)
 	input)))
+
+(defun read-composite-formula-in-signature (signature 
+					    &optional (stream *standard-input*))
+  (let ((formula (read-composite-formula stream)))
+    (if (belongs-to-signature? signature formula)
+	formula
+	(error 'expression-not-in-signature-error
+	       :expression formula))))
 
 ;;; formulas.lisp ends here

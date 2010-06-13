@@ -7,6 +7,53 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defclass signature ()
+  nil)
+
+(defclass propositional-signature (signature)
+  nil)
+
+(defclass finite-variable-propositional-signature (propositional-signature)
+  ((predicates :initarg :predicates
+	       :type list
+	       :accessor signature-predicates
+	       :initform nil)))
+
+(define-condition non-symbol-treated-as-predicate-symbol-error (error)
+  ((item :initarg :item
+	 :reader item))
+  (:report (lambda (condition stream)
+	     (let ((item (item condition)))
+	       (format stream "The item~%~%  ~A~%~%cannot be treated as a predicate symbol because it is not a lisp symbol." item)))))
+
+(defun make-finite-variable-propositional-signature (&rest predicate-letters)
+  (if (null predicate-letters)
+      (progn
+	(warn 'empty-signature-warning)
+	(make-instance 'finite-variable-propositional-signature))
+      (progn
+	(loop
+	   with final-preds = nil
+	   with trimmed-preds = (remove-duplicates predicate-letters
+						   :test #'eql)
+	   for pred-letter in trimmed-preds
+	   do
+	     (if (symbolp pred-letter)
+		 (push pred-letter final-preds)
+		 (error 'non-symbol-treated-as-predicate-symbol-error
+			:item pred-letter))
+	   finally 
+	     (return (make-instance 'finite-variable-propositional-signature
+				    :predicates final-preds))))))
+
+(defclass infinite-variable-propositional-signature (propositional-signature)
+  ((predicate-test :initarg :predicate-symbol-test
+		   :type function
+		   :accessor predicate-symbol-test
+		   :initform (lambda (pred-sym)
+			       (declare (ignore pred-sym))
+			       nil))))
+
+(defclass first-order-signature (signature)
   ((constants :initarg :constants
 	      :initform nil
 	      :type list
@@ -20,16 +67,30 @@
 	      :type list
 	      :accessor signature-functions)))
 
-(defclass finite-variable-signature (signature)
+(defclass signature-w/equality (signature)
+  nil)
+
+(defclass finite-variable-first-order-signature (first-order-signature)
   ((variables :initarg :variables
 	      :initform nil
 	      :type list
 	      :accessor signature-variables)))
 
-(defclass infinite-variable-signature (signature)
+(defclass finite-variable-first-order-signature-w/equality
+    (finite-variable-first-order-signature signature-w/equality)
+  nil)
+
+(defclass infinite-variable-first-order-signature (first-order-signature)
   ((variable-test :initarg :variable-test-pred
 		  :type function
+		  :initform (lambda (var)
+			      (declare (ignore var))
+			      nil)
 		  :accessor variable-test-pred)))
+
+(defclass infinite-variable-first-order-signature-w/equality
+    (infinite-variable-first-order-signature signature-w/equality)
+  nil)
 
 (define-condition unacceptable-identifier-name-error (error)
   ((text :initarg :text
@@ -69,20 +130,38 @@
 
 (defgeneric copy-signature (signature))
 
-(defmethod copy-signature ((sig infinite-variable-signature))
-  (make-instance 'infinite-variable-signature
-		 :constants (copy-list (signature-constants sig))
-		 :predicates (copy-list (signature-predicates sig))
-		 :functions (copy-list (signature-functions sig))))
+(defmethod copy-signature ((sig finite-variable-propositional-signature))
+  (make-instance 'finite-variable-propositional-signature
+		 :predicates (copy-list (signature-predicates sig))))
 
-(defmethod copy-signature ((sig finite-variable-signature))
-  (make-instance 'finite-variable-signature
+(defmethod copy-signature ((sig finite-variable-first-order-signature))
+  (make-instance 'finite-variable-first-order-signature
 		 :constants (copy-list (signature-constants sig))
 		 :predicates (copy-list (signature-predicates sig))
 		 :functions (copy-list (signature-functions sig))
 		 :variables (copy-list (signature-variables sig))))
 
-(defmethod print-object ((sig finite-variable-signature) stream)
+(defmethod copy-signature ((sig infinite-variable-first-order-signature))
+  (make-instance 'infinite-variable-first-order-signature
+		 :constants (copy-list (signature-constants sig))
+		 :predicates (copy-list (signature-predicates sig))
+		 :functions (copy-list (signature-functions sig))))
+
+(defmethod copy-signature ((sig finite-variable-first-order-signature))
+  (make-instance 'finite-variable-first-order-signature
+		 :constants (copy-list (signature-constants sig))
+		 :predicates (copy-list (signature-predicates sig))
+		 :functions (copy-list (signature-functions sig))
+		 :variables (copy-list (signature-variables sig))))
+
+(defmethod print-object ((sig finite-variable-propositional-signature) stream)
+  (print-unreadable-object (sig stream :type t)
+    (with-slots (predicates) sig
+      (if (null predicates)
+	  (format stream "predicates: (none)")
+	  (format stream "predicates: ~A" predicates)))))
+
+(defmethod print-object ((sig finite-variable-first-order-signature) stream)
   (print-unreadable-object (sig stream :type t)
     (with-slots (variables constants predicates functions) sig
       (format stream "variables: ~A, constants: ~A, functions: ~A, predicates: ~A"
@@ -95,7 +174,7 @@
 	      (or functions "(none)")
 	      (or predicates "(none)")))))
 
-(defmethod print-object ((sig infinite-variable-signature) stream)
+(defmethod print-object ((sig infinite-variable-first-order-signature) stream)
   (print-unreadable-object (sig stream :type t)
     (with-slots (constants predicates functions) sig
       (format stream "constants: ~A, functions: ~A, predicates: ~A" 
@@ -124,11 +203,85 @@
 		    (signature-functions signature-2)
 		    :test #'equal)))
 
-(defun make-signature-with-equality (&key constants predicates functions)
-  (make-instance 'signature 
-		 :constants constants
-		 :predicates (cons '= predicates)
-		 :functions functions))
+(defun verify-name-and-arity-item (item)
+  (if (consp item)
+      (if (null (cdr item))
+	  (error 'inappropriate-name-and-arity-item-error
+		 :item item)
+	    (let ((arity (cdr item)))
+	      (or (integerp arity)
+		  (error 'inappropriate-name-and-arity-error
+			 :item item))))
+      (error 'inappropriate-name-and-arity-error
+	     :item item)))
+
+(define-condition duplicate-names-with-different-arities-error (error)
+  ((item :initarg :item
+	       :reader item)
+   (first-value :initarg :first-value
+		:reader first-value)
+   (second-value :initarg :second-value
+		:reader second-value)
+   (item-list :initarg :list
+	      :reader item-list))
+  (:report (lambda (condition stream)
+	     (let ((item (item condition))
+		   (1st-value (first-value condition))
+		   (2nd-value (second-value condition))
+		   (items (item-list condition)))
+	       (format stream 
+		       "The item~%~%  ~A~%~%occurs twice in the list~%~%  ~A~%~%with different values: the first is~%~%  ~A,~%~%and the second is ~%~%~A"
+		       item
+		       items
+		       1st-value
+		       2nd-value)))))
+
+(defun verify-name-and-arity-list (list)
+  (when (every #'verify-name-and-arity-item list)
+    (loop
+       with already-seen-items = nil
+       for item in list
+       do
+	 (let ((seen (member (car item) already-seen-items 
+			     :test #'eql 
+			     :key #'car)))
+	   (if (null seen)
+	       (push item already-seen-items)
+	       (error 'duplicate-names-with-different-arities-error
+		      :first-item (caar seen)
+		      :first-value (cdar seen)
+		      :second-item (car item)
+		      :second-value (cdr item)
+		      :list list)))
+       finally
+	 (return t))))
+
+(defun make-infinite-variable-signature-with-equality 
+    (&key constants predicates functions)
+  "Make an infinite-variable first-order signature whose constants are
+CONSTANTS, whose predicates are PREDICATEs, and whose functions are
+FUNCTIONS.  All three arguments should be list (by default, they are
+all NIL).  CONSTANTS will be regarded as a simple list (i.e., its
+members will be treated as the signatures constants), whereas
+PREDICATES and FUNCTIONS should be lists of cons cells (NAME . ARITY)
+whose car will be treated as the name of the function/predicate whose
+arity will be ARITY.  All three lists will be treated as sets; if
+there are any duplicates in any of the lists, they will be removed.
+The names of all the signature's elements should all be disjoint:
+CONSTANTS should not overlap with (the cars of the elements of)
+PREDICATES and FUNCTIONS, and (the cars of the elements of) PREDICATES
+should not overlap with (the cars of the elements of) FUNCTIONS.  It
+is an error if two names in PREDICATES or FUNCTIONS are equal (in the
+sense of EQL) but with different corresponding arities."
+  (let ((constants-no-dups (remove-duplicates constants :test #'eql))
+	(predicates-no-dups (remove-duplicates predicates :test #'eql))
+	(functions-no-dups (remove-duplicates functions :test #'eql)))
+    (when (verify-name-and-arity-list predicates-no-dups)
+      (when (verify-name-and-arity-list functions-no-dups)
+	(make-instance 'infinite-variable-first-order-signature
+		       :constants constants-no-dups
+		       :predicates predicates-no-dups
+		       :functions functions-no-dups)))))
 
 (defun functions-of-arity (signature arity)
   (let (result)
@@ -173,19 +326,14 @@
 (defgeneric function? (signature sym))
 (defgeneric predicate? (signature sym))
 
-(defmethod variable? ((sig infinite-variable-signature) (sym symbol))
-  (let ((var (make-variable sym))
-	(variable-tester (variable-test-pred sig)))
-    (funcall variable-tester var)))    
-
-(defmethod variable? ((sig finite-variable-signature) (sym symbol))
-  (let ((var (make-variable sym)))
-    (member var (signature-variables sig) :test #'equal-terms?)))
-
 (defmethod constant? ((s signature) sym)
   (member sym (signature-constants s)))
 
-(defmethod predicate? ((s signature) pred-sym)
+(defmethod predicate? ((sig finite-variable-propositional-signature)
+		       (pred-sym symbol))
+  (member pred-sym (signature-predicates sig) :test #'eql))
+
+(defmethod predicate? ((s first-order-signature) pred-sym)
   (some #'(lambda (sym) (eq sym pred-sym))
 	(mapcar #'car (signature-predicates s))))
 
@@ -198,16 +346,22 @@
        (not (empty-string? str))
        (not (contains-whitespace? str))))
 
-(defmethod belongs-to-signature? ((sig finite-variable-signature) (sym symbol))
+(defmethod belongs-to-signature? ((sig finite-variable-first-order-signature)
+				  (sym symbol))
   (or (variable? sig sym)
       (constant? sig sym)
       (predicate? sig sym)
       (function? sig sym)))
 
-(defmethod belongs-to-signature? ((sig infinite-variable-signature) (sym symbol))
+(defmethod belongs-to-signature? ((sig infinite-variable-first-order-signature) 
+				  (sym symbol))
   (or (constant? sig sym) 
       (predicate? sig sym)
       (function? sig sym)))
+
+(defmethod belongs-to-signature? ((sig finite-variable-propositional-signature)
+				  (sym symbol))
+  (member sym (signature-predicates sig) :test #'eql))
 
 (defmethod belongs-to-signature? ((sig signature) (str string))
   (belongs-to-signature? sig (symbolify str)))
@@ -233,6 +387,12 @@
 (defmethod delete-constant ((sig signature) (constant-str string))
   (delete-constant sig (symbolify constant-str)))
 
+(defmethod add-predicate ((sig finite-variable-propositional-signature)
+			  (pred-sym symbol)
+			  arity)
+  (declare (ignore arity))
+  (push pred-sym (signature-predicates sig)))
+
 (defmethod add-predicate ((sig signature) (pred-sym symbol) (arity integer))
   (cond ((belongs-to-signature? sig pred-sym)
 	 (error 'symbol-already-present-error
@@ -248,7 +408,12 @@
       (error 'unacceptable-identifier-name-error
 	     :text pred-str)))
 
-(defmethod delete-predicate ((sig signature) (pred-sym symbol))
+(defmethod delete-predicate ((sig finite-variable-propositional-signature)
+			     (pred-sym symbol))
+  (with-slots (predicates) sig
+    (setf predicates (remove pred-sym predicates))))
+
+(defmethod delete-predicate ((sig first-order-signature) (pred-sym symbol))
   (setf (signature-predicates sig)
 	(remove (find pred-sym (signature-predicates sig) :key #'first)
 		(signature-predicates sig))))
@@ -352,22 +517,5 @@
 		   :predicates predicates
 		   :functions functions
 		   :constants constants)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Concrete signatures
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defparameter pqrs-propositional-signature
-  (make-instance 'signature
-		 :predicates '((p . 0)
-			       (q . 0)
-			       (r . 0)
-			       (s . 0))))
-
-(defparameter unary-pqrs-signature-with-equality
-  (make-signature-with-equality :predicates '((p . 1)
-					      (q . 1)
-					      (r . 1)
-					      (s . 1))))
 
 ;;; signature.lisp ends here

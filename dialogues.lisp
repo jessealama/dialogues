@@ -55,7 +55,7 @@
 	(format stream "[~A,~A] ~A" stance reference statement)
 	(format stream "~A (initial move)" statement))))
 
-(defun equal-moves? (move-1 move-2 signature)
+(defun equal-moves? (move-1 move-2)
   (and (eq (move-player move-1) (move-player move-2))
        (eq (move-stance move-1) (move-stance move-2))
        (let ((ref-1 (move-reference move-1))
@@ -64,8 +64,7 @@
 	     (and (integerp ref-2) (= ref-1 ref-2))
 	     (and (null ref-1) (null ref-2))))
        (equal-statements? (move-statement move-1)
-			  (move-statement move-2)
-			  signature)))
+			  (move-statement move-2))))
 
 (defun attacking-move? (move)
   (eq (move-stance move) 'A))
@@ -93,36 +92,78 @@
 ;;; Statements
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar symbolic-attacks
-  '(attack-left-conjunct attack-right-conjunct which-instance? which-disjunct?))
+(defclass symbolic-attack ()
+  nil)
+
+(defconstant-if-unbound attack-left-conjunct (make-instance 'symbolic-attack))
+(defconstant-if-unbound attack-right-conjunct (make-instance 'symbolic-attack))
+(defconstant-if-unbound which-instance? (make-instance 'symbolic-attack))
+(defconstant-if-unbound which-disjunct? (make-instance 'symbolic-attack))
+
+(defmethod print-object ((attack (eql attack-left-conjunct)) stream)
+  (format stream "ATTACK-LEFT-CONJUNCT"))
+
+(defmethod print-object ((attack (eql attack-right-conjunct)) stream)
+  (format stream "ATTACK-RIGHT-CONJUNCT"))
+
+(defmethod print-object ((attack (eql which-instance?)) stream)
+  (format stream "WHICH-INSTANCE?"))
+
+(defmethod print-object ((attack (eql which-disjunct?)) stream)
+  (format stream "WHICH-DISJUNCT?"))
+
+(defvar symbolic-attacks (list attack-left-conjunct
+			       attack-right-conjunct
+			       which-instance?
+			       which-disjunct?))
 
 (defun symbolic-attack? (obj)
-  (member obj symbolic-attacks))
+  (eql (class-of obj) 'symbolic-attack))
 
-(defun statement? (obj signature)
-  (or (formula? signature obj)
-      (symbolic-attack? obj)
-      (term? signature obj)))
+(defclass statement (formula symbolic-attack term)
+  nil)
 
-(defun non-symbolic-attack-term? (obj signature)
+(defgeneric equal-statements? (statement-1 statement-2))
+
+(defmethod equal-statements? ((form-1 formula) (form-2 formula))
+  (equal-formulas? form-1 form-2))
+
+(defmethod equal-statements? ((form formula) (sa symbolic-attack))
+  nil)
+
+(defmethod equal-statements? ((form formula) (term term))
+  nil)
+
+(defmethod equal-statements? ((sa symbolic-attack) (form formula))
+  nil)
+
+(defmethod equal-statements? ((sa-1 symbolic-attack) (sa-2 symbolic-attack))
+  (eq sa-1 sa-2))
+
+(defmethod equal-statements? ((sa symbolic-attack) (term term))
+  nil)
+
+(defmethod equal-statements? ((term term) (formula formula))
+  nil)
+
+(defmethod equal-statements? ((term term) (sa symbolic-attack))
+  nil)
+
+(defmethod equal-statements? ((term-1 term) (term-2 term))
+  (equal-terms? term-1 term-2))
+
+(defun non-symbolic-attack-term? (obj)
   "Determine whether OBJ is a term different from the symbolic
 attacks which, being symbols, do qualify as terms."
   (and (not (symbolic-attack? obj))
-       (term? obj signature)))
+       (term? obj)))
 
-(defun non-symbolic-attack-formula? (obj signature)
+(defun non-symbolic-attack-formula? (obj)
   "Determine whether OBJ is a formula different from the symbolic
   attacks which, being simply lisp symbols, do qualify as [atomic]
   formulas)."
   (and (not (symbolic-attack? obj))
-       (formula? obj signature)))
-
-(defun equal-statements? (statement-1 statement-2 signature)
-  (if (symbolic-attack? statement-1)
-      (eq statement-1 statement-2)
-      (if (term? statement-1 signature)
-	  (equal-terms? statement-1 statement-2 signature)
-	  (equal-formulas? statement-1 statement-2 signature))))
+       (formula? obj)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Dialogues
@@ -199,6 +240,35 @@ attacks which, being symbols, do qualify as terms."
 		(list move)))
   dialogue)
 
+(define-condition dialogue-index-out-of-bounds-error (error)
+  ((dialogue :initarg :dialogue
+	     :reader dialogue)
+   (move :initarg :move
+	 :reader move)
+   (index :initarg :index
+	  :reader index))
+  (:report (lambda (condition stream)
+	     (let ((dialogue (dialogue condition))
+		   (move (move condition))
+		   (index (index condition)))
+	       (format stream "Unable to add the move ~A to the dialogue ~A at sposition ~A: the index is out-of-bounds" move dialogue index)))))
+
+(defun add-move-to-dialogue-at-position (dialogue move position)
+  (let ((len (dialogue-length dialogue)))
+    (if (<= position len)
+	(if (= position len)
+	    (add-move-to-dialogue dialogue move)
+	    (progn
+	      (setf (dialogue-plays dialogue)
+		    (append (first-n position (dialogue-plays dialogue))
+			    (list move)
+			    (nthcdr (1+ position) (dialogue-plays dialogue))))
+	      dialogue))
+	(error 'dialogue-index-out-of-bounds-error
+	       :dialogue dialogue
+	       :move move
+	       :index position))))
+
 (defun extend-dialogue (dialogue player stance statement reference)
   (add-move-to-dialogue dialogue
 			(make-move player statement stance reference))
@@ -225,7 +295,7 @@ attacks which, being symbols, do qualify as terms."
 	 (equal-length? (dialogue-plays dialogue-1)
 			(dialogue-plays dialogue-2))
 	 (every-pair #'(lambda (move-1 move-2)
-			 (equal-moves? move-1 move-2 signature-1))
+			 (equal-moves? move-1 move-2))
 		     (dialogue-plays dialogue-1)
 		     (dialogue-plays dialogue-2)))))
 
@@ -461,7 +531,7 @@ attacks which, being symbols, do qualify as terms."
      check-arguments
        (cond ((and signature
 		   initial-formula 
-		   (formula? initial-formula signature))
+		   (formula? initial-formula))
 	      (setf dialogue (make-dialogue initial-formula
 					    signature
 					    rules))
@@ -493,8 +563,8 @@ attacks which, being symbols, do qualify as terms."
        (msg "Input a composite formula:")
        (format t "~A" prompt)
        (setf statement nil)
-       (until (composite-formula? statement signature)
-	 (restart-case (setf statement (read-composite-formula t signature))
+       (until (composite-formula? statement)
+	 (restart-case (setf statement (read-composite-formula))
 	   (try-another-formula (new-formula) 
 	     :report "Enter another formula"
 	     :interactive read-new-formula
@@ -668,8 +738,8 @@ attacks which, being symbols, do qualify as terms."
        (msg "Enter a formula:")
        (format t "~A" prompt)
        (setf statement nil)
-       (until (formula? statement signature)
-	 (restart-case (setf statement (read-formula t signature))
+       (until (formula? statement)
+	 (restart-case (setf statement (read-formula))
 	   (try-another-formula (new-formula) 
 	     :report "Enter a different formula."
 	     :interactive read-new-formula
@@ -678,7 +748,7 @@ attacks which, being symbols, do qualify as terms."
      term-input
        (msg "Enter a term:")
        (format t "~A" prompt)
-       (setf statement (read-term))
+       (setf statement (read-term-in-signature signature))
        (go evaluate-rules)
      statement-input
        (if (eq stance 'a)
@@ -699,10 +769,10 @@ attacks which, being symbols, do qualify as terms."
 	 (p (go print-then-statement-input))
 	 (f (go formula-input))
 	 (t (go term-input))
-	 (l (setf statement 'attack-left-conjunct))
-	 (r (setf statement 'attack-right-conjunct))
-	 (d (setf statement 'which-disjunct?))
-	 (i (setf statement 'which-instance?)))
+	 (l (setf statement attack-left-conjunct))
+	 (r (setf statement attack-right-conjunct))
+	 (d (setf statement which-disjunct?))
+	 (i (setf statement which-instance?)))
        (go evaluate-rules)
      statement
        (msg "You are responding to move #~A.  Enter:" index)

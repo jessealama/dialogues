@@ -17,27 +17,25 @@
   (make-offensive-rule
    :name d01-conjunction
    :condition (binary-conjunction? (nth-statement dialogue current-reference))
-   :body (or (eq current-statement 'attack-left-conjunct)
-	     (eq current-statement 'attack-right-conjunct))
+   :body (or (eq current-statement attack-left-conjunct)
+	     (eq current-statement attack-right-conjunct))
    :failure-message "Only two attacks against conjunctions are permitted:~%ATTACK-LEFT-CONJUNCT and ATTACK-RIGHT-CONJUNCT."))
 
 (defvar rule-d01-left-conjunct
   (make-offensive-rule
    :name d01-left-conjunct
-   :condition (eq current-statement 'attack-left-conjunct)
+   :condition (eq current-statement attack-left-conjunct)
    :body (and (non-symbolic-attack-formula?
-	       (nth-statement dialogue current-reference)
-	       (dialogue-signature dialogue))
+	       (nth-statement dialogue current-reference))
 	      (binary-conjunction? (nth-statement dialogue current-reference)))
    :failure-message "One cannot attack the left conjunct of a formula~%that isn't a conjunction."))
 
 (defvar rule-d01-right-conjunct
   (make-offensive-rule
    :name d01-right-conjunct
-   :condition (eq current-statement 'attack-right-conjunct)
+   :condition (eq current-statement attack-right-conjunct)
    :body (and (non-symbolic-attack-formula?
-	       (nth-statement dialogue current-reference)
-	       (dialogue-signature dialogue))
+	       (nth-statement dialogue current-reference))
 	      (binary-conjunction? (nth-statement dialogue current-reference)))
    :failure-message "One cannot attack the right conjunct of a formula that isn't a conjunction."))
 
@@ -45,13 +43,13 @@
   (make-offensive-rule
    :name d01-disjunction
    :condition (binary-disjunction? (nth-statement dialogue current-reference))
-   :body (eq current-statement 'which-disjunct?)
+   :body (eq current-statement which-disjunct?)
    :failure-message "WHICH-DISJUNCT? is the only permissible attack against a disjunction."))
 
 (defvar rule-d01-which-disjunct
   (make-offensive-rule
    :name d01-which-disjunct
-   :condition (eq current-statement 'which-disjunct?)
+   :condition (eq current-statement which-disjunct?)
    :body (binary-disjunction? (nth-statement dialogue current-reference))
    :failure-message "The WHICH-DISJUNCT? attack applies only to disjunctions."))
 
@@ -59,52 +57,44 @@
   (make-offensive-rule
    :name d01-implication
    :condition (implication? (nth-statement dialogue current-reference))
-   :body (and (non-symbolic-attack-formula? current-statement
-					    (dialogue-signature dialogue))
-	      (equal-formulas? current-statement
-			       (antecedent
-				(nth-statement dialogue current-reference))
-			       (dialogue-signature dialogue)))
+   :body (and (non-symbolic-attack-formula? current-statement)
+	      (equal-statements? current-statement
+				 (antecedent
+				  (nth-statement dialogue current-reference))))
    :failure-message "To attack an implication, one must assert the antecdent."))
 
 (defvar rule-d01-negation
   (make-offensive-rule 
    :name d01-negation
    :condition (negation? (nth-statement dialogue current-reference))
-   :body (and (non-symbolic-attack-formula? current-statement
-					    (dialogue-signature dialogue))
-	      (equal-formulas? current-statement
-			       (unnegate
-				(nth-statement dialogue current-reference))
-			       (dialogue-signature dialogue)))
+   :body (and (non-symbolic-attack-formula? current-statement)
+	      (equal-statements? current-statement
+				 (unnegate
+				  (nth-statement dialogue current-reference))))
    :failure-message "To attack a negation, one must assert the \"unnegation\" of the negation."))
 
 (defvar rule-d01-universal
   (make-offensive-rule
    :name d01-universal
    :condition (universal-generalization? (nth-statement dialogue current-reference))
-   :body (non-symbolic-attack-term? current-statement
-				    (dialogue-signature dialogue))
+   :body (non-symbolic-attack-term? current-statement)
    :failure-message "To attack a universal, one must assert a term."))
 
 (defvar rule-d01-term
   (make-offensive-rule
    :name d01-term
-   :condition (non-symbolic-attack-term? current-statement
-					 (dialogue-signature dialogue))
+   :condition (non-symbolic-attack-term? current-statement)
    :body (let ((s (nth-statement dialogue current-reference)))
-	   (and (non-symbolic-attack-formula? s
-					      (dialogue-signature dialogue))
+	   (and (non-symbolic-attack-formula? s)
 		(universal-generalization? s)))
    :failure-message "If one asserts a term as an attack, then the assertion being attacked must be a universal generalization."))
 
 (defvar rule-d01-which-instance
   (make-offensive-rule 
    :name d01-which-instance
-   :condition (eq current-statement 'which-instance?)
+   :condition (eq current-statement which-instance?)
    :body (let ((s (nth-statement dialogue current-reference)))
-	   (and (non-symbolic-attack-formula? s
-					      (dialogue-signature dialogue))
+	   (and (non-symbolic-attack-formula? s)
 		(existential-generalization? s)))
    :failure-message "The WHICH-INSTANCE? attack applies only to existential generalizations."))
 
@@ -112,14 +102,13 @@
   (make-offensive-rule
    :name d01-existential
    :condition (existential-generalization? (nth-statement dialogue current-reference))
-   :body (eq current-statement 'which-instance?)
+   :body (eq current-statement which-instance?)
    :failure-message "WHICH-INSTANCE? is the only permissible attack on existential generalizations."))
 
 (defvar rule-d01-formula
   (make-offensive-rule 
    :name d01-formula
-   :condition (non-symbolic-attack-formula? current-statement
-					    (dialogue-signature dialogue))
+   :condition (non-symbolic-attack-formula? current-statement)
    :body (or (implication? (nth-statement dialogue current-reference))
 	     (negation? (nth-statement dialogue current-reference))
 	     (universal-generalization? (nth-statement dialogue current-reference)))
@@ -145,43 +134,38 @@
 (defvar rule-d02-formula
   (make-defensive-rule
    :name d02-formula
-   :body (non-symbolic-attack-formula? current-statement
-				       (dialogue-signature dialogue))
+   :body (non-symbolic-attack-formula? current-statement)
    :failure-message "All defensive statements are supposed to be formulas."))
 
 (defvar rule-d02-left-conjunct
   (make-defensive-rule
    :name d02-left-conjunct
    :condition (eq (nth-statement dialogue current-reference)
-		  'attack-left-conjunct)
+		  attack-left-conjunct)
   :body (with-original-statement (original-statement)
-	  (equal-formulas? current-statement
-			   (lhs original-statement)
-			   (dialogue-signature dialogue)))
+	  (equal-statements? current-statement
+			     (lhs original-statement)))
   :failure-message "To defend against the ATTACK-LEFT-CONJUNCT attack,~% assert the left conjunct of the original conjunction."))
 
 (defvar rule-d02-right-conjunct
   (make-defensive-rule 
    :name d02-right-conjunct
    :condition (eq (nth-statement dialogue current-reference)
-		  'attack-right-conjunct)
+		  attack-right-conjunct)
    :body (with-original-statement (original-statement)
-	   (equal-formulas? current-statement
-			    (rhs original-statement)
-			    (dialogue-signature dialogue)))
+	   (equal-statements? current-statement
+			      (rhs original-statement)))
    :failure-message "To defend against the ATTACK-RIGHT-CONJUNCT attack,~% assert the right conjunct of the original conjunction."))
 
 (defvar rule-d02-which-disjunct
   (make-defensive-rule
    :name d02-which-disjunct
-   :condition (eq (nth-statement dialogue current-reference) 'which-disjunct?)
+   :condition (eq (nth-statement dialogue current-reference) which-disjunct?)
    :body (with-original-statement (original-statement)
-	   (or (equal-formulas? current-statement
-				(lhs original-statement)
-				(dialogue-signature dialogue))
-	       (equal-formulas? current-statement
-				(rhs original-statement)
-				(dialogue-signature dialogue))))
+	   (or (equal-statements? current-statement
+				  (lhs original-statement))
+	       (equal-statements? current-statement
+				  (rhs original-statement))))
    :failure-message "To defend against the WHICH-DISJUNCT? attack,~%assert either the left or the right disjunct~%of the original disjunction."))
 
 (defvar rule-d02-implication
@@ -190,9 +174,8 @@
    :condition (with-original-statement (original-statement)
 		(implication? original-statement))
    :body (with-original-statement (original-statement)
-	   (equal-formulas? current-statement
-			    (consequent original-statement)
-			    (dialogue-signature dialogue)))
+	   (equal-statements? current-statement
+			      (consequent original-statement)))
    :failure-message "To defend against an attack on an implication, assert its consequent."))
 
 (defvar rule-d02-negation
@@ -215,9 +198,8 @@
 		(original-statement (move-statement original-move))
 		(var (bound-variable original-statement))
 		(matrix (matrix original-statement)))
-	   (equal-formulas? current-statement
-			    (instantiate instance var matrix)
-			    (dialogue-signature dialogue)))
+	   (equal-statements? current-statement
+			      (instantiate instance var matrix)))
    :failure-message "The asserted statement is not the required instance of the original universal generalization."))
 
 (defvar rule-d02-existential
@@ -291,14 +273,12 @@
 (defvar rule-d10
   (make-rule :name d10
 	     :condition (and (evenp current-position) 
-			     (non-symbolic-attack-formula? current-statement
-							   (dialogue-signature dialogue))
+			     (non-symbolic-attack-formula? current-statement)
 			     (atomic-formula? current-statement))
 	     :body (some-move #'(lambda (move)
 				  (when (opponent-move? move)
-				    (equal-formulas? (move-statement move)
-						     current-statement
-						     (dialogue-signature dialogue))))
+				    (equal-statements? (move-statement move)
+						       current-statement)))
 			      dialogue)
 	     :failure-message "Proponent cannot assert an atomic formula before opponent has asserted it."))
 

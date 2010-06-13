@@ -6,7 +6,8 @@
 
 (defcomponent signature-editor ()
   ((signature :initarg :signature
-	      :accessor signature)))
+	      :accessor signature
+	      :type finite-variable-propositional-signature)))
 
 (defaction save-signature ((self signature-editor) new-predicate-symbol)
   (add-predicate (signature self) 
@@ -39,7 +40,8 @@
 
 (defcomponent add-a-predicate ()
   ((signature :initarg :signature
-	      :accessor signature)
+	      :accessor signature
+	      :type finite-variable-propositional-signature)
    (proposed-name :initarg :name 
 		  :accessor proposed-name 
 		  :initform nil)
@@ -109,7 +111,8 @@
 
 (defcomponent delete-a-predicate ()
   ((signature :initarg :signature
-	      :accessor signature)))
+	      :accessor signature
+	      :type finite-variable-propositional-signature)))
 
 (defmethod render ((self delete-a-predicate))
   (let (selected-predicate)
@@ -124,26 +127,30 @@
 	      (<:p "Choose a predicate to be deleted from the signature:")
 	      (<ucw:select :size 1
 			   :accessor selected-predicate
-	        (dolist (predicate-and-arity (signature-predicates sig))
-		  (let ((pred (first predicate-and-arity)))
-		    (<ucw:option :value pred
-				 (<:as-html pred)))))
+	        (dolist (pred (signature-predicates sig))
+		  (<ucw:option :value pred
+			       (<:as-html pred))))
 	      (<ucw:submit :value "Delete this predicate"
 			   :action $take-action))
 	    (<:p "There are no predicates in the signature; none can be deleted. " (<ucw:a :action (answer (signature self))
 											  "Proceed") "."))))))
 
-(defmethod render ((self signature))
+(defmethod render ((self finite-variable-propositional-signature))
   (with-slots (predicates) self
     (<:p "Predicates:")
      (if (null predicates)
 	 (<:em "(none)")
-	 (<:as-html (comma-separated-list (mapcar #'car predicates))))))
+	 (let ((first (car predicates)))
+	   (<:em (<:as-html first))
+	   (dolist (pred (cdr predicates))
+	     (<:as-is ", ")
+	     (<:em (<:as-html pred)))))))
 
 (defentry-point "" (:application *dialogue-application*)
     ()
   (let* ((default-fec (make-instance 'formula-entry-component 
-				     :signature (copy-signature pqrs-propositional-signature)))
+				     :signature (copy-signature
+						 pqrs-propositional-signature)))
 	 (default-sgc (make-instance 'start-game-component 
 				     :formula-entry-component default-fec)))
     (call 'initial-formula-window :body default-sgc)))
@@ -188,17 +195,18 @@
 
 (defaction parse-formula-action (formula-str signature)
   (ucw-handler-case
-      (answer (parse-formula input-formula signature))
+      (answer (parse-formula formula-str signature))
     (malformed-formula-error ()
       (answer (call 'formula-corrector
-		    :text input-formula
+		    :text formula-str
 		    :signature (formula-corrector-signature self))))))
 
 (defmethod render ((self formula-corrector))
   (let ((input-formula)
-	(sig (formula-corrector-signature self)))
+	(sig (formula-corrector-signature self))
+	(text (formula-corrector-text self)))
     (<:h1 "Invalid formula supplied")
-    (<:p "We are unable to make sense of the formula, \"" (<:as-html (formula-corrector-text self)) "\" that you supplied.  The signature with respect to which you should enter a formula is:")
+    (<:p "We are unable to make sense of the formula, \"" (render text) "\" that you supplied.  The signature with respect to which you should enter a formula is:")
     (render sig)
     (formula-guide)
     (<:p "Please try again.")
@@ -206,12 +214,22 @@
 	       :action (parse-formula-action input-formula sig)
       (<:p "Enter a formula in the above signature.  If you wish, you can "
 	   (<ucw:a :action (let ((new-signature (call 'signature-editor :signature sig)))
-	                     (ucw-handler-case
-				 (answer (parse-formula (formula-corrector-text self)
-							new-signature))
-			       (malformed-formula-error () (answer (call 'formula-corrector
-									 :text input-formula
-									 :signature sig)))))
+			     (if (formula? text)
+				 (if (belongs-to-signature? new-signature
+							    text)
+				     (answer text)
+				     (answer
+				      (call 'formula-corrector
+					    :text text
+					    :signature new-signature)))
+				 (ucw-handler-case
+				     (answer (parse-formula 
+					      (formula-corrector-text self)))
+			       (malformed-formula-error 
+				() 
+				(answer (call 'formula-corrector
+					      :text input-formula
+					      :signature new-signature))))))
 		   "edit the signature") ". (If edit the signature and the formula that you provided becomes well-formed in the new signature, then you will go back to where you were before you came here.  If, after editing the signature, the formula is still not valid, you will come back to this page.)")
 	(<ucw:input :type "text"
 		    :id "formula-input"
@@ -245,6 +263,7 @@
 (defmethod render ((self turn-evaluator))
   (with-slots (player statement stance reference game)
       self
+    (let ((game-len (dialogue-length game)))
     (if (and player statement stance reference)
 	(multiple-value-bind (rules-result messages)
 	    (evaluate-all-rules (dialogue-rules game)
@@ -258,11 +277,13 @@
 	      (progn
 		(<:h1 "Success!")
 		(<:p "Your move was accepted. " (<ucw:a :action (call 'turn-editor
-								      :game (add-move-to-dialogue (game self)
-												  (make-move player
-													     statement
-													     stance
-													     reference)))
+								      :game (add-move-to-dialogue-at-position
+									     (game self)
+									     (make-move player
+											statement
+											stance
+											reference)
+									     game-len))
 							"Proceed") "."))
 	      (progn
 		(<:h1 "Problem!")
@@ -282,22 +303,23 @@
 		(<ucw:form :method "POST"
 			   :action (call 'turn-editor :game game)
 		  (<ucw:submit :value "Edit this move"
-			       :action (call 'turn-editor :game game)))))))))
+			       :action (call 'turn-editor :game game))))))))))
 
 (defmethod render ((self turn-editor))
   (let (stance-option player-option reference-option input-statement selected-symbolic-attack rewind-point)
-    (let ((game (game self)))
+    (let* ((game (game self))
+	   (game-len (dialogue-length game)))
     (symbol-macrolet 
 	(($take-action 
 	  (let (new-statement)
 	    (if (empty-string? input-statement)
 		(setf new-statement selected-symbolic-attack)
-		(setf new-statement (ucw-handler-case (parse-formula input-statement
-								 (dialogue-signature game))
-				      (malformed-formula-error () 
-					(call 'formula-corrector
-					      :text input-statement
-					      :signature (dialogue-signature game))))))
+		(setf new-statement
+		      (ucw-handler-case (parse-formula input-statement)
+			(malformed-formula-error () 
+						 (call 'formula-corrector
+						       :text input-statement
+						       :signature (dialogue-signature game))))))
 	    (call 'turn-evaluator
 		  :player player-option
 		  :stance stance-option
@@ -320,16 +342,20 @@
 		   (destructuring-bind (next-statement next-reference)
 		       next-proponent-attack
 		     (<:li (<ucw:a 
-			    :action (add-move-to-dialogue game
-							  (make-move 'p next-statement 'a next-reference))
-			    "Attack move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))
+			    :action (add-move-to-dialogue-at-position
+				     game
+				     (make-move 'p next-statement 'a next-reference)
+				     game-len)
+			    "Attack move " (<:as-html next-reference) " by asserting " (render next-statement)))))
 		 (dolist (next-proponent-defense next-proponent-defenses)
 		   (destructuring-bind (next-statement next-reference)
 		       next-proponent-defense
 		     (<:li 
-		      (<ucw:a :action (add-move-to-dialogue game
-							    (make-move 'p next-statement 'd next-reference))
-			      "Defend against the attack of move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))))
+		      (<ucw:a :action (add-move-to-dialogue-at-position
+				       game
+				       (make-move 'p next-statement 'd next-reference)
+				       game-len)
+			      "Defend against the attack of move " (<:as-html next-reference) " by asserting " (render next-statement)))))))
 	    (<:p (<:em "(no moves for Proponent are available.)")))
 	(<:p "Available moves for " (<:b "Opponent") ":")
 	(if (or next-opponent-attacks next-opponent-defenses)
@@ -339,16 +365,20 @@
 		   (destructuring-bind (next-statement next-reference)
 		       next-opponent-attack
 		     (<:li (<ucw:a 
-			    :action (add-move-to-dialogue game
-							  (make-move 'o next-statement 'a next-reference))
-			    "Attack move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))
+			    :action (add-move-to-dialogue-at-position
+				     game
+				     (make-move 'o next-statement 'a next-reference)
+				     game-len)
+			    "Attack move " (<:as-html next-reference) " by asserting " (render next-statement)))))
 		 (dolist (next-opponent-defense next-opponent-defenses)
 		   (destructuring-bind (next-statement next-reference)
 		       next-opponent-defense
 		     (<:li 
-		      (<ucw:a :action (add-move-to-dialogue game
-							    (make-move 'o next-statement 'd next-reference))
-			      "Defend against the attack of move " (<:as-html next-reference) " by asserting " (<:as-is next-statement)))))))
+		      (<ucw:a :action (add-move-to-dialogue-at-position
+				       game
+				       (make-move 'o next-statement 'd next-reference)
+				       game-len)
+			      "Defend against the attack of move " (<:as-html next-reference) " by asserting " (render next-statement)))))))
 	    (<:p (<:em "(no moves for Opponent are available.)"))))
       (<:h1 "...or enter your move manually")
       (<:p "The list in the previous section shows all moves that
@@ -436,7 +466,7 @@ way to explore the meaning of the dialogue rules.")
 	    (<:tr 
 	     (<:td (<:as-html i))
 	     (<:td (<:as-html player))
-	     (<:td (<:as-is statement))
+	     (<:td (render statement))
 	     (if (= i 0)
 		 (<:td (<:em "(initial move)"))
 		 (<:td "[" (<:as-html stance) "," (<:as-html reference) "]"))))))))
@@ -444,65 +474,108 @@ way to explore the meaning of the dialogue rules.")
 (defun render-variable (variable)
   (<:em (<:as-html variable)))
 
-(defun render-formula (formula)
-  (cond ((conjunction? formula)
+(defgeneric render-statement (statement))
+
+(defmethod render-statement ((statement term))
+  (let ((func-sym (function-symbol statement))
+	(args (arguments statement)))
+    (<:em func-sym)
+    (<:as-is "(")
+    (if (null args)
+	(<:as-is ")")
+	(let ((first (car args)))
+	  (render-statement first)
+	  (when (not (null (cdr args)))
+	    (dolist (arg args)
+	      (<:as-is ",")
+	      (render-statement arg)))
+	  (<:as-is ")")))))
+
+(defmethod render-statement ((sa (eql attack-left-conjunct)))
+  (<:as-is "&and;")
+  (<:sub "L"))
+
+(defmethod render-statement ((sa (eql attack-right-conjunct)))
+  (<:as-is "&and;")
+  (<:sub "R"))
+
+(defmethod render-statement ((sa (eql which-instance?)))
+  (<:as-is "?"))
+
+(defmethod render-statement ((sa (eql which-disjunct?)))
+  (<:as-is "?"))
+
+(defmethod render ((formula binary-conjunction))
 	 (<:as-html "(")
-	 (render-formula (left-conjunct formula))
+	 (render (lhs formula))
 	 (<:as-html " ")
 	 (<:as-is "&and;")
 	 (<:as-html " ")
-	 (render-formula (right-conjunct formula))
+	 (render (rhs formula))
 	 (<:as-html ")"))
-	((disjunction? formula)
-	 (<:as-html "(")
-	 (render-formula (left-disjunct formula))
-	 (<:as-html " ")
-	 (<:as-is "&or;")
-	 (<:as-html " ")
-	 (render-formula (right-disjunct formula))
-	 (<:as-html ")"))
-	((implication? formula)
-	 (<:as-html "(")
-	 (render-formula (left-disjunct formula))
-	 (<:as-html " ")
-	 (<:as-is "&rarr;")
-	 (<:as-html " ")
-	 (render-formula (right-disjunct formula))
-	 (<:as-html ")"))
-	((equivalence? formula)
-	 (<:as-html "(")
-	 (render-formula (left-disjunct formula))
-	 (<:as-html " ")
-	 (<:as-is "&harr;")
-	 (<:as-html " ")
-	 (render-formula (right-disjunct formula))
-	 (<:as-html ")"))
-	((universal? formula)
-	 (let ((var (bound-variable formula))
-	       (body (matrix formula)))
-	 (<:as-html "(")
-	 (<:as-is "&forall;")
-	 (render-variable var)
-	 (<:as-html "[")
-	 (<:as-is "&harr;")
-	 (render-formula body)
-	 (<:as-html "]")))
-	((existential? formula)
-	 (let ((var (bound-variable formula))
-	       (body (matrix formula)))
-	 (<:as-html "(")
-	 (<:as-is "&exist;")
-	 (render-variable var)
-	 (<:as-html "[")
-	 (<:as-is "&harr;")
-	 (render-formula body)
-	 (<:as-html "]")))
-	(t ; atomic case
-	 (<:as-html formula))))
-	   
-	 
-	
 
+(defmethod render ((formula binary-disjunction))
+  (<:as-html "(")
+  (render (lhs formula))
+  (<:as-html " ")
+  (<:as-is "&or;")
+  (<:as-html " ")
+  (render (rhs formula))
+  (<:as-html ")"))
+
+(defmethod render ((formula implication))
+  (<:as-html "(")
+  (render (antecedent formula))
+  (<:as-html " ")
+  (<:as-is "&rarr;")
+  (<:as-html " ")
+  (render (consequent formula))
+  (<:as-html ")"))
+
+(defmethod render ((formula equivalence))
+   (<:as-html "(")
+   (render (lhs formula))
+   (<:as-html " ")
+   (<:as-is "&harr;")
+   (<:as-html " ")
+   (render (rhs formula))
+   (<:as-html ")"))
+
+(defmethod render ((formula universal-generalization))
+  (let ((var (bound-variable formula))
+	(body (matrix formula)))
+    (<:as-html "(")
+    (<:as-is "&forall;")
+    (render-variable var)
+    (<:as-html "[")
+    (<:as-is "&harr;")
+    (render body)
+    (<:as-html "]")))
+
+(defmethod render ((formula existential-generalization))
+  (let ((var (bound-variable formula))
+	(body (matrix formula)))
+    (<:as-html "(")
+    (<:as-is "&exist;")
+    (render-variable var)
+    (<:as-html "[")
+    (<:as-is "&harr;")
+    (render body)
+    (<:as-html "]")))
+
+(defmethod render ((formula atomic-formula))
+  (let ((pred (predicate formula))
+	(args (arguments formula)))
+    (<:em (<:as-html pred))
+    (unless (null args)
+      (<:as-is "(")
+      (let ((first (car args)))
+	(render-statement first)
+	(when (not (null (cdr args)))
+	  (dolist (arg args)
+	    (<:as-is ",")
+	    (render-statement arg)))
+	(<:as-is ")")))))
 
 (defmethod render ((self game-component))
   (let ((game (game self)))
@@ -534,7 +607,8 @@ way to explore the meaning of the dialogue rules.")
 
 (defcomponent formula-entry-component ()
   ((signature :initarg :signature
-	      :accessor signature)))
+	      :accessor signature
+	      :type finite-variable-propositional-signature)))
 
 (defmethod render ((self formula-entry-component))
   (let (input-formula selected-formula selected-rules)
@@ -542,22 +616,29 @@ way to explore the meaning of the dialogue rules.")
       (($take-action 
 	(let ((sig (signature self)))
 	  (if (empty-string? input-formula)
-	      (if (formula? selected-formula sig)
+	      (if (belongs-to-signature? sig selected-formula)
 		  (call 'turn-editor
 			:game (make-dialogue selected-formula 
 					     sig
 					     selected-rules))
 		  (call 'formula-corrector
-			:text (format nil "~A" selected-formula)
+			:text selected-formula
 			:signature sig))
-	      (ucw-handler-case (call 'turn-editor
-				      :game (make-dialogue 
-					     (parse-formula input-formula sig) 
-					     sig
-					     selected-rules))
-		(malformed-formula-error (call 'formula-corrector
-					       :text input-formula
-					       :signature sig)))))))
+	      (let (parsed-formula)
+		(ucw-handler-case (setf parsed-formula
+					(parse-formula))
+		  (malformed-formula-error (call 'formula-corrector
+						 :text input-formula
+						 :signature sig)))
+		(if (belongs-to-signature? sig parsed-formula)
+		    (call 'turn-editor
+			  :game (make-dialogue 
+				 (parse-formula input-formula) 
+				 sig
+				 selected-rules))
+		    (call 'formula-corrector
+			  :text input-formula
+			  :signature sig)))))))
     (let ((sig (signature self)))
       (<:p "To get started, enter a formula in the text box below or choose a famous formula from the menu.")
       (formula-guide)

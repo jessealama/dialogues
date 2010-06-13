@@ -8,6 +8,9 @@
 
 (defclass term () nil)
 
+(defun term? (thing)
+  (typep thing 'term))
+
 (defclass function-term (term)
   ((function-symbol :initarg :function
 		    :accessor function-symbol
@@ -23,15 +26,24 @@
 
 (defclass variable-term (term)
   ((name :initarg :name
-	 :accessor name
+	 :accessor variable-name
 	 :type string)))
+
+(defun variable-term? (thing)
+  (typep thing 'variable-term))
 
 (defclass unsorted-variable (variable-term)
   nil)
 
+(defun unsorted-variable? (thing)
+  (typep thing 'unsorted-variable?))
+
 (defclass sorted-variable (variable-term)
   ((sort :initarg :sort
 	 :accessor variable-sort)))
+
+(defun sorted-variable? (thing)
+  (typep thing 'sorted-variable?))
 
 (defgeneric make-unsorted-variable (source))
 
@@ -53,8 +65,8 @@
 (defgeneric equal-variables? (var-1 var-2))
 
 (defmethod equal-variables? ((var-1 unsorted-variable) (var-2 unsorted-variable))
-  (string= (name var-1)
-	   (name var-2)))
+  (string= (variable-name var-1)
+	   (variable-name var-2)))
 
 (defmethod equal-variables? ((var-1 unsorted-variable) (var-2 sorted-variable))
   nil)
@@ -63,15 +75,15 @@
   nil)
 
 (defmethod equal-variables? ((var-1 sorted-variable) (var-2 sorted-variable))
-  (and (string= (name var-1)
-		(name var-2))
+  (and (string= (variable-name var-1)
+		(variable-name var-2))
        (eql (variable-sort var-1)
 	    (variable-sort var-2))))
 
 (defgeneric equal-terms? (term-1 term-2))
 
 (defmethod equal-terms? ((var-1 unsorted-variable) (var-2 unsorted-variable))
-  (string= (name var-1) (name var-2)))
+  (string= (variable-name var-1) (variable-name var-2)))
 
 (defmethod equal-terms? ((var-1 unsorted-variable) (var-2 sorted-variable))
   nil)
@@ -82,8 +94,8 @@
 (defmethod equal-terms? ((var-1 sorted-variable) (var-2 unsorted-variable))
   nil)
 
-(defmethod equals-terms? ((var-1 sorted-variable) (var-2 sorted-variable))
-  (string= (name var-1) (name var-2)))
+(defmethod equal-terms? ((var-1 sorted-variable) (var-2 sorted-variable))
+  (string= (variable-name var-1) (variable-name var-2)))
 
 (defmethod equal-terms? ((var sorted-variable) (func-term function-term))
   nil)
@@ -106,6 +118,19 @@
     (cond ((string= name "")
 	   (error "One cannot make a variable with an empty name"))
 	  (t (make-symbol (concatenate 'string "?" name))))))
+
+(defgeneric variable-in-signature? (signature thing))
+
+(defmethod variable-in-signature? ((sig infinite-variable-first-order-signature)
+				   (sym symbol))
+  (let ((var (make-variable sym))
+	(variable-tester (variable-test-pred sig)))
+    (funcall variable-tester var)))    
+
+(defmethod variable-in-signature? ((sig finite-variable-first-order-signature)
+				   (sym symbol))
+  (let ((var (make-variable sym)))
+    (member var (signature-variables sig) :test #'equal-terms?)))
 
 (defgeneric term-in-signature? (term signature))
 

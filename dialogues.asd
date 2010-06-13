@@ -38,6 +38,7 @@ UCW."
   :components ((:file "packages")
 	       (:file "utils")
 	       (:file "signature")
+	       (:file "signature-examples")
 	       (:file "terms")
 	       (:file "formulas")
 	       (:file "famous-formulas")
