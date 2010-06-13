@@ -90,7 +90,8 @@
    [[~/sources/clbuild/source/ucw/src/rerl/request-loop-error.lisp]]
 * DONE Ensure that entering dupication functions, constants, and predicates is blocked
   CLOSED: [2010-05-25 Tue 21:03]
-* TODO When a session expires (or a user quits), unintern any symbols that were created an interned in the dialogues package 
+* DONE When a session expires (or a user quits), unintern any symbols that were created an interned in the dialogues package 
+  CLOSED: [2010-06-13 Sun 18:08]
   This can happen when editing the signature.
   
   We might even want to consider restricting the number of symbols
