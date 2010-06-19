@@ -496,6 +496,12 @@ attacks which, being symbols, do qualify as terms."
 	    (push (list statement index)
 		  result)))))))
 
+(defun next-attacks (dialogue player)
+  (next-moves dialogue player 'a))
+
+(defun next-defenses (dialogue player)
+  (next-moves dialogue player 'd))
+
 (defun proponent-wins? (dialogue)
   (and (proponent-move? (last-player dialogue))
        (null (next-moves dialogue 'o 'a))
