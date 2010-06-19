@@ -407,9 +407,9 @@ way to explore the meaning of the dialogue rules.")
 			    :accessor input-statement)
 		(<ucw:select :accessor selected-symbolic-attack
 			     :size 1
-		  (<ucw:option :value 'attack-left-conjunct "Attack the left conjunct")
-		  (<ucw:option :value 'attack-right-conjunct "Attack the right conjunct")
-		  (<ucw:option :value 'which-disjunct? "Request that a disjunct be chosen")))))
+		  (<ucw:option :value attack-left-conjunct "Attack the left conjunct")
+		  (<ucw:option :value attack-right-conjunct "Attack the right conjunct")
+		  (<ucw:option :value which-disjunct? "Request that a disjunct be chosen")))))
 		      
 	(<:br)
 	(<ucw:submit :value "Make a move"
