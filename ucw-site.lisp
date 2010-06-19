@@ -213,23 +213,23 @@
     (<ucw:form :method "POST"
 	       :action (parse-formula-action input-formula sig)
       (<:p "Enter a formula in the above signature.  If you wish, you can "
-	   (<ucw:a :action (let ((new-signature (call 'signature-editor :signature sig)))
-			     (if (formula? text)
-				 (if (belongs-to-signature? new-signature
-							    text)
-				     (answer text)
-				     (answer
-				      (call 'formula-corrector
-					    :text text
-					    :signature new-signature)))
-				 (ucw-handler-case
-				     (answer (parse-formula 
-					      (formula-corrector-text self)))
-			       (malformed-formula-error 
-				() 
-				(answer (call 'formula-corrector
-					      :text input-formula
-					      :signature new-signature))))))
+	   (<ucw:a :action 
+		   (let ((new-signature (call 'signature-editor :signature sig)))
+		     (if (formula? text)
+			 (if (belongs-to-signature? new-signature text)
+			     (answer text)
+			     (answer
+			      (call 'formula-corrector
+				    :text text
+				    :signature new-signature)))
+			 (ucw-handler-case
+			     (answer (parse-formula 
+				      (formula-corrector-text self)))
+			   (malformed-formula-error 
+			    () 
+			    (answer (call 'formula-corrector
+					  :text input-formula
+					  :signature new-signature))))))
 		   "edit the signature") ". (If edit the signature and the formula that you provided becomes well-formed in the new signature, then you will go back to where you were before you came here.  If, after editing the signature, the formula is still not valid, you will come back to this page.)")
 	(<ucw:input :type "text"
 		    :id "formula-input"
@@ -276,15 +276,17 @@
 	  (if rules-result
 	      (progn
 		(<:h1 "Success!")
-		(<:p "Your move was accepted. " (<ucw:a :action (call 'turn-editor
-								      :game (add-move-to-dialogue-at-position
-									     (game self)
-									     (make-move player
-											statement
-											stance
-											reference)
-									     game-len))
-							"Proceed") "."))
+		(<:p "Your move was accepted. "
+		     (<ucw:a :action 
+			     (call 'turn-editor
+				   :game (add-move-to-dialogue-at-position
+					  (game self)
+					  (make-move player
+						     statement
+						     stance
+						     reference)
+					  game-len))
+			     "Proceed") "."))
 	      (progn
 		(<:h1 "Problem!")
 		(<:p "The game at this point:")
@@ -305,6 +307,32 @@
 		  (<ucw:submit :value "Edit this move"
 			       :action (call 'turn-editor :game game))))))))))
 
+(defun render-attacks (attacks)
+  (dolist (attack attacks)
+    (destructuring-bind (statement reference)
+	attack
+      (<:li (<ucw:a
+	     :action (add-move-to-dialogue-at-position game
+						       (make-move player
+								  statement
+								  'a
+								  reference)
+						       game-len)
+	     "Attack move " (<:as-html reference) " by asserting " (render statement))))))
+
+(defun render-defenses (defenses)
+  (dolist (defense defenses)
+    (destructuring-bind (statement reference)
+	defense
+      (<:li 
+       (<ucw:a :action (add-move-to-dialogue-at-position game
+							 (make-move player
+								    statement
+								    'd
+								    reference)
+							 game-len)
+	       "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))))
+
 (defmethod render ((self turn-editor))
   (let (stance-option player-option reference-option input-statement selected-symbolic-attack rewind-point)
     (let* ((game (game self))
@@ -316,10 +344,11 @@
 		(setf new-statement selected-symbolic-attack)
 		(setf new-statement
 		      (ucw-handler-case (parse-formula input-statement)
-			(malformed-formula-error () 
-						 (call 'formula-corrector
-						       :text input-statement
-						       :signature (dialogue-signature game))))))
+			(malformed-formula-error
+			 () 
+			 (call 'formula-corrector
+			       :text input-statement
+			       :signature (dialogue-signature game))))))
 	    (call 'turn-evaluator
 		  :player player-option
 		  :stance stance-option
@@ -330,56 +359,17 @@
       (<:div :style "border:1px solid"
 	     (pretty-print-game game))
       (<:h1 "Choose from the available moves...")
-      (let* ((next-proponent-attacks (next-moves game 'p 'a))
-	     (next-proponent-defenses (next-moves game 'p 'd))
-	     (next-opponent-attacks (next-moves game 'o 'a))
-	     (next-opponent-defenses (next-moves game 'o 'd)))
-	(<:p "Available moves for " (<:b "Proponent") ":")
-	(if (or next-proponent-attacks next-proponent-defenses)
-	    (<:ul
-	     (if next-proponent-attacks
-		 (dolist (next-proponent-attack next-proponent-attacks)
-		   (destructuring-bind (next-statement next-reference)
-		       next-proponent-attack
-		     (<:li (<ucw:a 
-			    :action (add-move-to-dialogue-at-position
-				     game
-				     (make-move 'p next-statement 'a next-reference)
-				     game-len)
-			    "Attack move " (<:as-html next-reference) " by asserting " (render next-statement)))))
-		 (dolist (next-proponent-defense next-proponent-defenses)
-		   (destructuring-bind (next-statement next-reference)
-		       next-proponent-defense
-		     (<:li 
-		      (<ucw:a :action (add-move-to-dialogue-at-position
-				       game
-				       (make-move 'p next-statement 'd next-reference)
-				       game-len)
-			      "Defend against the attack of move " (<:as-html next-reference) " by asserting " (render next-statement)))))))
-	    (<:p (<:em "(no moves for Proponent are available.)")))
-	(<:p "Available moves for " (<:b "Opponent") ":")
-	(if (or next-opponent-attacks next-opponent-defenses)
-	    (<:ul
-	     (if next-opponent-attacks
-		 (dolist (next-opponent-attack next-opponent-attacks)
-		   (destructuring-bind (next-statement next-reference)
-		       next-opponent-attack
-		     (<:li (<ucw:a 
-			    :action (add-move-to-dialogue-at-position
-				     game
-				     (make-move 'o next-statement 'a next-reference)
-				     game-len)
-			    "Attack move " (<:as-html next-reference) " by asserting " (render next-statement)))))
-		 (dolist (next-opponent-defense next-opponent-defenses)
-		   (destructuring-bind (next-statement next-reference)
-		       next-opponent-defense
-		     (<:li 
-		      (<ucw:a :action (add-move-to-dialogue-at-position
-				       game
-				       (make-move 'o next-statement 'd next-reference)
-				       game-len)
-			      "Defend against the attack of move " (<:as-html next-reference) " by asserting " (render next-statement)))))))
-	    (<:p (<:em "(no moves for Opponent are available.)"))))
+      (dolist (player '(p o))
+	(<:p "Available moves for " (<:b (if (eq player 'p)
+					     "Proponent"
+					     "Opponent")) ":")
+	(let ((next-attacks (next-attacks game player))
+	      (next-defenses (next-defenses game player)))
+	  (if (or next-attacks next-defenses)
+	      (<:ul
+	       (render-attacks next-attacks)
+	       (render-defenses next-defenses))
+	      (<:p (<:em "(no moves are available.)")))))
       (<:h1 "...or enter your move manually")
       (<:p "The list in the previous section shows all moves that
 could be made, by either player, that adhere to the dialogue rules;
@@ -441,13 +431,6 @@ way to explore the meaning of the dialogue rules.")
 				    (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
 			       (call 'initial-formula-window :body default-sgc))))))))
 
-;; I'm confused about what to do here.  I want the user to indicate,
-;; first of all, whether they should attack or defend something.  I
-;; think I can do that.  But what component do I call, once I have the
-;; information about what kind of stance the user wants to take?  The
-;; same component that displays the game?  Do I need to define a
-;; new entry point?
-
 (defun pretty-print-game (game)
   (unless (zerop (dialogue-length game))
     (<:table
@@ -474,9 +457,7 @@ way to explore the meaning of the dialogue rules.")
 (defun render-variable (variable)
   (<:em (<:as-html variable)))
 
-(defgeneric render-statement (statement))
-
-(defmethod render-statement ((statement term))
+(defmethod render ((statement term))
   (let ((func-sym (function-symbol statement))
 	(args (arguments statement)))
     (<:em func-sym)
@@ -484,25 +465,25 @@ way to explore the meaning of the dialogue rules.")
     (if (null args)
 	(<:as-is ")")
 	(let ((first (car args)))
-	  (render-statement first)
+	  (render first)
 	  (when (not (null (cdr args)))
 	    (dolist (arg args)
 	      (<:as-is ",")
-	      (render-statement arg)))
+	      (render arg)))
 	  (<:as-is ")")))))
 
-(defmethod render-statement ((sa (eql attack-left-conjunct)))
+(defmethod render ((sa (eql attack-left-conjunct)))
   (<:as-is "&and;")
   (<:sub "L"))
 
-(defmethod render-statement ((sa (eql attack-right-conjunct)))
+(defmethod render ((sa (eql attack-right-conjunct)))
   (<:as-is "&and;")
   (<:sub "R"))
 
-(defmethod render-statement ((sa (eql which-instance?)))
+(defmethod render ((sa (eql which-instance?)))
   (<:as-is "?"))
 
-(defmethod render-statement ((sa (eql which-disjunct?)))
+(defmethod render ((sa (eql which-disjunct?)))
   (<:as-is "?"))
 
 (defmethod render ((formula binary-conjunction))
@@ -570,11 +551,11 @@ way to explore the meaning of the dialogue rules.")
     (unless (null args)
       (<:as-is "(")
       (let ((first (car args)))
-	(render-statement first)
+	(render first)
 	(when (not (null (cdr args)))
 	  (dolist (arg args)
 	    (<:as-is ",")
-	    (render-statement arg)))
+	    (render arg)))
 	(<:as-is ")")))))
 
 (defmethod render ((self game-component))
@@ -643,7 +624,7 @@ way to explore the meaning of the dialogue rules.")
       (<:p "To get started, enter a formula in the text box below or choose a famous formula from the menu.")
       (formula-guide)
       (render sig)
-      (<:p "You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)")
+      (<:p "You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. You will not be able to edit the signature once the game begins.  (If you choose to edit the signature, you'll come back here when you're finished.)")
       (<ucw:form :method "POST"
 		 :action $take-action
         (<:p "Enter a formula ")
