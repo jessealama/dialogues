@@ -4,10 +4,13 @@
 
 (defvar *maintainer-email* "jesse.alama@gmail.com")
 
-(defcomponent signature-editor ()
+(defclass signature-component ()
   ((signature :initarg :signature
-	      :accessor signature
-	      :type finite-variable-propositional-signature)))
+	      :type finite-variable-propositional-signature
+	      :accessor signature)))
+
+(defcomponent signature-editor (signature-component)
+  ())
 
 (defaction save-signature ((self signature-editor) new-predicate-symbol)
   (add-predicate (signature self) 
@@ -44,10 +47,7 @@
 ;; adding a predicate
 
 (defcomponent add-a-predicate ()
-  ((signature :initarg :signature
-	      :accessor signature
-	      :type finite-variable-propositional-signature)
-   (proposed-name :initarg :name 
+  ((proposed-name :initarg :name 
 		  :accessor proposed-name 
 		  :initform nil)
    (validation-error-message :initarg :error-message
@@ -117,9 +117,7 @@
 ;; deleting a predicate
 
 (defcomponent delete-a-predicate ()
-  ((signature :initarg :signature
-	      :accessor signature
-	      :type finite-variable-propositional-signature)))
+  ())
 
 (defmethod render ((self delete-a-predicate))
   (let (selected-predicate)
@@ -182,9 +180,8 @@
     ("Scott's formula" "scott-formula" ,scott-formula)
     ("Smetanich's formula" "smetanich-formula" ,smetanich-formula)))
 
-(defcomponent formula-corrector ()
-  ((text :initarg :text :accessor formula-corrector-text)
-   (signature :initarg :signature :accessor formula-corrector-signature)))
+(defcomponent formula-corrector (signature-component)
+  ((text :initarg :text :accessor formula-corrector-text)))
 
 (defun formula-guide ()
   (<:p "Non-atomic formulas are written in prefix notation, with parentheses
@@ -202,7 +199,7 @@
 
 (defaction parse-formula-action (formula-str signature)
   (ucw-handler-case
-      (answer (parse-formula formula-str signature))
+      (answer (parse-formula formula-str))
     (malformed-formula-error ()
       (answer (call 'formula-corrector
 		    :text formula-str
@@ -213,7 +210,10 @@
 	(sig (formula-corrector-signature self))
 	(text (formula-corrector-text self)))
     (<:h1 "Invalid formula supplied")
-    (<:p "We are unable to make sense of the formula, \"" (render text) "\" that you supplied.  The signature with respect to which you should enter a formula is:")
+    (<:p "We are unable to make sense of the formula, \""
+	 (if (stringp text)
+	     (<:as-html text)
+	     (render text)) "\" that you supplied.  The signature with respect to which you should enter a formula is:")
     (render sig)
     (formula-guide)
     (<:p "Please try again.")
@@ -274,7 +274,7 @@
 	    (evaluate-all-rules (dialogue-rules game)
 				game 
 				player 
-				(dialogue-length game)
+				game-len
 				statement 
 				stance
 				reference)
@@ -352,7 +352,7 @@
 	    (<:ul
 	     (render-attacks next-attacks player game)
 	     (render-defenses next-defenses player game))
-	    (<:p (<:em "(no moves are available.)"))))))
+	    (<:p (<:em "(no moves are available)"))))))
 
 (defmethod render ((self turn-editor))
   (let (stance-option player-option reference-option input-statement selected-symbolic-attack rewind-point)
@@ -408,7 +408,7 @@ way to explore the meaning of the dialogue rules.")
 	  (<:td "Choose the statement to which the selected player is responding.")
 	  (<:td (<ucw:select :accessor reference-option
 			     :size 1
-		  (loop for i from 0 upto (1- (dialogue-length game))
+		  (loop for i from 0 upto (1- game-len)
 		     do (<ucw:option :value i (<:as-html i))))))
 	 (<:tr
 	  (<:td
@@ -426,16 +426,15 @@ way to explore the meaning of the dialogue rules.")
 	(<ucw:submit :value "Make a move"
 		     :action $take-action)
 	(<:br)
-	(let ((length (dialogue-length game)))
-	  (when (> length 1)
-	    (<:p "or")
-	    (<ucw:select :size 1
-			 :accessor rewind-point
-	      (loop for i from 1 upto (1- (dialogue-length game))
-		 do (<ucw:option :value i (<:as-html i))))
-	    (<ucw:submit :value "Rewind the game to this turn"
-			 :action (call 'turn-editor
-				       :game (truncate-dialogue game rewind-point)))))
+	(when (> game-len 1)
+	  (<:p "or")
+	  (<ucw:select :size 1
+		       :accessor rewind-point
+	    (loop for i from 1 upto (1- game-len)
+	       do (<ucw:option :value i (<:as-html i))))
+	  (<ucw:submit :value "Rewind the game to this turn"
+		       :action (call 'turn-editor
+				     :game (truncate-dialogue game rewind-point))))
 	(<:p "or")
 	(<ucw:submit :value "Quit"
 		     :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
@@ -496,6 +495,13 @@ way to explore the meaning of the dialogue rules.")
 
 (defmethod render ((sa (eql which-disjunct?)))
   (<:as-is "?"))
+
+(defmethod render :around ((formula unary-connective-formula))
+  (call-next-method)
+  (render (argument formula)))
+
+(defmethod render ((neg negation))
+  (<:as-is "&not;"))
 
 (defmethod render :around ((formula binary-connective-formula))
   (<:as-html "(")
@@ -573,10 +579,8 @@ way to explore the meaning of the dialogue rules.")
 			    :initarg :formula-entry-component
 			    :accessor formula-entry-component)))
 
-(defcomponent formula-entry-component ()
-  ((signature :initarg :signature
-	      :accessor signature
-	      :type finite-variable-propositional-signature)))
+(defcomponent formula-entry-component (signature-component)
+  ())
 
 (defmethod render ((self formula-entry-component))
   (let (input-formula selected-formula selected-rules)
@@ -592,20 +596,19 @@ way to explore the meaning of the dialogue rules.")
 		  (call 'formula-corrector
 			:text selected-formula
 			:signature sig))
-	      (let (parsed-formula)
-		(ucw-handler-case (setf parsed-formula
-					(parse-formula))
-		  (malformed-formula-error (call 'formula-corrector
-						 :text input-formula
-						 :signature sig)))
+	      (let ((parsed-formula 
+		     (ucw-handler-case (parse-formula input-formula)
+		       (malformed-formula-error (call 'formula-corrector
+						      :text input-formula
+						      :signature sig)))))
 		(if (belongs-to-signature? sig parsed-formula)
 		    (call 'turn-editor
 			  :game (make-dialogue 
-				 (parse-formula input-formula) 
+				 parsed-formula
 				 sig
 				 selected-rules))
 		    (call 'formula-corrector
-			  :text input-formula
+			  :text parsed-formula
 			  :signature sig)))))))
     (let ((sig (signature self)))
       (<:p "To get started, enter a formula in the text box below or choose a famous formula from the menu.")
