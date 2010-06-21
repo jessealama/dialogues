@@ -78,21 +78,39 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (and (formula? formula)
        (not (atomic-formula? formula))))
 
-(defclass negation (composite-formula)
-  ((negated :initarg :negated
-	    :accessor unnegate
-	    :type formula)))
+(defmethod print-object :around ((formula binary-connective-formula) stream)
+  (format stream "(~A " (lhs formula))
+  (call-next-method)
+  (format stream " ~A)" (rhs formula)))
+
+(defclass unary-connective-formula (composite-formula)
+  ((argument :initarg :argument
+	     :accessor argument)))
+
+(defmethod print-object :around ((formula unary-connective-formula) stream)
+  (format stream "(")
+  (call-next-method)
+  (format stream "~A" (argument formula))
+  (format stream ")"))
+
+(defclass negation (unary-connective-formula)
+  nil)
+
+(defgeneric unnegate (formula))
+
+(defmethod unnegate ((negation negation))
+  (argument negation))
 
 (defun negation? (thing)
-  (eql (class-of thing) 'negation))
+  (typep thing 'negation))
 
 (defmethod print-object ((neg negation) stream)
-  (format stream "(¬~A)" (unnegate neg)))
+  (format stream "¬"))
 
 (defgeneric negate (thing))
 
 (defmethod negate ((formula formula))
-  (make-instance 'negation :negated formula))
+  (make-instance 'negation :argument formula))
 
 (defclass binary-connective-formula (composite-formula)
   ((lhs :initarg :lhs
@@ -106,6 +124,25 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   ((items :initarg :items
 	  :accessor items
 	  :type list)))
+
+(defgeneric connective-unit (multiple-arity-connective-formula))
+
+(defmethod print-object :around ((formula multiple-arity-connective-formula)
+				 stream)
+  (let ((items (items formula)))
+    (if (null items)
+	(format stream "~A" (connective-unit formula))
+	(if (null (cdr items))
+	    (format stream "~A" (car items))
+	    (progn
+	      (format stream "(")
+	      (format stream "~A" (car items))
+	      (loop for item in (cdr items)
+		   do
+		   (format stream " ")
+		   (call-next-method)
+		   (format stream " ~A" item))
+	      (format stream ")"))))))
 
 (defmethod belongs-to-signature? ((sig signature) 
 				  (formula binary-connective-formula))
@@ -125,10 +162,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (typep thing 'implication))
 
 (defmethod print-object ((implication implication) stream)
-  (format stream 
-	  "(~A → ~A)"
-	  (antecedent implication)
-	  (consequent implication)))
+  (format stream "→"))
 
 (defgeneric make-implication (antecedent consequent))
 
@@ -182,29 +216,22 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defclass multiple-arity-disjunction (multiple-arity-connective-formula)
   nil)
 
+(defmethod connective-unit ((mad multiple-arity-disjunction))
+  (declare (ignore mad))
+  top)
+
 (defun multiple-arity-disjunction? (thing)
   (eql (class-of thing) 'multiple-arity-disjunction))
 
 (defmethod print-object ((mad multiple-arity-disjunction) stream)
-  (let ((items (items mad)))
-    (if (null items)
-	(format stream "⊤")
-	(if (null (cdr items))
-	    (format stream "~A" (car items))
-	    (progn
-	      (format stream "(")
-	      (format stream "~A" (car items))
-	      (loop for item in (cdr items)
-		   do
-		   (format stream " ⋁ ~A" item))
-	      (format stream ")"))))))
-
-(defgeneric make-multiple-arity-disjunction (&rest disjuncts))
+  (format stream "⋁"))
 
 (defmethod make-binary-disjunction ((lhs formula) (rhs formula))
   (make-instance 'binary-disjunction
 		 :lhs lhs
 		 :rhs rhs))
+
+(defgeneric make-multiple-arity-disjunction (&rest disjuncts))
 
 (defmethod make-multiple-arity-disjunction (&rest disjuncts)
   (if disjuncts
@@ -255,22 +282,15 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defclass multiple-arity-conjunction (multiple-arity-connective-formula)
   nil)
 
+(defmethod connective-unit ((mac multiple-arity-conjunction))
+  (declare (ignore mac))
+  contradiction)
+
 (defun multiple-arity-conjunction? (thing)
   (eql (class-of thing) 'multiple-arity-conjunction))
 
 (defmethod print-object ((mac multiple-arity-conjunction) stream)
-  (let ((items (items mac)))
-    (if (null items)
-	(format stream "⊥")
-	(if (null (cdr items))
-	    (format stream "~A" (car items))
-	    (progn
-	      (format stream "(")
-	      (format stream "~A" (car items))
-	      (loop for item in (cdr items)
-		   do
-		   (format stream " ⋁ ~A" item))
-	      (format stream ")"))))))
+  (format stream "⋁"))
 
 (defun make-binary-conjunction (lhs rhs)
   (make-instance 'binary-conjunction
@@ -317,6 +337,13 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 	   :accessor matrix
 	   :type formula)))
 
+(defmethod print-object :after ((gen generalization) stream)
+  (call-next-method)
+  (format stream 
+	  "~A[~A]"
+	  (bound-variable gen)
+	  (matrix gen)))
+
 (defclass universal-generalization (generalization)
   nil)
 
@@ -324,13 +351,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (eql (class-of thing) 'universal-generalization))
 
 (defmethod print-object ((uni-gen universal-generalization) stream)
-  (let ((var (bound-variable uni-gen))
-	(matrix (matrix uni-gen)))
-    (if (unsorted-variable? var)
-	(format stream "(∀~A[~A])" var matrix)
-	(let ((sort (variable-sort var))
-	      (name (variable-name var)))
-	  (format stream "(∀~A:~A[~A])" name sort matrix)))))
+  (format stream "∀"))
 
 (defclass existential-generalization (generalization)
   nil)
@@ -339,13 +360,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (eql (class-of thing) 'existential-generalization))
 
 (defmethod print-object ((exi-gen existential-generalization) stream)
-  (let ((var (bound-variable exi-gen))
-	(matrix (matrix exi-gen)))
-    (if (unsorted-variable? var)
-	(format stream "(∃~A[~A])" var matrix)
-	(let ((sort (variable-sort var))
-	      (name (variable-name var)))
-	  (format stream "(∀~A:~A[~A])" name sort matrix)))))
+  (format stream "∃"))
 
 (defun make-universal (var formula)
   (make-instance 'universal-generalization
