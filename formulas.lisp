@@ -78,6 +78,14 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (and (formula? formula)
        (not (atomic-formula? formula))))
 
+(defclass binary-connective-formula (composite-formula)
+  ((lhs :initarg :lhs
+	:accessor lhs
+	:type formula)
+   (rhs :initarg :rhs
+	:accessor rhs
+	:type formula)))
+
 (defmethod print-object :around ((formula binary-connective-formula) stream)
   (format stream "(~A " (lhs formula))
   (call-next-method)
@@ -86,6 +94,10 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defclass unary-connective-formula (composite-formula)
   ((argument :initarg :argument
 	     :accessor argument)))
+
+(defmethod belongs-to-signature? ((sig signature)
+				  (formula unary-connective-formula))
+  (belongs-to-signature? sig (argument formula)))
 
 (defmethod print-object :around ((formula unary-connective-formula) stream)
   (format stream "(")
@@ -112,14 +124,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defmethod negate ((formula formula))
   (make-instance 'negation :argument formula))
 
-(defclass binary-connective-formula (composite-formula)
-  ((lhs :initarg :lhs
-	:accessor lhs
-	:type formula)
-   (rhs :initarg :rhs
-	:accessor rhs
-	:type formula)))
-
 (defclass multiple-arity-connective-formula (composite-formula)
   ((items :initarg :items
 	  :accessor items
@@ -144,7 +148,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 		   (format stream " ~A" item))
 	      (format stream ")"))))))
 
-(defmethod belongs-to-signature? ((sig signature) 
+(defmethod belongs-to-signature? ((sig signature)
 				  (formula binary-connective-formula))
   (and (belongs-to-signature? sig (lhs formula))
        (belongs-to-signature? sig (rhs formula))))
@@ -206,10 +210,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (typep thing 'binary-disjunction))
 
 (defmethod print-object ((bin-dis binary-disjunction) stream)
-  (format stream 
-	  "(~A ⋁ ~A)"
-	  (lhs bin-dis)
-	  (rhs bin-dis)))
+  (format stream "⋁"))
 
 (defgeneric make-binary-disjunction (lhs rhs))
 
@@ -1053,7 +1054,7 @@ value."
   (if (null arguments)
       (error 'parse-form-empty-argument-list-error :operator op)
       (if (null (cdr arguments))
-	  (let ((negated (form->formula (cadr arguments))))
+	  (let ((negated (form->formula (car arguments))))
 	    (negate negated))
 	  (error 'parse-form-unary-operator-multiple-arguments-error
 		 :operator op))))
