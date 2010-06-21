@@ -78,7 +78,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (and (formula? formula)
        (not (atomic-formula? formula))))
 
-(defclass negation (formula)
+(defclass negation (composite-formula)
   ((negated :initarg :negated
 	    :accessor unnegate
 	    :type formula)))
