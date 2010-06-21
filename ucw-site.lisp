@@ -15,6 +15,11 @@
 		 0)
   (answer (signature self)))
 
+(defclass game-component ()
+  ((game :accessor game
+	 :initarg :game
+	 :type dialogue)))
+
 (defmethod render ((self signature-editor))
   (with-slots ((sig signature))
       self
@@ -61,10 +66,12 @@
 						    *maintainer-email*)
 				 "notify the site maintainer") " about this.")
   (<:p "What next?  You can either go back with your browser or simply " 
-       (<ucw:a :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
-			      (default-sgc (make-instance 'start-game-component 
-							  :formula-entry-component default-fec)))
-			 (call 'initial-formula-window :body default-sgc))
+       (<ucw:a :action
+	       (let* ((default-fec (make-instance 'formula-entry-component 
+						  :signature (copy-signature pqrs-propositional-signature)))
+		      (default-sgc (make-instance 'start-game-component 
+						  :formula-entry-component default-fec)))
+		 (call 'initial-formula-window :body default-sgc))
 	       "quit and start over") "."))
 
 (defaction insert-predicate (signature pred-name)
@@ -236,15 +243,15 @@
 		    :accessor input-formula)
 	(<:submit :value "Use this formula"))))
 
-(defcomponent turn-editor ()
-  ((game :accessor game
-	 :initarg :game)))
+(defcomponent turn-editor (game-component)
+  ((available-moves-list :component t
+			 :accessor available-moves-list
+			 :initform nil)))
 
-(defcomponent game-component ()
-  ((game :accessor game
-	 :initarg :game)))
+(defcomponent available-moves-list (game-component)
+  ())
 
-(defcomponent turn-evaluator ()
+(defcomponent turn-evaluator (game-component)
   ((player :accessor player
 	   :initarg :player
 	   :initform nil)
@@ -256,9 +263,7 @@
 	   :initform nil)
    (reference :accessor reference
 	      :initarg :reference
-	      :initform nil)
-   (game :accessor game
-	 :initarg :game)))
+	      :initform nil)))
 
 (defmethod render ((self turn-evaluator))
   (with-slots (player statement stance reference game)
@@ -307,31 +312,47 @@
 		  (<ucw:submit :value "Edit this move"
 			       :action (call 'turn-editor :game game))))))))))
 
-(defun render-attacks (attacks)
-  (dolist (attack attacks)
-    (destructuring-bind (statement reference)
-	attack
-      (<:li (<ucw:a
-	     :action (add-move-to-dialogue-at-position game
-						       (make-move player
-								  statement
-								  'a
-								  reference)
-						       game-len)
-	     "Attack move " (<:as-html reference) " by asserting " (render statement))))))
-
-(defun render-defenses (defenses)
-  (dolist (defense defenses)
-    (destructuring-bind (statement reference)
-	defense
-      (<:li 
-       (<ucw:a :action (add-move-to-dialogue-at-position game
+(defun render-attacks (attacks player game)
+  (let ((game-len (dialogue-length game)))
+    (dolist (attack attacks)
+      (destructuring-bind (statement reference)
+	  attack
+	(<:li (<ucw:a
+	       :action (add-move-to-dialogue-at-position game
 							 (make-move player
 								    statement
-								    'd
+								    'a
 								    reference)
 							 game-len)
-	       "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))))
+	       "Attack move " (<:as-html reference) " by asserting " (render statement)))))))
+
+(defun render-defenses (defenses player game)
+  (let ((game-len (dialogue-length game)))
+    (dolist (defense defenses)
+      (destructuring-bind (statement reference)
+	  defense
+	(<:li 
+	 (<ucw:a :action (add-move-to-dialogue-at-position game
+							   (make-move player
+								      statement
+								      'd
+								      reference)
+							   game-len)
+		 "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement)))))))
+
+(defun render-available-moves (game)
+  (dolist (player '(p o))
+    (<:p "Available moves for " (<:b (<:as-html
+				      (if (eq player 'p)
+					  "Proponent"
+					  "Opponent"))) ":")
+    (let ((next-attacks (next-attacks game player))
+	  (next-defenses (next-defenses game player)))
+      (if (or next-attacks next-defenses)
+	    (<:ul
+	     (render-attacks next-attacks player game)
+	     (render-defenses next-defenses player game))
+	    (<:p (<:em "(no moves are available.)"))))))
 
 (defmethod render ((self turn-editor))
   (let (stance-option player-option reference-option input-statement selected-symbolic-attack rewind-point)
@@ -359,17 +380,7 @@
       (<:div :style "border:1px solid"
 	     (pretty-print-game game))
       (<:h1 "Choose from the available moves...")
-      (dolist (player '(p o))
-	(<:p "Available moves for " (<:b (if (eq player 'p)
-					     "Proponent"
-					     "Opponent")) ":")
-	(let ((next-attacks (next-attacks game player))
-	      (next-defenses (next-defenses game player)))
-	  (if (or next-attacks next-defenses)
-	      (<:ul
-	       (render-attacks next-attacks)
-	       (render-defenses next-defenses))
-	      (<:p (<:em "(no moves are available.)")))))
+      (render-available-moves game)
       (<:h1 "...or enter your move manually")
       (<:p "The list in the previous section shows all moves that
 could be made, by either player, that adhere to the dialogue rules;
@@ -486,63 +497,37 @@ way to explore the meaning of the dialogue rules.")
 (defmethod render ((sa (eql which-disjunct?)))
   (<:as-is "?"))
 
-(defmethod render ((formula binary-conjunction))
-	 (<:as-html "(")
-	 (render (lhs formula))
-	 (<:as-html " ")
-	 (<:as-is "&and;")
-	 (<:as-html " ")
-	 (render (rhs formula))
-	 (<:as-html ")"))
-
-(defmethod render ((formula binary-disjunction))
+(defmethod render :around ((formula composite-formula))
   (<:as-html "(")
   (render (lhs formula))
   (<:as-html " ")
-  (<:as-is "&or;")
+  (call-next-method)
   (<:as-html " ")
   (render (rhs formula))
   (<:as-html ")"))
 
+(defmethod render :around ((gen generalization))
+  (call-next-method)
+  (<:em (<:as-html (bound-variable gen)))
+  (render (matrix gen)))
+
+(defmethod render ((formula binary-conjunction))
+  (<:as-is "&and;"))
+
+(defmethod render ((formula binary-disjunction))
+  (<:as-is "&or;"))
+
 (defmethod render ((formula implication))
-  (<:as-html "(")
-  (render (antecedent formula))
-  (<:as-html " ")
-  (<:as-is "&rarr;")
-  (<:as-html " ")
-  (render (consequent formula))
-  (<:as-html ")"))
+  (<:as-is "&rarr;"))
 
 (defmethod render ((formula equivalence))
-   (<:as-html "(")
-   (render (lhs formula))
-   (<:as-html " ")
-   (<:as-is "&harr;")
-   (<:as-html " ")
-   (render (rhs formula))
-   (<:as-html ")"))
+   (<:as-is "&harr;"))
 
 (defmethod render ((formula universal-generalization))
-  (let ((var (bound-variable formula))
-	(body (matrix formula)))
-    (<:as-html "(")
-    (<:as-is "&forall;")
-    (render-variable var)
-    (<:as-html "[")
-    (<:as-is "&harr;")
-    (render body)
-    (<:as-html "]")))
+  (<:as-is "&forall;"))
 
 (defmethod render ((formula existential-generalization))
-  (let ((var (bound-variable formula))
-	(body (matrix formula)))
-    (<:as-html "(")
-    (<:as-is "&exist;")
-    (render-variable var)
-    (<:as-html "[")
-    (<:as-is "&harr;")
-    (render body)
-    (<:as-html "]")))
+  (<:as-is "&exist;"))
 
 (defmethod render ((formula atomic-formula))
   (let ((pred (predicate formula))
