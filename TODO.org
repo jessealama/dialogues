@@ -107,4 +107,4 @@
 * DONE Show closed and open attacks in different colors
   CLOSED: [2010-06-22 Tue 12:28]
   Perhaps grey out the closed attacks, and put the open attacks in bold.
-* TODO Give a legend indicating how to interpret the colors.
+* IN-PROGRESS Give a legend indicating how to interpret the colors.
