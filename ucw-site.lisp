@@ -295,8 +295,7 @@
 	      (progn
 		(<:h1 "Problem!")
 		(<:p "The game at this point:")
-		(<:p
-		 (pretty-print-game game))
+		(render game)
 		(<:p "Your proposed move:")
 		(<:ul
 		 (<:li "Player: " (<:as-html player))
@@ -378,7 +377,7 @@
 		  :game game))))
       (<:h1 "The game so far")
       (<:div :style "border:1px solid"
-	     (pretty-print-game game))
+        (render game))
       (<:h1 "Choose from the available moves...")
       (render-available-moves game)
       (<:h1 "...or enter your move manually")
@@ -441,28 +440,58 @@ way to explore the meaning of the dialogue rules.")
 				    (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
 			       (call 'initial-formula-window :body default-sgc))))))))
 
-(defun pretty-print-game (game)
+(defun render-open-attack (play move-number)
+  (with-slots (player statement stance reference)
+      play
+    (<:tr :style "background-color:#CCCCFF;"
+     (<:td (<:as-html move-number))
+     (<:td (<:as-html player))
+     (<:td (render statement))
+     (if (zerop move-number)
+	 (<:td (<:em "(initial move)"))
+	 (<:td "[" (<:as-html "A") "," (<:as-html reference) "]")))))
+
+(defun render-closed-attack (play move-number)
+  (with-slots (player statement stance reference)
+      play
+    (<:tr :style "background-color:#CCCCCC;"
+     (<:td (<:as-html move-number))
+     (<:td (<:as-html player))
+     (<:td (render statement))
+     (if (zerop move-number)
+	 (<:td (<:em "(initial move)"))
+	 (<:td "[" (<:as-html "A") "," (<:as-html reference) "]")))))
+
+(defun render-defensive-move (play move-number)
+  (with-slots (player statement stance reference)
+      play
+    (<:tr
+     (<:td (<:as-html move-number))
+     (<:td (<:as-html player))
+     (<:td (render statement))
+     (if (zerop move-number)
+	 (<:td (<:em "(initial move)"))
+	 (<:td "[" (<:as-html "D") "," (<:as-html reference) "]")))))
+
+(defmethod render ((game dialogue))
   (unless (zerop (dialogue-length game))
-    (<:table
-     (<:thead
-      (<:th "Move")
-      (<:th "Player")
-      (<:th "Assertion")
-      (<:th "Stance, Reference"))
-     (loop with plays = (dialogue-plays game)
-	with len = (length plays)
-	for play in plays
-	for i from 0 upto len
-	do
-	  (with-slots (player statement stance reference)
-	      play
-	    (<:tr 
-	     (<:td (<:as-html i))
-	     (<:td (<:as-html player))
-	     (<:td (render statement))
-	     (if (= i 0)
-		 (<:td (<:em "(initial move)"))
-		 (<:td "[" (<:as-html stance) "," (<:as-html reference) "]"))))))))
+    (let ((open-attacks (open-attack-indices game)))
+      (<:table
+       (<:thead
+	(<:th "Move")
+	(<:th "Player")
+	(<:th "Assertion")
+	(<:th "Stance, Reference"))
+       (loop with plays = (dialogue-plays game)
+	  with len = (length plays)
+	  for play in plays
+	  for i from 0 upto len
+	  do
+	    (if (attacking-move? play)
+		(if (member i open-attacks)
+		    (render-open-attack play i)
+		    (render-closed-attack play i))
+		(render-defensive-move play i)))))))
 
 (defun render-variable (variable)
   (<:em (<:as-html variable)))

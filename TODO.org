@@ -104,5 +104,6 @@
   
 * DONE Ensure that symbols are printed without their package prefix
   CLOSED: [2010-06-06 Sun 19:27]
-* IN-PROGRESS Show closed and open attacks in different colors
+* DONE Show closed and open attacks in different colors
+  CLOSED: [2010-06-22 Tue 12:28]
   Perhaps grey out the closed attacks, and put the open attacks in bold.
