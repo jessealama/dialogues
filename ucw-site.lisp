@@ -476,22 +476,33 @@ way to explore the meaning of the dialogue rules.")
 (defmethod render ((game dialogue))
   (unless (zerop (dialogue-length game))
     (let ((open-attacks (open-attack-indices game)))
-      (<:table
+      (<:table 
        (<:thead
 	(<:th "Move")
 	(<:th "Player")
 	(<:th "Assertion")
 	(<:th "Stance, Reference"))
-       (loop with plays = (dialogue-plays game)
-	  with len = (length plays)
-	  for play in plays
-	  for i from 0 upto len
-	  do
-	    (if (attacking-move? play)
-		(if (member i open-attacks)
-		    (render-open-attack play i)
-		    (render-closed-attack play i))
-		(render-defensive-move play i)))))))
+       (<:tbody
+	(loop with plays = (dialogue-plays game)
+	   with len = (length plays)
+	   for play in plays
+	   for i from 0 upto len
+	   do
+	     (if (attacking-move? play)
+		 (if (member i open-attacks)
+		     (render-open-attack play i)
+		     (render-closed-attack play i))
+		 (render-defensive-move play i))))
+       (<:tfoot
+	(<:tr 
+	  (<:td :align "center"
+		:colspan "4"
+		(<:em "Rows in " (<:span :style "background-color:#CCCCCC"
+					 "grey")
+		      " are closed attacks; rows in "
+		      (<:span :style "background-color:#CCCCFF"
+			      "blue")
+		      " are open attacks.  (Defensive moves are not colored.)"))))))))
 
 (defun render-variable (variable)
   (<:em (<:as-html variable)))
