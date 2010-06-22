@@ -92,13 +92,13 @@
 ;;; Statements
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass symbolic-attack ()
-  nil)
-
-(defconstant-if-unbound attack-left-conjunct (make-instance 'symbolic-attack))
-(defconstant-if-unbound attack-right-conjunct (make-instance 'symbolic-attack))
-(defconstant-if-unbound which-instance? (make-instance 'symbolic-attack))
-(defconstant-if-unbound which-disjunct? (make-instance 'symbolic-attack))
+(always
+  (defclass symbolic-attack ()
+    nil)
+  (defconstant-if-unbound attack-left-conjunct (make-instance 'symbolic-attack))
+  (defconstant-if-unbound attack-right-conjunct (make-instance 'symbolic-attack))
+  (defconstant-if-unbound which-instance? (make-instance 'symbolic-attack))
+  (defconstant-if-unbound which-disjunct? (make-instance 'symbolic-attack)))
 
 (defmethod print-object ((attack (eql attack-left-conjunct)) stream)
   (format stream "ATTACK-LEFT-CONJUNCT"))

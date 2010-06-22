@@ -203,11 +203,11 @@
     (malformed-formula-error ()
       (answer (call 'formula-corrector
 		    :text formula-str
-		    :signature (formula-corrector-signature self))))))
+		    :signature (signature self))))))
 
 (defmethod render ((self formula-corrector))
   (let ((input-formula)
-	(sig (formula-corrector-signature self))
+	(sig (signature self))
 	(text (formula-corrector-text self)))
     (<:h1 "Invalid formula supplied")
     (<:p "We are unable to make sense of the formula, \""
