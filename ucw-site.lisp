@@ -340,8 +340,21 @@
 		 "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement)))))))
 
 (defun render-available-moves (game)
+  (<:p "Below is a description of all available moves for both
+Proponent and Opponent.")
+  (<:p "The list of moves available to each player in the following
+list is determined by the set of subformulas of all formulas played so
+far. When using the usual rules for propositional dialogue
+games (Felscher's D-rules and E-rules, for example), this is
+sufficient: every assertion asserted in the course of a dialogue game
+is a subformula of the initial formula, or is one of the symbolic
+attacks (" (<:as-is "&and;<sub>L</sub>, &and;<sub>R</sub>, and
+?)") ". If one modifies the rules, this structural fact about formulas
+occuring in a dialogue game may no longer hold, so that the list below
+may no longer be an exhaustive enumeration of all formulas that can be
+asserted in the next move.")
   (dolist (player '(p o))
-    (<:p "Available moves for " (<:b (<:as-html
+    (<:h2 "Available moves for " (<:b (<:as-html
 				      (if (eq player 'p)
 					  "Proponent"
 					  "Opponent"))) ":")
@@ -353,92 +366,175 @@
 	     (render-defenses next-defenses player game))
 	    (<:p (<:em "(no moves are available)"))))))
 
-(defmethod render ((self turn-editor))
-  (let (stance-option player-option reference-option input-statement selected-symbolic-attack rewind-point)
-    (let* ((game (game self))
-	   (game-len (dialogue-length game)))
-    (symbol-macrolet 
-	(($take-action 
-	  (let (new-statement)
-	    (if (empty-string? input-statement)
-		(setf new-statement selected-symbolic-attack)
-		(setf new-statement
-		      (ucw-handler-case (parse-formula input-statement)
-			(malformed-formula-error
-			 () 
-			 (call 'formula-corrector
-			       :text input-statement
-			       :signature (dialogue-signature game))))))
-	    (call 'turn-evaluator
-		  :player player-option
-		  :stance stance-option
-		  :reference reference-option
-		  :statement new-statement
-		  :game game))))
-      (<:h1 "The game so far")
-      (<:div :style "border:1px solid"
-        (render game))
-      (<:h1 "Choose from the available moves...")
-      (render-available-moves game)
-      (<:h1 "...or enter your move manually")
+(defun render-manual-move-entry-form (game)
+  (let (input-statement player-option reference-option selected-symbolic-attack stance-option)
+  (symbol-macrolet 
+      (($take-action 
+	(let (new-statement)
+	  (if (empty-string? input-statement)
+	      (setf new-statement selected-symbolic-attack)
+	      (setf new-statement
+		    (ucw-handler-case (parse-formula input-statement)
+		      (malformed-formula-error
+		       () 
+		       (call 'formula-corrector
+			     :text input-statement
+			     :signature (dialogue-signature game))))))
+	  (call 'turn-evaluator
+		:player player-option
+		:stance stance-option
+		:reference reference-option
+		:statement new-statement
+		:game game))))
+    (let ((game-len (dialogue-length game)))
       (<:p "The list in the previous section shows all moves that
 could be made, by either player, that adhere to the dialogue rules;
 follow the links there to make the corresponding moves.  Here, you can
 enter a move manually.  If the move you enter is different from any of
 the moves in the previous section, then it will inadmissible and you
-will see which of the rules are violated by your move.  This is a good
-way to explore the meaning of the dialogue rules.")
+will see which of the rules are violated by your move.  Entering moves
+manully is a good way to explore the meaning of the dialogue rules.")
       (<ucw:form :method "POST"
 		 :action $take-action
-	(<:table :style "border:1px solid;"
-	 (<:tr 
-	  (<:td "Which player will move?")
-	  (<:td (<ucw:select :accessor player-option
-			     :size 1
-		  (<ucw:option :value 'p "Proponent")
-		  (<ucw:option :value 'o "Opponent"))))
-	 (<:tr
-	  (<:td "Attack or defend?")
-	  (<:td (<ucw:select :accessor stance-option
-			     :size 1
-		  (<ucw:option :value 'a "Attack")
-		  (<ucw:option :value 'd "Defend"))))
-	 (<:tr
-	  (<:td "Choose the statement to which the selected player is responding.")
-	  (<:td (<ucw:select :accessor reference-option
-			     :size 1
-		  (loop for i from 0 upto (1- game-len)
-		     do (<ucw:option :value i (<:as-html i))))))
-	 (<:tr
-	  (<:td
-	   "What do you want to assert? Enter a formula or choose a symbolic attack.  (If you enter a formula, it will be your proposed assertion; otherwise, the displayed symbolic attack in the menu will be your move.)")
-	  (<:td (<ucw:input :type "text"
-			    :id "input-statement"
-			    :accessor input-statement)
-		(<ucw:select :accessor selected-symbolic-attack
-			     :size 1
-		  (<ucw:option :value attack-left-conjunct "Attack the left conjunct")
-		  (<ucw:option :value attack-right-conjunct "Attack the right conjunct")
-		  (<ucw:option :value which-disjunct? "Request that a disjunct be chosen")))))
-		      
-	(<:br)
-	(<ucw:submit :value "Make a move"
-		     :action $take-action)
-	(<:br)
-	(when (> game-len 1)
-	  (<:p "or")
-	  (<ucw:select :size 1
-		       :accessor rewind-point
-	    (loop for i from 1 upto (1- game-len)
-	       do (<ucw:option :value i (<:as-html i))))
-	  (<ucw:submit :value "Rewind the game to this turn"
-		       :action (call 'turn-editor
-				     :game (truncate-dialogue game rewind-point))))
-	(<:p "or")
-	(<ucw:submit :value "Quit"
-		     :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
-				    (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
-			       (call 'initial-formula-window :body default-sgc))))))))
+      (<:table :style "border:1px solid;"
+	       (<:tr 
+		(<:td "Which player will move?")
+		(<:td (<ucw:select :accessor player-option
+				   :size 1
+		        (<ucw:option :value 'p "Proponent")
+			(<ucw:option :value 'o "Opponent"))))
+	       (<:tr
+		(<:td "Attack or defend?")
+		(<:td (<ucw:select :accessor stance-option
+				   :size 1
+		        (<ucw:option :value 'a "Attack")
+			(<ucw:option :value 'd "Defend"))))
+	       (<:tr
+		(<:td "Choose the statement to which the selected player is responding.")
+		(<:td (<ucw:select :accessor reference-option
+				   :size 1
+		        (loop for i from 0 upto (1- game-len)
+			   do (<ucw:option :value i (<:as-html i))))))
+	       (<:tr
+		(<:td
+		 "What do you want to assert? Enter a formula or choose a symbolic attack.  (If you enter a formula, it will be your proposed assertion; otherwise, the displayed symbolic attack in the menu will be your move.)")
+		(<:td (<ucw:input :type "text"
+				  :id "input-statement"
+				  :accessor input-statement)
+		        (<ucw:select :accessor selected-symbolic-attack
+				     :size 1
+		          (<ucw:option :value attack-left-conjunct 
+				       "Attack the left conjunct")
+			  (<ucw:option :value attack-right-conjunct
+				       "Attack the right conjunct")
+			  (<ucw:option :value which-disjunct?
+				       "Request that a disjunct be chosen"))))
+	       (<:caption :style "caption-side:bottom;"
+	         (<ucw:submit :value "Make a move"
+			      :action $take-action))))))))
+
+(defun render-rewind-form (game)
+  (let (rewind-point)
+  (let ((game-len (dialogue-length game)))
+    (<:p "Select a number between 1 and the one less than the
+current turn number.  Moves of the game after the selected number will
+be discarded, and the state of the game will be rewound so that the
+current turn number is the selected one.")
+    (<:form :method "POST"
+      (<:table
+       (<:tr
+	(<:td
+	 (<ucw:select :size 1
+		      :accessor rewind-point
+	   (loop for i from 1 upto (1- game-len)
+	      do (<ucw:option :value i (<:as-html i)))))
+	(<:td
+	 (<ucw:submit :value "Rewind the game to this turn"
+		      :action (call 'turn-editor
+				    :game (truncate-dialogue game
+							     rewind-point))))))))))
+
+(defun render-signature-editor (game)
+  (let ((sig (dialogue-signature game)))
+    (<:p "The signature being used in this game is:")
+    (<:blockquote
+     (render sig))
+    (<:p "You are welcome to edit the signature, if you wish.")
+    (<:p "Bear in mind, though, that editing the signature will make
+no substantive difference to the game unless you are working with
+custom dialogue rules:")
+    (<:ul
+     (<:li "if you " (<:b "delete") " predicates from the signature,
+some formulas occuring in the game that are well-formed now with
+respect to the current signature may become malformed with respect to
+the diminished signature, thus rendering the game incoherent.  Yet if
+all the formulas occuring in the game remain well-formed with respect
+to the diminished signature, the set of formulas that can be asserted
+in the game from this point forward is unchanged, when working with
+the usual dialogue rules (Felscher's D-rules or E-rules) because
+formulas occuring in games that adhere to these rules are all
+subformulas of the initial formula;")
+     (<:li "if you " (<:b "add" ) " predicates to the signature, you
+conceivably enlarge the set of assertions that can be asserted later
+in the game, but this is not the case when using the usual dialogue
+rules (such as Felscher's D-rules and E-rules); only in the presence
+of custom dialogue rules can adding predicates to the signature now
+make a difference."))
+    (<:p "If you edit the signature, all the assertions made so far in
+the game will be evaluated to ensure that they are well-formed
+formulas in the modified signature. If any of the assertions cease to
+be well-formed formulas, you will be required to further edit the
+signature to ensure that they are well-formed.  If all assertions are
+well-formed, you will be brought back to this page after editing the
+signature.")
+    (<:blockquote
+     (<:em "(This functionality is not yet implemented.)"))
+    (<ucw:submit 
+     :value "Edit the signature"
+     :action (let* ((new-sig (call 'signature-editor
+				  :signature sig))
+		    (malformed (remove-if-not #'(lambda (assertion)
+						  (belongs-to-signature? new-sig
+									 assertion))
+					     (dialogue-assertions game))))
+	       (if (null malformed)
+		   (setf (signature game) new-sig)
+		   (call 'signature-editor
+			 :signature new-sig))))))
+
+(defun render-rule-editor (game)
+  (declare (ignore game))
+  (<:blockquote
+   (<:em "(This functionality is not yet implemented.)"))
+  (<ucw:submit :action (+ 1 1)
+	       :value "Edit the dialogue rules"))
+
+(defun render-quit-form ()
+  (<:p "Quitting the game will discard whatever progress you've made so far and return you to the initial page.")
+  (<ucw:submit :value "Quit"
+	       :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
+			      (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
+			 (call 'initial-formula-window :body default-sgc))))
+
+(defmethod render ((self turn-editor))
+    (let* ((game (game self))
+	   (game-len (dialogue-length game)))
+      (<:h1 "The game so far")
+      (<:div :style "border:1px solid"
+        (render game))
+      (<:h1 "Choose from the available moves...")
+      (render-available-moves game)
+      (<:h1 "...or enter your move manually...")
+      (render-manual-move-entry-form game)
+      (when (> game-len 1)
+	(<:h1 "...or rewind the game...")
+	(render-rewind-form game))
+      (<:h1 "...or edit the signature...")
+      (render-signature-editor game)
+      (<:h1 "...or edit the dialogue rules...")
+      (render-rule-editor game)
+      (<:h1 "...or quit.")
+      (render-quit-form)))
 
 (defun render-open-attack (play move-number)
   (with-slots (player statement stance reference)
