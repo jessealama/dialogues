@@ -331,7 +331,9 @@ sense of EQL) but with different corresponding arities."
 
 (defmethod predicate? ((sig finite-variable-propositional-signature)
 		       (pred-sym symbol))
-  (member pred-sym (signature-predicates sig) :test #'eql))
+  (member pred-sym (signature-predicates sig) 
+	  :test #'string=
+	  :key #'symbol-name))	  
 
 (defmethod predicate? ((s first-order-signature) pred-sym)
   (some #'(lambda (sym) (eq sym pred-sym))
