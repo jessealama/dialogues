@@ -607,10 +607,12 @@ signature.")
 
 (defun render-quit-form ()
   (<:p "Quitting the game will discard whatever progress you've made so far and return you to the initial page.")
-  (<ucw:submit :value "Quit"
-	       :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
-			      (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
-			 (call 'initial-formula-window :body default-sgc))))
+  (<ucw:form :method "POST"
+	     :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
+				(default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
+			   (call 'initial-formula-window :body default-sgc))
+	  (<:submit :value "Quit")))
+		 
 
 (defmethod render ((self turn-editor))
     (let* ((game (game self))
