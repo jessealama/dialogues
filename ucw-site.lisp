@@ -311,33 +311,138 @@
 		  (<ucw:submit :value "Edit this move"
 			       :action (call 'turn-editor :game game))))))))))
 
-(defun render-attacks (attacks player game)
-  (let ((game-len (dialogue-length game)))
-    (dolist (attack attacks)
-      (destructuring-bind (statement reference)
-	  attack
-	(<:li (<ucw:a
-	       :action (add-move-to-dialogue-at-position game
-							 (make-move player
-								    statement
-								    'a
-								    reference)
-							 game-len)
-	       "Attack move " (<:as-html reference) " by asserting " (render statement)))))))
+(defun render-attack (attack player game position)
+  (destructuring-bind (statement reference)
+      attack
+    (<ucw:a
+     :action (add-move-to-dialogue-at-position game
+					       (make-move player
+							  statement
+							  'a
+							  reference)
+					       position)
+     "Attack move " (<:as-html reference) " by asserting " (render statement))))
 
-(defun render-defenses (defenses player game)
+(defun render-defense (defense player game position)
+  (destructuring-bind (statement reference)
+      defense
+     (<ucw:a :action (add-move-to-dialogue-at-position game
+						       (make-move player
+								  statement
+								  'd
+								  reference)
+						       position)
+	     "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))
+
+(defun render-attacks (game)
   (let ((game-len (dialogue-length game)))
-    (dolist (defense defenses)
-      (destructuring-bind (statement reference)
-	  defense
-	(<:li 
-	 (<ucw:a :action (add-move-to-dialogue-at-position game
-							   (make-move player
-								      statement
-								      'd
-								      reference)
-							   game-len)
-		 "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement)))))))
+  (labels ((render-proponent-attacks-empty-opponent-attacks (attacks)
+	     (dolist (attack attacks)
+	       (<:tr
+		(<:td (render-attack attack 'p game game-len))
+		(<:td))))
+	   (render-opponent-attacks-empty-proponent-attacks (attacks)
+	     (dolist (attack attacks)
+	       (<:tr
+		(<:td)
+		(<:td (render-attack attack 'o game game-len))))))
+  (let* ((next-proponent-attacks (next-attacks game 'p))
+	 (next-opponent-attacks (next-attacks game 'o))
+	 (num-proponent-attacks (length next-proponent-attacks))
+	 (num-opponent-attacks (length next-opponent-attacks)))
+    (<:table
+     (<:thead
+      (<:th "Attacks for Proponent")
+      (<:th "Attacks for Opponent"))
+     (<:tbody
+      (multiple-value-bind (last-man-standing last-man-tail)
+	  (map-initial-pairs next-proponent-attacks
+			     next-opponent-attacks
+			     #'(lambda (proponent-attack opponent-attack)
+				 (<:tr
+				  (<:td (render-attack proponent-attack 'p game game-len))
+				  (<:td (render-attack opponent-attack 'o game game-len)))))
+	(if (zerop last-man-standing)
+	    (if (null last-man-tail)
+		(<:tr
+		 (<:td (<:em "(no attacks are available)"))
+		 (<:td (<:em "(no attacks are available)")))
+		(if (zerop num-opponent-attacks)
+		    (let ((first-remaining-attack (car last-man-tail)))
+		      (<:tr
+		       (<:td (render-attack first-remaining-attack 'p game game-len))
+		       (<:td :rowspan (length last-man-tail)
+			     (<:em "(no attacks are available)")))
+		      (render-proponent-attacks-empty-opponent-attacks (cdr last-man-tail)))
+		    (render-proponent-attacks-empty-opponent-attacks last-man-tail)))
+	    (if (null last-man-tail)
+		(<:tr
+		 (<:td (<:em "(no attacks are available)"))
+		 (<:td (<:em "(no attacks are available)")))
+		(if (zerop num-proponent-attacks)
+		    (let ((first-remaining-attack (car last-man-tail)))
+		      (<:tr
+		       (<:td :rowspan (length last-man-tail)
+			     (<:em "(no attacks are available)"))
+		       (<:td (render-attack first-remaining-attack 'o game game-len)))
+		      (render-opponent-attacks-empty-proponent-attacks (cdr last-man-tail)))
+		    (render-opponent-attacks-empty-proponent-attacks last-man-tail)))))))))))
+
+(defun render-defenses (game)
+  (let ((game-len (dialogue-length game)))
+  (labels
+      ((render-proponent-defenses-empty-opponent-defenses (defenses)
+	 (dolist (defense defenses)
+	   (<:tr
+	    (<:td (render-defense defense 'p game game-len))
+	    (<:td))))
+       (render-opponent-defenses-empty-proponent-defenses (defenses)
+	 (dolist (defense defenses)
+	   (<:tr
+	    (<:td)
+	    (<:td (render-defense defense 'o game game-len))))))
+  (let* ((next-proponent-defenses (next-defenses game 'p))
+	 (next-opponent-defenses (next-defenses game 'o))
+	 (num-proponent-defenses (length next-proponent-defenses))
+	 (num-opponent-defenses (length next-opponent-defenses)))
+    (<:table
+     (<:thead
+      (<:th "Defenses for Proponent")
+      (<:th "Defenses for Opponent"))
+     (<:tbody
+      (multiple-value-bind (last-man-standing last-man-tail)
+	  (map-initial-pairs next-proponent-defenses
+			     next-opponent-defenses
+			     #'(lambda (proponent-defense opponent-defense)
+				 (<:tr
+				  (<:td (render-defense proponent-defense 'p game game-len))
+				  (<:td (render-defense opponent-defense 'o game game-len)))))
+	(if (zerop last-man-standing)
+	    (if (null last-man-tail)
+		(<:tr
+		 (<:td (<:em "(no defenses are available)"))
+		 (<:td (<:em "(no defenses are available)")))
+		(if (zerop num-opponent-defenses)
+		    (let ((first-remaining-defense (car last-man-tail)))
+		      (<:tr
+		       (<:td (render-defense first-remaining-defense 'p game game-len))
+		       (<:td :rowspan (length last-man-tail)
+			     (<:em "(no defenses are available)")))
+		      (render-proponent-defenses-empty-opponent-defenses (cdr last-man-tail)))
+		    (render-proponent-defenses-empty-opponent-defenses last-man-tail)))
+	    (if (null last-man-tail)
+		(<:tr
+		 (<:td (<:em "(no defenses are available)"))
+		 (<:td (<:em "(no defenses are available)")))
+		(if (zerop num-proponent-defenses)
+		    (let ((first-remaining-defense (car last-man-tail)))
+		      (<:tr
+		       (<:td :rowspan (length last-man-tail)
+			     (<:em "(no defenses are available)"))
+		       (<:td (render-defense first-remaining-defense 'o game game-len)))
+		      (render-opponent-defenses-empty-proponent-defenses (cdr last-man-tail)))
+		    (render-opponent-defenses-empty-proponent-defenses last-man-tail)))))))))))
+	    
 
 (defun render-available-moves (game)
   (<:p "Below is a description of all available moves for both
@@ -353,18 +458,9 @@ attacks (" (<:as-is "&and;<sub>L</sub>, &and;<sub>R</sub>, and
 occuring in a dialogue game may no longer hold, so that the list below
 may no longer be an exhaustive enumeration of all formulas that can be
 asserted in the next move.")
-  (dolist (player '(p o))
-    (<:h2 "Available moves for " (<:b (<:as-html
-				      (if (eq player 'p)
-					  "Proponent"
-					  "Opponent"))) ":")
-    (let ((next-attacks (next-attacks game player))
-	  (next-defenses (next-defenses game player)))
-      (if (or next-attacks next-defenses)
-	    (<:ul
-	     (render-attacks next-attacks player game)
-	     (render-defenses next-defenses player game))
-	    (<:p (<:em "(no moves are available)"))))))
+  (render-attacks game)
+  (<:br)
+  (render-defenses game))
 
 (defun render-manual-move-entry-form (game)
   (let (input-statement player-option reference-option selected-symbolic-attack stance-option)
