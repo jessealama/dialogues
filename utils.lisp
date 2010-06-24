@@ -85,6 +85,16 @@
      collect elt into result
      finally (return result))) 
 
+(defun map-initial-pairs (lst-1 lst-2 fn)
+  (cond ((null lst-1)
+	 (values 1 lst-2))
+	((null lst-2)
+	 (values 0 lst-1))
+	(t
+	 (funcall fn (car lst-1) (car lst-2))
+	 (map-initial-pairs (cdr lst-1) (cdr lst-2) fn))))
+	    
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Numbers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
