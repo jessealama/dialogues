@@ -887,9 +887,11 @@ signature.")
 		     :size 1
 		     :accessor selected-rules
 	  (<ucw:option :value d-dialogue-rules
-		       "D rules")
+		       "D rules (Basic rules for intuitionistic logic)")
 	  (<ucw:option :value e-dialogue-rules
-		       "E rules"))
+		       "E rules (D rules + Opponment must respond immediately)")
+	  (<ucw:option :value classical-dialogue-rules
+		       "Classical logic rules"))
 	(<:p
 	 (<:submit :value "Let's play")))))))
 
