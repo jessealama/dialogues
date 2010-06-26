@@ -282,6 +282,21 @@
 			      dialogue)
 	     :failure-message "Proponent cannot assert an atomic formula before opponent has asserted it."))
 
+(defvar rule-d10-literal
+  (make-rule :name d10-literal
+	     :condition (and (evenp current-position)
+			     (non-symbolic-attack-formula? current-statement)
+			     (atomic-formula? current-statement))
+	     :body (some-move #'(lambda (move)
+				  (when (opponent-move? move)
+				    (or (equal-statements? (move-statement move)
+							   current-statement)
+					(and (negation? (move-statement move))
+					     (equal-statements? current-statement
+								(unnegate (move-statement move)))))))
+			      dialogue)
+	     :failure-message "Proponent may assert an atomic formula only if Opponent has either asserted that formula, or its negation, earlier in the dialogue."))
+
 (defvar rule-d11
   (make-defensive-rule 
    :name d11
@@ -371,6 +386,18 @@
    :condition (eq current-player 'o)
    :body (length-at-most (moves-referring-to dialogue current-reference) 3)
    :failure-message "A P-assertion may be attacked at most twice."))
+
+(defvar d-dialogue-rules-literal-d10
+  (append argumentation-forms
+	  (list rule-d00-atomic
+		rule-d00-proponent
+		rule-d00-opponent
+		rule-d01-composite
+		rule-d02-attack
+		rule-d10-literal
+		rule-d11
+		rule-d12
+		rule-d13)))
 
 (defvar d-dialogue-rules-minus-d11
   (append argumentation-forms
