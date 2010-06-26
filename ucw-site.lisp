@@ -294,23 +294,48 @@
 	      (progn
 		(<:h1 "Problem!")
 		(<:p "The game at this point:")
-		(render game)
-		(<:p "Your proposed move:")
-		(<:ul
-		 (<:li "Player: " (<:as-html player))
-		 (<:li "Statement: " (render statement))
-		 (<:li "Stance: " (if (eq stance 'a)
-				      "Attack"
-				      "Defend"))
-		 (<:li "Respond to statement number: " (<:as-html reference)))
+		(unless (zerop (dialogue-length game))
+		  (let ((open-attacks (open-attack-indices game)))
+		    (<:table 
+		     (<:thead
+		      (<:th "Move")
+		      (<:th "Player")
+		      (<:th "Assertion")
+		      (<:th "Stance, Reference"))
+		     (<:tbody
+		      (loop with plays = (dialogue-plays game)
+			 with len = (length plays)
+			 for play in plays
+			 for i from 0 upto len
+			 do
+			   (if (attacking-move? play)
+			       (if (member i open-attacks)
+				   (render-open-attack play i)
+				   (render-closed-attack play i))
+			       (render-defensive-move play i)))
+		      (<:tr :style "background-color:#FF3333;"
+			    (<:td (<:as-html game-len))
+			    (<:td (<:as-html player))
+			    (<:td (render statement))
+			    (<:td "[" (<:as-html stance) "," (<:as-html reference) "]")))
+		    (<:tfoot
+		      (<:tr 
+		       (<:td :align "center"
+			     :colspan "4"
+			     (<:em "Rows in " (<:span :style "background-color:#CCCCCC"
+						      "grey")
+				   " are closed attacks; rows in "
+				   (<:span :style "background-color:#CCCCFF"
+					   "blue")
+				   " are open attacks.  (Defensive moves are not colored.)")))))))
 		(<:p "At least one of the dialogue rules is violated by your proposed move:")
 		(<:ul
 		 (dolist (message messages)
 		   (<:li (<:as-html message))))
 		(<ucw:form :method "POST"
 			   :action (call 'turn-editor :game game)
-		  (<ucw:submit :value "Edit this move"
-			       :action (call 'turn-editor :game game))))))))))
+		  (<:p "You must edit your move; please try again.")
+		  (<:submit :value "Go back and edit the move")))))))))
 
 (defun render-attack (attack player game position)
   (destructuring-bind (statement reference)
