@@ -93,7 +93,12 @@
 	(t
 	 (funcall fn (car lst-1) (car lst-2))
 	 (map-initial-pairs (cdr lst-1) (cdr lst-2) fn))))
-	    
+
+(defun length-at-most (lst n)
+  (or (minusp n)
+      (if (zerop n)
+	  (null lst)
+	  (length-at-most (cdr lst) (1- n)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Numbers
