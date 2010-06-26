@@ -549,10 +549,7 @@ current turn number is the selected one.")
 	   (loop for i from 1 upto (1- game-len)
 	      do (<ucw:option :value i (<:as-html i)))))
 	(<:td
-	 (<ucw:submit :value "Rewind the game to this turn"
-		      :action (call 'turn-editor
-				    :game (truncate-dialogue game
-							     rewind-point))))))))))
+	 (<:submit :value "Rewind the game to this turn"))))))))
 
 (defun render-signature-editor (game)
   (let ((sig (dialogue-signature game)))
