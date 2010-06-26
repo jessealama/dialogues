@@ -459,20 +459,20 @@
 (defun render-available-moves (game)
   (<:p "Below is a description of all available moves for both
 Proponent and Opponent.")
-  (<:p "The list of moves available to each player in the following
-list is determined by the set of subformulas of all formulas played so
-far. When using the usual rules for propositional dialogue
-games (Felscher's D-rules and E-rules, for example), this is
+  (render-attacks game)
+  (<:br)
+  (render-defenses game)
+  (<:p (<:em "Note:") "The list of moves available to each player in
+the following list is determined by the set of subformulas of all
+formulas played so far. When using the usual rules for propositional
+dialogue games (Felscher's D-rules and E-rules, for example), this is
 sufficient: every assertion asserted in the course of a dialogue game
 is a subformula of the initial formula, or is one of the symbolic
 attacks (" (<:as-is "&and;<sub>L</sub>, &and;<sub>R</sub>, and
 ?)") ". If one modifies the rules, this structural fact about formulas
 occuring in a dialogue game may no longer hold, so that the list below
 may no longer be an exhaustive enumeration of all formulas that can be
-asserted in the next move.")
-  (render-attacks game)
-  (<:br)
-  (render-defenses game))
+asserted in the next move."))
 
 (defun render-manual-move-entry-form (game)
   (let (input-statement player-option reference-option selected-symbolic-attack stance-option)
