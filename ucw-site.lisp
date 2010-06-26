@@ -324,6 +324,12 @@
 						 position)
      "Attack move " (<:as-html reference) " by asserting " (render statement))))
 
+(defun render-proponent-attack (attack game position)
+  (render-attack attack 'p game position))
+
+(defun render-opponent-attack (attack game position)
+  (render-attack attack 'o game position))
+
 (defun render-defense (defense player game position)
   (destructuring-bind (statement reference)
       defense
@@ -335,18 +341,24 @@
 						   position)
 	     "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))
 
+(defun render-proponent-defense (defense game position)
+  (render-defense defense 'p game position))
+
+(defun render-opponent-defense (defense game position)
+  (render-defense defense 'o game position))
+
 (defun render-attacks (game)
   (let ((game-len (dialogue-length game)))
   (labels ((render-proponent-attacks-empty-opponent-attacks (attacks)
 	     (dolist (attack attacks)
 	       (<:tr
-		(<:td (render-attack attack 'p game game-len))
+		(<:td (render-proponent-attack attack game game-len))
 		(<:td))))
 	   (render-opponent-attacks-empty-proponent-attacks (attacks)
 	     (dolist (attack attacks)
 	       (<:tr
 		(<:td)
-		(<:td (render-attack attack 'o game game-len))))))
+		(<:td (render-opponent-attack attack game game-len))))))
   (let* ((next-proponent-attacks (next-attacks game 'p))
 	 (next-opponent-attacks (next-attacks game 'o))
 	 (num-proponent-attacks (length next-proponent-attacks))
@@ -361,8 +373,8 @@
 			     next-opponent-attacks
 			     #'(lambda (proponent-attack opponent-attack)
 				 (<:tr
-				  (<:td (render-attack proponent-attack 'p game game-len))
-				  (<:td (render-attack opponent-attack 'o game game-len)))))
+				  (<:td (render-proponent-attack proponent-attack game game-len))
+				  (<:td (render-opponent-attack opponent-attack game game-len)))))
 	(if (zerop last-man-standing)
 	    (if (null last-man-tail)
 		(<:tr
@@ -371,7 +383,7 @@
 		(if (zerop num-opponent-attacks)
 		    (let ((first-remaining-attack (car last-man-tail)))
 		      (<:tr
-		       (<:td (render-attack first-remaining-attack 'p game game-len))
+		       (<:td (render-proponent-attack first-remaining-attack game game-len))
 		       (<:td :rowspan (length last-man-tail)
 			     (<:em "(no attacks are available)")))
 		      (render-proponent-attacks-empty-opponent-attacks (cdr last-man-tail)))
@@ -385,7 +397,7 @@
 		      (<:tr
 		       (<:td :rowspan (length last-man-tail)
 			     (<:em "(no attacks are available)"))
-		       (<:td (render-attack first-remaining-attack 'o game game-len)))
+		       (<:td (render-opponent-attack first-remaining-attack game game-len)))
 		      (render-opponent-attacks-empty-proponent-attacks (cdr last-man-tail)))
 		    (render-opponent-attacks-empty-proponent-attacks last-man-tail)))))))))))
 
@@ -395,13 +407,13 @@
       ((render-proponent-defenses-empty-opponent-defenses (defenses)
 	 (dolist (defense defenses)
 	   (<:tr
-	    (<:td (render-defense defense 'p game game-len))
+	    (<:td (render-proponent-defense defense game game-len))
 	    (<:td))))
        (render-opponent-defenses-empty-proponent-defenses (defenses)
 	 (dolist (defense defenses)
 	   (<:tr
 	    (<:td)
-	    (<:td (render-defense defense 'o game game-len))))))
+	    (<:td (render-opponent-defense defense game game-len))))))
   (let* ((next-proponent-defenses (next-defenses game 'p))
 	 (next-opponent-defenses (next-defenses game 'o))
 	 (num-proponent-defenses (length next-proponent-defenses))
@@ -416,8 +428,8 @@
 			     next-opponent-defenses
 			     #'(lambda (proponent-defense opponent-defense)
 				 (<:tr
-				  (<:td (render-defense proponent-defense 'p game game-len))
-				  (<:td (render-defense opponent-defense 'o game game-len)))))
+				  (<:td (render-proponent-defense proponent-defense game game-len))
+				  (<:td (render-opponent-defense opponent-defense game game-len)))))
 	(if (zerop last-man-standing)
 	    (if (null last-man-tail)
 		(<:tr
@@ -426,7 +438,7 @@
 		(if (zerop num-opponent-defenses)
 		    (let ((first-remaining-defense (car last-man-tail)))
 		      (<:tr
-		       (<:td (render-defense first-remaining-defense 'p game game-len))
+		       (<:td (render-proponent-defense first-remaining-defense game game-len))
 		       (<:td :rowspan (length last-man-tail)
 			     (<:em "(no defenses are available)")))
 		      (render-proponent-defenses-empty-opponent-defenses (cdr last-man-tail)))
@@ -440,7 +452,7 @@
 		      (<:tr
 		       (<:td :rowspan (length last-man-tail)
 			     (<:em "(no defenses are available)"))
-		       (<:td (render-defense first-remaining-defense 'o game game-len)))
+		       (<:td (render-opponent-defense first-remaining-defense game game-len)))
 		      (render-opponent-defenses-empty-proponent-defenses (cdr last-man-tail)))
 		    (render-opponent-defenses-empty-proponent-defenses last-man-tail)))))))))))
 	    
