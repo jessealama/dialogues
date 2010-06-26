@@ -106,8 +106,7 @@
       (render sig)
       (<:p "The new predicate name should be different from the names of currently existing predicates.  It should be different from the empty string and should not contain any whitespace characters.")
       (<ucw:form :method "POST"
-		 :action (answer (insert-predicate (signature self)
-						   input-predicate-name))
+		 :action (answer (insert-predicate sig input-predicate-name))
         (<:label :for "new-predicate-name" "New predicate name")
 	(<ucw:input :type "text" 
 		    :id "new-predicate-name"
