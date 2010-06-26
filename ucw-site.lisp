@@ -537,7 +537,10 @@ meaning of the dialogue rules.")
 current turn number.  Moves of the game after the selected number will
 be discarded, and the state of the game will be rewound so that the
 current turn number is the selected one.")
-    (<:form :method "POST"
+    (<ucw:form :method "POST"
+	       :action (call 'turn-editor
+			     :game (truncate-dialogue game
+						      rewind-point))
       (<:table
        (<:tr
 	(<:td
