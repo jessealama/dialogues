@@ -141,14 +141,14 @@
 
 (defmethod render ((self finite-variable-propositional-signature))
   (with-slots (predicates) self
-    (<:p "Predicates:")
-     (if (null predicates)
-	 (<:em "(none)")
-	 (let ((first (car predicates)))
-	   (<:em (<:as-html first))
-	   (dolist (pred (cdr predicates))
-	     (<:as-is ", ")
-	     (<:em (<:as-html pred)))))))
+    (<:p "Predicates:"
+      (if (null predicates)
+	  (<:em "(none)")
+	  (let ((first (car predicates)))
+	    (<:em (<:as-html first))
+	    (dolist (pred (cdr predicates))
+	      (<:as-is ", ")
+	      (<:em (<:as-html pred))))))))
 
 (defentry-point "" (:application *dialogue-application*)
     ()
