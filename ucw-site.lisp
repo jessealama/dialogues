@@ -299,9 +299,11 @@
 		(<:p "Your proposed move:")
 		(<:ul
 		 (<:li "Player: " (<:as-html player))
-		 (<:li "Statement: " (<:as-html statement))
-		 (<:li "Stance: " (<:as-html stance))
-		 (<:li "Reference: " (<:as-html reference)))
+		 (<:li "Statement: " (rener statement))
+		 (<:li "Stance: " (if (eq stance 'a)
+				      "Attack"
+				      "Defend"))
+		 (<:li "Respond to statement number: " (<:as-html reference)))
 		(<:p "At least one of the dialogue rules is violated by your proposed move:")
 		(<:ul
 		 (dolist (message messages)
