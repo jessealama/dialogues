@@ -41,6 +41,7 @@ UCW."
 	       (:file "signature-examples")
 	       (:file "terms")
 	       (:file "formulas")
+	       (:file "translations")
 	       (:file "famous-formulas")
 	       (:file "sequent")
 	       (:file "dialogues")
