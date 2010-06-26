@@ -21,6 +21,18 @@
 (defun make-defense (player statement reference)
   (make-move player statement 'd reference))
 
+(defun make-proponent-attack (statement reference)
+  (make-attack 'p statement reference))
+
+(defun make-opponent-attack (statement reference)
+  (make-attack 'o statement reference))
+
+(defun make-proponent-defense (statement reference)
+  (make-defense 'p statement reference))
+
+(defun make-opponent-defense (statement reference)
+  (make-defense 'o statement reference))
+
 (defun proponent-move? (move)
   (let ((player (move-player move)))
     (string= player "P")))
@@ -268,6 +280,16 @@ attacks which, being symbols, do qualify as terms."
 	       :dialogue dialogue
 	       :move move
 	       :index position))))
+
+(defun add-attack-to-dialogue-at-position (dialogue player statement ref pos)
+  (add-move-to-dialogue-at-position dialogue
+				    (make-attack player statement ref)
+				    pos))
+
+(defun add-defense-to-dialogue-at-position (dialogue player statement ref pos)
+  (add-move-to-dialogue-at-position dialogue
+				    (make-defense player statement ref)
+				    pos))
 
 (defun extend-dialogue (dialogue player stance statement reference)
   (add-move-to-dialogue dialogue
