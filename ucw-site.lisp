@@ -462,7 +462,7 @@ Proponent and Opponent.")
   (render-attacks game)
   (<:br)
   (render-defenses game)
-  (<:p (<:em "Note:") "The list of moves available to each player in
+  (<:p (<:em "Note:") " The list of moves available to each player in
 the following list is determined by the set of subformulas of all
 formulas played so far. When using the usual rules for propositional
 dialogue games (Felscher's D-rules and E-rules, for example), this is
