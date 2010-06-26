@@ -141,7 +141,7 @@
 
 (defmethod render ((self finite-variable-propositional-signature))
   (with-slots (predicates) self
-    (<:p "Predicates:"
+    (<:p "Predicates: "
       (if (null predicates)
 	  (<:em "(none)")
 	  (let ((first (car predicates)))
