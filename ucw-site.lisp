@@ -299,7 +299,7 @@
 		(<:p "Your proposed move:")
 		(<:ul
 		 (<:li "Player: " (<:as-html player))
-		 (<:li "Statement: " (rener statement))
+		 (<:li "Statement: " (render statement))
 		 (<:li "Stance: " (if (eq stance 'a)
 				      "Attack"
 				      "Defend"))
