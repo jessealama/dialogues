@@ -348,16 +348,10 @@
 
 (defun render-attacks (game)
   (let ((game-len (dialogue-length game)))
-  (labels ((render-proponent-attacks-empty-opponent-attacks (attacks)
+  (labels ((render-multiple-attacks (attacks)
 	     (dolist (attack attacks)
 	       (<:tr
-		(<:td (render-proponent-attack attack game game-len))
-		(<:td))))
-	   (render-opponent-attacks-empty-proponent-attacks (attacks)
-	     (dolist (attack attacks)
-	       (<:tr
-		(<:td)
-		(<:td (render-opponent-attack attack game game-len))))))
+		(<:td (render-proponent-attack attack game game-len))))))
   (let* ((next-proponent-attacks (next-attacks game 'p))
 	 (next-opponent-attacks (next-attacks game 'o))
 	 (num-proponent-attacks (length next-proponent-attacks))
@@ -385,8 +379,8 @@
 		       (<:td (render-proponent-attack first-remaining-attack game game-len))
 		       (<:td :rowspan (length last-man-tail)
 			     (<:em "(no attacks are available)")))
-		      (render-proponent-attacks-empty-opponent-attacks (cdr last-man-tail)))
-		    (render-proponent-attacks-empty-opponent-attacks last-man-tail)))
+		      (render-multiple-attacks (cdr last-man-tail)))
+		    (render-multiple-attacks last-man-tail)))
 	    (if (null last-man-tail)
 		(<:tr
 		 (<:td (<:em "(no attacks are available)"))
@@ -397,21 +391,15 @@
 		       (<:td :rowspan (length last-man-tail)
 			     (<:em "(no attacks are available)"))
 		       (<:td (render-opponent-attack first-remaining-attack game game-len)))
-		      (render-opponent-attacks-empty-proponent-attacks (cdr last-man-tail)))
-		    (render-opponent-attacks-empty-proponent-attacks last-man-tail)))))))))))
+		      (render-multiple-attacks (cdr last-man-tail)))
+		    (render-multiple-attacks last-man-tail)))))))))))
 
 (defun render-defenses (game)
   (let ((game-len (dialogue-length game)))
   (labels
-      ((render-proponent-defenses-empty-opponent-defenses (defenses)
+      ((render-multiple-defenses (defenses)
 	 (dolist (defense defenses)
 	   (<:tr
-	    (<:td (render-proponent-defense defense game game-len))
-	    (<:td))))
-       (render-opponent-defenses-empty-proponent-defenses (defenses)
-	 (dolist (defense defenses)
-	   (<:tr
-	    (<:td)
 	    (<:td (render-opponent-defense defense game game-len))))))
   (let* ((next-proponent-defenses (next-defenses game 'p))
 	 (next-opponent-defenses (next-defenses game 'o))
@@ -440,8 +428,8 @@
 		       (<:td (render-proponent-defense first-remaining-defense game game-len))
 		       (<:td :rowspan (length last-man-tail)
 			     (<:em "(no defenses are available)")))
-		      (render-proponent-defenses-empty-opponent-defenses (cdr last-man-tail)))
-		    (render-proponent-defenses-empty-opponent-defenses last-man-tail)))
+		      (render-multiple-defenses (cdr last-man-tail)))
+		    (render-multiple-defenses last-man-tail)))
 	    (if (null last-man-tail)
 		(<:tr
 		 (<:td (<:em "(no defenses are available)"))
@@ -452,9 +440,8 @@
 		       (<:td :rowspan (length last-man-tail)
 			     (<:em "(no defenses are available)"))
 		       (<:td (render-opponent-defense first-remaining-defense game game-len)))
-		      (render-opponent-defenses-empty-proponent-defenses (cdr last-man-tail)))
-		    (render-opponent-defenses-empty-proponent-defenses last-man-tail)))))))))))
-	    
+		      (render-multiple-defenses (cdr last-man-tail)))
+		    (render-multiple-defenses last-man-tail)))))))))))	    
 
 (defun render-available-moves (game)
   (<:p "Below is a description of all available moves for both
