@@ -885,7 +885,9 @@ signature.")
 	  (<ucw:option :value d-dialogue-rules-minus-d11
 		       "D rules, but you may defend against any open attack")
 	  (<ucw:option :value d-dialogue-rules-minus-d12
-		       "D rules, but attacks may be answered any number of times"))
+		       "D rules, but attacks may be answered any number of times")
+	  (<ucw:option :value d-dialogue-rules-literal-d10
+		       "D rules, but literals have a similar status as atomic formulas"))
 	(<:p
 	 (<:submit :value "Let's play")))))))
 
