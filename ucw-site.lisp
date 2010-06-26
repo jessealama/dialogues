@@ -285,7 +285,7 @@
 		     (<ucw:a :action 
 			     (call 'turn-editor
 				   :game (add-move-to-dialogue-at-position
-					  (game self)
+					  game
 					  (make-move player
 						     statement
 						     stance
@@ -317,23 +317,22 @@
   (destructuring-bind (statement reference)
       attack
     (<ucw:a
-     :action (add-move-to-dialogue-at-position game
-					       (make-move player
-							  statement
-							  'a
-							  reference)
-					       position)
+     :action (add-attack-to-dialogue-at-position game
+						 player
+						 statement
+						 reference
+						 position)
      "Attack move " (<:as-html reference) " by asserting " (render statement))))
 
 (defun render-defense (defense player game position)
   (destructuring-bind (statement reference)
       defense
-     (<ucw:a :action (add-move-to-dialogue-at-position game
-						       (make-move player
-								  statement
-								  'd
-								  reference)
-						       position)
+     (<ucw:a
+      :action (add-defense-to-dialogue-at-position game
+						   player
+						   statement
+						   reference
+						   position)
 	     "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))
 
 (defun render-attacks (game)
