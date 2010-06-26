@@ -327,6 +327,9 @@ attacks which, being symbols, do qualify as terms."
 (defun every-move (predicate dialogue)
   (every predicate (dialogue-plays dialogue)))
 
+(defun select-moves (predicate dialogue)
+  (remove-if-not predicate (dialogue-plays dialogue)))
+
 (defun nth-move (dialogue n)
   (nth n (dialogue-plays dialogue)))
 
@@ -347,6 +350,12 @@ attacks which, being symbols, do qualify as terms."
 
 (defun defensive-moves (dialogue)
   (remove-if-not #'defensive-move? (dialogue-plays dialogue)))
+
+(defun moves-referring-to (dialogue reference)
+  (select-moves #'(lambda (move)
+		    (unless (initial-move? move)
+		      (= (move-reference move) reference)))
+		dialogue))
 
 (defun closed-attack-indices (dialogue)
   (mapcar #'move-reference (defensive-moves dialogue)))
