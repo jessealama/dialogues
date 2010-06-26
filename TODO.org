@@ -109,7 +109,7 @@
   Perhaps grey out the closed attacks, and put the open attacks in bold.
 * DONE Give a legend indicating how to interpret the colors.
   CLOSED: [2010-06-22 Tue 12:58]
-* TODO Provide a way of switching the dialogue rules.
+* IN-PROGRESS Provide a way of switching the dialogue rules.
   This is an intermediate step between providing no functionality for
   editing rules, and providing a full-blown rule editor.  The idea is
   that we have three rulesets: D-rules, E-rules, and rules for
