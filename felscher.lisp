@@ -358,6 +358,19 @@
 		     dialogue)
    :failure-message "Attacks may be answered at most twice."))
 
+(defvar rule-d13-two-times
+  (make-offensive-rule
+   :name d13-two-times
+   :condition (eq current-player 'o)
+   :body (length-at-most (moves-referring-to dialogue current-reference) 2)
+   :failure-message "A P-assertion may be attacked at most twice."))
+
+(defvar rule-d13-three-times
+  (make-offensive-rule
+   :name d13-three-times
+   :condition (eq current-player 'o)
+   :body (length-at-most (moves-referring-to dialogue current-reference) 3)
+   :failure-message "A P-assertion may be attacked at most twice."))
 
 (defvar d-dialogue-rules-minus-d11
   (append argumentation-forms
