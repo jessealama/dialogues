@@ -116,3 +116,12 @@
   classical logic.  It would be nice to provide a way to switch
   between them.
 
+* TODO A better presentation of rule-violating moves
+  At present (2010-06-26), the problem report simply shows the game so
+  far, and describes the problematic move in a format entirely
+  different from the other moves of the game.  A better way to present
+  the problematic move would be to display it like the
+  already-existing rules, but flagged somehow.
+
+  We could use a different tabe section (TBODY) to display the
+  problematic move and then show the rules that are violated.
