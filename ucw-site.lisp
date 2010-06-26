@@ -818,14 +818,15 @@ signature.")
   ())
 
 (defmethod render ((self formula-entry-component))
-  (let (input-formula selected-formula selected-rules)
+  (let (input-formula selected-formula selected-rules selected-translation)
   (symbol-macrolet 
       (($take-action 
 	(let ((sig (signature self)))
 	  (if (empty-string? input-formula)
 	      (if (belongs-to-signature? sig selected-formula)
 		  (call 'turn-editor
-			:game (make-dialogue selected-formula 
+			:game (make-dialogue (funcall selected-translation
+						      selected-formula)
 					     sig
 					     selected-rules))
 		  (call 'formula-corrector
@@ -839,7 +840,8 @@ signature.")
 		(if (belongs-to-signature? sig parsed-formula)
 		    (call 'turn-editor
 			  :game (make-dialogue 
-				 parsed-formula
+				 (funcall selected-translation
+					  parsed-formula)
 				 sig
 				 selected-rules))
 		    (call 'formula-corrector
@@ -854,7 +856,7 @@ signature.")
 		 :action $take-action
         (<:p "Enter a formula ")
 	(<ucw:input :type "text" :accessor input-formula :id "input-formula")
-	(<:p " or select a famous formula from the menu ")
+	(<:p "or select a famous formula from the menu ")
 	(<ucw:select :id "selected-formula" 
 		     :size 1 
 		     :accessor selected-formula
@@ -863,6 +865,17 @@ signature.")
 		famous-formula
 	      (declare (ignore short-name))
 	      (<ucw:option :value formula (<:as-html long-name)))))
+	(<:p "and select a translation to be applied to the formula.
+The default is the identity translation, so that whatever formula is
+chosen (or whatever formula is entered into the text box) will be,
+verbatim, the formula with which the game begins.")
+	(<ucw:select :id "selected-translation"
+		     :size 1
+		     :accessor selected-translation
+	  (<ucw:option :value #'identity
+		       "Identity function (no change)")
+	  (<ucw:option :value #'gödel-gentzen
+		       "Gödel-Gentzen negative translation"))
 	(<:p
 	 (<:as-html "(If you have deleted some elements from the signature but wish to choose one of the pre-selected formulas, you should be aware that the formula you choose might not actually be a formula in a diminished sgnature.)  If the text box is not empty, its contents will be the initial formula.  If the text box is empty, then the selected \"famous formula\" will be used."))
 	(<:p "Choose which dialogue rules to use.  The D-dialogue

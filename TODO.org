@@ -125,7 +125,8 @@
 
   We could use a different tabe section (TBODY) to display the
   problematic move and then show the rules that are violated.
-* TODO Provide a way of applying the Gödel-Gentzen translation to a "famous formula"
+* DONE Provide a way of applying the Gödel-Gentzen translation to a "famous formula"
+  CLOSED: [2010-06-26 Sat 21:33]
   There would then be three ways to enter formulas:
   - manually,
   - from a pulldown list,
