@@ -171,7 +171,7 @@
     ("Dummet's formula" "dummett-formula" ,dummett-formula)
     ("Double negation introduction" "double-negation-intro" ,double-negation-intro)
     ("Double negation elimination" "double-negation-elim" ,double-negation-elimination)
-    ("Markov's formula" "markov-formula" ,markov-formula)
+    ; ("Markov's formula" "markov-formula" ,markov-formula)
     ("K formula" "k-formula" ,k-formula)
     ("B formula" "b-formula" ,b-formula)
     ("C formula" "c-formula" ,c-formula)
