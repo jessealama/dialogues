@@ -86,6 +86,9 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 	:accessor rhs
 	:type formula)))
 
+(defun binary-connective-formula? (thing)
+  (typep thing 'binary-connective-formula))
+
 (defmethod print-object :around ((formula binary-connective-formula) stream)
   (format stream "(~A " (lhs formula))
   (call-next-method)
