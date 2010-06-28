@@ -879,58 +879,77 @@ signature.")
 			  :text parsed-formula
 			  :signature sig)))))))
     (let ((sig (signature self)))
-      (<:p "To get started, enter a formula in the text box below or choose a famous formula from the menu.")
-      (formula-guide)
-      (render sig)
-      (<:p "You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)  You will not be able to edit the signature once the game begins.")
       (<ucw:form :method "POST"
 		 :action $take-action
-        (<:p "Enter a formula ")
-	(<ucw:input :type "text" :accessor input-formula :id "input-formula")
-	(<:p "or select a famous formula from the menu ")
-	(<ucw:select :id "selected-formula" 
-		     :size 1 
-		     :accessor selected-formula
-          (dolist (famous-formula famous-formulas)
-	    (destructuring-bind (long-name short-name formula)
-		famous-formula
-	      (declare (ignore short-name))
-	      (<ucw:option :value formula (<:as-html long-name)))))
-	(<:p "and select a translation to be applied to the formula.
-The default is the identity translation, so that whatever formula is
-chosen (or whatever formula is entered into the text box) will be,
-verbatim, the formula with which the game begins.")
-	(<ucw:select :id "selected-translation"
-		     :size 1
-		     :accessor selected-translation
-	  (<ucw:option :value #'identity
-		       "Identity function (no change)")
-	  (<ucw:option :value #'gödel-gentzen
-		       "Gödel-Gentzen negative translation"))
-	(<:p
-	 (<:as-html "(If you have deleted some elements from the signature but wish to choose one of the pre-selected formulas, you should be aware that the formula you choose might not actually be a formula in a diminished sgnature.)  If the text box is not empty, its contents will be the initial formula.  If the text box is empty, then the selected \"famous formula\" will be used."))
-	(<:p "Choose which dialogue rules to use.  The D-dialogue
-	rules are the basic dialogue rules.  The E-dialogue rules
-	extend the D-dialogue rules and are more strict: they require
-	that Opponent always respond to the immediately prior
-	assertion of Proponent.")
-	(<ucw:select :id "selected-rules"
-		     :size 1
-		     :accessor selected-rules
-	  (<ucw:option :value d-dialogue-rules
-		       "D rules (basic rules for intuitionistic logic)")
-	  (<ucw:option :value e-dialogue-rules
-		       "E rules (D rules + Opponment must always respond immediately)")
-	  (<ucw:option :value classical-dialogue-rules
-		       "Classical logic rules")
-	  (<ucw:option :value d-dialogue-rules-minus-d11
-		       "D rules, but you may defend against any open attack")
-	  (<ucw:option :value d-dialogue-rules-minus-d12
-		       "D rules, but attacks may be answered any number of times")
-	  (<ucw:option :value d-dialogue-rules-literal-d10
-		       "D rules, but literals have a similar status as atomic formulas"))
-	(<:p
-	 (<:submit :value "Let's play")))))))
+      (<:table :style "border:1px solid;"
+       (<:caption :style "caption-side:bottom;"
+		  (<:submit :value "Let's play"))
+       (<:tbody :style "border:1px solid;"
+       (<:tr :style "background-color:#FF6600;"
+	(<:td "The signature that will be used:")
+	(<:td (render sig)))
+       (<:tr :style "background-color:#33CCFF;"
+	(<:td "Enter a formula or choose a famous formula from the menu:")
+	(<:td
+	 (<:table
+	  (<:tr 
+	   (<:td (<ucw:input :type "text" 
+			     :accessor input-formula 
+			     :id "input-formula")))
+	  (<:tr
+	   (<:td (<ucw:select :id "selected-formula" 
+			      :size 1 
+			      :accessor selected-formula
+		   (dolist (famous-formula famous-formulas)
+		     (destructuring-bind (long-name short-name formula)
+			 famous-formula
+		       (declare (ignore short-name))
+		       (<ucw:option :value formula (<:as-html long-name))))))))))
+       (<:tr :style "background-color:#CC99FF;"
+	(<:td "Select a translation to be applied to the selected formula:")
+	(<:td (<ucw:select :id "selected-translation"
+			   :size 1
+			   :accessor selected-translation
+	        (<ucw:option :value #'identity
+			     "Identity function (no change)")
+		(<ucw:option :value #'gödel-gentzen
+			     "Gödel-Gentzen negative translation")
+		(<ucw:option :value #'kuroda
+			     "Kuroda negative translation")
+		(<ucw:option :value #'dn-all-subformulas
+			      "Double negate all subformulas")
+		(<ucw:option :value #'double-negate
+			     "Double negate the whole formula"))))
+       (<:tr :style "background-color:#FF6699;"
+	(<:td "Choose the dialogue rules to be used during the game:")
+	(<:td (<ucw:select :id "selected-rules"
+			   :size 1
+			   :accessor selected-rules
+	        (<ucw:option :value d-dialogue-rules
+			     "D rules (basic rules for intuitionistic logic)")
+		(<ucw:option :value e-dialogue-rules
+			     "E rules (D rules + Opponment must always respond immediately)")
+		(<ucw:option :value classical-dialogue-rules
+			     "Classical logic rules")
+		(<ucw:option :value d-dialogue-rules-minus-d11
+			     "D rules, but you may defend against any open attack")
+		(<ucw:option :value d-dialogue-rules-minus-d12
+			     "D rules, but attacks may be answered any number of times")
+		(<ucw:option :value d-dialogue-rules-literal-d10
+			     "D rules, but literals have a similar status as atomic formulas")))))
+       (<:tfoot
+	(<:tr
+	  (<:td :colspan "2" (<:em (<:b "About the signature:")) " You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)  You will not be able to edit the signature once the game begins."))
+	(<:tr 
+	  (<:td :colspan "2" (<:em (<:b "About the formula:")) " If the text box is not empty, its contents will be the initial formula of the game.  If the text box is empty, then the selected \"famous formula\" will be." 
+		(formula-guide)))
+	(<:tr 
+	  (<:td :colspan "2" (<:em (<:b "About the translation:")) " The default is the
+identity translation, so that whatever formula is chosen (or whatever
+formula is entered into the text box) will be, verbatim, the formula
+with which the game begins."))
+	(<:tr
+	 (<:td :colspan "2" (<:em (<:b "About the rules:")) " The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985.  They probably were introduced earlier.  You will be able to alter your choice (in a limited way) after the game has begun.")))))))))
 
 (defmethod render ((self start-game-component))
   (with-slots ((sig signature))
