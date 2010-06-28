@@ -23,10 +23,10 @@
 								 statement
 								 index))))
 			    next-moves)
-		    extensions)))))))
+		    extensions))))))
 
 (defun dialogue-search-bfs (rules initial-statement signature &optional more-nodes)
-  (if (formula? initial-statement signature)
+  (if (belongs-to-signature? signature initial-statement)
       (let* ((initial-state (make-dialogue initial-statement signature rules))
 	     (problem (make-dialogue-search-problem :initial-state initial-state
 						    :signature signature
@@ -35,7 +35,7 @@
       (error "The initial statement ~A is not a formula according to the given signature ~A" initial-statement signature)))
 
 (defun dialogue-search-dfs (rules initial-statement signature)
-  (if (formula? initial-statement signature)
+  (if (belongs-to-signature? signature initial-statement)
       (let* ((initial-state (make-dialogue initial-statement signature rules))
 	     (problem (make-dialogue-search-problem :initial-state initial-state
 						    :signature signature
@@ -44,7 +44,7 @@
       (error "The initial statement ~A is not a formula according to the given signature ~A" initial-statement signature)))
 
 (defun dialogue-search-dfs-no-cycles (rules initial-statement signature)
-  (if (formula? initial-statement signature)
+  (if (belongs-to-signature? signature initial-statement)
       (let* ((initial-state (make-dialogue initial-statement signature rules))
 	     (problem (make-dialogue-search-problem :initial-state initial-state
 						    :signature signature
