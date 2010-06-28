@@ -9,20 +9,19 @@
 
 (defmethod successors ((dsp dialogue-search-problem) node)
   (let ((dialogue-so-far (node-state node))
-	(rules (dialogue-search-problem-rules dsp)))
-    (let (extensions)
-      (dolist (player '(p o) extensions)
-	(dolist (stance '(a d))
-	  (let ((next-moves (next-moves dialogue-so-far rules player stance)))
-	    (push-all (mapcar #'(lambda (next-move)
-				  (destructuring-bind (statement index)
-				      next-move
-				    (cons (list player stance index statement)
-					  (freshly-extend-dialogue dialogue-so-far
-								   player
-								   stance
-								   statement
-								   index))))
+	(extensions nil))
+    (dolist (player '(p o) extensions)
+      (dolist (stance '(a d))
+	(let ((next-moves (next-moves dialogue-so-far player stance)))
+	  (push-all (mapcar #'(lambda (next-move)
+				(destructuring-bind (statement index)
+				    next-move
+				  (cons (list player stance index statement)
+					(freshly-extend-dialogue dialogue-so-far
+								 player
+								 stance
+								 statement
+								 index))))
 			    next-moves)
 		    extensions)))))))
 
