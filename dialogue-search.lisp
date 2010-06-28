@@ -51,6 +51,15 @@
 						    :rules rules)))
 	(no-cycles-depth-first-search-for-bottom problem #'equal-dialogues?))
       (error "The initial statement ~A is not a formula according to the given signature ~A" initial-statement signature)))
+
+(defun bounded-dialogue-search (rules initial-statement signature depth)
+  (if (belongs-to-signature? signature initial-statement)
+      (let* ((initial-state (make-dialogue initial-statement signature rules))
+	     (problem (make-dialogue-search-problem :initial-state initial-state
+						    :signature signature
+						    :rules rules)))
+	(depth-limited-search problem depth))
+      (error "The initial statement ~A is not a formula according to the given signature ~A" initial-statement signature)))
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Searching for strategies
