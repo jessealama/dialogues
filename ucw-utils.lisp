@@ -45,4 +45,7 @@
 	   
 	   (apply #'values ,res)))))
 
+(defun html-quote (str)
+  (<:as-is "&ldquo;") (<:as-html str) (<:as-is "&rdquo;"))
+
 ;;; ucw-utils.lisp ends here
