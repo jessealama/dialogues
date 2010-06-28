@@ -133,3 +133,4 @@
   - from a pulldown list,
   - from a pulldown list of formulas together with a pulldown list of
     translations
+* TODO Provide a way to enter TeX code for formulas
