@@ -333,6 +333,18 @@
 	     :body (= current-reference (1- current-position))
 	     :failure-message "Opponent must react to the most recent statement by Proponent."))
 
+(defvar rule-no-repetitions
+  (make-rule
+   :name no-repetitions
+   :condition t
+   :body (every-move #'(lambda (move)
+			 (or (initial-move? move)
+			     (/= (move-reference move) current-reference)
+			     (not (eq (move-stance move) current-stance))
+			     (not (equal-statements? (move-statement move)
+						     current-statement))))
+		     dialogue)))
+
 (defvar d-dialogue-rules (append argumentation-forms 
 				 (list rule-d00-atomic
 				       rule-d00-proponent
@@ -356,7 +368,8 @@
 		rule-d10
 		;; rule-d11
 		;; rule-d12
-		rule-d13)))
+		rule-d13
+		rule-no-repetitions)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Some variants of Felscher's rules
