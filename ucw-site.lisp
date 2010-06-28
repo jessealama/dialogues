@@ -297,6 +297,8 @@
 		(unless (zerop (dialogue-length game))
 		  (let ((open-attacks (open-attack-indices game)))
 		    (<:table 
+		     (<:colgroup :span "2" :align "center")
+		     (<:colgroup :span "2" :align "left")
 		     (<:thead
 		      (<:th "Move")
 		      (<:th "Player")
@@ -697,6 +699,8 @@ signature.")
   (unless (zerop (dialogue-length game))
     (let ((open-attacks (open-attack-indices game)))
       (<:table 
+       (<:colgroup :span "2" :align "center")
+       (<:colgroup :span "2" :align "left")
        (<:thead
 	(<:th "Move")
 	(<:th "Player")
@@ -815,6 +819,8 @@ signature.")
   (let ((game (game self)))
     (unless (zerop (dialogue-length game))
       (<:table
+       (<:colgroup :span "2")
+       (<:colgroup :span "2" :align "left")
        (<:thead
 	(<:th "Move")
 	(<:th "Player")
