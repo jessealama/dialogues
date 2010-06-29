@@ -931,6 +931,8 @@ signature.")
 			     "E rules (D rules + Opponment must always respond immediately)")
 		(<ucw:option :value classical-dialogue-rules
 			     "Classical logic rules")
+		(<ucw:option :value faux-classical-dialogue-rules
+			     "Classical logic rules?")
 		(<ucw:option :value d-dialogue-rules-minus-d11
 			     "D rules, but you may defend against any open attack")
 		(<ucw:option :value d-dialogue-rules-minus-d12
