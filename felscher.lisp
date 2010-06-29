@@ -308,12 +308,12 @@
 (defvar rule-d12
   (make-defensive-rule
    :name d12
-   :body (every-move #'(lambda (move)
-			 (or (initial-move? move)
-			     (attacking-move? move)
-			     (/= (move-reference move)
-				 current-reference)))
-		     dialogue)
+   :body (null (select-moves #'(lambda (move)
+				 (and (not (initial-move? move))
+				      (defensive-move? move)
+				      (= (move-reference move)
+					 current-reference)))
+			     dialogue))
    :failure-message "Attacks may be answered at most once."))
 
 (defvar rule-d13
