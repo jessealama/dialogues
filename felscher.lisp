@@ -373,7 +373,21 @@
 		;; rule-d11
 		;; rule-d12
 		rule-d13
+		rule-e
 		rule-no-repetitions)))
+
+(defvar faux-classical-dialogue-rules
+  (append argumentation-forms
+	  (list rule-d00-atomic
+		rule-d00-proponent
+		rule-d00-opponent
+		rule-d01-composite
+		rule-d02-attack
+		rule-d10
+		;; rule-d11
+		;; rule-d12
+		rule-d13
+		)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Some variants of Felscher's rules
