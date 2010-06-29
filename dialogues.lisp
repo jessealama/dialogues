@@ -357,6 +357,13 @@ attacks which, being symbols, do qualify as terms."
 		      (= (move-reference move) reference)))
 		dialogue))
 
+(defun attacks-referring-to (dialogue reference)
+  (select-moves #'(lambda (move)
+		    (unless (initial-move? move)
+		      (when (attacking-move? move)
+			(= (move-reference move) reference))))
+		dialogue))
+
 (defun closed-attack-indices (dialogue)
   (mapcar #'move-reference (defensive-moves dialogue)))
 
