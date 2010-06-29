@@ -373,8 +373,8 @@
 		;; rule-d11
 		;; rule-d12
 		rule-d13
-		rule-e
-		rule-no-repetitions)))
+		rule-e)))
+		;; rule-no-repetitions)))
 
 (defvar faux-classical-dialogue-rules
   (append argumentation-forms
