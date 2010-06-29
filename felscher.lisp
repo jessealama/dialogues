@@ -341,11 +341,13 @@
    :condition t
    :body (every-move #'(lambda (move)
 			 (or (initial-move? move)
+			     (not (eq (move-player move) current-player))
 			     (/= (move-reference move) current-reference)
 			     (not (eq (move-stance move) current-stance))
 			     (not (equal-statements? (move-statement move)
 						     current-statement))))
-		     dialogue)))
+		     dialogue)
+   :failure-message "You may not make the exact same move (same stance, same reference, same statement) twice."))
 
 (defvar d-dialogue-rules (append argumentation-forms 
 				 (list rule-d00-atomic
