@@ -100,6 +100,13 @@
 	  (null lst)
 	  (length-at-most (cdr lst) (1- n)))))
 
+(defun random-element (lst)
+  (if (null lst)
+      nil
+      (let* ((len (length lst))
+	     (index (random len)))
+	(nth index lst))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Numbers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

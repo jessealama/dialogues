@@ -299,7 +299,8 @@ attacks which, being symbols, do qualify as terms."
 (defun copy-dialogue (dialogue)
   (make-instance 'dialogue
 		 :signature (dialogue-signature dialogue)
-		 :plays (copy-list (dialogue-plays dialogue))))
+		 :plays (copy-list (dialogue-plays dialogue))
+		 :rules (dialogue-rules dialogue)))						   
 
 (defun freshly-extend-dialogue (dialogue player stance statement reference)
   (let ((copy (copy-dialogue dialogue)))

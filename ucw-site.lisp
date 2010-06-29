@@ -247,6 +247,12 @@
 			 :accessor available-moves-list
 			 :initform nil)))
 
+(defcomponent random-opponent-turn-editor (game-component)
+  ())
+
+(defcomponent random-proponent-turn-editor (game-component)
+  ())
+
 (defcomponent available-moves-list (game-component)
   ())
 
@@ -468,7 +474,7 @@
 			     (<:em "(no defenses are available)"))
 		       (<:td (render-opponent-defense first-remaining-defense game game-len)))
 		      (render-multiple-defenses (cdr last-man-tail) 'o))
-		    (render-multiple-defenses last-man-tail 'o)))))))))))	    
+		    (render-multiple-defenses last-man-tail 'o)))))))))))
 
 (defun render-available-moves (game)
   (<:p "Below is a description of all available moves for both
@@ -556,6 +562,234 @@ meaning of the dialogue rules.")
 	       (<:caption :style "caption-side:bottom;"
 	         (<ucw:submit :value "Make a move"
 			      :action $take-action))))))))
+
+(defun render-proponent-attack-against-random-opponent (attack game position)
+  (destructuring-bind (statement reference)
+      attack
+    (let ((game-after-attack
+	   (add-attack-to-dialogue-at-position (copy-dialogue game)
+					       'p
+					       statement
+					       reference
+					       position)))
+      (let* ((next-opponent-attacks (next-attacks game-after-attack 'o))
+	     (next-opponent-defenses (next-defenses game-after-attack 'o))
+	     (all-opponent-moves (append next-opponent-attacks
+					 next-opponent-defenses)))
+	(if (null all-opponent-moves)
+	    (<ucw:a :action (call 'random-opponent-turn-editor
+				  :game game-after-attack)
+		    "Attack move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
+	    (<ucw:a :action 
+		    (let ((random-move (random-element all-opponent-moves)))
+		      (destructuring-bind (statement reference)
+			  random-move
+			(if (member random-move next-opponent-attacks)
+			    (call 'random-opponent-turn-editor
+				  :game
+				  (add-move-to-dialogue-at-position game-after-attack
+								    (make-move 'o statement 'a reference)
+								    (1+ position)))
+			    (call 'random-opponent-turn-editor
+				  :game
+				  (add-move-to-dialogue-at-position game-after-attack
+								    (make-move 'o statement 'd reference)
+								    (1+ position))))))
+			"Attack move " (<:as-html reference) " by asserting " (render statement)))))))
+
+(defun render-opponent-attack-against-random-proponent (attack game position)
+  (destructuring-bind (statement reference)
+      attack
+    (let ((game-after-attack
+	   (add-attack-to-dialogue-at-position (copy-dialogue game)
+					       'o
+					       statement
+					       reference
+					       position)))
+      (let* ((next-proponent-attacks (next-attacks game-after-attack 'p))
+	     (next-proponent-defenses (next-defenses game-after-attack 'p))
+	     (all-proponent-moves (append next-proponent-attacks
+					  next-proponent-defenses)))
+	(if (null all-proponent-moves)
+	    (<ucw:a :action (call 'random-proponent-turn-editor
+				  :game game-after-attack)
+		    "Attack move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
+	    (<ucw:a :action 
+		    (let ((random-move (random-element all-proponent-moves)))
+		      (destructuring-bind (statement reference)
+			  random-move
+			(if (member random-move next-proponent-attacks)
+			    (call 'random-proponent-turn-editor
+				  :game
+				  (add-move-to-dialogue-at-position game-after-attack
+								    (make-move 'p statement 'a reference)
+								    (1+ position)))
+			    (call 'random-proponent-turn-editor
+				  :game
+				  (add-move-to-dialogue-at-position game-after-attack
+								    (make-move 'p statement 'd reference)
+								    (1+ position))))))
+			"Attack move " (<:as-html reference) " by asserting " (render statement)))))))
+
+(defun render-opponent-defense-against-random-proponent (defense game position)
+  (destructuring-bind (statement reference)
+      defense
+    (let ((game-after-defense
+	   (add-defense-to-dialogue-at-position (copy-dialogue game)
+					       'o
+					       statement
+					       reference
+					       position)))
+      (let* ((next-proponent-attacks (next-attacks game-after-defense 'p))
+	     (next-proponent-defenses (next-defenses game-after-defense 'p))
+	     (all-proponent-moves (append next-proponent-attacks
+					  next-proponent-defenses)))
+	(if (null all-proponent-moves)
+	    (<ucw:a :action (call 'random-proponent-turn-editor
+				  :game game-after-defense)
+		    "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
+	    (<ucw:a :action 
+		    (let ((random-move (random-element all-proponent-moves)))
+		      (destructuring-bind (statement reference)
+			  random-move
+			(if (member random-move next-proponent-attacks)
+			    (call 'random-proponent-turn-editor
+				  :game
+				  (add-move-to-dialogue-at-position game-after-defense
+								    (make-move 'p statement 'a reference)
+								    (1+ position)))
+			    (call 'random-proponent-turn-editor
+				  :game
+				  (add-move-to-dialogue-at-position game-after-defense
+								    (make-move 'p statement 'd reference)
+								    (1+ position))))))
+			"Defend against the attack of move " (<:as-html reference) " by asserting " (render statement)))))))
+
+(defun render-proponent-defense-against-random-opponent (defense game position)
+  (destructuring-bind (statement reference)
+      defense
+    (let ((game-after-defense
+	   (add-defense-to-dialogue-at-position (copy-dialogue game)
+						'p
+						statement
+						reference
+						position)))
+      (let* ((next-opponent-attacks (next-attacks game-after-defense 'o))
+	     (next-opponent-defenses (next-defenses game-after-defense 'o))
+	     (all-opponent-moves (append next-opponent-attacks
+					 next-opponent-defenses)))
+	(if (null all-opponent-moves)
+	    (<ucw:a :action (call 'random-opponent-turn-editor
+				  :game game-after-defense)
+		    "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
+	    (<ucw:a :action 
+		    (let ((random-move (random-element all-opponent-moves)))
+		      (destructuring-bind (statement reference)
+			  random-move
+			(if (member random-move next-opponent-attacks)
+			    (call 'random-opponent-turn-editor
+				  :game (add-move-to-dialogue-at-position game-after-defense
+									  (make-move 'o statement 'a reference)
+									  (1+ position)))
+			    (call 'random-opponent-turn-editor
+				  :game (add-move-to-dialogue-at-position game-after-defense
+									  (make-move 'o statement 'd reference)
+									  (1+ position))))))
+		    "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement)))))))
+
+(defun render-proponent-attacks-with-random-opponent (game)
+  (let* ((game-len (dialogue-length game))
+	 (attacks (next-attacks game 'p)))
+    (<:table
+     (<:thead
+      (<:th "Attacks for Proponent"))
+     (<:tbody
+      (if (null attacks)
+	  (<:tr (<:td (<:em "(no attacks are available)")))
+	   (dolist (attack attacks)
+	     (<:tr
+	      (<:td (render-proponent-attack-against-random-opponent attack
+								     game
+								     game-len)))))))))
+
+(defun render-proponent-defenses-with-random-opponent (game)
+  (let* ((game-len (dialogue-length game))
+	 (defenses (next-defenses game 'p)))
+    (<:table
+     (<:thead
+      (<:th "Defenses for Proponent"))
+     (<:tbody
+      (if (null defenses)
+	  (<:tr (<:td (<:em "(no defenses are available)")))
+	   (dolist (defense defenses)
+	     (<:tr
+	      (<:td (render-proponent-defense-against-random-opponent defense
+								     game
+								     game-len)))))))))
+
+(defun render-opponent-attacks-with-random-proponent (game)
+  (let* ((game-len (dialogue-length game))
+	 (attacks (next-attacks game 'o)))
+    (<:table
+     (<:thead
+      (<:th "Attacks for Opponent"))
+     (<:tbody
+      (if (null attacks)
+	  (<:tr (<:td (<:em "(no attacks are available)")))
+	   (dolist (attack attacks)
+	     (<:tr
+	      (<:td (render-opponent-attack-against-random-proponent attack
+								     game
+								     game-len)))))))))
+
+(defun render-opponent-defenses-with-random-proponent (game)
+  (let* ((game-len (dialogue-length game))
+	 (defenses (next-defenses game 'o)))
+    (<:table
+     (<:thead
+      (<:th "Defenses for Opponent"))
+     (<:tbody
+      (if (null defenses)
+	  (<:tr (<:td (<:em "(no defenses are available)")))
+	   (dolist (defense defenses)
+	     (<:tr
+	      (<:td (render-opponent-defense-against-random-proponent defense
+								     game
+								     game-len)))))))))
+
+(defun render-available-proponent-moves (game)
+  (<:p "Below is a description of all available moves for Proponent.")
+  (render-proponent-attacks-with-random-opponent game)
+  (<:br)
+  (render-proponent-defenses-with-random-opponent game)
+  (<:p (<:em "Note:") " The list of moves available to each player in
+the following list is determined by the set of subformulas of all
+formulas played so far. When using the usual rules for propositional
+dialogue games (Felscher's D-rules and E-rules, for example), this is
+sufficient: every assertion of a dialogue game is a subformula of the
+initial formula, or is one of the symbolic
+attacks (" (<:as-is "&and;<sub>L</sub>, &and;<sub>R</sub>, and
+?)") ". If one modifies the rules, this structural fact about formulas
+occuring in a dialogue game may no longer hold, so that the list below
+may no longer be an exhaustive enumeration of all formulas that can be
+asserted in the next move."))
+
+(defun render-available-opponent-moves (game)
+  (<:p "Below is a description of all available moves for Proponent.")
+  (render-opponent-attacks-with-random-proponent game)
+  (<:br)
+  (render-opponent-defenses-with-random-proponent game)
+  (<:p (<:em "Note:") " The list of moves available to each player in
+the following list is determined by the set of subformulas of all
+formulas played so far. When using the usual rules for propositional
+dialogue games (Felscher's D-rules and E-rules, for example), this is
+sufficient: every assertion of a dialogue game is a subformula of the
+initial formula, or is one of the symbolic
+attacks (" (<:as-is "&and;<sub>L</sub>, &and;<sub>R</sub>, and
+?)") ". If one modifies the rules, this structural fact about formulas
+occuring in a dialogue game may no longer hold, so that the list below
+may no longer be an exhaustive enumeration of all formulas that can be
+asserted in the next move."))
 
 (defun render-rewind-form (game)
   (let (rewind-point)
@@ -661,6 +895,46 @@ signature.")
       ;; (render-rule-editor game)
       (<:h1 "...or quit.")
       (render-quit-form)))
+
+(defmethod render ((self random-opponent-turn-editor))
+  (let* ((game (game self))
+	 (game-len (dialogue-length game)))
+    (<:h1 "The game so far")
+    (<:div :style "border:1px solid"
+	   (render game))
+    (<:h1 "Choose from the available moves...")
+    (render-available-proponent-moves game)
+    (<:h1 "...or enter your move manually...")
+    (render-manual-move-entry-form game)
+    (when (> game-len 1)
+      (<:h1 "...or rewind the game...")
+      (render-rewind-form game))
+    ;; (<:h1 "...or edit the signature...")
+    ;; (render-signature-editor game)
+    ;; (<:h1 "...or edit the dialogue rules...")
+    ;; (render-rule-editor game)
+    (<:h1 "...or quit.")
+    (render-quit-form)))  
+
+(defmethod render ((self random-proponent-turn-editor))
+  (let* ((game (game self))
+	 (game-len (dialogue-length game)))
+    (<:h1 "The game so far")
+    (<:div :style "border:1px solid"
+	   (render game))
+    (<:h1 "Choose from the available moves...")
+    (render-available-opponent-moves game)
+    (<:h1 "...or enter your move manually...")
+    (render-manual-move-entry-form game)
+    (when (> game-len 1)
+      (<:h1 "...or rewind the game...")
+      (render-rewind-form game))
+    ;; (<:h1 "...or edit the signature...")
+    ;; (render-signature-editor game)
+    ;; (<:h1 "...or edit the dialogue rules...")
+    ;; (render-rule-editor game)
+    (<:h1 "...or quit.")
+    (render-quit-form)))  
 
 (defun render-open-attack (play move-number)
   (with-slots (player statement stance reference)
@@ -849,17 +1123,17 @@ signature.")
   ())
 
 (defmethod render ((self formula-entry-component))
-  (let (input-formula selected-formula selected-rules selected-translation)
-  (symbol-macrolet 
-      (($take-action 
+  (let (input-formula
+	selected-formula 
+	selected-rules
+	selected-translation
+	selected-play-style)
+  (symbol-macrolet
+      (($formula
 	(let ((sig (signature self)))
 	  (if (empty-string? input-formula)
 	      (if (belongs-to-signature? sig selected-formula)
-		  (call 'turn-editor
-			:game (make-dialogue (funcall selected-translation
-						      selected-formula)
-					     sig
-					     selected-rules))
+		  selected-formula
 		  (call 'formula-corrector
 			:text selected-formula
 			:signature sig))
@@ -869,21 +1143,53 @@ signature.")
 						      :text input-formula
 						      :signature sig)))))
 		(if (belongs-to-signature? sig parsed-formula)
-		    (call 'turn-editor
-			  :game (make-dialogue 
-				 (funcall selected-translation
-					  parsed-formula)
-				 sig
-				 selected-rules))
+		    parsed-formula
 		    (call 'formula-corrector
 			  :text parsed-formula
-			  :signature sig)))))))
+			  :signature sig))))))
+       ($take-action
+	(ecase selected-play-style
+	  (play-as-both-proponent-and-opponent
+	   (call 'turn-editor
+		 :game (make-dialogue (funcall selected-translation $formula)
+				      sig
+				      selected-rules)))
+	  (play-as-proponent-random-opponent
+	   (call 'random-opponent-turn-editor
+		 :game (let ((initial-dialogue
+			      (make-dialogue (funcall selected-translation $formula)
+					     sig
+					     selected-rules)))
+			 (let* ((next-opponent-attacks (next-attacks initial-dialogue 'o))
+				(next-opponent-defenses (next-defenses initial-dialogue 'o))
+				(all-opponent-moves (append next-opponent-attacks
+							    next-opponent-defenses)))
+			   (if (null all-opponent-moves)
+			       (call 'random-opponent-turn-editor
+				     :game initial-dialog)
+			       (let ((random-move (random-element all-opponent-moves)))
+				 (destructuring-bind (statement reference)
+				     random-move
+				   (if (member random-move next-opponent-attacks)
+				       (call 'random-opponent-turn-editor
+					     :game (add-move-to-dialogue-at-position initial-dialogue
+										     (make-move 'o statement 'a reference)
+										     1))
+				       (call 'random-opponent-turn-editor
+					     :game (add-move-to-dialogue-at-position initial-dialogue
+										     (make-move 'o statement 'd reference)
+										     1))))))))))
+	  (play-as-opponent-ranom-proponent
+	   (call 'random-proponent-turn-editor
+		 :game (make-dialogue (funcall selected-translation $formula)
+				      sig
+				      selected-rules))))))
     (let ((sig (signature self)))
       (<ucw:form :method "POST"
 		 :action $take-action
       (<:table :style "border:1px solid;"
-       (<:caption :style "caption-side:bottom;"
-		  (<:submit :value "Let's play"))
+      (<:caption :style "caption-side:bottom;"
+		 (<:submit :value "Let's play"))
        (<:tbody :style "border:1px solid;"
        (<:tr :style "background-color:#FF6600;"
 	(<:td "The signature that will be used:")
@@ -914,8 +1220,8 @@ signature.")
 			     "Identity function (no change)")
 		(<ucw:option :value #'gödel-gentzen
 			     "Gödel-Gentzen negative translation")
-		(<ucw:option :value #'kuroda
-			     "Kuroda negative translation")
+		;; (<ucw:option :value #'kuroda
+		;; 	     "Kuroda negative translation")
 		(<ucw:option :value #'dn-all-subformulas
 			      "Double negate all subformulas")
 		(<ucw:option :value #'double-negate
@@ -929,8 +1235,8 @@ signature.")
 			     "D rules (basic rules for intuitionistic logic)")
 		(<ucw:option :value e-dialogue-rules
 			     "E rules (D rules + Opponment must always respond to the immediately previous move)")
-		;; (<ucw:option :value faux-classical-dialogue-rules
-		;; 	     "Nearly (?) classical logic (drop Felscher's D11 and D12)")
+		(<ucw:option :value faux-classical-dialogue-rules
+		 	     "Nearly (?) classical logic (drop Felscher's D11 and D12)")
 		(<ucw:option :value classical-dialogue-rules
 			     "Classical logic rules (drop Felscher's D11 and D12, but add rule E)")
 
@@ -939,7 +1245,18 @@ signature.")
 		(<ucw:option :value d-dialogue-rules-minus-d12
 			     "D rules, but attacks may be answered any number of times")
 		(<ucw:option :value d-dialogue-rules-literal-d10
-			     "D rules, but literals have a similar status as atomic formulas")))))
+			     "D rules, but Proponent may assert an atomic formula only if Opponent has asserted the corresponding literal"))))
+       (<:tr :style "background-color:#99CC33;"
+         (<:td "Choose the style of play:")
+	 (<:td (<ucw:select :id "selected-play-style"
+			    :size 1
+			    :accessor selected-play-style
+	         (<ucw:option :value 'play-as-both-proponent-and-opponent
+			      "Play as both proponent and opponent")
+		 (<ucw:option :value 'play-as-proponent-random-opponent
+			      "Play as Proponent (Opponent will choose its moves randomly)")
+		 (<ucw:option :value 'play-as-opponent-ranom-proponent
+			      "Play as Opponent (Propnent will choose its moves randomly)"))))))
        (<:tfoot
 	(<:tr
 	  (<:td :colspan "2" (<:em (<:b "About the signature:")) " You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)  You will not be able to edit the signature once the game begins."))
@@ -952,7 +1269,7 @@ identity translation, so that whatever formula is chosen (or whatever
 formula is entered into the text box) will be, verbatim, the formula
 with which the game begins."))
 	(<:tr
-	 (<:td :colspan "2" (<:em (<:b "About the rules:")) " The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985.  They probably were introduced earlier.  You will be able to alter your choice (in a limited way) after the game has begun.")))))))))
+	 (<:td :colspan "2" (<:em (<:b "About the rules:")) " The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985.  They probably were introduced earlier.  You will be able to alter your choice (in a limited way) after the game has begun."))))))))
 
 (defmethod render ((self start-game-component))
   (with-slots ((sig signature))
