@@ -168,7 +168,7 @@
   `(("Peirce's formula" "peirce-formula" ,peirce-formula)
     ("Excluded middle" "excluded-middle" ,excluded-middle)
     ("Weak excuded middle" "weak-excluded-middle" ,weak-excluded-middle)
-    ("Dummet's formula" "dummett-formula" ,dummett-formula)
+    ("Dummett's formula" "dummett-formula" ,dummett-formula)
     ("Double negation introduction" "double-negation-intro" ,double-negation-intro)
     ("Double negation elimination" "double-negation-elim" ,double-negation-elimination)
     ; ("Markov's formula" "markov-formula" ,markov-formula)
