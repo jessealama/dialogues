@@ -320,11 +320,13 @@
   (make-offensive-rule
    :name d13
    :condition (eq current-player 'o)
-   :body (every-move #'(lambda (move)
-			 (or (proponent-move? move)
-			     (/= (move-reference move)
-				 current-reference)))
-		     dialogue)
+   :body (null (select-moves #'(lambda (move)
+				 (and (not (initial-move? move))
+				      (opponent-move? move)
+				      (attacking-move? move)
+				      (= (move-reference move)
+					 current-reference)))
+			     dialogue))
    :failure-message "A P-assertion may be attacked at most once."))
 
 (defvar rule-e
