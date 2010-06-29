@@ -79,10 +79,10 @@
 			  (move-statement move-2))))
 
 (defun attacking-move? (move)
-  (eq (move-stance move) 'A))
+  (eq (move-stance move) 'a))
 
 (defun defensive-move? (move)
-  (eq (move-stance move) 'D))
+  (eq (move-stance move) 'd))
 
 (defun initial-move? (move)
   (and (null (move-stance move))
