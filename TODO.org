@@ -134,3 +134,11 @@
   - from a pulldown list of formulas together with a pulldown list of
     translations
 * TODO Provide a way to enter TeX code for formulas
+* TODO Allow entering greek formulas in the signature
+  phi, psi, theta, chi, etc.
+* TODO Allow interactive play: computer as Opponent (or as Proponent).
+  Low-hanging fruit: just choose randomly when multiple choices are
+  available.
+* TODO Playing online with other human players.
+* TODO Define a function for checking for fixed-points.
+  What's the definition, and how to I implement it?
