@@ -1191,10 +1191,10 @@ signature.")
       (<:caption :style "caption-side:bottom;"
 		 (<:submit :value "Let's play"))
        (<:tbody :style "border:1px solid;"
-       (<:tr :style "background-color:#FF6600;"
+       (<:tr :style "background-color:#F0B2E0;"
 	(<:td "The signature that will be used:")
 	(<:td (render sig)))
-       (<:tr :style "background-color:#33CCFF;"
+       (<:tr :style "background-color:#F063CD;"
 	(<:td "Enter a formula or choose a famous formula from the menu:")
 	(<:td
 	 (<:table
@@ -1211,7 +1211,7 @@ signature.")
 			 famous-formula
 		       (declare (ignore short-name))
 		       (<ucw:option :value formula (<:as-html long-name))))))))))
-       (<:tr :style "background-color:#CC99FF;"
+       (<:tr :style "background-color:#A7007D;"
 	(<:td "Select a translation to be applied to the selected formula:")
 	(<:td (<ucw:select :id "selected-translation"
 			   :size 1
@@ -1226,7 +1226,7 @@ signature.")
 			      "Double negate all subformulas")
 		(<ucw:option :value #'double-negate
 			     "Double negate the whole formula"))))
-       (<:tr :style "background-color:#FF6699;"
+       (<:tr :style "background-color:#7B942E;"
 	(<:td "Choose the dialogue rules to be used during the game:")
 	(<:td (<ucw:select :id "selected-rules"
 			   :size 1
@@ -1246,7 +1246,7 @@ signature.")
 			     "D rules, but attacks may be answered any number of times")
 		(<ucw:option :value d-dialogue-rules-literal-d10
 			     "D rules, but Proponent may assert an atomic formula only if Opponent has asserted the corresponding literal"))))
-       (<:tr :style "background-color:#99CC33;"
+       (<:tr :style "background-color:#A3D800;"
          (<:td "Choose the style of play:")
 	 (<:td (<ucw:select :id "selected-play-style"
 			    :size 1
