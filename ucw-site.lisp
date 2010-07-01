@@ -1108,7 +1108,7 @@ signature.")
 		      " are closed attacks; rows in "
 		      (<:span :style "background-color:#CCCCFF"
 			      "blue")
-		      " are open attacks.  (Defensive moves are not colored.) A dagger " (<:as-is "(&#8224;)") " in the Notes column indicates that alternative moves were available; follow the link to see them."))))))))
+		      " are open attacks.  (Defensive moves are not colored.) A dagger " (<:as-is "(&#8224;)") " in the Notes column indicates that alternative moves were available; follow the link to see them and rewind the game to explore an alternative course."))))))))
 
 (defun render-game-with-highlighted-alternative (game alternative-move-number play-style)
   (unless (zerop (dialogue-length game))
