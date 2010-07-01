@@ -346,13 +346,18 @@
 (defun render-attack (attack player game position)
   (destructuring-bind (statement reference)
       attack
-    (<ucw:a
-     :action (add-attack-to-dialogue-at-position game
-						 player
-						 statement
-						 reference
-						 position)
-     "Attack move " (<:as-html reference) " by asserting " (render statement))))
+    (let* ((statement-str (render-plainly statement))
+	   (title (format nil "Attack move ~d by asserting ~A"
+			  reference
+			  statement-str)))
+      (<ucw:a
+       :action (add-attack-to-dialogue-at-position game
+						   player
+						   statement
+						   reference
+						   position)
+       :title title
+       "Attack move " (<:as-html reference) " by asserting " (render statement)))))
 
 (defun render-proponent-attack (attack game position)
   (render-attack attack 'p game position))
@@ -363,14 +368,18 @@
 (defun render-defense (defense player game position)
   (destructuring-bind (statement reference)
       defense
-     (<ucw:a
-      :action (add-defense-to-dialogue-at-position game
-						   player
-						   statement
-						   reference
-						   position)
-      ; :title (<:as-html "Defend against the attack of move " reference " by asserting " (render-plainly statement))
-      "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))
+    (let* ((statement-str (render-plainly statement))
+	   (title (format nil "Defend against the attack of move ~d by asserting ~A" 
+			  reference
+			  statement-str)))
+      (<ucw:a
+       :action (add-defense-to-dialogue-at-position game
+						    player
+						    statement
+						    reference
+						    position)
+       :title title
+       "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement)))))
 
 (defun render-proponent-defense (defense game position)
   (render-defense defense 'p game position))
@@ -566,21 +575,25 @@ meaning of the dialogue rules.")
 (defun render-proponent-attack-against-random-opponent (attack game position)
   (destructuring-bind (statement reference)
       attack
-    (let ((game-after-attack
-	   (add-attack-to-dialogue-at-position (copy-dialogue game)
-					       'p
-					       statement
-					       reference
-					       position)))
-      (let* ((next-opponent-attacks (next-attacks game-after-attack 'o))
-	     (next-opponent-defenses (next-defenses game-after-attack 'o))
-	     (all-opponent-moves (append next-opponent-attacks
-					 next-opponent-defenses)))
+    (let* ((game-after-attack
+	    (add-attack-to-dialogue-at-position (copy-dialogue game)
+						'p
+						statement
+						reference
+						position))
+	   (statement-str (render-plainly statement))
+	   (title (format nil "Attack move ~d by asserting ~A"
+			  reference
+			  statement-str))			  
+	   (next-opponent-attacks (next-attacks game-after-attack 'o))
+	   (next-opponent-defenses (next-defenses game-after-attack 'o))
+	   (all-opponent-moves (append next-opponent-attacks
+				       next-opponent-defenses)))
 	(if (null all-opponent-moves)
 	    (<ucw:a :action (call 'turn-editor
 				  :play-style 'play-as-proponent-random-opponent
 				  :game game-after-attack)
-		    ; :title (<:as-html "Attack move " reference " by asserting " (render-plainly statement) " (you would win the game)")
+		    :title title
 		    "Attack move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
 	    (<ucw:a :action 
 		    (let ((random-move (random-element all-opponent-moves)))
@@ -599,27 +612,31 @@ meaning of the dialogue rules.")
 				  (add-move-to-dialogue-at-position game-after-attack
 								    (make-move 'o statement 'd reference)
 								    (1+ position))))))
-		    ; :title (<:as-html "Attack move " reference " by asserting " (render-plainly statement))
-			"Attack move " (<:as-html reference) " by asserting " (render statement)))))))
+		    :title title
+		    "Attack move " (<:as-html reference) " by asserting " (render statement))))))
 
 (defun render-opponent-attack-against-random-proponent (attack game position)
   (destructuring-bind (statement reference)
       attack
-    (let ((game-after-attack
-	   (add-attack-to-dialogue-at-position (copy-dialogue game)
-					       'o
-					       statement
-					       reference
-					       position)))
-      (let* ((next-proponent-attacks (next-attacks game-after-attack 'p))
-	     (next-proponent-defenses (next-defenses game-after-attack 'p))
-	     (all-proponent-moves (append next-proponent-attacks
-					  next-proponent-defenses)))
+    (let* ((game-after-attack
+	    (add-attack-to-dialogue-at-position (copy-dialogue game)
+						'o
+						statement
+						reference
+						position))
+	   (statement-str (render-plainly statement))
+	   (title (format nil "Attack move ~d by asserting ~A" 
+			  reference
+			  statement-str))
+	   (next-proponent-attacks (next-attacks game-after-attack 'p))
+	   (next-proponent-defenses (next-defenses game-after-attack 'p))
+	   (all-proponent-moves (append next-proponent-attacks
+					next-proponent-defenses)))
 	(if (null all-proponent-moves)
 	    (<ucw:a :action (call 'turn-editor
 				  :play-style 'play-as-opponent-random-proponent
 				  :game game-after-attack)
-		    ; :title (<:as-html "Attack move " reference " by asserting " (render-plainly statement) " (you would win the game)")
+		    :title title
 		    "Attack move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
 	    (<ucw:a :action 
 		    (let ((random-move (random-element all-proponent-moves)))
@@ -638,19 +655,23 @@ meaning of the dialogue rules.")
 				  (add-move-to-dialogue-at-position game-after-attack
 								    (make-move 'p statement 'd reference)
 								    (1+ position))))))
-		    ; :title (<:as-html "Attack move " reference " by asserting " (render-plainly statement))
-			"Attack move " (<:as-html reference) " by asserting " (render statement)))))))
+		    :title title
+		    "Attack move " (<:as-html reference) " by asserting " (render statement))))))
 
 (defun render-opponent-defense-against-random-proponent (defense game position)
   (destructuring-bind (statement reference)
       defense
-    (let ((game-after-defense
-	   (add-defense-to-dialogue-at-position (copy-dialogue game)
-					       'o
-					       statement
-					       reference
-					       position)))
-      (let* ((next-proponent-attacks (next-attacks game-after-defense 'p))
+    (let* ((game-after-defense
+	    (add-defense-to-dialogue-at-position (copy-dialogue game)
+						 'o
+						 statement
+						 reference
+						 position))
+	     (statement-str (render-plainly statement))
+	     (title (format nil "Defend against the attack of move ~d by asserting ~A"
+			    reference
+			    statement-str))
+	     (next-proponent-attacks (next-attacks game-after-defense 'p))
 	     (next-proponent-defenses (next-defenses game-after-defense 'p))
 	     (all-proponent-moves (append next-proponent-attacks
 					  next-proponent-defenses)))
@@ -658,7 +679,7 @@ meaning of the dialogue rules.")
 	    (<ucw:a :action (call 'turn-editor
 				  :play-style 'play-as-opponent-random-proponent
 				  :game game-after-defense)
-		    ; :title (<:as-html "Defend against the attack of move " reference " by asserting " (render-plainly statement) " (you would win the game)")
+		    :title title
 		    "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
 	    (<ucw:a :action 
 		    (let ((random-move (random-element all-proponent-moves)))
@@ -677,27 +698,31 @@ meaning of the dialogue rules.")
 				  (add-move-to-dialogue-at-position game-after-defense
 								    (make-move 'p statement 'd reference)
 								    (1+ position))))))
-		    ; :title (<:as-html "Defend against the attack of move " reference " by asserting " (render-plainly statement))
-			"Defend against the attack of move " (<:as-html reference) " by asserting " (render statement)))))))
+		    :title title
+		    "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))))
 
 (defun render-proponent-defense-against-random-opponent (defense game position)
   (destructuring-bind (statement reference)
       defense
-    (let ((game-after-defense
-	   (add-defense-to-dialogue-at-position (copy-dialogue game)
-						'p
-						statement
-						reference
-						position)))
-      (let* ((next-opponent-attacks (next-attacks game-after-defense 'o))
-	     (next-opponent-defenses (next-defenses game-after-defense 'o))
-	     (all-opponent-moves (append next-opponent-attacks
-					 next-opponent-defenses)))
+    (let* ((game-after-defense
+	    (add-defense-to-dialogue-at-position (copy-dialogue game)
+						 'p
+						 statement
+						 reference
+						 position))
+	   (statement-str (render-plainly statement))
+	   (title (format nil "Defend against the attack of move ~d by asserting ~A"
+			  reference
+			  statement-str))
+	   (next-opponent-attacks (next-attacks game-after-defense 'o))
+	   (next-opponent-defenses (next-defenses game-after-defense 'o))
+	   (all-opponent-moves (append next-opponent-attacks
+				       next-opponent-defenses)))
 	(if (null all-opponent-moves)
 	    (<ucw:a :action (call 'turn-editor
 				  :play-style 'play-as-proponent-random-opponent
 				  :game game-after-defense)
-		    ; :title (<:as-html "Defend against the attack of move " reference " by asserting " (render-plainly statement) " (you would win the game)")
+		    :title title
 		    "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
 	    (<ucw:a :action 
 		    (let ((random-move (random-element all-opponent-moves)))
@@ -714,8 +739,8 @@ meaning of the dialogue rules.")
 				  :game (add-move-to-dialogue-at-position game-after-defense
 									  (make-move 'o statement 'd reference)
 									  (1+ position))))))
-		    ; :title (<:as-html "Defend against the attack of move " reference " by asserting " (render-plainly statement))
-		    "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement)))))))
+		    :title title
+		    "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))))
 
 (defun render-proponent-attacks-with-random-opponent (game)
   (let* ((game-len (dialogue-length game))
@@ -1147,57 +1172,61 @@ signature.")
 (defmethod render-plainly ((statement term))
   (let ((func-sym (function-symbol statement))
 	(args (arguments statement)))
-    (<:as-html func-sym)
-    (<:as-is "(")
     (if (null args)
-	(<:as-is ")")
-	(let ((first (car args)))
-	  (render first)
-	  (when (not (null (cdr args)))
-	    (dolist (arg args)
-	      (<:as-is ",")
-	      (render arg)))
-	  (<:as-is ")")))))
+	(format nil "~A" func-sym)
+	(if (null (cdr args))
+	    (format nil "~A(~A)"
+		    func-sym
+		    (render-plainly (car args)))
+	    (funcall #'concat-strings
+		     (format nil "~A" func-sym)
+		     "("
+		     (render-plainly (car args))
+		     (apply #'concat-strings
+			    (mapcar #'(lambda (arg)
+					(format ",~A" (render-plainly arg)))
+				    (cdr args)))
+		     ")")))))
 
 (defmethod render ((sa (eql attack-left-conjunct)))
   (<:as-is "&and;")
   (<:sub "L"))
 
 (defmethod render-plainly ((sa (eql attack-left-conjunct)))
-  (<:as-is "&and;(L)"))
+  "&and;(L)")
 
 (defmethod render ((sa (eql attack-right-conjunct)))
   (<:as-is "&and;")
   (<:sub "R"))
 
 (defmethod render-plainly ((sa (eql attack-right-conjunct)))
-  (<:as-is "&and;(R)"))
+  "&and;(R)")
 
 (defmethod render ((sa (eql which-instance?)))
   (<:as-is "?"))
 
 (defmethod render-plainly ((sa (eql which-instance?)))
-  (<:as-is "?"))
+  "?")
 
 (defmethod render ((sa (eql which-disjunct?)))
   (<:as-is "?"))
 
-(defmethod render ((sa (eql which-disjunct?)))
-  (<:as-is "?"))
+(defmethod render-plainly ((sa (eql which-disjunct?)))
+  "?")	   
 
 (defmethod render :around ((formula unary-connective-formula))
   (call-next-method)
   (render (argument formula)))
 
 (defmethod render-plainly :around ((formula unary-connective-formula))
-  (call-next-method)
-  (render (argument formula)))
+  (let ((body (call-next-method)))
+    (concatenate 'string body (render-plainly (argument formula)))))
 
 (defmethod render ((neg negation))
   (<:as-is "&not;"))
 
 (defmethod render-plainly ((neg negation))
-  (<:as-is "&not;"))
+  "&not;")
 
 (defmethod render :around ((formula binary-connective-formula))
   (<:as-html "(")
@@ -1209,13 +1238,14 @@ signature.")
   (<:as-html ")"))
 
 (defmethod render-plainly :around ((formula binary-connective-formula))
-  (<:as-html "(")
-  (render (lhs formula))
-  (<:as-html " ")
-  (call-next-method)
-  (<:as-html " ")
-  (render (rhs formula))
-  (<:as-html ")"))
+  (concatenate 'string
+	       "("
+	       (render-plainly (lhs formula))
+	       " "
+	       (call-next-method)
+	       " "
+	       (render-plainly (rhs formula))
+	       ")"))
 
 (defmethod render :around ((gen generalization))
   (call-next-method)
@@ -1225,47 +1255,48 @@ signature.")
   (<:as-html "]"))
 
 (defmethod render-plainly :around ((gen generalization))
-  (call-next-method)
-  (<:as-html (bound-variable gen))
-  (<:as-html "[")
-  (render (matrix gen))
-  (<:as-html "]"))
+  (concatenate 'string
+	       (call-next-method)
+	       (render-plainly (bound-variable gen))
+	       "["
+	       (render-plainly (matrix gen))
+	       "]"))
 
 (defmethod render ((formula binary-conjunction))
   (<:as-is "&and;"))
 
 (defmethod render-plainly ((formula binary-conjunction))
-  (<:as-is "&and;"))
+  "&and;")
 
 (defmethod render ((formula binary-disjunction))
   (<:as-is "&or;"))
 
 (defmethod render-plainly ((formula binary-disjunction))
-  (<:as-is "&or;"))
+  "&or;")
 
 (defmethod render ((formula implication))
   (<:as-is "&rarr;"))
 
 (defmethod render-plainly ((formula implication))
-  (<:as-is "&rarr;"))
+  "&rarr;")
 
 (defmethod render ((formula equivalence))
    (<:as-is "&harr;"))
 
 (defmethod render-plainly ((formula equivalence))
-   (<:as-is "&harr;"))
+  "&harr;")
 
 (defmethod render ((formula universal-generalization))
   (<:as-is "&forall;"))
 
 (defmethod render-plainly ((formula universal-generalization))
-  (<:as-is "&forall;"))
+  "&forall;")
 
 (defmethod render ((formula existential-generalization))
   (<:as-is "&exist;"))
 
 (defmethod render-plainly ((formula existential-generalization))
-  (<:as-is "&exist;"))
+  "&exist;")
 
 (defmethod render ((formula atomic-formula))
   (let ((pred (predicate formula))
@@ -1284,16 +1315,22 @@ signature.")
 (defmethod render-plainly ((formula atomic-formula))
   (let ((pred (predicate formula))
 	(args (arguments formula)))
-    (<:as-html pred)
-    (unless (null args)
-      (<:as-is "(")
-      (let ((first (car args)))
-	(render first)
-	(when (not (null (cdr args)))
-	  (dolist (arg args)
-	    (<:as-is ",")
-	    (render arg)))
-	(<:as-is ")")))))
+    (if (null args)
+	(format nil "~A" pred)
+	(if (null (cdr args))
+	    (format nil "~A(~A)"
+		    pred
+		    (render-plainly (car args)))
+	    (funcall #'concat-strings
+		     (format nil "~A" pred)
+		     "("
+		     (render-plainly (car args))
+		     (apply #'concatenate
+			    'string
+			    (mapcar #'(lambda (arg)
+					(format ",~A" (render-plainly arg)))
+				    (cdr args)))
+		     ")")))))
 
 (defcomponent start-game-component ()
   ((formula-entry-component :component t
