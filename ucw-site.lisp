@@ -312,20 +312,24 @@
 			 for i from 0 upto len
 			 do
 			   (if (attacking-move? play)
-			       (if (member i open-attacks)
-				   (render-open-attack-in-game play game i nil play-style)
-				   (render-closed-attack-in-game play game i nil play-style))
-			       (render-defensive-move-in-game play game i nil play-style)))
+			       (render-attack-in-game 
+				play game i
+				:play-style play-style
+				:attack-is-closed (not (member i open-attacks)))
+			       (render-defensive-move-in-game 
+				play game i
+				:play-style play-style)))
 		      (<:tr :style "background-color:#FF3333;"
-			    (<:td (<:as-html game-len))
-			    (<:td (<:as-html player))
-			    (<:td (render statement))
-			    (<:td "[" (<:as-html stance) "," (<:as-html reference) "]")
+			    (<:td :align "left" (<:as-html game-len))
+			    (<:td :align "center" (<:as-html player))
+			    (<:td :align "left" (render statement))
+			    (<:td :align "right"
+				  (<:as-html "[" stance "," reference "]"))
 			    (<:td)))
 		    (<:tfoot
 		      (<:tr 
 		       (<:td :align "center"
-			     :colspan "4"
+			     :colspan "5"
 			     (<:em "Rows in " (<:span :style "background-color:#CCCCCC"
 						      "grey")
 				   " are closed attacks; rows in "
@@ -1017,10 +1021,12 @@ signature.")
       (<:td :align "left" (<:as-html move-number))
       (<:td :align "center" (<:as-html player))
       (if move-is-alternative
-	  (<:td :style (format nil "border:3px solid #~S;"
-			       alternative-attack-color)
-		:align "left"
-		(render statement))
+	  (let ((cell-style (concatenate 'string background-style
+					 (format nil "border:3px solid #~S;"
+						 alternative-attack-color))))
+	    (<:td :style cell-style
+		  :align "left"
+		  (render statement)))
 	  (<:td :align "left" (render statement)))
       (if (zerop move-number)
 	  (<:td :align "right" (<:em "(initial move)"))
@@ -1039,9 +1045,13 @@ signature.")
 			       :actual-play play
 			       :move-number move-number)
 			 :title "There were alternatives to this move"
-			 (<:as-is "&#8224;"))))))))))
+			 (<:as-is "&#8224;")))))
+	  (<:td))))))
 
-(defun render-defensive-move-in-game (play game move-number indicate-alternatives play-style &key (move-is-alternative))
+(defun render-defensive-move-in-game (play game move-number 
+				      &key move-is-alternative
+				           indicate-alternatives
+				           play-style)
   (with-slots (player statement stance reference)
       play
     (<:tr
@@ -1068,7 +1078,8 @@ signature.")
 			     :actual-play play
 			     :move-number move-number)
 		       :title "There were alternatives to this move"
-		       (<:as-is "&#8224;")))))))))
+		       (<:as-is "&#8224;")))))
+	  (<:td)))))
 
 (defun render-game (game play-style &key (indicate-alternatives nil))
   (unless (zerop (dialogue-length game))
@@ -1098,7 +1109,10 @@ signature.")
 					    :indicate-alternatives indicate-alternatives
 					    :play-style play-style
 					    :attack-is-closed nil))
-		 (render-defensive-move-in-game play game i indicate-alternatives play-style))))
+		 (render-defensive-move-in-game
+		  play game i
+		  :indicate-alternatives indicate-alternatives
+		  :play-style play-style))))
        (<:tfoot
 	(<:tr 
 	  (<:td :align "center"
@@ -1129,18 +1143,15 @@ signature.")
 	   for i from 0 upto len
 	   do
 	     (if (attacking-move? play)
-		 (if (member i open-attacks)
-		     (if (= i alternative-move-number)
-			 (render-open-attack-in-game play game i nil play-style
-						     :move-is-alternative t)
-			 (render-open-attack-in-game play game i nil play-style))
-		     (if (= i alternative-move-number)
-			 (render-closed-attack-in-game play game i nil play-style
-						       :move-is-alternative t)
-			 (render-closed-attack-in-game play game i nil play-style)))
-		 (if (= i alternative-move-number)
-		     (render-defensive-move-in-game play game i nil play-style :move-is-alternative t)
-		     (render-defensive-move-in-game play game i nil play-style)))))
+		 (render-attack-in-game
+		  play game i
+		  :play-style play-style
+		  :attack-is-closed (member i open-attacks)
+		  :move-is-alternative (= i alternative-move-number))
+		 (render-defensive-move-in-game 
+		  play game i
+		  :play-style play-style 
+		  :move-is-alternative (= i alternative-move-number)))))
        (<:tfoot
 	(<:tr 
 	  (<:td :align "center"
