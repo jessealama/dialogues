@@ -98,6 +98,9 @@
 		 :plays (subseq (dialogue-plays dialogue) 0 cutoff)
 		 :rules (dialogue-rules dialogue)))
 
+(defun copy-and-truncate-dialogue (dialogue cutoff)
+  (truncate-dialogue (copy-dialogue dialogue) cutoff))
+
 (defvar *prompt* "> ")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -519,21 +522,49 @@ attacks which, being symbols, do qualify as terms."
 ;;; Extensions of dialogues
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun next-moves-at-position (dialogue player stance position)
+  (let ((result nil)
+	(subformulas (proper-subformulas (initial-statement dialogue)))
+	(game-len (dialogue-length dialogue)))
+    (if (> position game-len)
+	nil
+	(dotimes (index position result)
+	  (dolist (statement (append subformulas symbolic-attacks))
+	    (when (every-rule-passes (dialogue-rules dialogue)
+				     (copy-and-truncate-dialogue dialogue
+								 position)
+				     player
+				     position
+				     statement
+				     stance
+				     index)
+	      (push (list statement index)
+		    result)))))))
+
+(defun all-next-moves-at-position (dialogue position)
+  (append (mapcar #'(lambda (statement-and-reference)
+		      (destructuring-bind (statement reference)
+			  statement-and-reference
+			(make-move 'p statement 'a reference)))
+		  (next-moves-at-position dialogue 'p 'a position))
+	  (mapcar #'(lambda (statement-and-reference)
+		      (destructuring-bind (statement reference)
+			  statement-and-reference
+			(make-move 'p statement 'd reference)))
+		  (next-moves-at-position dialogue 'p 'd position))
+	  (mapcar #'(lambda (statement-and-reference)
+		      (destructuring-bind (statement reference)
+			  statement-and-reference
+			(make-move 'o statement 'a reference)))
+		  (next-moves-at-position dialogue 'o 'a position))
+	  (mapcar #'(lambda (statement-and-reference)
+		      (destructuring-bind (statement reference)
+			  statement-and-reference
+			(make-move 'o statement 'd reference)))
+		  (next-moves-at-position dialogue 'o 'd position))))
+
 (defun next-moves (dialogue player stance)
-  (let (result)
-    (let* ((subformulas (proper-subformulas (initial-statement dialogue)))
-	   (turn-number (dialogue-length dialogue)))
-      (dotimes (index turn-number result)
-	(dolist (statement (append subformulas symbolic-attacks))
-	  (when (every-rule-passes (dialogue-rules dialogue)
-				   dialogue
-				   player
-				   turn-number
-				   statement
-				   stance
-				   index)
-	    (push (list statement index)
-		  result)))))))
+  (next-moves-at-position dialogue player stance (dialogue-length dialogue)))
 
 (defun next-attacks (dialogue player)
   (next-moves dialogue player 'a))

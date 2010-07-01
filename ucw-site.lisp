@@ -23,6 +23,10 @@
 	 :initarg :game
 	 :type dialogue)))
 
+(defclass play-style-component ()
+  ((play-style :accessor play-style
+	       :initarg :play-style)))
+
 (defmethod render ((self signature-editor))
   (with-slots ((sig signature))
       self
@@ -46,7 +50,7 @@
 
 ;; adding a predicate
 
-(defcomponent add-a-predicate ()
+(defcomponent add-a-predicate (signature-component)
   ((proposed-name :initarg :name 
 		  :accessor proposed-name 
 		  :initform nil)
@@ -242,21 +246,10 @@
 		    :accessor input-formula)
 	(<:submit :value "Use this formula"))))
 
-(defcomponent turn-editor (game-component)
-  ((available-moves-list :component t
-			 :accessor available-moves-list
-			 :initform nil)))
-
-(defcomponent random-opponent-turn-editor (game-component)
+(defcomponent turn-editor (game-component play-style-component)
   ())
 
-(defcomponent random-proponent-turn-editor (game-component)
-  ())
-
-(defcomponent available-moves-list (game-component)
-  ())
-
-(defcomponent turn-evaluator (game-component)
+(defcomponent turn-evaluator (game-component play-style-component)
   ((player :accessor player
 	   :initarg :player
 	   :initform nil)
@@ -271,7 +264,7 @@
 	      :initform nil)))
 
 (defmethod render ((self turn-evaluator))
-  (with-slots (player statement stance reference game)
+  (with-slots (player statement stance reference game play-style)
       self
     (let ((game-len (dialogue-length game)))
     (if (and player statement stance reference)
@@ -289,6 +282,7 @@
 		(<:p "Your move was accepted. "
 		     (<ucw:a :action 
 			     (call 'turn-editor
+				   :play-style (play-style self)
 				   :game (add-move-to-dialogue-at-position
 					  game
 					  (make-move player
@@ -309,7 +303,8 @@
 		      (<:th "Move")
 		      (<:th "Player")
 		      (<:th "Assertion")
-		      (<:th "Stance, Reference"))
+		      (<:th "Stance, Reference")
+		      (<:th "Notes"))
 		     (<:tbody
 		      (loop with plays = (dialogue-plays game)
 			 with len = (length plays)
@@ -318,14 +313,15 @@
 			 do
 			   (if (attacking-move? play)
 			       (if (member i open-attacks)
-				   (render-open-attack play i)
-				   (render-closed-attack play i))
-			       (render-defensive-move play i)))
+				   (render-open-attack-in-game play game i nil play-style)
+				   (render-closed-attack-in-game play game i nil play-style))
+			       (render-defensive-move-in-game play game i nil play-style)))
 		      (<:tr :style "background-color:#FF3333;"
 			    (<:td (<:as-html game-len))
 			    (<:td (<:as-html player))
 			    (<:td (render statement))
-			    (<:td "[" (<:as-html stance) "," (<:as-html reference) "]")))
+			    (<:td "[" (<:as-html stance) "," (<:as-html reference) "]")
+			    (<:td)))
 		    (<:tfoot
 		      (<:tr 
 		       (<:td :align "center"
@@ -341,7 +337,9 @@
 		 (dolist (message messages)
 		   (<:li (<:as-html message))))
 		(<ucw:form :method "POST"
-			   :action (call 'turn-editor :game game)
+			   :action (call 'turn-editor 
+					 :game game
+					 :play-style (play-style self))
 		  (<:p "You must edit your move; please try again.")
 		  (<:submit :value "Go back and edit the move")))))))))
 
@@ -371,7 +369,8 @@
 						   statement
 						   reference
 						   position)
-	     "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))
+      ; :title (<:as-html "Defend against the attack of move " reference " by asserting " (render-plainly statement))
+      "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))
 
 (defun render-proponent-defense (defense game position)
   (render-defense defense 'p game position))
@@ -494,7 +493,7 @@ occuring in a dialogue game may no longer hold, so that the list below
 may no longer be an exhaustive enumeration of all formulas that can be
 asserted in the next move."))
 
-(defun render-manual-move-entry-form (game)
+(defun render-manual-move-entry-form (game play-style)
   (let (input-statement player-option reference-option selected-symbolic-attack stance-option)
   (symbol-macrolet 
       (($take-action 
@@ -509,6 +508,7 @@ asserted in the next move."))
 			     :text input-statement
 			     :signature (dialogue-signature game))))))
 	  (call 'turn-evaluator
+		:play-style play-style
 		:player player-option
 		:stance stance-option
 		:reference reference-option
@@ -577,24 +577,29 @@ meaning of the dialogue rules.")
 	     (all-opponent-moves (append next-opponent-attacks
 					 next-opponent-defenses)))
 	(if (null all-opponent-moves)
-	    (<ucw:a :action (call 'random-opponent-turn-editor
+	    (<ucw:a :action (call 'turn-editor
+				  :play-style 'play-as-proponent-random-opponent
 				  :game game-after-attack)
+		    ; :title (<:as-html "Attack move " reference " by asserting " (render-plainly statement) " (you would win the game)")
 		    "Attack move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
 	    (<ucw:a :action 
 		    (let ((random-move (random-element all-opponent-moves)))
 		      (destructuring-bind (statement reference)
 			  random-move
 			(if (member random-move next-opponent-attacks)
-			    (call 'random-opponent-turn-editor
+			    (call 'turn-editor
+				  :play-style 'play-as-proponent-random-opponent
 				  :game
 				  (add-move-to-dialogue-at-position game-after-attack
 								    (make-move 'o statement 'a reference)
 								    (1+ position)))
-			    (call 'random-opponent-turn-editor
+			    (call 'turn-editor
+				  :play-style 'play-as-proponent-random-opponent
 				  :game
 				  (add-move-to-dialogue-at-position game-after-attack
 								    (make-move 'o statement 'd reference)
 								    (1+ position))))))
+		    ; :title (<:as-html "Attack move " reference " by asserting " (render-plainly statement))
 			"Attack move " (<:as-html reference) " by asserting " (render statement)))))))
 
 (defun render-opponent-attack-against-random-proponent (attack game position)
@@ -611,24 +616,29 @@ meaning of the dialogue rules.")
 	     (all-proponent-moves (append next-proponent-attacks
 					  next-proponent-defenses)))
 	(if (null all-proponent-moves)
-	    (<ucw:a :action (call 'random-proponent-turn-editor
+	    (<ucw:a :action (call 'turn-editor
+				  :play-style 'play-as-opponent-random-proponent
 				  :game game-after-attack)
+		    ; :title (<:as-html "Attack move " reference " by asserting " (render-plainly statement) " (you would win the game)")
 		    "Attack move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
 	    (<ucw:a :action 
 		    (let ((random-move (random-element all-proponent-moves)))
 		      (destructuring-bind (statement reference)
 			  random-move
 			(if (member random-move next-proponent-attacks)
-			    (call 'random-proponent-turn-editor
+			    (call 'turn-editor
+				  :play-style 'play-as-opponent-random-proponent
 				  :game
 				  (add-move-to-dialogue-at-position game-after-attack
 								    (make-move 'p statement 'a reference)
 								    (1+ position)))
-			    (call 'random-proponent-turn-editor
+			    (call 'turn-editor
+				  :play-style 'play-as-opponent-random-proponent
 				  :game
 				  (add-move-to-dialogue-at-position game-after-attack
 								    (make-move 'p statement 'd reference)
 								    (1+ position))))))
+		    ; :title (<:as-html "Attack move " reference " by asserting " (render-plainly statement))
 			"Attack move " (<:as-html reference) " by asserting " (render statement)))))))
 
 (defun render-opponent-defense-against-random-proponent (defense game position)
@@ -645,24 +655,29 @@ meaning of the dialogue rules.")
 	     (all-proponent-moves (append next-proponent-attacks
 					  next-proponent-defenses)))
 	(if (null all-proponent-moves)
-	    (<ucw:a :action (call 'random-proponent-turn-editor
+	    (<ucw:a :action (call 'turn-editor
+				  :play-style 'play-as-opponent-random-proponent
 				  :game game-after-defense)
+		    ; :title (<:as-html "Defend against the attack of move " reference " by asserting " (render-plainly statement) " (you would win the game)")
 		    "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
 	    (<ucw:a :action 
 		    (let ((random-move (random-element all-proponent-moves)))
 		      (destructuring-bind (statement reference)
 			  random-move
 			(if (member random-move next-proponent-attacks)
-			    (call 'random-proponent-turn-editor
+			    (call 'turn-editor
+				  :style 'play-as-opponent-random-proponent
 				  :game
 				  (add-move-to-dialogue-at-position game-after-defense
 								    (make-move 'p statement 'a reference)
 								    (1+ position)))
-			    (call 'random-proponent-turn-editor
+			    (call 'turn-editor
+				  :play-style 'play-as-opponent-random-proponent
 				  :game
 				  (add-move-to-dialogue-at-position game-after-defense
 								    (make-move 'p statement 'd reference)
 								    (1+ position))))))
+		    ; :title (<:as-html "Defend against the attack of move " reference " by asserting " (render-plainly statement))
 			"Defend against the attack of move " (<:as-html reference) " by asserting " (render statement)))))))
 
 (defun render-proponent-defense-against-random-opponent (defense game position)
@@ -679,22 +694,27 @@ meaning of the dialogue rules.")
 	     (all-opponent-moves (append next-opponent-attacks
 					 next-opponent-defenses)))
 	(if (null all-opponent-moves)
-	    (<ucw:a :action (call 'random-opponent-turn-editor
+	    (<ucw:a :action (call 'turn-editor
+				  :play-style 'play-as-proponent-random-opponent
 				  :game game-after-defense)
+		    ; :title (<:as-html "Defend against the attack of move " reference " by asserting " (render-plainly statement) " (you would win the game)")
 		    "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
 	    (<ucw:a :action 
 		    (let ((random-move (random-element all-opponent-moves)))
 		      (destructuring-bind (statement reference)
 			  random-move
 			(if (member random-move next-opponent-attacks)
-			    (call 'random-opponent-turn-editor
+			    (call 'turn-editor
+				  :play-style 'play-as-proponent-random-opponent
 				  :game (add-move-to-dialogue-at-position game-after-defense
 									  (make-move 'o statement 'a reference)
 									  (1+ position)))
-			    (call 'random-opponent-turn-editor
+			    (call 'turn-editor
+				  :play-style 'play-as-proponent-random-opponent
 				  :game (add-move-to-dialogue-at-position game-after-defense
 									  (make-move 'o statement 'd reference)
 									  (1+ position))))))
+		    ; :title (<:as-html "Defend against the attack of move " reference " by asserting " (render-plainly statement))
 		    "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement)))))))
 
 (defun render-proponent-attacks-with-random-opponent (game)
@@ -791,7 +811,7 @@ occuring in a dialogue game may no longer hold, so that the list below
 may no longer be an exhaustive enumeration of all formulas that can be
 asserted in the next move."))
 
-(defun render-rewind-form (game)
+(defun render-rewind-form (game play-style)
   (let (rewind-point)
   (let ((game-len (dialogue-length game)))
     (<:p "Select a number between 1 and the one less than the
@@ -801,7 +821,8 @@ current turn number is the selected one.")
     (<ucw:form :method "POST"
 	       :action (call 'turn-editor
 			     :game (truncate-dialogue game
-						      rewind-point))
+						      rewind-point)
+			     :play-style play-style)
       (<:table
        (<:tr
 	(<:td
@@ -878,17 +899,24 @@ signature.")
 
 (defmethod render ((self turn-editor))
     (let* ((game (game self))
+	   (play-style (play-style self))
 	   (game-len (dialogue-length game)))
       (<:h1 "The game so far")
       (<:div :style "border:1px solid"
-        (render game))
+        (render-game game play-style :indicate-alternatives t))
       (<:h1 "Choose from the available moves...")
-      (render-available-moves game)
+      (ecase (play-style self)
+	(play-as-both-proponent-and-opponent
+	 (render-available-moves game))
+	(play-as-proponent-random-opponent
+	 (render-available-proponent-moves game))
+	(play-as-opponent-random-proponent
+	 (render-available-opponent-moves game)))
       (<:h1 "...or enter your move manually...")
-      (render-manual-move-entry-form game)
+      (render-manual-move-entry-form game play-style)
       (when (> game-len 1)
 	(<:h1 "...or rewind the game...")
-	(render-rewind-form game))
+	(render-rewind-form game play-style))
       ;; (<:h1 "...or edit the signature...")
       ;; (render-signature-editor game)
       ;; (<:h1 "...or edit the dialogue rules...")
@@ -896,90 +924,139 @@ signature.")
       (<:h1 "...or quit.")
       (render-quit-form)))
 
-(defmethod render ((self random-opponent-turn-editor))
-  (let* ((game (game self))
-	 (game-len (dialogue-length game)))
-    (<:h1 "The game so far")
-    (<:div :style "border:1px solid"
-	   (render game))
-    (<:h1 "Choose from the available moves...")
-    (render-available-proponent-moves game)
-    (<:h1 "...or enter your move manually...")
-    (render-manual-move-entry-form game)
-    (when (> game-len 1)
-      (<:h1 "...or rewind the game...")
-      (render-rewind-form game))
-    ;; (<:h1 "...or edit the signature...")
-    ;; (render-signature-editor game)
-    ;; (<:h1 "...or edit the dialogue rules...")
-    ;; (render-rule-editor game)
-    (<:h1 "...or quit.")
-    (render-quit-form)))  
+(defcomponent alternative-move-chooser (game-component play-style-component)
+  ((move-number :initarg :move-number
+		:accessor move-number)
+   (actual-play :initarg :actual-play
+		:accessor actual-play)))
 
-(defmethod render ((self random-proponent-turn-editor))
-  (let* ((game (game self))
-	 (game-len (dialogue-length game)))
-    (<:h1 "The game so far")
-    (<:div :style "border:1px solid"
-	   (render game))
-    (<:h1 "Choose from the available moves...")
-    (render-available-opponent-moves game)
-    (<:h1 "...or enter your move manually...")
-    (render-manual-move-entry-form game)
-    (when (> game-len 1)
-      (<:h1 "...or rewind the game...")
-      (render-rewind-form game))
-    ;; (<:h1 "...or edit the signature...")
-    ;; (render-signature-editor game)
-    ;; (<:h1 "...or edit the dialogue rules...")
-    ;; (render-rule-editor game)
-    (<:h1 "...or quit.")
-    (render-quit-form)))  
+(defmethod render ((self alternative-move-chooser))
+  (let ((game (game self))
+	(play-style (play-style self))
+  	(move-number (move-number self)))
+    (<:h1 "Alternatives were available")
+    (<:p "The game so far is:")
+    (render-game-with-highlighted-alternative game move-number play-style)
+    (<:p "Alternatives at move " (<:as-html move-number) ":")
+    (<:ul
+     (dolist (play (all-next-moves-at-position game move-number))
+       (unless (equal-moves? play (actual-play self))
+  	 (let ((player (move-player play))
+  	       (statement (move-statement play))
+  	       (stance (move-stance play))
+  	       (reference (move-reference play)))
+  	   (<:li (<ucw:a :action
+  			(call 'turn-editor
+  			      :game (add-move-to-dialogue-at-position
+				     (truncate-dialogue
+				      (copy-dialogue game)
+				      move-number)
+				     play
+				     move-number)
+			      :play-style play-style)
+			(<:as-html
+			 (if (eq player 'p)
+			     "Proponent"
+			     "Opponent"))
+  			" could have "
+  			(<:as-html
+			 (if (eq stance 'a)
+			     "attacked move "
+			     "defended against the attack of move "))
+  			(<:as-html reference)
+  			" by asserting "
+  			(render statement)))))))
+    (<:p "Follow a link to rewind the current game to move " (<:as-html move-number) " and play the selected alternative move rather than what was actually asserted.  Or, " (<ucw:a :action
+  					  (call 'turn-editor
+						:play-style play-style
+  						:game game)
+  					  "continue playing the original game")
+    ".")))
 
-(defun render-open-attack (play move-number)
+(defvar closed-attack-color "CCCCFF")
+(defvar open-attack-color "CCCCCC")
+(defvar alternative-attack-color "CC3300")
+
+(defun render-attack-in-game (play game move-number
+			      &key (indicate-alternatives nil)
+			           play-style
+			           (attack-is-closed nil)
+			           (move-is-alternative nil))
   (with-slots (player statement stance reference)
       play
-    (<:tr :style "background-color:#CCCCFF;"
-     (<:td (<:as-html move-number))
-     (<:td (<:as-html player))
-     (<:td (render statement))
-     (if (zerop move-number)
-	 (<:td (<:em "(initial move)"))
-	 (<:td "[" (<:as-html "A") "," (<:as-html reference) "]")))))
+    (let ((background-style (format nil "background-color:#~A;"
+				    (if attack-is-closed
+					closed-attack-color
+					open-attack-color))))
+    (<:tr :style background-style
+      (<:td :align "left" (<:as-html move-number))
+      (<:td :align "center" (<:as-html player))
+      (if move-is-alternative
+	  (<:td :style (format nil "border:3px solid #~S;"
+			       alternative-attack-color)
+		:align "left"
+		(render statement))
+	  (<:td :align "left" (render statement)))
+      (if (zerop move-number)
+	  (<:td :align "right" (<:em "(initial move)"))
+	  (<:td :align "right"
+		(<:as-html "[A," reference "]")))
+      (if indicate-alternatives
+	  (let ((all-previous-moves (all-next-moves-at-position game
+								move-number)))
+	    (if (null (cdr all-previous-moves)) ;; PLAY was the only one
+		(<:td)
+		(<:td :align "center"
+		 (<ucw:a :action
+			 (call 'alternative-move-chooser
+			       :play-style play-style
+			       :game game
+			       :actual-play play
+			       :move-number move-number)
+			 :title "There were alternatives to this move"
+			 (<:as-is "&#8224;"))))))))))
 
-(defun render-closed-attack (play move-number)
-  (with-slots (player statement stance reference)
-      play
-    (<:tr :style "background-color:#CCCCCC;"
-     (<:td (<:as-html move-number))
-     (<:td (<:as-html player))
-     (<:td (render statement))
-     (if (zerop move-number)
-	 (<:td (<:em "(initial move)"))
-	 (<:td "[" (<:as-html "A") "," (<:as-html reference) "]")))))
-
-(defun render-defensive-move (play move-number)
+(defun render-defensive-move-in-game (play game move-number indicate-alternatives play-style &key (move-is-alternative))
   (with-slots (player statement stance reference)
       play
     (<:tr
-     (<:td (<:as-html move-number))
-     (<:td (<:as-html player))
-     (<:td (render statement))
+     (<:td :align "left" (<:as-html move-number))
+     (<:td :align "center" (<:as-html player))
+     (if move-is-alternative
+	 (<:td :style "border:3px solid #CC3300;"
+	       (render statement))
+	 (<:td (render statement)))
      (if (zerop move-number)
-	 (<:td (<:em "(initial move)"))
-	 (<:td "[" (<:as-html "D") "," (<:as-html reference) "]")))))
+	 (<:td :align "right" (<:em "(initial move)"))
+	 (<:td :align "right" 
+	       (<:as-html "[D," reference) "]"))
+      (if indicate-alternatives
+	  (let ((all-previous-moves (all-next-moves-at-position game
+								move-number)))
+	    (if (null (cdr all-previous-moves)) ;; PLAY was the only one
+	      (<:td)
+	      (<:td :align "center"
+	       (<ucw:a :action
+		       (call 'alternative-move-chooser
+			     :play-style play-style
+			     :game game
+			     :actual-play play
+			     :move-number move-number)
+		       :title "There were alternatives to this move"
+		       (<:as-is "&#8224;")))))))))
 
-(defmethod render ((game dialogue))
+(defun render-game (game play-style &key (indicate-alternatives nil))
   (unless (zerop (dialogue-length game))
     (let ((open-attacks (open-attack-indices game)))
       (<:table 
        (<:colgroup :span "2" :align "center")
-       (<:colgroup :span "2" :align "left")
+       (<:colgroup :span "3" :align "left")
        (<:thead
 	(<:th "Move")
 	(<:th "Player")
 	(<:th "Assertion")
-	(<:th "Stance, Reference"))
+	(<:th "Stance, Reference")
+	(<:th "Notes"))
        (<:tbody
 	(loop with plays = (dialogue-plays game)
 	   with len = (length plays)
@@ -988,13 +1065,61 @@ signature.")
 	   do
 	     (if (attacking-move? play)
 		 (if (member i open-attacks)
-		     (render-open-attack play i)
-		     (render-closed-attack play i))
-		 (render-defensive-move play i))))
+		     (render-attack-in-game play game i
+					    :indicate-alternatives indicate-alternatives
+					    :play-style play-style
+					    :attack-is-closed t)
+		     (render-attack-in-game play game i
+					    :indicate-alternatives indicate-alternatives
+					    :play-style play-style
+					    :attack-is-closed nil))
+		 (render-defensive-move-in-game play game i indicate-alternatives play-style))))
        (<:tfoot
 	(<:tr 
 	  (<:td :align "center"
-		:colspan "4"
+		:colspan "5"
+		(<:em "Rows in " (<:span :style "background-color:#CCCCCC"
+					 "grey")
+		      " are closed attacks; rows in "
+		      (<:span :style "background-color:#CCCCFF"
+			      "blue")
+		      " are open attacks.  (Defensive moves are not colored.) A dagger in the Notes column indicates that alternative moves were available; follow the link to see them."))))))))
+
+(defun render-game-with-highlighted-alternative (game alternative-move-number play-style)
+  (unless (zerop (dialogue-length game))
+    (let ((open-attacks (open-attack-indices game)))
+      (<:table 
+       (<:colgroup :span "2" :align "center")
+       (<:colgroup :span "3" :align "left")
+       (<:thead
+	(<:th "Move")
+	(<:th "Player")
+	(<:th "Assertion")
+	(<:th "Stance, Reference")
+	(<:th "Notes"))
+       (<:tbody
+	(loop with plays = (dialogue-plays game)
+	   with len = (length plays)
+	   for play in plays
+	   for i from 0 upto len
+	   do
+	     (if (attacking-move? play)
+		 (if (member i open-attacks)
+		     (if (= i alternative-move-number)
+			 (render-open-attack-in-game play game i nil play-style
+						     :move-is-alternative t)
+			 (render-open-attack-in-game play game i nil play-style))
+		     (if (= i alternative-move-number)
+			 (render-closed-attack-in-game play game i nil play-style
+						       :move-is-alternative t)
+			 (render-closed-attack-in-game play game i nil play-style)))
+		 (if (= i alternative-move-number)
+		     (render-defensive-move-in-game play game i nil play-style :move-is-alternative t)
+		     (render-defensive-move-in-game play game i nil play-style)))))
+       (<:tfoot
+	(<:tr 
+	  (<:td :align "center"
+		:colspan "5"
 		(<:em "Rows in " (<:span :style "background-color:#CCCCCC"
 					 "grey")
 		      " are closed attacks; rows in "
@@ -1002,8 +1127,7 @@ signature.")
 			      "blue")
 		      " are open attacks.  (Defensive moves are not colored.)"))))))))
 
-(defun render-variable (variable)
-  (<:em (<:as-html variable)))
+(defgeneric render-plainly (statement))
 
 (defmethod render ((statement term))
   (let ((func-sym (function-symbol statement))
@@ -1020,15 +1144,42 @@ signature.")
 	      (render arg)))
 	  (<:as-is ")")))))
 
+(defmethod render-plainly ((statement term))
+  (let ((func-sym (function-symbol statement))
+	(args (arguments statement)))
+    (<:as-html func-sym)
+    (<:as-is "(")
+    (if (null args)
+	(<:as-is ")")
+	(let ((first (car args)))
+	  (render first)
+	  (when (not (null (cdr args)))
+	    (dolist (arg args)
+	      (<:as-is ",")
+	      (render arg)))
+	  (<:as-is ")")))))
+
 (defmethod render ((sa (eql attack-left-conjunct)))
   (<:as-is "&and;")
   (<:sub "L"))
+
+(defmethod render-plainly ((sa (eql attack-left-conjunct)))
+  (<:as-is "&and;(L)"))
 
 (defmethod render ((sa (eql attack-right-conjunct)))
   (<:as-is "&and;")
   (<:sub "R"))
 
+(defmethod render-plainly ((sa (eql attack-right-conjunct)))
+  (<:as-is "&and;(R)"))
+
 (defmethod render ((sa (eql which-instance?)))
+  (<:as-is "?"))
+
+(defmethod render-plainly ((sa (eql which-instance?)))
+  (<:as-is "?"))
+
+(defmethod render ((sa (eql which-disjunct?)))
   (<:as-is "?"))
 
 (defmethod render ((sa (eql which-disjunct?)))
@@ -1038,10 +1189,26 @@ signature.")
   (call-next-method)
   (render (argument formula)))
 
+(defmethod render-plainly :around ((formula unary-connective-formula))
+  (call-next-method)
+  (render (argument formula)))
+
 (defmethod render ((neg negation))
   (<:as-is "&not;"))
 
+(defmethod render-plainly ((neg negation))
+  (<:as-is "&not;"))
+
 (defmethod render :around ((formula binary-connective-formula))
+  (<:as-html "(")
+  (render (lhs formula))
+  (<:as-html " ")
+  (call-next-method)
+  (<:as-html " ")
+  (render (rhs formula))
+  (<:as-html ")"))
+
+(defmethod render-plainly :around ((formula binary-connective-formula))
   (<:as-html "(")
   (render (lhs formula))
   (<:as-html " ")
@@ -1057,22 +1224,47 @@ signature.")
   (render (matrix gen))
   (<:as-html "]"))
 
+(defmethod render-plainly :around ((gen generalization))
+  (call-next-method)
+  (<:as-html (bound-variable gen))
+  (<:as-html "[")
+  (render (matrix gen))
+  (<:as-html "]"))
+
 (defmethod render ((formula binary-conjunction))
+  (<:as-is "&and;"))
+
+(defmethod render-plainly ((formula binary-conjunction))
   (<:as-is "&and;"))
 
 (defmethod render ((formula binary-disjunction))
   (<:as-is "&or;"))
 
+(defmethod render-plainly ((formula binary-disjunction))
+  (<:as-is "&or;"))
+
 (defmethod render ((formula implication))
+  (<:as-is "&rarr;"))
+
+(defmethod render-plainly ((formula implication))
   (<:as-is "&rarr;"))
 
 (defmethod render ((formula equivalence))
    (<:as-is "&harr;"))
 
+(defmethod render-plainly ((formula equivalence))
+   (<:as-is "&harr;"))
+
 (defmethod render ((formula universal-generalization))
   (<:as-is "&forall;"))
 
+(defmethod render-plainly ((formula universal-generalization))
+  (<:as-is "&forall;"))
+
 (defmethod render ((formula existential-generalization))
+  (<:as-is "&exist;"))
+
+(defmethod render-plainly ((formula existential-generalization))
   (<:as-is "&exist;"))
 
 (defmethod render ((formula atomic-formula))
@@ -1089,30 +1281,19 @@ signature.")
 	    (render arg)))
 	(<:as-is ")")))))
 
-(defmethod render ((self game-component))
-  (let ((game (game self)))
-    (unless (zerop (dialogue-length game))
-      (<:table
-       (<:colgroup :span "2")
-       (<:colgroup :span "2" :align "left")
-       (<:thead
-	(<:th "Move")
-	(<:th "Player")
-	(<:th "Assertion")
-	(<:th "Stance, Reference"))
-       (loop with plays = (dialogue-plays game)
-	     with len = (length plays)
-	     for play in plays
-	     for i from 1 upto len
-	  do
-	    (with-slots (player statement stance reference)
-		play
-	      (<:tr 
-	       (<:td (<:as-html player))
-	       (<:td (<:as-is statement))
-	       (if (= i 1)
-		   (<:td (<:em "(initial move)"))
-		   (<:td "[" (<:as-html stance) "," (<:as-html reference) "]")))))))))
+(defmethod render-plainly ((formula atomic-formula))
+  (let ((pred (predicate formula))
+	(args (arguments formula)))
+    (<:as-html pred)
+    (unless (null args)
+      (<:as-is "(")
+      (let ((first (car args)))
+	(render first)
+	(when (not (null (cdr args)))
+	  (dolist (arg args)
+	    (<:as-is ",")
+	    (render arg)))
+	(<:as-is ")")))))
 
 (defcomponent start-game-component ()
   ((formula-entry-component :component t
@@ -1151,11 +1332,13 @@ signature.")
 	(ecase selected-play-style
 	  (play-as-both-proponent-and-opponent
 	   (call 'turn-editor
+		 :play-style 'play-as-both-proponent-and-opponent
 		 :game (make-dialogue (funcall selected-translation $formula)
 				      sig
 				      selected-rules)))
 	  (play-as-proponent-random-opponent
-	   (call 'random-opponent-turn-editor
+	   (call 'turn-editor
+		 :play-style 'play-as-proponent-random-opponent
 		 :game (let ((initial-dialogue
 			      (make-dialogue (funcall selected-translation $formula)
 					     sig
@@ -1165,22 +1348,26 @@ signature.")
 				(all-opponent-moves (append next-opponent-attacks
 							    next-opponent-defenses)))
 			   (if (null all-opponent-moves)
-			       (call 'random-opponent-turn-editor
+			       (call 'turn-editor
+				     :play-style 'play-as-proponent-random-opponent
 				     :game initial-dialog)
 			       (let ((random-move (random-element all-opponent-moves)))
 				 (destructuring-bind (statement reference)
 				     random-move
 				   (if (member random-move next-opponent-attacks)
-				       (call 'random-opponent-turn-editor
+				       (call 'turn-editor
+					     :play-style 'play-as-proponent-random-opponent
 					     :game (add-move-to-dialogue-at-position initial-dialogue
 										     (make-move 'o statement 'a reference)
 										     1))
-				       (call 'random-opponent-turn-editor
+				       (call 'turn-editor
+					     :play-style 'play-as-proponent-random-opponent
 					     :game (add-move-to-dialogue-at-position initial-dialogue
 										     (make-move 'o statement 'd reference)
 										     1))))))))))
-	  (play-as-opponent-ranom-proponent
-	   (call 'random-proponent-turn-editor
+	  (play-as-opponent-random-proponent
+	   (call 'turn-editor
+		 :play-style 'play-as-opponent-random-proponent
 		 :game (make-dialogue (funcall selected-translation $formula)
 				      sig
 				      selected-rules))))))
@@ -1255,7 +1442,7 @@ signature.")
 			      "Play as both proponent and opponent")
 		 (<ucw:option :value 'play-as-proponent-random-opponent
 			      "Play as Proponent (Opponent will choose its moves randomly)")
-		 (<ucw:option :value 'play-as-opponent-ranom-proponent
+		 (<ucw:option :value 'play-as-opponent-random-proponent
 			      "Play as Opponent (Propnent will choose its moves randomly)"))))))
        (<:tfoot
 	(<:tr
