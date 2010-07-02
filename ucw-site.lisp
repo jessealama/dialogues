@@ -313,13 +313,10 @@
 			 do
 			   (render-move-in-game 
 			    play game i
-			    :indicate-alternatives indicate-alternatives
+			    :indicate-alternatives nil
 			    :play-style play-style
 			    :attack-is-closed (not (member i open-attacks 
-							   :test #'=))
-			    :move-is-alternative (member i 
-							 moves-to-highlight 
-							 :test #'=)))
+							   :test #'=))))
 		      (<:tr :style "background-color:#FF3333;"
 			    (<:td :align "left" (<:as-html game-len))
 			    (<:td :align "center" (<:as-html player))
@@ -1029,7 +1026,7 @@ signature.")
       (<:td :align "center" (<:as-html player))
       (if move-is-alternative
 	  (let ((cell-style (concatenate 'string background-style
-					 (format nil "border:3px solid #~S;"
+					 (format nil "border:3px solid #~A;"
 						 alternative-attack-color))))
 	    (<:td :style cell-style
 		  :align "left"
@@ -1394,7 +1391,17 @@ signature.")
 		(<ucw:option :value #'dn-all-subformulas
 			      "Double negate all subformulas")
 		(<ucw:option :value #'double-negate
-			     "Double negate the whole formula"))))
+			     "Double negate the whole formula")
+		(<ucw:option :value #'negate-atomic-subformulas
+			     "Negate atomic subformulas")
+		(<ucw:option :value #'double-negate-atomic-subformulas
+			     "Double negate atomic subformulas")
+		(<ucw:option :value #'self-conjoin-atomic-subformulas
+			     (<:as-is "Replace all atomic subformulas p by (p &and; p)"))
+		(<ucw:option :value #'self-disjoin-atomic-subformulas
+			     (<:as-is "Replace all atomic subformulas p by (p &or; p)"))
+		(<ucw:option :value #'contrapositivify
+			     "Take the contrapositive of all implications"))))
        (<:tr :style "background-color:#7B942E;"
 	(<:td "Choose the dialogue rules to be used during the game:")
 	(<:td (<ucw:select :id "selected-rules"

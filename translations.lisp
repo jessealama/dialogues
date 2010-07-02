@@ -78,5 +78,119 @@
 				      (kuroda-helper (matrix form)))))))))
     (negate (negate (kuroda-helper formula)))))
 
+;;; Replace all atomic formulas by their negations
+
+(defgeneric negate-atomic-subformulas (formula))
+
+(defmethod negate-atomic-subformulas ((formula atomic-formula))
+  (negate formula))
+
+(defmethod negate-atomic-subformulas ((formula unary-connective-formula))
+  (make-instance (class-of formula)
+		 :argument (negate-atomic-subformulas (argument formula))))
+
+(defmethod negate-atomic-subformulas ((formula binary-connective-formula))
+  (make-instance (class-of formula)
+		 :lhs (negate-atomic-subformulas (lhs formula))
+		 :rhs (negate-atomic-subformulas (rhs formula))))
+
+(defmethod negate-atomic-subformulas ((gen generalization))
+  (make-instance (class-of gen)
+		 :bound-variable (bound-variable gen)
+		 :matrix (negate-atomic-subformulas (matrix gen))))
+
+;; Replace all atomic subformulas by their double negations
+
+(defgeneric double-negate-atomic-subformulas (formula))
+
+(defmethod double-negate-atomic-subformulas ((formula atomic-formula))
+  (negate (negate formula)))
+
+(defmethod double-negate-atomic-subformulas ((formula unary-connective-formula))
+  (make-instance (class-of formula)
+		 :argument (double-negate-atomic-subformulas (argument formula))))
+
+(defmethod double-negate-atomic-subformulas ((formula binary-connective-formula))
+  (make-instance (class-of formula)
+		 :lhs (double-negate-atomic-subformulas (lhs formula))
+		 :rhs (double-negate-atomic-subformulas (rhs formula))))
+
+(defmethod double-negate-atomic-subformulas ((gen generalization))
+  (make-instance (class-of gen)
+		 :bound-variable (bound-variable gen)
+		 :matrix (double-negate-atomic-subformulas (matrix gen))))
+
+;; Replace all atomic subformulas by their "self-conjunctions"
+
+(defgeneric self-conjoin-atomic-subformulas (formula))
+
+(defmethod self-conjoin-atomic-subformulas ((formula atomic-formula))
+  (make-binary-conjunction formula formula))			   
+
+(defmethod self-conjoin-atomic-subformulas ((formula unary-connective-formula))
+  (make-instance (class-of formula)
+		 :argument (self-conjoin-atomic-subformulas (argument formula))))
+
+(defmethod self-conjoin-atomic-subformulas ((formula binary-connective-formula))
+  (make-instance (class-of formula)
+		 :lhs (self-conjoin-atomic-subformulas (lhs formula))
+		 :rhs (self-conjoin-atomic-subformulas (rhs formula))))
+
+(defmethod self-conjoin-atomic-subformulas ((gen generalization))
+  (make-instance (class-of gen)
+		 :bound-variable (bound-variable gen)
+		 :matrix (self-conjoin-atomic-subformulas (matrix gen))))
+
+;; Replace all atomic subformulas by their "self-disjunctions"
+
+(defgeneric self-disjoin-atomic-subformulas (formula))
+
+(defmethod self-disjoin-atomic-subformulas ((formula atomic-formula))
+  (make-binary-disjunction formula formula))			   
+
+(defmethod self-disjoin-atomic-subformulas ((formula unary-connective-formula))
+  (make-instance (class-of formula)
+		 :argument (self-disjoin-atomic-subformulas (argument formula))))
+
+(defmethod self-disjoin-atomic-subformulas ((formula binary-connective-formula))
+  (make-instance (class-of formula)
+		 :lhs (self-disjoin-atomic-subformulas (lhs formula))
+		 :rhs (self-disjoin-atomic-subformulas (rhs formula))))
+
+(defmethod self-disjoin-atomic-subformulas ((gen generalization))
+  (make-instance (class-of gen)
+		 :bound-variable (bound-variable gen)
+		 :matrix (self-disjoin-atomic-subformulas (matrix gen))))
+
+;; Contrapositive of all implications
+
+(defgeneric contrapositivify (formula))
+
+(defmethod contrapositivify ((formula atomic-formula))
+  formula)
+
+(defmethod contrapositivify ((formula binary-conjunction))
+  (make-binary-conjunction (contrapositivify (lhs formula))
+			   (contrapositivify (rhs formula))))
+
+(defmethod contrapositivify ((formula binary-disjunction))
+  (make-binary-disjunction (contrapositivify (lhs formula))
+			   (contrapositivify (rhs formula))))
+
+(defmethod contrapositivify ((neg negation))
+  (negate (contrapositivify (argument neg))))
+
+(defmethod contrapositivify ((equiv equivalence))
+  (make-equivalence (contrapositivify (lhs equiv))
+		    (contrapositivify (rhs equiv))))
+
+(defmethod contrapositivify ((imp implication))
+  (make-implication (negate (contrapositivify (consequent imp)))
+		    (negate (contrapositivify (antecedent imp)))))
+
+(defmethod contrapositivify ((gen generalization))
+  (make-instance (class-of gen)
+		 :bound-variable (bound-variable gen)
+		 :matrix (contrapositivify (matrix gen))))
 
 ;;; translations.lisp ends here
