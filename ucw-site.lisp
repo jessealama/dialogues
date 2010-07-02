@@ -311,14 +311,15 @@
 			 for play in plays
 			 for i from 0 upto len
 			 do
-			   (if (attacking-move? play)
-			       (render-attack-in-game 
-				play game i
-				:play-style play-style
-				:attack-is-closed (not (member i open-attacks)))
-			       (render-defensive-move-in-game 
-				play game i
-				:play-style play-style)))
+			   (render-move-in-game 
+			    play game i
+			    :indicate-alternatives indicate-alternatives
+			    :play-style play-style
+			    :attack-is-closed (not (member i open-attacks 
+							   :test #'=))
+			    :move-is-alternative (member i 
+							 moves-to-highlight 
+							 :test #'=)))
 		      (<:tr :style "background-color:#FF3333;"
 			    (<:td :align "left" (<:as-html game-len))
 			    (<:td :align "center" (<:as-html player))
@@ -327,7 +328,7 @@
 				  (<:as-html "[" stance "," reference "]"))
 			    (<:td)))
 		    (<:tfoot
-		      (<:tr 
+		      (<:tr
 		       (<:td :align "center"
 			     :colspan "5"
 			     (<:em "Rows in " (<:span :style "background-color:#CCCCCC"
@@ -932,7 +933,9 @@ signature.")
 	   (game-len (dialogue-length game)))
       (<:h1 "The game so far")
       (<:div :style "border:1px solid"
-        (render-game game play-style :indicate-alternatives t))
+        (render-game game 
+		     :play-style play-style
+		     :indicate-alternatives t))
       (<:h1 "Choose from the available moves...")
       (ecase (play-style self)
 	(play-as-both-proponent-and-opponent
@@ -965,7 +968,9 @@ signature.")
   	(move-number (move-number self)))
     (<:h1 "Alternatives were available")
     (<:p "The game so far is:")
-    (render-game-with-highlighted-alternative game move-number play-style)
+    (render-game game
+		 :play-style play-style
+		 :moves-to-highlight (list move-number))
     (<:p "Alternatives at move " (<:as-html move-number) ":")
     (<:ul
      (dolist (play (all-next-moves-at-position game move-number))
@@ -1002,21 +1007,23 @@ signature.")
   					  "continue playing the original game")
     ".")))
 
-(defvar closed-attack-color "CCCCFF")
-(defvar open-attack-color "CCCCCC")
+(defvar closed-attack-color "CCCCCC")
+(defvar open-attack-color "CCCCFF")
 (defvar alternative-attack-color "CC3300")
 
-(defun render-attack-in-game (play game move-number
-			      &key (indicate-alternatives nil)
+(defun render-move-in-game (play game move-number
+			      &key indicate-alternatives
 			           play-style
-			           (attack-is-closed nil)
-			           (move-is-alternative nil))
+			           attack-is-closed
+			           move-is-alternative)
   (with-slots (player statement stance reference)
       play
-    (let ((background-style (format nil "background-color:#~A;"
-				    (if attack-is-closed
-					closed-attack-color
-					open-attack-color))))
+    (let ((background-style (if (attacking-move? play)
+				(format nil "background-color:#~A;"
+					(if attack-is-closed
+					    closed-attack-color
+					    open-attack-color))
+				"")))
     (<:tr :style background-style
       (<:td :align "left" (<:as-html move-number))
       (<:td :align "center" (<:as-html player))
@@ -1031,7 +1038,12 @@ signature.")
       (if (zerop move-number)
 	  (<:td :align "right" (<:em "(initial move)"))
 	  (<:td :align "right"
-		(<:as-html "[A," reference "]")))
+		(<:as-html "[" (if (attacking-move? play)
+				   "A"
+				   "D")
+			   ","
+			   reference
+			   "]")))
       (if indicate-alternatives
 	  (let ((all-previous-moves (all-next-moves-at-position game
 								move-number)))
@@ -1048,40 +1060,9 @@ signature.")
 			 (<:as-is "&#8224;")))))
 	  (<:td))))))
 
-(defun render-defensive-move-in-game (play game move-number 
-				      &key move-is-alternative
-				           indicate-alternatives
-				           play-style)
-  (with-slots (player statement stance reference)
-      play
-    (<:tr
-     (<:td :align "left" (<:as-html move-number))
-     (<:td :align "center" (<:as-html player))
-     (if move-is-alternative
-	 (<:td :style "border:3px solid #CC3300;"
-	       (render statement))
-	 (<:td (render statement)))
-     (if (zerop move-number)
-	 (<:td :align "right" (<:em "(initial move)"))
-	 (<:td :align "right" 
-	       (<:as-html "[D," reference) "]"))
-      (if indicate-alternatives
-	  (let ((all-previous-moves (all-next-moves-at-position game
-								move-number)))
-	    (if (null (cdr all-previous-moves)) ;; PLAY was the only one
-	      (<:td)
-	      (<:td :align "center"
-	       (<ucw:a :action
-		       (call 'alternative-move-chooser
-			     :play-style play-style
-			     :game game
-			     :actual-play play
-			     :move-number move-number)
-		       :title "There were alternatives to this move"
-		       (<:as-is "&#8224;")))))
-	  (<:td)))))
-
-(defun render-game (game play-style &key (indicate-alternatives nil))
+(defun render-game (game &key indicate-alternatives
+		              play-style
+		              moves-to-highlight)
   (unless (zerop (dialogue-length game))
     (let ((open-attacks (open-attack-indices game)))
       (<:table 
@@ -1099,20 +1080,12 @@ signature.")
 	   for play in plays
 	   for i from 0 upto len
 	   do
-	     (if (attacking-move? play)
-		 (if (member i open-attacks)
-		     (render-attack-in-game play game i
-					    :indicate-alternatives indicate-alternatives
-					    :play-style play-style
-					    :attack-is-closed t)
-		     (render-attack-in-game play game i
-					    :indicate-alternatives indicate-alternatives
-					    :play-style play-style
-					    :attack-is-closed nil))
-		 (render-defensive-move-in-game
-		  play game i
-		  :indicate-alternatives indicate-alternatives
-		  :play-style play-style))))
+	     (render-move-in-game 
+	      play game i
+	      :indicate-alternatives indicate-alternatives
+	      :play-style play-style
+	      :attack-is-closed (not (member i open-attacks :test #'=))
+	      :move-is-alternative (member i moves-to-highlight :test #'=))))
        (<:tfoot
 	(<:tr 
 	  (<:td :align "center"
@@ -1123,45 +1096,6 @@ signature.")
 		      (<:span :style "background-color:#CCCCFF"
 			      "blue")
 		      " are open attacks.  (Defensive moves are not colored.) A dagger " (<:as-is "(&#8224;)") " in the Notes column indicates that alternative moves were available; follow the link to see them and rewind the game to explore an alternative course."))))))))
-
-(defun render-game-with-highlighted-alternative (game alternative-move-number play-style)
-  (unless (zerop (dialogue-length game))
-    (let ((open-attacks (open-attack-indices game)))
-      (<:table 
-       (<:colgroup :span "2" :align "center")
-       (<:colgroup :span "3" :align "left")
-       (<:thead
-	(<:th "Move")
-	(<:th "Player")
-	(<:th "Assertion")
-	(<:th "Stance, Reference")
-	(<:th "Notes"))
-       (<:tbody
-	(loop with plays = (dialogue-plays game)
-	   with len = (length plays)
-	   for play in plays
-	   for i from 0 upto len
-	   do
-	     (if (attacking-move? play)
-		 (render-attack-in-game
-		  play game i
-		  :play-style play-style
-		  :attack-is-closed (member i open-attacks)
-		  :move-is-alternative (= i alternative-move-number))
-		 (render-defensive-move-in-game 
-		  play game i
-		  :play-style play-style 
-		  :move-is-alternative (= i alternative-move-number)))))
-       (<:tfoot
-	(<:tr 
-	  (<:td :align "center"
-		:colspan "5"
-		(<:em "Rows in " (<:span :style "background-color:#CCCCCC"
-					 "grey")
-		      " are closed attacks; rows in "
-		      (<:span :style "background-color:#CCCCFF"
-			      "blue")
-		      " are open attacks.  (Defensive moves are not colored.)"))))))))
 
 (defgeneric render-plainly (statement))
 
