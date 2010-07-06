@@ -1414,7 +1414,7 @@ signature.")
 			     "D rules (basic rules for intuitionistic logic)")
 		(<ucw:option :value e-dialogue-rules
 			     "E rules (D rules + Opponment must always respond to the immediately previous move)")
-		(<ucw:option :value faux-classical-dialogue-rules
+		(<ucw:option :value nearly-classical-dialogue-rules
 		 	     "Nearly (?) classical logic (drop Felscher's D11 and D12)")
 		(<ucw:option :value classical-dialogue-rules
 			     "Classical logic rules (drop Felscher's D11 and D12, but add rule E)")
