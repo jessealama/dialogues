@@ -360,7 +360,8 @@
 				      rule-d10
 				      rule-d11
 				      rule-d12
-				      rule-d13))))
+				      rule-d13))
+		 :description "D rules (basic rules for intuitionistic logic)"))
 
 (defparameter e-dialogue-rules
   (make-instance 'ruleset
@@ -374,7 +375,8 @@
 				      rule-d11
 				      rule-d12
 				      rule-d13
-				      rule-e))))
+				      rule-e))
+		 :description "E rules (D rules + Opponment must always respond to the immediately previous move)"))
 
 (defparameter classical-dialogue-rules
   (make-instance 'ruleset
@@ -388,7 +390,8 @@
 				      ; rule-d11
 				      ; rule-d12
 				      rule-d13
-				      rule-e))))
+				      rule-e))
+		 :description "Classical logic rules (drop Felscher's D11 and D12, but add rule E)"))
 
 (defparameter nearly-classical-dialogue-rules
   (make-instance 'ruleset
@@ -402,7 +405,8 @@
 				      ;; rule-d11
 				      ;; rule-d12
 				      rule-d13
-				      ))))
+				      ))
+		 :description "Nearly (?) classical logic (drop Felscher's D11 and D12)"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Some variants of Felscher's rules
@@ -444,7 +448,8 @@
 				      rule-d10-literal
 				      rule-d11
 				      rule-d12
-				      rule-d13))))
+				      rule-d13))
+		 :description "D rules, but Proponent may assert an atomic formula only if Opponent has asserted the corresponding literal"))
 
 (defparameter d-dialogue-rules-minus-d11
   (make-instance 'ruleset
@@ -457,7 +462,8 @@
 				      rule-d10
 				      ;; rule-d11
 				      rule-d12
-				      rule-d13))))
+				      rule-d13))
+		 :description "D rules, but you may defend against any open attack"))
 
 (defparameter d-dialogue-rules-minus-d12
   (make-instance 'ruleset
@@ -470,7 +476,8 @@
 				      rule-d10
 				      rule-d11
 				      ;; rule-d12
-				      rule-d13))))
+				      rule-d13))
+		 :description "D rules, but attacks may be answered any number of times"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Playing games with Felscher's rules
