@@ -31,7 +31,7 @@
   (with-slots ((sig signature))
       self
     (<:p "The signature that will be used during the game is:")
-    (render sig)
+    (render-signature sig)
     (<:p
      "[" (<ucw:a :action (call 'add-a-predicate
 			       :signature sig
@@ -107,7 +107,7 @@
 	(<:div :class "error-message"
 	  (<:p (<:as-html message) " " "Please try again.")))
       (<:p "The current signature is:")
-      (render sig)
+      (render-signature sig)
       (<:p "The new predicate name should be different from the names of currently existing predicates.  It should be different from the empty string and should not contain any whitespace characters.")
       (<ucw:form :method "POST"
 		 :action (answer (insert-predicate sig input-predicate-name))
@@ -222,7 +222,7 @@
 	 (if (stringp text)
 	     (<:as-html text)
 	     (render text)) "\" that you supplied.  The signature with respect to which you should enter a formula is:")
-    (render sig)
+    (render-signature sig)
     (formula-guide)
     (<:p "Please try again.")
     (<ucw:form :method "POST"
@@ -869,7 +869,7 @@ current turn number is the selected one.")
   (let ((sig (dialogue-signature game)))
     (<:p "The signature being used in this game is:")
     (<:blockquote
-     (render sig))
+     (render-signature sig))
     (<:p "You are welcome to edit the signature, if you wish.")
     (<:p "Bear in mind, though, that editing the signature will make
 no substantive difference to the game unless you are working with
@@ -1383,7 +1383,7 @@ signature.")
        (<:tbody :style "border:1px solid;"
        (<:tr :style "background-color:#F0B2E0;"
 	(<:td "The signature that will be used:")
-	(<:td (render sig)))
+	(<:td (render-signature sig)))
        (<:tr :style "background-color:#F063CD;"
 	(<:td "Enter a formula or choose a famous formula from the menu:")
 	(<:td
