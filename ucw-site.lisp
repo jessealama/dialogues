@@ -1284,6 +1284,15 @@ signature.")
 (defcomponent formula-entry-component (signature-component)
   ())
 
+(defparameter available-rulesets
+  (list d-dialogue-rules 
+	e-dialogue-rules
+	nearly-classical-dialogue-rules
+	classical-dialogue-rules
+	d-dialogue-rules-minus-d11
+	d-dialogue-rules-minus-d12
+	d-dialogue-rules-literal-d10))
+
 (defmethod render ((self formula-entry-component))
   (let (input-formula
 	selected-formula 
@@ -1409,21 +1418,9 @@ signature.")
 	(<:td (<ucw:select :id "selected-rules"
 			   :size 1
 			   :accessor selected-rules
-	        (<ucw:option :value d-dialogue-rules
-			     "D rules (basic rules for intuitionistic logic)")
-		(<ucw:option :value e-dialogue-rules
-			     "E rules (D rules + Opponment must always respond to the immediately previous move)")
-		(<ucw:option :value nearly-classical-dialogue-rules
-		 	     "Nearly (?) classical logic (drop Felscher's D11 and D12)")
-		(<ucw:option :value classical-dialogue-rules
-			     "Classical logic rules (drop Felscher's D11 and D12, but add rule E)")
-
-		(<ucw:option :value d-dialogue-rules-minus-d11
-			     "D rules, but you may defend against any open attack")
-		(<ucw:option :value d-dialogue-rules-minus-d12
-			     "D rules, but attacks may be answered any number of times")
-		(<ucw:option :value d-dialogue-rules-literal-d10
-			     "D rules, but Proponent may assert an atomic formula only if Opponent has asserted the corresponding literal"))))
+		(dolist (ruleset available-rulesets)
+		  (<ucw:option :value ruleset
+				(<:as-html (description ruleset)))))))
        (<:tr :style "background-color:#A3D800;"
          (<:td "Choose the style of play:")
 	 (<:td (<ucw:select :id "selected-play-style"
