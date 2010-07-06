@@ -43,7 +43,7 @@
 			:item pred-letter))
 	   finally 
 	     (return (make-instance 'finite-variable-propositional-signature
-				    :predicates final-preds))))))
+				    :predicates (reverse final-preds)))))))
 
 (defclass infinite-variable-propositional-signature (propositional-signature)
   ((predicate-test :initarg :predicate-symbol-test
