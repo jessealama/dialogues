@@ -175,13 +175,16 @@
     ("Dummett's formula" "dummett-formula" ,dummett-formula)
     ("Double negation introduction" "double-negation-intro" ,double-negation-intro)
     ("Double negation elimination" "double-negation-elim" ,double-negation-elimination)
-    ; ("Markov's formula" "markov-formula" ,markov-formula)
     ("K formula" "k-formula" ,k-formula)
     ("B formula" "b-formula" ,b-formula)
     ("C formula" "c-formula" ,c-formula)
     ("W formula" "w-formulas" ,w-formula)
     ("Scott's formula" "scott-formula" ,scott-formula)
-    ("Smetanich's formula" "smetanich-formula" ,smetanich-formula)))
+    ("Smetanich's formula" "smetanich-formula" ,smetanich-formula)
+    ("De Morgan &not;(P &and; Q) &rarr; (&not;P &or; &not;Q)" "de-morgan-not-and-implies-or" de-morgan-not-and-implies-or)
+    ("De Morgan &not;(P &or; Q) &rarr; (&not;P &and; &not;Q)" "de-morgan-not-or-implies-and" de-morgan-not-or-implies-and)
+    ("De Morgan (&not;P &and; &not;Q) &rarr; &not;(P &or; Q)" "de-morgan-and-not-implies-not-or" de-morgan-and-not-implies-not-or)
+    ("De Morgan (&not;P &or; &not;Q) &rarr; &not;(P &and; Q)" "de-morgan-or-not-implies-not-and" de-morgan-or-not-implies-not-and)))
 
 (defcomponent formula-corrector (signature-component)
   ((text :initarg :text :accessor formula-corrector-text)))
@@ -1376,7 +1379,7 @@ signature.")
 		     (destructuring-bind (long-name short-name formula)
 			 famous-formula
 		       (declare (ignore short-name))
-		       (<ucw:option :value formula (<:as-html long-name))))))))))
+		       (<ucw:option :value formula (<:as-is long-name))))))))))
        (<:tr :style "background-color:#A7007D;"
 	(<:td "Select a translation to be applied to the selected formula:")
 	(<:td (<ucw:select :id "selected-translation"
