@@ -143,8 +143,10 @@
 	    (<:p "There are no predicates in the signature; none can be deleted. " (<ucw:a :action (answer (signature self))
 											  "Proceed") "."))))))
 
-(defmethod render ((self finite-variable-propositional-signature))
-  (with-slots (predicates) self
+(defgeneric render-signature (signature))
+
+(defmethod render-signature ((sig finite-variable-propositional-signature))
+  (with-slots (predicates) sig
     (<:p "Predicates: "
       (if (null predicates)
 	  (<:em "(none)")
@@ -1062,39 +1064,50 @@ signature.")
 (defun render-game (game &key indicate-alternatives
 		              play-style
 		              moves-to-highlight)
-  (unless (zerop (dialogue-length game))
-    (let ((open-attacks (open-attack-indices game)))
-      (<:table 
-       (<:colgroup :span "2" :align "center")
-       (<:colgroup :span "3" :align "left")
-       (<:thead
-	(<:th "Move")
-	(<:th "Player")
-	(<:th "Assertion")
-	(<:th "Stance, Reference")
-	(<:th "Notes"))
-       (<:tbody
-	(loop with plays = (dialogue-plays game)
-	   with len = (length plays)
-	   for play in plays
-	   for i from 0 upto len
-	   do
-	     (render-move-in-game 
-	      play game i
-	      :indicate-alternatives indicate-alternatives
-	      :play-style play-style
-	      :attack-is-closed (not (member i open-attacks :test #'=))
-	      :move-is-alternative (member i moves-to-highlight :test #'=))))
-       (<:tfoot
-	(<:tr 
-	  (<:td :align "center"
-		:colspan "5"
-		(<:em "Rows in " (<:span :style "background-color:#CCCCCC"
-					 "grey")
-		      " are closed attacks; rows in "
-		      (<:span :style "background-color:#CCCCFF"
-			      "blue")
-		      " are open attacks.  (Defensive moves are not colored.) A dagger " (<:as-is "(&#8224;)") " in the Notes column indicates that alternative moves were available; follow the link to see them and rewind the game to explore an alternative course."))))))))
+  (<:p "Signature: "
+       (render-signature (signature game)))
+  (let ((ruleset (dialogue-rules game)))
+    (<:p "Ruleset: "
+	 (<:as-html (name ruleset))
+	 ": "
+	 (<:as-html (description ruleset))))
+  (<:table 
+   (<:colgroup :span "2" :align "center")
+   (<:colgroup :span "3" :align "left")
+   (<:thead
+    (<:th "Move")
+    (<:th "Player")
+    (<:th "Assertion")
+    (<:th "Stance, Reference")
+    (<:th "Notes"))
+   (<:tbody
+    (let ((game-len (dialogue-length game)))
+      (if (zerop game-len)
+	  (<:tr
+	   (<:td :colspan "5"
+		 (<:em "(there are no moves in the game)")))
+	  (let ((open-attacks (open-attack-indices game)))
+	    (loop with plays = (dialogue-plays game)
+	       with len = (length plays)
+	       for play in plays
+	       for i from 0 upto len
+	       do
+		 (render-move-in-game 
+		  play game i
+		  :indicate-alternatives indicate-alternatives
+		  :play-style play-style
+		  :attack-is-closed (not (member i open-attacks :test #'=))
+		  :move-is-alternative (member i moves-to-highlight :test #'=)))))))
+   (<:tfoot
+    (<:tr 
+     (<:td :align "center"
+	   :colspan "5"
+	   (<:em "Rows in " (<:span :style "background-color:#CCCCCC"
+				    "grey")
+		 " are closed attacks; rows in "
+		 (<:span :style "background-color:#CCCCFF"
+			 "blue")
+		 " are open attacks.  (Defensive moves are not colored.) A dagger " (<:as-is "(&#8224;)") " in the Notes column indicates that alternative moves were available; follow the link to see them and rewind the game to explore an alternative course."))))))
 
 (defgeneric render-plainly (statement))
 
