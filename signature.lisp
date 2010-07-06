@@ -350,8 +350,7 @@ sense of EQL) but with different corresponding arities."
 
 (defmethod belongs-to-signature? ((sig finite-variable-first-order-signature)
 				  (sym symbol))
-  (or (variable? sig sym)
-      (constant? sig sym)
+  (or (constant? sig sym)
       (predicate? sig sym)
       (function? sig sym)))
 
