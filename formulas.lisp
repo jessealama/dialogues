@@ -1250,4 +1250,20 @@ value."
 	(error 'expression-not-in-signature-error
 	       :expression formula))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Shortcuts
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmacro -> (antecdent consequent)
+  `(make-implication ,antecdent ,consequent))
+
+(defmacro & (lhs rhs)
+  `(make-binary-conjunction ,lhs ,rhs))
+
+(defmacro v (lhs rhs)
+  `(make-binary-disjunction ,lhs ,rhs))
+
+(defmacro ¬ (argument)
+  `(negate ,argument))
+
 ;;; formulas.lisp ends here
