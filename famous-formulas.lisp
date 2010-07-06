@@ -8,70 +8,70 @@
 	(r (make-atomic-formula 'r))
 	(s (make-atomic-formula 's)))
     
-    (defconstant peirce-formula 
+    (defparameter peirce-formula 
       (-> (-> (-> p q) p) p))
 
-    (defconstant excluded-middle 
+    (defparameter excluded-middle 
       (v p (¬ p)))
 
-    (defconstant dummett-formula 
+    (defparameter dummett-formula 
       (v (-> p q) (-> q p)))
 
-    (defconstant double-negation-intro
+    (defparameter double-negation-intro
       (-> p
 	  (¬ (¬ p))))
     
-    (defconstant double-negation-elimination
+    (defparameter double-negation-elimination
       (-> (¬ (¬ p)) p))
     
-    (defconstant k-formula
+    (defparameter k-formula
       (-> p (-> q p)))
     
-    (defconstant b-formula
+    (defparameter b-formula
       (->
        (-> p q)
        (->
 	(-> r p)
 	(-> r q))))
 
-    (defconstant c-formula
+    (defparameter c-formula
       (->
        (-> p
 	   (-> q r))
        (-> q
 	   (-> p r))))
 
-    (defconstant w-formula 
+    (defparameter w-formula 
       (->
        (-> p
 	   (-> p q))
        (-> p q)))
 
-    (defconstant weak-excluded-middle
+    (defparameter weak-excluded-middle
       (v
        (¬ p)
        (¬ (¬ p))))
     
-    (defconstant scott-formula 
+    (defparameter scott-formula 
       (-> (-> double-negation-elimination excluded-middle)
 	  weak-excluded-middle))
 
-    (defconstant smetanich-formula 
+    (defparameter smetanich-formula 
       (-> (-> (¬ q) p) peirce-formula))
     
-    (defconstant de-morgan-not-and-implies-or
+    (defparameter de-morgan-not-and-implies-or
       (-> (¬ (& p q))
 	  (v (¬ p) (¬ q))))
 
-    (defconstant de-morgan-not-or-implies-and
+    (defparameter de-morgan-not-or-implies-and
       (-> (¬ (v p q))
 	  (& (¬ p) (¬ q))))
 
-    (defconstant de-morgan-and-not-implies-not-or
+    (defparameter de-morgan-and-not-implies-not-or
       (-> (& (¬ p) (¬ q))
 	  (¬ (v p q))))
 
-    (defconstant de-morgan-or-not-implies-not-and
+    (defparameter de-morgan-or-not-implies-not-and
       (-> (v (¬ p) (¬ q))
 	  (¬ (& p q))))
 
