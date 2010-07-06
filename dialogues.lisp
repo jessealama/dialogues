@@ -181,6 +181,161 @@ attacks which, being symbols, do qualify as terms."
        (formula? obj)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Dialogue rules
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defclass dialogue-rule ()
+  ((name :initarg :name
+	 :accessor name
+	 :initform "(no name was supplied)"
+	 :type string)
+   (description :initarg :description
+		:accessor description
+		:initform "(no description was supplied)"
+		:type string)
+   (precondition-form :initarg :precondition
+		      :accessor precondition-form)
+   (precondition-fn :initarg :precondition-fn
+		    :accessor precondition-fn
+		    :type function
+		    :documentation "A function of six arguments (DIALOGUE CURRENT-PLAYER CURRENT-POSITION CURRENT-STATEMENT CURRENT-STANCE CURRENT-REFERENCE).  It if evaluates to NIL when given these inputs, which are understood as a dialogue together with a proposed move to place at the end of the dialogue, it is interpreted as failing to satisfy the condition of the rule.")
+   (body-form :initarg :body
+	      :accessor body-form)
+   (body :initarg :body-fn
+	 :accessor body-fn
+	 :type function
+	 :documentation "A function of six arguments (DIALOGUE CURRENT-PLAYER CURRENT-POSITION CURRENT-STATEMENT CURRENT-STANCE CURRENT-REFERENCE).  It if evaluates to NIL when given these inputs, which are understood as a dialogue together with a proposed move to place at the end of the dialogue, it is interpreted as satisfying the \"body\" of the rule in question.  The function can assume that the predicate defined in the PRECONDITION slot holds (so that, e.g., certain objects that are tested for existence by the condition can be assumed to exist by this function).")))
+
+(defmethod print-object ((rule dialogue-rule) stream)
+  (print-unreadable-object (rule stream :type t)
+    (with-slots (name description precondition-form body-form)
+	rule
+      (format stream "Name: ~A~%" name)
+      (format stream "Description: ~A~%" description)
+      (format stream "Precondition: ~A~%" precondition-form)
+      (format stream "Body: ~A~%" body-form))))
+
+(defmacro make-rule (&key name precondition body description)
+  (let ((precondition-fn `(lambda (dialogue current-player 
+				   current-position
+				   current-statement
+				   current-stance
+				   current-reference)
+			    (declare (ignorable dialogue
+						current-player
+						current-position
+						current-statement
+						current-stance
+						current-reference))
+			    ,precondition))
+	(body-fn `(lambda (dialogue current-player 
+			   current-position
+			   current-statement
+			   current-stance
+			   current-reference)
+		    (declare (ignorable dialogue
+					current-player
+					current-position
+					current-statement
+					current-stance
+					current-reference))
+		    ,body)))
+    `(make-instance 'dialogue-rule
+		    :name ,name
+		    :description ,description
+		    :precondition (quote ,precondition)
+		    :precondition-fn ,precondition-fn
+		    :body (quote ,body)
+		    :body-fn ,body-fn)))
+
+(defun attack? (stance)
+  (eq stance 'a))
+
+(defun defense? (stance)
+  (eq stance 'd))
+
+(defmacro make-defensive-rule (&key name
+			            (precondition t)
+			            body
+				    description)
+  `(make-rule :name ,name
+	      :precondition (and (defense? current-stance)
+				 ,precondition)
+	      :body ,body
+	      :description ,description))
+
+(defmacro make-offensive-rule (&key name
+			            (precondition t)
+			            body
+			            description)
+  `(make-rule :name ,name
+	      :precondition (and (attack? current-stance)
+				 ,precondition)
+	      :body ,body
+	      :description ,description))
+
+(defmacro with-original-statement ((original-statement) &body body)
+  (let ((attack (gensym))
+	(attack-refers-to (gensym))
+	(original-move (gensym)))
+    `(let ((,attack (nth-move dialogue current-reference)))
+       (when ,attack
+	 (let ((,attack-refers-to (move-reference ,attack)))
+	   (when ,attack-refers-to
+	     (let ((,original-move (nth-move dialogue ,attack-refers-to)))
+	       (when ,original-move
+		 (let ((,original-statement (move-statement ,original-move)))
+		   (when ,original-statement
+		     ,@body))))))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Rulesets
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defclass ruleset ()
+  ((rules :initarg :rules
+	  :accessor rules
+	  :initform nil
+	  :type list)
+   (description :initarg :description
+		:accessor description
+		:initform "(no description was supplied)"
+		:type string)))
+
+(defmethod print-object ((ruleset ruleset) stream)
+  (print-unreadable-object (ruleset stream :type t)
+    (with-slots (description rules)
+	ruleset
+      (format stream "Description: ~A~%" description)
+      (if (null rules)
+	  (format stream "Rules: (none)")
+	  (progn
+	    (format stream "Rules:~%")
+	    (dolist (rule rules)
+	      (format stream "* ~A~%" rule)))))))
+
+(defun eval-ruleset-on-proposed-move (dialogue move)
+  "Determine whether every rule in RULESET passes, given DIALOGUE and
+a proposed move MOVE.  MOVE is proposed in the sense that MOVE does
+not actually belong to the dialogue; the ruleset will be tested on
+DIALOGUE assuming that MOVE is added to the end of the list of plays
+of DIALOGUE.  (It is unspecified whether an actually new, temporary
+dialogue will be created as an intermediate step in the
+calculuation.)"
+  (evaluate-all-rules (rules dialogue)
+		      dialogue
+		      (dialogue-length dialogue)
+		      (move-player move)
+		      (move-statement move)
+		      (move-stance move)
+		      (move-reference move)))
+
+(defun eval-entire-dialogue (dialogue)
+  (every #'(lambda (move)
+	     (eval-ruleset-on-proposed-move dialogue move))
+	 (dialogue-plays dialogue)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Dialogues
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	
@@ -192,14 +347,16 @@ attacks which, being symbols, do qualify as terms."
 	  :initform nil
 	  :initarg :plays)
    (rules :accessor dialogue-rules
-	  :initform nil
-	  :initarg :rules)))
+	  :initform (make-instance 'ruleset)
+	  :initarg :rules
+	  :type ruleset)))
 
 (defmethod print-object ((game dialogue) stream)
   (print-unreadable-object (game stream :type t)
-    (with-slots (signature plays) game
-      (format stream "signature: ~A moves: ~A"
-	      signature plays))))
+    (with-slots (rules signature plays) game
+      (format stream 
+	      "rules: ~A~%signature: ~A~%moves: ~A"
+	      rules signature plays))))
 
 (defun make-dialogue (formula signature rules)
   (make-instance 'dialogue
@@ -390,105 +547,37 @@ attacks which, being symbols, do qualify as terms."
       (car open-attacks))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Dialogue rules
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmacro make-rule (&key name condition body failure-message)
-  (let ((condition-result (gensym))
-	(condition-error (gensym))
-	(body-result (gensym))
-	(body-error (gensym)))
-  `(lambda (dialogue current-player 
-	             current-position
-	             current-statement
-	             current-stance
-	             current-reference)
-     (declare (ignorable dialogue
-			 current-player
-			 current-position
-			 current-statement
-			 current-stance
-			 current-reference))
-     (with-value-and-error (,condition-result ,condition-error)
-         ,condition
-       (if ,condition-error
-	   (warn "An error occurred while evaluating the condition for rule ~A!~%The type of the error was ~A.~%The dialogue at this point is:~%~A~%player: ~A~%position: ~A~%statement: ~A~%stance: ~A~%reference: ~A~%Continuing..." 
-		 (quote ,name)
-		 ,condition-error
-		 dialogue
-		 current-player
-		 current-position
-		 current-statement
-		 current-stance
-		 current-reference)
-	   (if ,condition-result
-	       (with-value-and-error (,body-result ,body-error)
-		   ,body
-		 (if ,body-error 
-		     (warn "An error occurred while evaluating the body of rule ~A!~%The type of the error was ~A.~%The dialogue at this point is:~%~A~%player: ~A~%position: ~A~%statement: ~A~%stance: ~A~%reference: ~A~%Continuing..." 
-			   (quote ,name)
-			   ,body-error
-			   dialogue
-			   current-player
-			   current-position
-			   current-statement
-			   current-stance
-			   current-reference)
-		     (values ,body-result (format nil (concatenate 'string "[~A] " ,failure-message) (quote ,name)))))
-	       (values t nil)))))))
-
-(defun attack? (stance)
-  (eq stance 'a))
-
-(defun defense? (stance)
-  (eq stance 'd))
-
-(defmacro make-defensive-rule (&key name
-			            (condition t)
-			            body
-				    failure-message)
-  `(make-rule :name ,name
-	      :condition (and (defense? current-stance)
-			      ,condition)
-	      :body ,body
-	      :failure-message ,failure-message))
-
-(defmacro make-offensive-rule (&key name
-			            (condition t)
-			            body
-			            failure-message)
-  `(make-rule :name ,name
-	      :condition (and (attack? current-stance)
-			      ,condition)
-	      :body ,body
-	      :failure-message ,failure-message))
-
-(defmacro with-original-statement ((original-statement) &body body)
-  (let ((attack (gensym))
-	(attack-refers-to (gensym))
-	(original-move (gensym)))
-    `(let ((,attack (nth-move dialogue current-reference)))
-       (when ,attack
-	 (let ((,attack-refers-to (move-reference ,attack)))
-	   (when ,attack-refers-to
-	     (let ((,original-move (nth-move dialogue ,attack-refers-to)))
-	       (when ,original-move
-		 (let ((,original-statement (move-statement ,original-move)))
-		   (when ,original-statement
-		     ,@body))))))))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Evaluating rules
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun evaluate-all-rules (rules dialogue player turn-number statement stance index &optional messages)
+(defun evaluate-rule (rule dialogue player turn-number statement stance index)
+  (let ((pre (precondition-fn rule)))
+    (if (funcall pre dialogue
+		     player
+		     turn-number
+		     statement
+		     stance
+		     index)
+	(let ((body (body-fn rule)))
+	  (let ((body-result (funcall body dialogue
+				      player
+				      turn-number
+				      statement
+				      stance
+				      index)))
+	    (if body-result
+		(values t t)
+		(values t nil))))
+	(values nil nil))))
+
+(defun evaluate-all-rules (rules dialogue player turn-number statement stance index &optional failing-rules)
   (if (null rules)
-      (if messages
-	  (values nil messages)
+      (if failing-rules
+	  (values nil failing-rules)
 	  (values t nil))
       (let ((rule (car rules)))
-	(multiple-value-bind (result error-message)
-	    (funcall rule dialogue player turn-number statement stance index)
+	(multiple-value-bind (precondition-passes body-passes)
+	    (evaluate-rule rule dialogue player turn-number statement stance index)
 	  (evaluate-all-rules (cdr rules)
 			      dialogue
 			      player
@@ -496,27 +585,22 @@ attacks which, being symbols, do qualify as terms."
 			      statement 
 			      stance 
 			      index
-			      (if result
-				  messages
-				  (cons error-message messages)))))))
+			      (if precondition-passes
+				  (if body-passes
+				      failing-rules
+				      (cons rule failing-rules))
+				  failing-rules))))))
 
 (defun every-rule-passes (rules dialogue player turn-number statement stance index)
   (or (null rules)
       (let ((rule (car rules)))
-	(let ((result (funcall rule dialogue 
-			            player
-				    turn-number
-				    statement
-				    stance
-				    index)))
-	  (when result
-	    (every-rule-passes (cdr rules)
-			       dialogue
-			       player
-			       turn-number
-			       statement
-			       stance
-			       index))))))
+	(multiple-value-bind (precondition-result body-result)
+	    (evaluate-rule rule dialogue player turn-number statement stance index)
+	  (if (null precondition-result)
+	      (every-rule-passes (cdr rules) dialogue player turn-number statement stance index)
+	      (if body-result
+		  (every-rule-passes (cdr rules) dialogue player turn-number statement stance index)
+		  nil))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Extensions of dialogues
@@ -530,7 +614,7 @@ attacks which, being symbols, do qualify as terms."
 	nil
 	(dotimes (index position result)
 	  (dolist (statement (append subformulas symbolic-attacks))
-	    (when (every-rule-passes (dialogue-rules dialogue)
+	    (when (every-rule-passes (rules (dialogue-rules dialogue))
 				     (copy-and-truncate-dialogue dialogue
 								 position)
 				     player
@@ -865,7 +949,7 @@ attacks which, being symbols, do qualify as terms."
 	 (s (go statement-input)))
      evaluate-rules
        (multiple-value-bind (rules-result messages)
-	   (evaluate-all-rules rules dialogue player turn-number statement stance index)
+	   (evaluate-all-rules (rules (dialogue-rules dialogue)) dialogue player turn-number statement stance index)
 	 (when rules-result
 	   (go successful-turn))
 	 (msg "At least one of the dialogue rules is violated by your attack:")
