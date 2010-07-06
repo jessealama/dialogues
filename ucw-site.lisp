@@ -1443,7 +1443,7 @@ signature.")
 	  (<:td :colspan "2" (<:em (<:b "About the formula:")) " If the text box is not empty, its contents will be the initial formula of the game.  If the text box is empty, then the selected \"famous formula\" will be." 
 		(formula-guide)))
 	(<:tr 
-	  (<:td :colspan "2" (<:em (<:b "About the translation:")) " The default is the
+	 (<:td :colspan "2" (<:em (<:b "About the translation:")) " The default is the
 identity translation, so that whatever formula is chosen (or whatever
 formula is entered into the text box) will be, verbatim, the formula
 with which the game begins."))
