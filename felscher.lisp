@@ -6,117 +6,117 @@
 ;;; Argumentation forms
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar rule-d01-alternating
+(defparameter rule-d01-alternating
   (make-offensive-rule
-   :name d01-alternating
+   :name "d01-alternating"
    :body (not (eq current-player
 		  (move-player (nth-move dialogue current-reference))))
-   :failure-message "You cannot attack yourself."))
+   :description "You cannot attack yourself."))
 
-(defvar rule-d01-conjunction
+(defparameter rule-d01-conjunction
   (make-offensive-rule
-   :name d01-conjunction
-   :condition (binary-conjunction? (nth-statement dialogue current-reference))
+   :name "d01-conjunction"
+   :precondition (binary-conjunction? (nth-statement dialogue current-reference))
    :body (or (eq current-statement attack-left-conjunct)
 	     (eq current-statement attack-right-conjunct))
-   :failure-message "Only two attacks against conjunctions are permitted:~%ATTACK-LEFT-CONJUNCT and ATTACK-RIGHT-CONJUNCT."))
+   :description "Only two attacks against conjunctions are permitted: ATTACK-LEFT-CONJUNCT and ATTACK-RIGHT-CONJUNCT."))
 
-(defvar rule-d01-left-conjunct
+(defparameter rule-d01-left-conjunct
   (make-offensive-rule
-   :name d01-left-conjunct
-   :condition (eq current-statement attack-left-conjunct)
+   :name "d01-left-conjunct"
+   :precondition (eq current-statement attack-left-conjunct)
    :body (and (non-symbolic-attack-formula?
 	       (nth-statement dialogue current-reference))
 	      (binary-conjunction? (nth-statement dialogue current-reference)))
-   :failure-message "One cannot attack the left conjunct of a formula~%that isn't a conjunction."))
+   :description "One cannot attack the left conjunct of a formula that isn't a conjunction."))
 
-(defvar rule-d01-right-conjunct
+(defparameter rule-d01-right-conjunct
   (make-offensive-rule
-   :name d01-right-conjunct
-   :condition (eq current-statement attack-right-conjunct)
+   :name "d01-right-conjunct"
+   :precondition (eq current-statement attack-right-conjunct)
    :body (and (non-symbolic-attack-formula?
 	       (nth-statement dialogue current-reference))
 	      (binary-conjunction? (nth-statement dialogue current-reference)))
-   :failure-message "One cannot attack the right conjunct of a formula that isn't a conjunction."))
+   :description "One cannot attack the right conjunct of a formula that isn't a conjunction."))
 
-(defvar rule-d01-disjunction
+(defparameter rule-d01-disjunction
   (make-offensive-rule
-   :name d01-disjunction
-   :condition (binary-disjunction? (nth-statement dialogue current-reference))
+   :name "d01-disjunction"
+   :precondition (binary-disjunction? (nth-statement dialogue current-reference))
    :body (eq current-statement which-disjunct?)
-   :failure-message "WHICH-DISJUNCT? is the only permissible attack against a disjunction."))
+   :description "WHICH-DISJUNCT? is the only permissible attack against a disjunction."))
 
-(defvar rule-d01-which-disjunct
+(defparameter rule-d01-which-disjunct
   (make-offensive-rule
-   :name d01-which-disjunct
-   :condition (eq current-statement which-disjunct?)
+   :name "d01-which-disjunct"
+   :precondition (eq current-statement which-disjunct?)
    :body (binary-disjunction? (nth-statement dialogue current-reference))
-   :failure-message "The WHICH-DISJUNCT? attack applies only to disjunctions."))
+   :description "The WHICH-DISJUNCT? attack applies only to disjunctions."))
 
-(defvar rule-d01-implication
+(defparameter rule-d01-implication
   (make-offensive-rule
-   :name d01-implication
-   :condition (implication? (nth-statement dialogue current-reference))
+   :name "d01-implication"
+   :precondition (implication? (nth-statement dialogue current-reference))
    :body (and (non-symbolic-attack-formula? current-statement)
 	      (equal-statements? current-statement
 				 (antecedent
 				  (nth-statement dialogue current-reference))))
-   :failure-message "To attack an implication, one must assert the antecdent."))
+   :description "To attack an implication, one must assert the antecdent."))
 
-(defvar rule-d01-negation
+(defparameter rule-d01-negation
   (make-offensive-rule 
-   :name d01-negation
-   :condition (negation? (nth-statement dialogue current-reference))
+   :name "d01-negation"
+   :precondition (negation? (nth-statement dialogue current-reference))
    :body (and (non-symbolic-attack-formula? current-statement)
 	      (equal-statements? current-statement
 				 (unnegate
 				  (nth-statement dialogue current-reference))))
-   :failure-message "To attack a negation, one must assert the \"unnegation\" of the negation."))
+   :description "To attack a negation, one must assert the \"unnegation\" of the negation."))
 
-(defvar rule-d01-universal
+(defparameter rule-d01-universal
   (make-offensive-rule
-   :name d01-universal
-   :condition (universal-generalization? (nth-statement dialogue current-reference))
+   :name "d01-universal"
+   :precondition (universal-generalization? (nth-statement dialogue current-reference))
    :body (non-symbolic-attack-term? current-statement)
-   :failure-message "To attack a universal, one must assert a term."))
+   :description "To attack a universal, one must assert a term."))
 
-(defvar rule-d01-term
+(defparameter rule-d01-term
   (make-offensive-rule
-   :name d01-term
-   :condition (non-symbolic-attack-term? current-statement)
+   :name "d01-term"
+   :precondition (non-symbolic-attack-term? current-statement)
    :body (let ((s (nth-statement dialogue current-reference)))
 	   (and (non-symbolic-attack-formula? s)
 		(universal-generalization? s)))
-   :failure-message "If one asserts a term as an attack, then the assertion being attacked must be a universal generalization."))
+   :description "If one asserts a term as an attack, then the assertion being attacked must be a universal generalization."))
 
-(defvar rule-d01-which-instance
+(defparameter rule-d01-which-instance
   (make-offensive-rule 
-   :name d01-which-instance
-   :condition (eq current-statement which-instance?)
+   :name "d01-which-instance"
+   :precondition (eq current-statement which-instance?)
    :body (let ((s (nth-statement dialogue current-reference)))
 	   (and (non-symbolic-attack-formula? s)
 		(existential-generalization? s)))
-   :failure-message "The WHICH-INSTANCE? attack applies only to existential generalizations."))
+   :description "The WHICH-INSTANCE? attack applies only to existential generalizations."))
 
-(defvar rule-d01-existential
+(defparameter rule-d01-existential
   (make-offensive-rule
-   :name d01-existential
-   :condition (existential-generalization? (nth-statement dialogue current-reference))
+   :name "d01-existential"
+   :precondition (existential-generalization? (nth-statement dialogue current-reference))
    :body (eq current-statement which-instance?)
-   :failure-message "WHICH-INSTANCE? is the only permissible attack on existential generalizations."))
+   :description "WHICH-INSTANCE? is the only permissible attack on existential generalizations."))
 
-(defvar rule-d01-formula
+(defparameter rule-d01-formula
   (make-offensive-rule 
-   :name d01-formula
-   :condition (non-symbolic-attack-formula? current-statement)
+   :name "d01-formula"
+   :precondition (non-symbolic-attack-formula? current-statement)
    :body (or (implication? (nth-statement dialogue current-reference))
 	     (negation? (nth-statement dialogue current-reference))
 	     (universal-generalization? (nth-statement dialogue current-reference)))
-   :failure-message "When the attacking statement is a formula,~%the statement being attacked must be either~%an implication or a negation."))
+   :description "When the attacking statement is a formula, the statement being attacked must be either an implication or a negation."))
 
-(defvar rule-d02-alternating
+(defparameter rule-d02-alternating
   (make-defensive-rule
-   :name d02-alternating
+   :name "d02-alternating"
    :body (let ((attack (nth-move dialogue current-reference)))
 	   (when attack
 	     (let ((attacking-player (move-player attack)))
@@ -129,67 +129,67 @@
 			   (when attacked-player
 			     (and (not (eq current-player attacking-player))
 				  (eq current-player attacked-player))))))))))))
-   :failure-message "You can defend only against the other player's attacks,~%which themselves are supposed to be against your statements."))
+   :description "You can defend only against the other player's attacks, which themselves are supposed to be against your statements."))
 
-(defvar rule-d02-formula
+(defparameter rule-d02-formula
   (make-defensive-rule
-   :name d02-formula
+   :name "d02-formula"
    :body (non-symbolic-attack-formula? current-statement)
-   :failure-message "All defensive statements are supposed to be formulas."))
+   :description "All defensive statements are supposed to be formulas."))
 
-(defvar rule-d02-left-conjunct
+(defparameter rule-d02-left-conjunct
   (make-defensive-rule
-   :name d02-left-conjunct
-   :condition (eq (nth-statement dialogue current-reference)
+   :name "d02-left-conjunct"
+   :precondition (eq (nth-statement dialogue current-reference)
 		  attack-left-conjunct)
   :body (with-original-statement (original-statement)
 	  (equal-statements? current-statement
 			     (lhs original-statement)))
-  :failure-message "To defend against the ATTACK-LEFT-CONJUNCT attack,~% assert the left conjunct of the original conjunction."))
+  :description "To defend against the ATTACK-LEFT-CONJUNCT attack, assert the left conjunct of the original conjunction."))
 
-(defvar rule-d02-right-conjunct
+(defparameter rule-d02-right-conjunct
   (make-defensive-rule 
-   :name d02-right-conjunct
-   :condition (eq (nth-statement dialogue current-reference)
+   :name "d02-right-conjunct"
+   :precondition (eq (nth-statement dialogue current-reference)
 		  attack-right-conjunct)
    :body (with-original-statement (original-statement)
 	   (equal-statements? current-statement
 			      (rhs original-statement)))
-   :failure-message "To defend against the ATTACK-RIGHT-CONJUNCT attack,~% assert the right conjunct of the original conjunction."))
+   :description "To defend against the ATTACK-RIGHT-CONJUNCT attack, assert the right conjunct of the original conjunction."))
 
-(defvar rule-d02-which-disjunct
+(defparameter rule-d02-which-disjunct
   (make-defensive-rule
-   :name d02-which-disjunct
-   :condition (eq (nth-statement dialogue current-reference) which-disjunct?)
+   :name "d02-which-disjunct"
+   :precondition (eq (nth-statement dialogue current-reference) which-disjunct?)
    :body (with-original-statement (original-statement)
 	   (or (equal-statements? current-statement
 				  (lhs original-statement))
 	       (equal-statements? current-statement
 				  (rhs original-statement))))
-   :failure-message "To defend against the WHICH-DISJUNCT? attack,~%assert either the left or the right disjunct~%of the original disjunction."))
+   :description "To defend against the WHICH-DISJUNCT? attack, assert either the left or the right disjunct of the original disjunction."))
 
-(defvar rule-d02-implication
+(defparameter rule-d02-implication
   (make-defensive-rule 
-   :name d02-implication
-   :condition (with-original-statement (original-statement)
+   :name "d02-implication"
+   :precondition (with-original-statement (original-statement)
 		(implication? original-statement))
    :body (with-original-statement (original-statement)
 	   (equal-statements? current-statement
 			      (consequent original-statement)))
-   :failure-message "To defend against an attack on an implication, assert its consequent."))
+   :description "To defend against an attack on an implication, assert its consequent."))
 
-(defvar rule-d02-negation
+(defparameter rule-d02-negation
   (make-defensive-rule 
-   :name d02-negation
-   :condition (with-original-statement (original-statement)
+   :name "d02-negation"
+   :precondition (with-original-statement (original-statement)
 		(negation? original-statement))
    :body nil
-   :failure-message "One cannot (directly) defend against an attack on a negation."))
+   :description "One cannot (directly) defend against an attack on a negation."))
 
-(defvar rule-d02-universal
+(defparameter rule-d02-universal
   (make-defensive-rule
-   :name d02-universal
-   :condition (with-original-statement (original-statement)
+   :name "d02-universal"
+   :precondition (with-original-statement (original-statement)
 		(universal-generalization? original-statement))
    :body (let* ((attack (nth-move dialogue current-reference))
 		(attack-refers-to (move-reference attack))
@@ -200,19 +200,19 @@
 		(matrix (matrix original-statement)))
 	   (equal-statements? current-statement
 			      (instantiate instance var matrix)))
-   :failure-message "The asserted statement is not the required instance of the original universal generalization."))
+   :description "The asserted statement is not the required instance of the original universal generalization."))
 
-(defvar rule-d02-existential
+(defparameter rule-d02-existential
   (make-defensive-rule
-   :name d02-existential
-   :condition (with-original-statement (original-statement)
+   :name "d02-existential"
+   :precondition (with-original-statement (original-statement)
 		(existential-generalization? original-statement))
    :body (with-original-statement (original-statement)
 	   (instance-of-quantified? current-statement
 				    original-statement))
-   :failure-message "The asserted statement is not an instance of the original existential generalization."))
+   :description "The asserted statement is not an instance of the original existential generalization."))
 
-(defvar argumentation-forms (list rule-d01-alternating
+(defparameter argumentation-forms (list rule-d01-alternating
 				  rule-d01-conjunction
 				  rule-d01-left-conjunct
 				  rule-d01-right-conjunct
@@ -239,40 +239,40 @@
 ;;; Dialogue rules
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar rule-d00-atomic
-  (make-rule :name d00-atomic
-	     :condition (zerop current-position)
+(defparameter rule-d00-atomic
+  (make-rule :name "d00-atomic"
+	     :precondition (zerop current-position)
 	     :body (composite-formula? current-statement)
-	     :failure-message "Dialogues must open with a composite formula."))
+	     :description "Dialogues must open with a composite formula."))
 
-(defvar rule-d00-proponent
-  (make-rule :name d00-proponent
-	     :condition (evenp current-position)
+(defparameter rule-d00-proponent
+  (make-rule :name "d00-proponent"
+	     :precondition (evenp current-position)
 	     :body (eq current-player 'p)
-	     :failure-message "Proponent plays even-numbered positions.  (Counting starts at zero.)"))
+	     :description "Proponent plays even-numbered positions.  (Counting starts at zero.)"))
 
-(defvar rule-d00-opponent
-  (make-rule :name d00-opponent
-	     :condition (oddp current-position)
+(defparameter rule-d00-opponent
+  (make-rule :name "d00-opponent"
+	     :precondition (oddp current-position)
 	     :body (eq current-player 'o)
-	     :failure-message "Opponent plays odd-numbered positions.  (Counting starts at zero.)"))
+	     :description "Opponent plays odd-numbered positions.  (Counting starts at zero.)"))
 
-(defvar rule-d01-composite
+(defparameter rule-d01-composite
   (make-offensive-rule
-   :name d01-composite
+   :name "d01-composite"
    :body (composite-formula? (nth-statement dialogue 
 					    current-reference))
-   :failure-message "Atomic formulas cannot be attacked."))
+   :description "Atomic formulas cannot be attacked."))
 
-(defvar rule-d02-attack
+(defparameter rule-d02-attack
   (make-defensive-rule 
-   :name d02-attack
+   :name "d02-attack"
    :body (attacking-move? (nth-move dialogue current-reference))
-   :failure-message "The move being defended against is not an attack."))
+   :description "The move being defended against is not an attack."))
 
-(defvar rule-d10
-  (make-rule :name d10
-	     :condition (and (evenp current-position) 
+(defparameter rule-d10
+  (make-rule :name "d10"
+	     :precondition (and (evenp current-position) 
 			     (non-symbolic-attack-formula? current-statement)
 			     (atomic-formula? current-statement))
 	     :body (some-move #'(lambda (move)
@@ -280,11 +280,11 @@
 				    (equal-statements? (move-statement move)
 						       current-statement)))
 			      dialogue)
-	     :failure-message "Proponent cannot assert an atomic formula before opponent has asserted it."))
+	     :description "Proponent cannot assert an atomic formula before opponent has asserted it."))
 
-(defvar rule-d10-literal
-  (make-rule :name d10-literal
-	     :condition (and (evenp current-position)
+(defparameter rule-d10-literal
+  (make-rule :name "d10-literal"
+	     :precondition (and (evenp current-position)
 			     (non-symbolic-attack-formula? current-statement)
 			     (atomic-formula? current-statement))
 	     :body (some-move #'(lambda (move)
@@ -295,31 +295,31 @@
 					     (equal-statements? current-statement
 								(unnegate (move-statement move)))))))
 			      dialogue)
-	     :failure-message "Proponent may assert an atomic formula only if Opponent has either asserted that formula, or its negation, earlier in the dialogue."))
+	     :description "Proponent may assert an atomic formula only if Opponent has either asserted that formula, or its negation, earlier in the dialogue."))
 
-(defvar rule-d11
+(defparameter rule-d11
   (make-defensive-rule 
-   :name d11
+   :name "d11"
    :body (let ((most-recent (most-recent-open-attack dialogue)))
 	   (or (null most-recent)
 	       (= most-recent current-reference)))
-   :failure-message "You must defend against the most recent open attack."))
+   :description "You must defend against the most recent open attack."))
 
-(defvar rule-d12
+(defparameter rule-d12
   (make-defensive-rule
-   :name d12
+   :name "d12"
    :body (null (select-moves #'(lambda (move)
 				 (and (not (initial-move? move))
 				      (defensive-move? move)
 				      (= (move-reference move)
 					 current-reference)))
 			     dialogue))
-   :failure-message "Attacks may be answered at most once."))
+   :description "Attacks may be answered at most once."))
 
-(defvar rule-d13
+(defparameter rule-d13
   (make-offensive-rule
-   :name d13
-   :condition (eq current-player 'o)
+   :name "d13"
+   :precondition (eq current-player 'o)
    :body (null (select-moves #'(lambda (move)
 				 (and (not (initial-move? move))
 				      (opponent-move? move)
@@ -327,18 +327,18 @@
 				      (= (move-reference move)
 					 current-reference)))
 			     dialogue))
-   :failure-message "A P-assertion may be attacked at most once."))
+   :description "A P-assertion may be attacked at most once."))
 
-(defvar rule-e
-  (make-rule :name e
-	     :condition (eq current-player 'o)
+(defparameter rule-e
+  (make-rule :name "e"
+	     :precondition (eq current-player 'o)
 	     :body (= current-reference (1- current-position))
-	     :failure-message "Opponent must react to the most recent statement by Proponent."))
+	     :description "Opponent must react to the most recent statement by Proponent."))
 
-(defvar rule-no-repetitions
+(defparameter rule-no-repetitions
   (make-rule
-   :name no-repetitions
-   :condition t
+   :name "no-repetitions"
+   :precondition t
    :body (every-move #'(lambda (move)
 			 (or (initial-move? move)
 			     (not (eq (move-player move) current-player))
@@ -347,112 +347,130 @@
 			     (not (equal-statements? (move-statement move)
 						     current-statement))))
 		     dialogue)
-   :failure-message "You may not make the exact same move (same stance, same reference, same statement) twice."))
+   :description "You may not make the exact same move (same stance, same reference, same statement) twice."))
 
-(defvar d-dialogue-rules (append argumentation-forms 
-				 (list rule-d00-atomic
-				       rule-d00-proponent
-				       rule-d00-opponent
-				       rule-d01-composite
-				       rule-d02-attack
-				       rule-d10
-				       rule-d11
-				       rule-d12
-				       rule-d13)))
+(defparameter d-dialogue-rules 
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms 
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      rule-d11
+				      rule-d12
+				      rule-d13))))
 
-(defvar e-dialogue-rules (append d-dialogue-rules (list rule-e)))
+(defparameter e-dialogue-rules
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms 
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      rule-d11
+				      rule-d12
+				      rule-d13
+				      rule-e))))
 
-(defvar classical-dialogue-rules
-  (append argumentation-forms
-	  (list rule-d00-atomic
-		rule-d00-proponent
-		rule-d00-opponent
-		rule-d01-composite
-		rule-d02-attack
-		rule-d10
-		;; rule-d11
-		;; rule-d12
-		rule-d13
-		rule-e)))
-		;; rule-no-repetitions)))
+(defparameter classical-dialogue-rules
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms 
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      ; rule-d11
+				      ; rule-d12
+				      rule-d13
+				      rule-e))))
 
-(defvar faux-classical-dialogue-rules
-  (append argumentation-forms
-	  (list rule-d00-atomic
-		rule-d00-proponent
-		rule-d00-opponent
-		rule-d01-composite
-		rule-d02-attack
-		rule-d10
-		;; rule-d11
-		;; rule-d12
-		rule-d13
-		)))
+(defparameter nearly-classical-dialogue-rules
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      ;; rule-d11
+				      ;; rule-d12
+				      rule-d13
+				      ))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Some variants of Felscher's rules
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar rule-d12-two-times
+(defparameter rule-d12-two-times
   (make-defensive-rule
-   :name d12
+   :name "d12"
    :body (every-move #'(lambda (move)
 			 (or (initial-move? move)
 			     (attacking-move? move)
 			     (/= (move-reference move)
 				 current-reference)))
 		     dialogue)
-   :failure-message "Attacks may be answered at most twice."))
+   :description "Attacks may be answered at most twice."))
 
-(defvar rule-d13-two-times
+(defparameter rule-d13-two-times
   (make-offensive-rule
-   :name d13-two-times
-   :condition (eq current-player 'o)
+   :name "d13-two-times"
+   :precondition (eq current-player 'o)
    :body (length-at-most (moves-referring-to dialogue current-reference) 2)
-   :failure-message "A P-assertion may be attacked at most twice."))
+   :description "A P-assertion may be attacked at most twice."))
 
-(defvar rule-d13-three-times
+(defparameter rule-d13-three-times
   (make-offensive-rule
-   :name d13-three-times
-   :condition (eq current-player 'o)
+   :name "d13-three-times"
+   :precondition (eq current-player 'o)
    :body (length-at-most (moves-referring-to dialogue current-reference) 3)
-   :failure-message "A P-assertion may be attacked at most twice."))
+   :description "A P-assertion may be attacked at most twice."))
 
-(defvar d-dialogue-rules-literal-d10
-  (append argumentation-forms
-	  (list rule-d00-atomic
-		rule-d00-proponent
-		rule-d00-opponent
-		rule-d01-composite
-		rule-d02-attack
-		rule-d10-literal
-		rule-d11
-		rule-d12
-		rule-d13)))
+(defparameter d-dialogue-rules-literal-d10
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10-literal
+				      rule-d11
+				      rule-d12
+				      rule-d13))))
 
-(defvar d-dialogue-rules-minus-d11
-  (append argumentation-forms
-	  (list rule-d00-atomic
-		rule-d00-proponent
-		rule-d00-opponent
-		rule-d01-composite
-		rule-d02-attack
-		rule-d10
-		;; rule-d11
-		rule-d12
-		rule-d13)))
+(defparameter d-dialogue-rules-minus-d11
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      ;; rule-d11
+				      rule-d12
+				      rule-d13))))
 
-(defvar d-dialogue-rules-minus-d12
-  (append argumentation-forms
-	  (list rule-d00-atomic
-		rule-d00-proponent
-		rule-d00-opponent
-		rule-d01-composite
-		rule-d02-attack
-		rule-d10
-		rule-d11
-		;; rule-d12
-		rule-d13)))
+(defparameter d-dialogue-rules-minus-d12
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      rule-d11
+				      ;; rule-d12
+				      rule-d13))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Playing games with Felscher's rules
