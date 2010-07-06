@@ -192,10 +192,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (typep thing 'equivalence))
 
 (defmethod print-object ((equiv equivalence) stream)
-  (format stream
-	  "(~A ↔ ~A)"
-	  (lhs equiv)
-	  (rhs equiv)))
+  (format stream "↔"))
 
 (defun make-equivalence (lhs rhs)
   (make-instance 'equivalence
@@ -276,10 +273,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (typep thing 'binary-conjunction))
 
 (defmethod print-object ((con binary-conjunction) stream)
-  (format stream 
-	  "(~A ⋀ ~A)"
-	  (lhs con)
-	  (rhs con)))
+  (format stream "⋀"))
 
 (defclass multiple-arity-conjunction (multiple-arity-connective-formula)
   nil)
