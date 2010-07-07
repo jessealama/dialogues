@@ -52,11 +52,12 @@
        (¬ (¬ p))))
     
     (defparameter scott-formula 
-      (-> (-> double-negation-elimination excluded-middle)
-	  weak-excluded-middle))
+      (-> (-> (-> (¬ (¬ p)) p) (v p (¬ p)))
+	  (v (¬ p) (¬ (¬ p)))))
 
     (defparameter smetanich-formula 
-      (-> (-> (¬ q) p) peirce-formula))
+      (-> (-> (¬ q) p) 
+	  (-> (-> (-> p q) p) p)))
     
     (defparameter de-morgan-not-and-implies-or
       (-> (¬ (& p q))
