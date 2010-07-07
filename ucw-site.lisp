@@ -914,11 +914,10 @@ signature.")
 			 :signature new-sig))))))
 
 (defun render-rule-editor (game)
-  (declare (ignore game))
-  (<:blockquote
-   (<:em "(This functionality is not yet implemented.)"))
-  (<ucw:submit :action (+ 1 1)
-	       :value "Edit the dialogue rules"))
+  (<:p "The ruleset currently in force in the game is:")
+  (let ((ruleset (dialogue-rules game)))
+    (<:blockquote
+     (<:p (<:em "Description:") " " (<:as-html (description ruleset))))))
 
 (defun render-quit-form ()
   (<:p "Quitting the game will discard whatever progress you've made so far and return you to the initial page.")
@@ -952,8 +951,8 @@ signature.")
       ;; 	(render-rewind-form game play-style))
       ;; (<:h1 "...or edit the signature...")
       ;; (render-signature-editor game)
-      ;; (<:h1 "...or edit the dialogue rules...")
-      ;; (render-rule-editor game)
+      (<:h1 "...or edit the dialogue rules...")
+      (render-rule-editor game)
       (<:h1 "...or quit.")
       (render-quit-form)))
 
