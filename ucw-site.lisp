@@ -1064,13 +1064,11 @@ signature.")
 (defun render-game (game &key indicate-alternatives
 		              play-style
 		              moves-to-highlight)
-  (<:p "Signature: "
-       (render-signature (signature game)))
+  (render-signature (dialogue-signature game))
   (let ((ruleset (dialogue-rules game)))
-    (<:p "Ruleset: "
-	 (<:as-html (name ruleset))
-	 ": "
+    (<:p (<:em "Ruleset: ")
 	 (<:as-html (description ruleset))))
+  (<:hr)
   (<:table 
    (<:colgroup :span "2" :align "center")
    (<:colgroup :span "3" :align "left")
