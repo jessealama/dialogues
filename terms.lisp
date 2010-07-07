@@ -36,14 +36,14 @@
   nil)
 
 (defun unsorted-variable? (thing)
-  (typep thing 'unsorted-variable?))
+  (typep thing 'unsorted-variable))
 
 (defclass sorted-variable (variable-term)
   ((sort :initarg :sort
 	 :accessor variable-sort)))
 
 (defun sorted-variable? (thing)
-  (typep thing 'sorted-variable?))
+  (typep thing 'sorted-variable))
 
 (defgeneric make-unsorted-variable (source))
 
