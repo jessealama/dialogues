@@ -1442,20 +1442,24 @@ signature.")
 		 (<ucw:option :value 'play-as-proponent-random-opponent
 			      "Play as Proponent (Opponent will choose its moves randomly)")
 		 (<ucw:option :value 'play-as-opponent-random-proponent
-			      "Play as Opponent (Propnent will choose its moves randomly)"))))))
+			      "Play as Opponent (Propnent will choose its moves randomly)")))))
        (<:tfoot
-	(<:tr
-	  (<:td :colspan "2" (<:em (<:b "About the signature:")) " You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)  You will not be able to edit the signature once the game begins."))
 	(<:tr 
-	  (<:td :colspan "2" (<:em (<:b "About the formula:")) " If the text box is not empty, its contents will be the initial formula of the game.  If the text box is empty, then the selected \"famous formula\" will be." 
+	  (<:td :colspan "2"
+		(<:em (<:b "About the signature:")) " You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)  You will not be able to edit the signature once the game begins."))
+	(<:tr 
+	  (<:td :colspan "2"
+		(<:em (<:b "About the formula:")) " If the text box is not empty, its contents will be the initial formula of the game.  If the text box is empty, then the selected \"famous formula\" will be." 
 		(formula-guide)))
 	(<:tr 
-	 (<:td :colspan "2" (<:em (<:b "About the translation:")) " The default is the
+	 (<:td :colspan "2"
+	       (<:em (<:b "About the translation:")) " The default is the
 identity translation, so that whatever formula is chosen (or whatever
 formula is entered into the text box) will be, verbatim, the formula
 with which the game begins."))
 	(<:tr
-	 (<:td :colspan "2" (<:em (<:b "About the rules:")) " The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985.  They probably were introduced earlier.  You will be able to alter your choice (in a limited way) after the game has begun."))))))))
+	 (<:td :colspan "2"
+	       (<:em (<:b "About the rules:")) " The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985.  You will be able to alter your choice of rules after the game has begun.")))))))))
 
 (defmethod render ((self start-game-component))
   (with-slots ((sig signature))
