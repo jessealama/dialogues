@@ -5,8 +5,7 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (let ((p (make-atomic-formula 'p))
 	(q (make-atomic-formula 'q))
-	(r (make-atomic-formula 'r))
-	(s (make-atomic-formula 's)))
+	(r (make-atomic-formula 'r)))
     
     (defparameter peirce-formula 
       (-> (-> (-> p q) p) p))
