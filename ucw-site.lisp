@@ -147,14 +147,14 @@
 
 (defmethod render-signature ((sig finite-variable-propositional-signature))
   (with-slots (predicates) sig
-    (<:p "Predicates: "
-      (if (null predicates)
-	  (<:em "(none)")
-	  (let ((first (car predicates)))
-	    (<:em (<:as-html first))
-	    (dolist (pred (cdr predicates))
-	      (<:as-is ", ")
-	      (<:em (<:as-html pred))))))))
+    (<:em "Predicates: ")
+    (if (null predicates)
+	(<:em "(none)")
+	(let ((first (car predicates)))
+	  (<:em (<:as-html first))
+	  (dolist (pred (cdr predicates))
+	    (<:as-is ", ")
+	    (<:em (<:as-html pred)))))))
 
 (defentry-point "" (:application *dialogue-application*)
     ()
@@ -170,7 +170,7 @@
   (:default-initargs
       :title "play a lorenzen dialogue game"))
 
-(defvar famous-formulas
+(defparameter famous-formulas
   `(("Peirce's formula" "peirce-formula" ,peirce-formula)
     ("Excluded middle" "excluded-middle" ,excluded-middle)
     ("Weak excuded middle" "weak-excluded-middle" ,weak-excluded-middle)
