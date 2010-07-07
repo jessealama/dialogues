@@ -498,11 +498,11 @@ Proponent and Opponent.")
   (<:br)
   (render-defenses game)
   (<:p (<:em "Note:") " The list of moves available to each player in
-the following list is determined by the set of subformulas of all
-formulas played so far. When using the usual rules for propositional
-dialogue games (Felscher's D-rules and E-rules, for example), this is
-sufficient: every assertion of a dialogue game is a subformula of the
-initial formula, or is one of the symbolic
+the following list is determined by the set of proper subformulas of
+all formulas played so far. When using the usual rules for
+propositional dialogue games (Felscher's D-rules and E-rules, for
+example), this is sufficient: every assertion of a dialogue game is a
+subformula of the initial formula, or is one of the symbolic
 attacks (" (<:as-is "&and;<sub>L</sub>, &and;<sub>R</sub>, and
 ?)") ". If one modifies the rules, this structural fact about formulas
 occuring in a dialogue game may no longer hold, so that the list below
