@@ -53,11 +53,9 @@
 		    (belongs-to-signature? sig arg))
 		args))))
 
-(unless (boundp 'contradiction)
-  (defconstant contradiction (make-atomic-formula '⊥)))
+(defparameter contradiction (make-atomic-formula '⊥))
 
-(unless (boundp 'top)
-  (defconstant top (make-atomic-formula '⊤)))
+(defparameter top (make-atomic-formula '⊤))
 
 (defun make-equation (lhs rhs)
   (make-atomic-formula '= lhs rhs))
