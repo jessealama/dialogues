@@ -213,27 +213,27 @@
    :description "The asserted statement is not an instance of the original existential generalization."))
 
 (defparameter argumentation-forms (list rule-d01-alternating
-				  rule-d01-conjunction
-				  rule-d01-left-conjunct
-				  rule-d01-right-conjunct
-				  rule-d01-disjunction
-				  rule-d01-which-disjunct
-				  rule-d01-implication
-				  rule-d01-negation
-				  rule-d01-universal
-				  rule-d01-term
-				  rule-d01-which-instance
-				  rule-d01-existential
-				  rule-d01-formula
-				  rule-d02-alternating
-				  rule-d02-formula
-				  rule-d02-left-conjunct
-				  rule-d02-right-conjunct
-				  rule-d02-which-disjunct
-				  rule-d02-implication
-				  rule-d02-negation
-				  rule-d02-universal
-				  rule-d02-existential))
+					rule-d01-conjunction
+					rule-d01-left-conjunct
+					rule-d01-right-conjunct
+					rule-d01-disjunction
+					rule-d01-which-disjunct
+					rule-d01-implication
+					rule-d01-negation
+					rule-d01-universal
+					rule-d01-term
+					rule-d01-which-instance
+					rule-d01-existential
+					rule-d01-formula
+					rule-d02-alternating
+					rule-d02-formula
+					rule-d02-left-conjunct
+					rule-d02-right-conjunct
+					rule-d02-which-disjunct
+					rule-d02-implication
+					rule-d02-negation
+					rule-d02-universal
+					rule-d02-existential))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Dialogue rules
