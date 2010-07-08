@@ -1499,6 +1499,10 @@ that all the rules in your edited ruleset are satisfied.")
 		 (<ucw:option :value 'play-as-opponent-random-proponent
 			      "Play as Opponent (Propnent will choose its moves randomly)")))))
        (<:tfoot
+	(<:tr
+	 (<:td :colspan "2"
+	       (<:em (<:b "About Lorenzen dialogue games:")) " Lorenzen
+dialogue games were initially designed as a formalism for capturing intuitionistic validity using games.  Since their invention and development in the late 1950s and early 1960s, they have been extended recently to capture different notions of validity, such as classical logic, modal logics, linear logic, etc.  For more information, a valuable online resource is " (<:a :href "http://plato.stanford.edu/entries/logic-dialogical/" "the entry on dialogue games") " in the " (<:em "Stanford Encyclopedia of Philosophy")))
 	(<:tr 
 	  (<:td :colspan "2"
 		(<:em (<:b "About the signature:")) " You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)  You will not be able to edit the signature once the game begins."))
