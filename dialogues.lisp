@@ -322,10 +322,10 @@ DIALOGUE assuming that MOVE is added to the end of the list of plays
 of DIALOGUE.  (It is unspecified whether an actually new, temporary
 dialogue will be created as an intermediate step in the
 calculuation.)"
-  (evaluate-all-rules (rules dialogue)
+  (evaluate-all-rules (rules (dialogue-rules dialogue))
 		      dialogue
-		      (dialogue-length dialogue)
 		      (move-player move)
+		      (dialogue-length dialogue)
 		      (move-statement move)
 		      (move-stance move)
 		      (move-reference move)))
