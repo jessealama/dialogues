@@ -913,11 +913,67 @@ signature.")
 		   (call 'signature-editor
 			 :signature new-sig))))))
 
-(defun render-rule-editor (game)
-  (<:p "The ruleset currently in force in the game is:")
-  (let ((ruleset (dialogue-rules game)))
+(defcomponent rule-editor (game-component)
+  ())
+
+(defun render-broken-game (game)
+  (declare (ignore game))
+  (<:p "something's broken"))
+
+(defmethod render ((self rule-editor))
+  (let* ((game (game self))
+	 (ruleset (dialogue-rules game))
+	 (rules (rules ruleset))
+	 (ok? (eval-entire-dialogue game)))
+    (unless ok?
+      (<:h1 "The game is incoherent with respect to the current ruleset")
+      (<:p "With the current ruleset, the game is incoherent.  Here is
+      a listing of the game, annotated with the violating moves:")
+      (render-broken-game game))
+    (<:h1 "The current ruleset")
+    (<:p "A concise description of the ruleset currently in force in the game:")
     (<:blockquote
-     (<:p (<:em "Description:") " " (<:as-html (description ruleset))))))
+     (<:as-html (description ruleset)))
+    (when ok?
+      (<:p "Since the game is well-formed with the ruleset currently
+	in force, you are welcome to " (<ucw:a :action (answer ruleset)
+					       "go back and continue playing the game")))
+    (<:p "You are welcome to look more carefully at the rules and edit
+    them, if you wish.  Here are the rules that constitute the current
+    ruleset:")
+    (if (null rules)
+	(<:blockquote
+	 "(none)")
+	(<:table
+	 (<:thead
+	  (<:tr
+	   (<:th "Name")
+	   (<:th "Description")))
+	 (<:tbody
+	  (dolist (rule rules)
+	    (with-slots (name description) 
+		rule
+	      (<:tr
+	       (<:td :align "right" (<:as-html name))
+	       (<:td :align "left" (<:as-html description))))))))))   
+
+(defun render-rule-editor (game)
+  (<ucw:form :action (setf (dialogue-signature game)
+			     (call 'rule-editor
+				   :game game))
+    (<:p "You are welcome to change the game's ruleset.  The ruleset
+that is currently in force can be found above, in the layout of the
+game so far.")
+    (<:p "If you proceed to edit the ruleset, you will be able to choose
+from a pre-compiled list of notable rulesets, or, if you like, you can
+construct your own custom ruleset.  Keep in mind that altering the
+ruleset could very well render the current game incoherent (that is,
+at least one of the game's moves violates at least one rule in the
+ruleset).  If the game becomes incoherent owing to your ruleset edits,
+you will be able to see the problematic moves and continue editing the
+ruleset.  Before continuing playing the game, you will need to ensure
+that all the rules in your edited ruleset are satisfied.")
+    (<:submit :value "Edit the ruleset")))
 
 (defun render-quit-form ()
   (<:p "Quitting the game will discard whatever progress you've made so far and return you to the initial page.")
@@ -1424,7 +1480,7 @@ signature.")
 		(<ucw:option :value #'contrapositivify
 			     "Take the contrapositive of all implications"))))
        (<:tr :style "background-color:#7B942E;"
-	(<:td "Choose the dialogue rules to be used during the game:")
+	(<:td "Choose the ruleset to be used during the game:")
 	(<:td (<ucw:select :id "selected-rules"
 			   :size 1
 			   :accessor selected-rules
