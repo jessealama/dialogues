@@ -926,41 +926,43 @@ signature.")
   (<:p "something's broken"))
 
 (defmethod render ((self rule-editor))
-  (let* ((game (game self))
-	 (ruleset (dialogue-rules game))
-	 (rules (rules ruleset))
-	 (ok? (eval-entire-dialogue game)))
-    (unless ok?
-      (<:h1 "The game is incoherent with respect to the current ruleset")
-      (<:p "With the current ruleset, the game is incoherent.  Here is
+  (let ((game (game self)))
+    (if (null game) ;; we need to edit the initial ruleset
+	(<:h1 "ok, let's edit the rules!")
+	(let ((ruleset (dialogue-rules game))
+	      (rules (rules ruleset))
+	      (ok? (eval-entire-dialogue game)))
+	  (unless ok?
+	    (<:h1 "The game is incoherent with respect to the current ruleset")
+	    (<:p "With the current ruleset, the game is incoherent.  Here is
       a listing of the game, annotated with the violating moves:")
-      (render-broken-game game))
-    (<:h1 "The current ruleset")
-    (<:p "A concise description of the ruleset currently in force in the game:")
-    (<:blockquote
-     (<:as-html (description ruleset)))
-    (when ok?
-      (<:p "Since the game is well-formed with the ruleset currently
+	    (render-broken-game game))
+	  (<:h1 "The current ruleset")
+	  (<:p "A concise description of the ruleset currently in force in the game:")
+	  (<:blockquote
+	   (<:as-html (description ruleset)))
+	  (when ok?
+	    (<:p "Since the game is well-formed with the ruleset currently
 	in force, you are welcome to " (<ucw:a :action (answer ruleset)
 					       "go back and continue playing the game")))
-    (<:p "You are welcome to look more carefully at the rules and edit
+	  (<:p "You are welcome to look more carefully at the rules and edit
     them, if you wish.  Here are the rules that constitute the current
     ruleset:")
-    (if (null rules)
-	(<:blockquote
-	 "(none)")
-	(<:table
-	 (<:thead
-	  (<:tr
-	   (<:th "Name")
-	   (<:th "Description")))
-	 (<:tbody
-	  (dolist (rule rules)
-	    (with-slots (name description) 
-		rule
-	      (<:tr
-	       (<:td :align "right" (<:as-html name))
-	       (<:td :align "left" (<:as-html description))))))))))   
+	  (if (null rules)
+	      (<:blockquote
+	       "(none)")
+	      (<:table
+	       (<:thead
+		(<:tr
+		 (<:th "Name")
+		 (<:th "Description")))
+	       (<:tbody
+		(dolist (rule rules)
+		  (with-slots (name description) 
+		      rule
+		    (<:tr
+		     (<:td :align "right" (<:as-html name))
+		     (<:td :align "left" (<:as-html description))))))))))))
 
 (defun render-rule-editor (game)
   (<ucw:form :action (setf (dialogue-signature game)
