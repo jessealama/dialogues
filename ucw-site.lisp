@@ -25,7 +25,8 @@
 (defclass game-component ()
   ((game :accessor game
 	 :initarg :game
-	 :type dialogue)))
+	 :initform nil
+	 :type (or (eql nil) dialogue))))
 
 (defclass play-style-component ()
   ((play-style :accessor play-style
