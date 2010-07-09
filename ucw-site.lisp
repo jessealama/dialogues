@@ -1525,7 +1525,10 @@ formula is entered into the text box) will be, verbatim, the formula
 with which the game begins."))
 	(<:tr
 	 (<:td :colspan "2"
-	       (<:em (<:b "About the rules:")) " The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985.  You will be able to alter your choice of rules after the game has begun.")))))))))
+	       (<:em (<:b "About the rules:")) " The rulesets in the
+above menu are some notable cases that have some logical content.  If
+you like, you can " (<ucw:a :action
+			    (setf ruleset (call 'rule-editor))					  "create a custom ruleset") ".  The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985.  You will be able to alter your choice of rules after the game has begun.")))))))))
 
 (defmethod render ((self start-game-component))
   (with-slots ((sig signature))
