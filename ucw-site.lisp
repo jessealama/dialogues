@@ -4,6 +4,10 @@
 
 (defvar *maintainer-email* "jesse.alama@gmail.com")
 
+(defclass ruleset-component ()
+  ((ruleset :initarg :ruleset
+	    :accessor ruleset)))
+
 (defclass signature-component ()
   ((signature :initarg :signature
 	      :type finite-variable-propositional-signature
@@ -913,7 +917,7 @@ signature.")
 		   (call 'signature-editor
 			 :signature new-sig))))))
 
-(defcomponent rule-editor (game-component)
+(defcomponent rule-editor (game-component ruleset-component)
   ())
 
 (defun render-broken-game (game)
@@ -1347,7 +1351,7 @@ that all the rules in your edited ruleset are satisfied.")
 			    :initarg :formula-entry-component
 			    :accessor formula-entry-component)))
 
-(defcomponent formula-entry-component (signature-component)
+(defcomponent formula-entry-component (signature-component ruleset-component)
   ())
 
 (defparameter available-rulesets
