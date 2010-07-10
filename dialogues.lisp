@@ -192,61 +192,81 @@ attacks which, being symbols, do qualify as terms."
    (description :initarg :description
 		:accessor description
 		:initform "(no description was supplied)"
-		:type string)
-   (precondition-form :initarg :precondition
-		      :accessor precondition-form)
-   (precondition-fn :initarg :precondition-fn
-		    :accessor precondition-fn
-		    :type function
-		    :documentation "A function of six arguments (DIALOGUE CURRENT-PLAYER CURRENT-POSITION CURRENT-STATEMENT CURRENT-STANCE CURRENT-REFERENCE).  It if evaluates to NIL when given these inputs, which are understood as a dialogue together with a proposed move to place at the end of the dialogue, it is interpreted as failing to satisfy the condition of the rule.")
-   (body-form :initarg :body
-	      :accessor body-form)
-   (body :initarg :body-fn
-	 :accessor body-fn
-	 :type function
-	 :documentation "A function of six arguments (DIALOGUE CURRENT-PLAYER CURRENT-POSITION CURRENT-STATEMENT CURRENT-STANCE CURRENT-REFERENCE).  It if evaluates to NIL when given these inputs, which are understood as a dialogue together with a proposed move to place at the end of the dialogue, it is interpreted as satisfying the \"body\" of the rule in question.  The function can assume that the predicate defined in the PRECONDITION slot holds (so that, e.g., certain objects that are tested for existence by the condition can be assumed to exist by this function).")))
+		:type string)))
 
 (defmethod print-object ((rule dialogue-rule) stream)
   (print-unreadable-object (rule stream :type t)
-    (with-slots (name description precondition-form body-form)
-	rule
-      (format stream "Name: ~A~%" name)
-      (format stream "Description: ~A~%" description)
-      (format stream "Precondition: ~A~%" precondition-form)
-      (format stream "Body: ~A~%" body-form))))
+    (format stream "~A" (name rule))))
 
-(defmacro make-rule (&key name precondition body description)
-  (let ((precondition-fn `(lambda (dialogue current-player 
-				   current-position
-				   current-statement
-				   current-stance
-				   current-reference)
-			    (declare (ignorable dialogue
-						current-player
-						current-position
-						current-statement
-						current-stance
-						current-reference))
-			    ,precondition))
-	(body-fn `(lambda (dialogue current-player 
-			   current-position
-			   current-statement
-			   current-stance
-			   current-reference)
-		    (declare (ignorable dialogue
-					current-player
-					current-position
-					current-statement
-					current-stance
-					current-reference))
-		    ,body)))
-    `(make-instance 'dialogue-rule
+(defmacro make-structural-rule (&key name description predicate)
+  (let ((pred-as-fun `(lambda (dialogue &key final-move-only)
+			(declare (ignorable dialogue))
+			,predicate)))
+    `(make-instance 'structural-rule
 		    :name ,name
 		    :description ,description
-		    :precondition (quote ,precondition)
-		    :precondition-fn ,precondition-fn
-		    :body (quote ,body)
-		    :body-fn ,body-fn)))
+		    :predicate ,pred-as-fun)))
+
+(defclass particle-rule (dialogue-rule)
+  ((precondition :initarg :precondition
+		 :accessor precondition
+		 :type function
+		 :documentation "A function of six arguments (DIALOGUE CURRENT-PLAYER CURRENT-POSITION CURRENT-STATEMENT CURRENT-STANCE CURRENT-REFERENCE).  It if evaluates to NIL when given these inputs, which are understood as a dialogue together with a proposed move to place at the end of the dialogue, it is interpreted as failing to satisfy the condition of the rule.")
+   (body :initarg :body
+	 :accessor body
+	 :type function
+	 :documentation "A function of six arguments (DIALOGUE CURRENT-PLAYER CURRENT-POSITION CURRENT-STATEMENT CURRENT-STANCE CURRENT-REFERENCE).  It if evaluates to NIL when given these inputs, which are understood as a dialogue together with a proposed move to place at the end of the dialogue, it is interpreted as satisfying the \"body\" of the rule in question.  The function can assume that the predicate defined in the PRECONDITION slot holds (so that, e.g., certain objects that are tested for existence by the condition can be assumed to exist by this function).")))
+
+(defun particle-rule? (thing)
+  (typep thing 'particle-rule))
+
+(defmacro make-particle-rule (&key name description precondition body)
+  `(make-instance 'particle-rule
+		  :name ,name
+		  :description ,description
+		  :precondition (lambda (dialogue 
+					 current-player
+					 current-position
+					 current-statement
+					 current-stance
+					 current-reference)
+				  (declare (ignorable dialogue
+						      current-player
+						      current-position
+						      current-statement
+						      current-stance
+						      current-reference))
+				  ,precondition)
+		  :body (lambda (dialogue 
+				 current-player
+				 current-position
+				 current-statement
+				 current-stance
+				 current-reference)
+			  (declare (ignorable dialogue
+					      current-player
+					      current-position
+					      current-statement
+					      current-stance
+					      current-reference))
+			  ,body)))
+
+(defclass structural-rule (dialogue-rule)
+  ((predicate :initarg :predicate
+	      :type function
+	      :accessor predicate)))	      
+
+(defun structural-rule? (thing)
+  (typep thing 'structural-rule))
+
+;; (defmethod print-object ((rule dialogue-rule) stream)
+;;   (print-unreadable-object (rule stream :type t)
+;;     (with-slots (name description precondition-form body-form)
+;; 	rule
+;;       (format stream "Name: ~A~%" name)
+;;       (format stream "Description: ~A~%" description)
+;;       (format stream "Precondition: ~A~%" precondition-form)
+;;       (format stream "Body: ~A~%" body-form))))
 
 (defun attack? (stance)
   (eq stance 'a))
@@ -258,21 +278,23 @@ attacks which, being symbols, do qualify as terms."
 			            (precondition t)
 			            body
 				    description)
-  `(make-rule :name ,name
-	      :precondition (and (defense? current-stance)
-				 ,precondition)
-	      :body ,body
-	      :description ,description))
+  `(make-particle-rule
+    :name ,name
+    :precondition (and (defense? current-stance)
+		       ,precondition)
+    :body ,body
+    :description ,description))
 
 (defmacro make-offensive-rule (&key name
 			            (precondition t)
 			            body
 			            description)
-  `(make-rule :name ,name
-	      :precondition (and (attack? current-stance)
-				 ,precondition)
-	      :body ,body
-	      :description ,description))
+  `(make-particle-rule
+    :name ,name
+    :precondition (and (attack? current-stance)
+		       ,precondition)
+    :body ,body
+    :description ,description))
 
 (defmacro with-original-statement ((original-statement) &body body)
   (let ((attack (gensym))
@@ -314,26 +336,26 @@ attacks which, being symbols, do qualify as terms."
 	    (dolist (rule rules)
 	      (format stream "* ~A~%" rule)))))))
 
-(defun eval-ruleset-on-proposed-move (dialogue move)
-  "Determine whether every rule in RULESET passes, given DIALOGUE and
-a proposed move MOVE.  MOVE is proposed in the sense that MOVE does
-not actually belong to the dialogue; the ruleset will be tested on
-DIALOGUE assuming that MOVE is added to the end of the list of plays
-of DIALOGUE.  (It is unspecified whether an actually new, temporary
-dialogue will be created as an intermediate step in the
-calculuation.)"
-  (evaluate-all-rules (rules (dialogue-rules dialogue))
-		      dialogue
-		      (move-player move)
-		      (dialogue-length dialogue)
-		      (move-statement move)
-		      (move-stance move)
-		      (move-reference move)))
+(defun eval-entire-dialogue (dialogue &key structural-rules-from-end)
+  (loop 
+     with failures = nil
+     with all-pass = t
+     with ruleset = (dialogue-rules dialogue)
+     for rule in (rules ruleset)
+     do
+       (let (rule-passes)
+	 (if (structural-rule? rule)
+	     (setf rule-passes (evaluate-structural-rule rule dialogue :from-end structural-rules-from-end))
+	     (setf rule-passes (evaluate-particle-rule rule dialogue)))
+	 (unless rule-passes
+	   (setf all-pass nil)
+	   (push rule failures)))
+     finally (return (values all-pass failures))))
 
-(defun eval-entire-dialogue (dialogue)
-  (every #'(lambda (move)
-	     (eval-ruleset-on-proposed-move dialogue move))
-	 (dialogue-plays dialogue)))
+(defun eval-provisional-dialogue (dialogue player statement stance reference)
+  (let* ((provisional-move (make-move player statement stance reference))
+	 (provisional-dialogue (provisionally-extend-dialogue dialogue provisional-move)))
+    (eval-entire-dialogue provisional-dialogue)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Dialogues
@@ -451,25 +473,19 @@ calculuation.)"
 				    (make-defense player statement ref)
 				    pos))
 
-(defun extend-dialogue (dialogue player stance statement reference)
-  (add-move-to-dialogue dialogue
-			(make-move player statement stance reference))
-  dialogue)
+(defun provisionally-extend-dialogue (dialogue move)
+  "Make a new dialogue from DIALOGUE that has MOVE at the end."
+  (make-instance 'dialogue
+		 :plays (append (dialogue-plays dialogue)
+				(list move))
+		 :rules (dialogue-rules dialogue)
+		 :signature (dialogue-signature dialogue)))
 
 (defun copy-dialogue (dialogue)
   (make-instance 'dialogue
 		 :signature (dialogue-signature dialogue)
 		 :plays (copy-list (dialogue-plays dialogue))
 		 :rules (dialogue-rules dialogue)))						   
-
-(defun freshly-extend-dialogue (dialogue player stance statement reference)
-  (let ((copy (copy-dialogue dialogue)))
-    (extend-dialogue copy
-		     player
-		     stance
-		     statement
-		     reference)
-    copy))
 
 (defun equal-dialogues? (dialogue-1 dialogue-2)
   (let ((signature-1 (dialogue-signature dialogue-1))
@@ -482,14 +498,14 @@ calculuation.)"
 		     (dialogue-plays dialogue-1)
 		     (dialogue-plays dialogue-2)))))
 
-(defun some-move (predicate dialogue)
-  (some predicate (dialogue-plays dialogue)))
+(defun some-move (predicate dialogue &key end)
+  (some predicate (subseq (dialogue-plays dialogue) 0 end)))
 
-(defun every-move (predicate dialogue)
-  (every predicate (dialogue-plays dialogue)))
+(defun every-move (predicate dialogue &key end)
+  (every predicate (subseq (dialogue-plays dialogue) 0 end)))
 
-(defun select-moves (predicate dialogue)
-  (remove-if-not predicate (dialogue-plays dialogue)))
+(defun select-moves (predicate dialogue &key end)
+  (remove-if-not predicate (dialogue-plays dialogue) :end end))
 
 (defun nth-move (dialogue n)
   (nth n (dialogue-plays dialogue)))
@@ -512,24 +528,26 @@ calculuation.)"
 (defun defensive-moves (dialogue)
   (remove-if-not #'defensive-move? (dialogue-plays dialogue)))
 
-(defun moves-referring-to (dialogue reference)
+(defun moves-referring-to (dialogue reference &key end)
   (select-moves #'(lambda (move)
 		    (unless (initial-move? move)
 		      (= (move-reference move) reference)))
-		dialogue))
+		dialogue
+		:end end))
 
-(defun attacks-referring-to (dialogue reference)
+(defun attacks-referring-to (dialogue reference &key end)
   (select-moves #'(lambda (move)
 		    (unless (initial-move? move)
 		      (when (attacking-move? move)
 			(= (move-reference move) reference))))
-		dialogue))
+		dialogue
+		:end end))
 
 (defun closed-attack-indices (dialogue)
   (mapcar #'move-reference (defensive-moves dialogue)))
 
-(defun open-attack-indices (dialogue)
-  (let ((moves (dialogue-plays dialogue)))
+(defun open-attack-indices (dialogue &key end)
+  (let ((moves (subseq (dialogue-plays dialogue) 0 end)))
     (when moves
       (do* ((i 0 (1+ i))
 	    (move (car moves) (car moves-tail))
@@ -541,8 +559,8 @@ calculuation.)"
 			(remove (move-reference move) result))))
 	   ((null moves-tail) result)))))
 
-(defun most-recent-open-attack (dialogue)
-  (let ((open-attacks (open-attack-indices dialogue)))
+(defun most-recent-open-attack (dialogue &key end)
+  (let ((open-attacks (open-attack-indices dialogue :end end)))
     (when open-attacks
       (car open-attacks))))
 
@@ -550,57 +568,30 @@ calculuation.)"
 ;;; Evaluating rules
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun evaluate-rule (rule dialogue player turn-number statement stance index)
-  (let ((pre (precondition-fn rule)))
-    (if (funcall pre dialogue
-		     player
-		     turn-number
-		     statement
-		     stance
-		     index)
-	(let ((body (body-fn rule)))
-	  (let ((body-result (funcall body dialogue
-				      player
-				      turn-number
-				      statement
-				      stance
-				      index)))
-	    (if body-result
-		(values t t)
-		(values t nil))))
-	(values nil nil))))
+(defun evaluate-structural-rule (rule dialogue &key from-end)
+  (funcall (predicate rule) dialogue :final-move-only from-end))
 
-(defun evaluate-all-rules (rules dialogue player turn-number statement stance index &optional failing-rules)
-  (if (null rules)
-      (if failing-rules
-	  (values nil failing-rules)
-	  (values t nil))
-      (let ((rule (car rules)))
-	(multiple-value-bind (precondition-passes body-passes)
-	    (evaluate-rule rule dialogue player turn-number statement stance index)
-	  (evaluate-all-rules (cdr rules)
-			      dialogue
-			      player
-			      turn-number 
-			      statement 
-			      stance 
-			      index
-			      (if precondition-passes
-				  (if body-passes
-				      failing-rules
-				      (cons rule failing-rules))
-				  failing-rules))))))
-
-(defun every-rule-passes (rules dialogue player turn-number statement stance index)
-  (or (null rules)
-      (let ((rule (car rules)))
-	(multiple-value-bind (precondition-result body-result)
-	    (evaluate-rule rule dialogue player turn-number statement stance index)
-	  (if (null precondition-result)
-	      (every-rule-passes (cdr rules) dialogue player turn-number statement stance index)
-	      (if body-result
-		  (every-rule-passes (cdr rules) dialogue player turn-number statement stance index)
-		  nil))))))
+(defun evaluate-particle-rule (rule dialogue)
+  (let ((precondition (precondition rule))
+	(body (body rule)))
+    (loop 
+       for move in (dialogue-plays dialogue)
+       for turn-number from 0
+       do
+	 (when (funcall precondition dialogue
+			(move-player move)
+			turn-number
+			(move-statement move)
+			(move-stance move)
+			(move-reference move))
+	     (unless (funcall body dialogue
+			      (move-player move)
+			      turn-number
+			      (move-statement move)
+			      (move-stance move)
+			      (move-reference move))
+	       (return nil)))
+       finally (return t))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Extensions of dialogues
@@ -614,39 +605,36 @@ calculuation.)"
 	nil
 	(dotimes (index position result)
 	  (dolist (statement (append subformulas symbolic-attacks))
-	    (when (every-rule-passes (rules (dialogue-rules dialogue))
-				     (copy-and-truncate-dialogue dialogue
-								 position)
-				     player
-				     position
-				     statement
-				     stance
-				     index)
-	      (push (list statement index)
-		    result)))))))
+	    (let* ((provisional-move (make-move player statement stance index))
+		   (provisional-extension (provisionally-extend-dialogue dialogue provisional-move)))
+	      (when (eval-entire-dialogue provisional-extension)
+		(push (list statement index)
+		      result))))))))
 
 (defun all-next-moves-at-position (dialogue position)
-  (append (mapcar #'(lambda (statement-and-reference)
-		      (destructuring-bind (statement reference)
-			  statement-and-reference
-			(make-move 'p statement 'a reference)))
-		  (next-moves-at-position dialogue 'p 'a position))
-	  (mapcar #'(lambda (statement-and-reference)
-		      (destructuring-bind (statement reference)
-			  statement-and-reference
-			(make-move 'p statement 'd reference)))
-		  (next-moves-at-position dialogue 'p 'd position))
-	  (mapcar #'(lambda (statement-and-reference)
-		      (destructuring-bind (statement reference)
-			  statement-and-reference
-			(make-move 'o statement 'a reference)))
-		  (next-moves-at-position dialogue 'o 'a position))
-	  (mapcar #'(lambda (statement-and-reference)
-		      (destructuring-bind (statement reference)
-			  statement-and-reference
-			(make-move 'o statement 'd reference)))
-		  (next-moves-at-position dialogue 'o 'd position))))
-
+  (unless (zerop position) ;; not allowed to change the initial move
+    (let ((diminished-dialogue (copy-and-truncate-dialogue dialogue position)))
+      (append (mapcar #'(lambda (statement-and-reference)
+			  (destructuring-bind (statement reference)
+			      statement-and-reference
+			    (make-move 'p statement 'a reference)))
+		      (next-moves-at-position diminished-dialogue 'p 'a position))
+	      (mapcar #'(lambda (statement-and-reference)
+			  (destructuring-bind (statement reference)
+			      statement-and-reference
+			    (make-move 'p statement 'd reference)))
+		      (next-moves-at-position diminished-dialogue 'p 'd position))
+	      (mapcar #'(lambda (statement-and-reference)
+			  (destructuring-bind (statement reference)
+			      statement-and-reference
+			    (make-move 'o statement 'a reference)))
+		      (next-moves-at-position diminished-dialogue 'o 'a position))
+	      (mapcar #'(lambda (statement-and-reference)
+			  (destructuring-bind (statement reference)
+			      statement-and-reference
+			    (make-move 'o statement 'd reference)))
+		      (next-moves-at-position diminished-dialogue 'o 'd position))))))
+  
 (defun next-moves (dialogue player stance)
   (next-moves-at-position dialogue player stance (dialogue-length dialogue)))
 
@@ -948,15 +936,16 @@ calculuation.)"
 	 (r (go start-move))
 	 (s (go statement-input)))
      evaluate-rules
-       (multiple-value-bind (rules-result messages)
-	   (evaluate-all-rules (rules (dialogue-rules dialogue)) dialogue player turn-number statement stance index)
-	 (when rules-result
-	   (go successful-turn))
-	 (msg "At least one of the dialogue rules is violated by your attack:")
-	 (dolist (message messages)
-	   (msg "* ~A" message))
-	 (msg "Restarting the move...")
-	 (go start-move))
+       (let ((provisional-move (make-move player statement stance index)))
+	 (multiple-value-bind (rules-result violated-rules)
+	     (eval-entire-dialogue (provisionally-extend-dialogue dialogue provisional-move))
+	   (when rules-result
+	     (go successful-turn))
+	   (msg "At least one of the dialogue rules is violated by your attack:")
+	   (dolist (violated-rule violated-rules)
+	     (msg "* Rule ~A: ~A" (name violated-rule) (description violated-rule)))
+	   (msg "Restarting the move...")
+	   (go start-move)))
      successful-turn
        (incf turn-number)
        (add-move-to-dialogue dialogue
