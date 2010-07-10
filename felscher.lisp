@@ -11,7 +11,7 @@
    :name "d01-alternating"
    :body (not (eq current-player
 		  (move-player (nth-move dialogue current-reference))))
-   :description "You cannot attack yourself."))
+   :description "You cannot respond to your own statements."))
 
 (defparameter rule-d01-conjunction
   (make-offensive-rule
