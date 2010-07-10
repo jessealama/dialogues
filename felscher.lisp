@@ -241,19 +241,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defparameter rule-d00-atomic
-  (make-rule :name "d00-atomic"
+  (make-particle-rule :name "d00-atomic"
 	     :precondition (zerop current-position)
 	     :body (composite-formula? current-statement)
 	     :description "Dialogues must open with a composite formula."))
 
 (defparameter rule-d00-proponent
-  (make-rule :name "d00-proponent"
+  (make-particle-rule :name "d00-proponent"
 	     :precondition (evenp current-position)
 	     :body (eq current-player 'p)
 	     :description "Proponent plays even-numbered positions.  (Counting starts at zero.)"))
 
 (defparameter rule-d00-opponent
-  (make-rule :name "d00-opponent"
+  (make-particle-rule :name "d00-opponent"
 	     :precondition (oddp current-position)
 	     :body (eq current-player 'o)
 	     :description "Opponent plays odd-numbered positions.  (Counting starts at zero.)"))
@@ -272,83 +272,202 @@
    :description "The move being defended against is not an attack."))
 
 (defparameter rule-d10
-  (make-rule :name "d10"
-	     :precondition (and (evenp current-position) 
-			     (non-symbolic-attack-formula? current-statement)
-			     (atomic-formula? current-statement))
-	     :body (some-move #'(lambda (move)
-				  (when (opponent-move? move)
-				    (equal-statements? (move-statement move)
-						       current-statement)))
-			      dialogue)
-	     :description "Proponent cannot assert an atomic formula before opponent has asserted it."))
+  (make-structural-rule 
+   :name "d10"
+   :description "Proponent cannot assert an atomic formula before opponent has asserted it."
+  :predicate
+  (loop
+     with len = (dialogue-length dialogue)
+     for move in (if final-move-only
+		     (subseq (dialogue-plays dialogue) (1- len))
+		     (dialogue-plays dialogue))
+     for i from (if final-move-only
+		    (1- len)
+		    0)
+     do
+       (if (and (proponent-move? move)
+		(atomic-formula? (move-statement move)))
+	   (unless
+	       (some-move
+		#'(lambda (other-move)
+		    (when (opponent-move? other-move)
+		      (equal-statements? (move-statement other-move)
+					 (move-statement move))))
+		dialogue :end i)
+	     (return nil)))
+       finally (return t))))
+
+;; (defparameter rule-d10-literal
+;;   (make-rule :name "d10-literal"
+;; 	     :precondition (and (evenp current-position)
+;; 			     (non-symbolic-attack-formula? current-statement)
+;; 			     (atomic-formula? current-statement))
+;; 	     :body (some-move #'(lambda (move)
+;; 				  (when (opponent-move? move)
+;; 				    (or (equal-statements? (move-statement move)
+;; 							   current-statement)
+;; 					(and (negation? (move-statement move))
+;; 					     (equal-statements? current-statement
+;; 								(unnegate (move-statement move)))))))
+;; 			      dialogue)
+;; 	     :description "Proponent may assert an atomic formula only if Opponent has either asserted that formula, or its negation, earlier in the dialogue."))
 
 (defparameter rule-d10-literal
-  (make-rule :name "d10-literal"
-	     :precondition (and (evenp current-position)
-			     (non-symbolic-attack-formula? current-statement)
-			     (atomic-formula? current-statement))
-	     :body (some-move #'(lambda (move)
-				  (when (opponent-move? move)
-				    (or (equal-statements? (move-statement move)
-							   current-statement)
-					(and (negation? (move-statement move))
-					     (equal-statements? current-statement
-								(unnegate (move-statement move)))))))
-			      dialogue)
-	     :description "Proponent may assert an atomic formula only if Opponent has either asserted that formula, or its negation, earlier in the dialogue."))
+  (make-structural-rule
+   :name "d10-literal"
+   :description "Proponent may assert an atomic formula only if Opponent has either asserted that formula, or its negation, earlier in the dialogue."
+   :predicate
+   (loop 
+      for move in (dialogue-plays dialogue)
+      for i from 0
+      do
+	(let ((statement (move-statement move)))
+	  (if (and (proponent-move? move)
+		   (atomic-formula? statement))
+	    (unless
+		(some-move
+		 #'(lambda (other-move)
+		     (let ((other-statement (move-statement other-move)))
+		       (when (opponent-move? other-move)
+			 (or (equal-statements? other-statement statement)
+			     (and (negation? other-move)
+				(equal-statements? (unnegate other-statement)
+						   statement))))))
+		 dialogue
+		 :end i)
+	      (return nil))))
+      finally (return t))))
+
+;; (defparameter rule-d11
+;;   (make-defensive-rule 
+;;    :name "d11"
+;;    :body (let ((most-recent (most-recent-open-attack dialogue)))
+;; 	   (or (null most-recent)
+;; 	       (= most-recent current-reference)))
+;;    :description "You must defend against the most recent open attack."))
 
 (defparameter rule-d11
-  (make-defensive-rule 
+  (make-structural-rule
    :name "d11"
-   :body (let ((most-recent (most-recent-open-attack dialogue)))
-	   (or (null most-recent)
-	       (= most-recent current-reference)))
-   :description "You must defend against the most recent open attack."))
+   :description "You must defend against the most recent open attack."
+   :predicate
+   (loop
+      for move in (dialogue-plays dialogue)
+      for i from 0
+      do
+	(when (defensive-move? move)
+	  (let ((most-recent (most-recent-open-attack dialogue :end i))
+		(reference (move-reference move)))
+	    (if (null most-recent)
+		(return nil)
+		(unless (= most-recent reference)
+		  (return nil)))))
+      finally (return t))))
+
+;; (defparameter rule-d12
+;;   (make-defensive-rule
+;;    :name "d12"
+;;    :body (null (select-moves #'(lambda (move)
+;; 				 (and (not (initial-move? move))
+;; 				      (defensive-move? move)
+;; 				      (= (move-reference move)
+;; 					 current-reference)))
+;; 			     dialogue))
+;;    :description "Attacks may be answered at most once."))
 
 (defparameter rule-d12
-  (make-defensive-rule
+  (make-structural-rule
    :name "d12"
-   :body (null (select-moves #'(lambda (move)
-				 (and (not (initial-move? move))
-				      (defensive-move? move)
-				      (= (move-reference move)
-					 current-reference)))
-			     dialogue))
-   :description "Attacks may be answered at most once."))
+   :description "Attacks may be answered at most once."
+   :predicate
+   (loop 
+      for move in (dialogue-plays dialogue)
+      for i from 0
+      do
+	(when (attacking-move? move)
+	  (unless (length-at-most (select-moves 
+				   #'(lambda (other-move)
+				       (and (defensive-move? other-move)
+					    (= (move-reference other-move)
+					       i)))
+				   dialogue)
+				  1)
+	    (return nil)))
+      finally (return t))))
+
+;; (defparameter rule-d13
+;;   (make-offensive-rule
+;;    :name "d13"
+;;    :precondition (eq current-player 'o)
+;;    :body (null (select-moves #'(lambda (move)
+;; 				 (and (not (initial-move? move))
+;; 				      (opponent-move? move)
+;; 				      (attacking-move? move)
+;; 				      (= (move-reference move)
+;; 					 current-reference)))
+;; 			     dialogue
+;; 			     :end current-position))
+;;    :description "A P-assertion may be attacked at most once."))
 
 (defparameter rule-d13
-  (make-offensive-rule
+  (make-structural-rule
    :name "d13"
-   :precondition (eq current-player 'o)
-   :body (null (select-moves #'(lambda (move)
-				 (and (not (initial-move? move))
-				      (opponent-move? move)
-				      (attacking-move? move)
-				      (= (move-reference move)
-					 current-reference)))
-			     dialogue))
-   :description "A P-assertion may be attacked at most once."))
+   :description "A P-assertion may be attacked at most once."
+   :predicate
+   (loop 
+      for move in (dialogue-plays dialogue)
+      for i from 0
+      do
+	(when (proponent-move? move)
+	  (unless (length-at-most (select-moves 
+				   #'(lambda (other-move)
+				       (and (attacking-move? other-move)
+					    (= (move-reference other-move)
+					       i)))
+				   dialogue)
+				  1)
+	    (return nil)))
+      finally (return t))))
+
+;; (defparameter rule-d13
+;;   (make-rule
+;;    :name "d13"
+;;    :precondition t
+;;    :body (length-at-most 
 
 (defparameter rule-e
-  (make-rule :name "e"
-	     :precondition (eq current-player 'o)
-	     :body (= current-reference (1- current-position))
-	     :description "Opponent must react to the most recent statement by Proponent."))
+   (make-structural-rule 
+    :name "e"
+    :description "Opponent must react to the most recent statement by Proponent."
+    :predicate 
+    (loop 
+       with len = (dialogue-length dialogue)
+       for move in (if final-move-only
+		       (subseq (dialogue-plays dialogue) (1- len))
+		       (dialogue-plays dialogue))
+       for i from (if final-move-only
+		      (1- len)
+		      0)
+       do
+	 (when (opponent-move? move)
+	   (let ((reference (move-reference move)))
+	     (unless (= (1+ reference) i)
+	       (return nil))))
+       finally (return t))))
 
-(defparameter rule-no-repetitions
-  (make-rule
-   :name "no-repetitions"
-   :precondition t
-   :body (every-move #'(lambda (move)
-			 (or (initial-move? move)
-			     (not (eq (move-player move) current-player))
-			     (/= (move-reference move) current-reference)
-			     (not (eq (move-stance move) current-stance))
-			     (not (equal-statements? (move-statement move)
-						     current-statement))))
-		     dialogue)
-   :description "You may not make the exact same move (same stance, same reference, same statement) twice."))
+;; (defparameter rule-no-repetitions
+;;   (make-structuralrule
+;;    :name "no-repetitions"
+;;    :precondition t
+;;    :body (every-move #'(lambda (move)
+;; 			 (or (initial-move? move)
+;; 			     (not (eq (move-player move) current-player))
+;; 			     (/= (move-reference move) current-reference)
+;; 			     (not (eq (move-stance move) current-stance))
+;; 			     (not (equal-statements? (move-statement move)
+;; 						     current-statement))))
+;; 		     dialogue)
+;;    :description "You may not make the exact same move (same stance, same reference, same statement) twice."))
 
 (defparameter d-dialogue-rules 
   (make-instance 'ruleset
