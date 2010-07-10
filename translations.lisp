@@ -17,7 +17,7 @@
 			   (gödel-gentzen (rhs conjunction))))
 
 (defmethod gödel-gentzen ((disjunction binary-disjunction))
-  (negate (make-binary-disjunction (negate (gödel-gentzen (lhs disjunction)))
+  (negate (make-binary-conjunction (negate (gödel-gentzen (lhs disjunction)))
 				   (negate (gödel-gentzen (rhs disjunction))))))
 
 (defmethod gödel-gentzen ((implication implication))
