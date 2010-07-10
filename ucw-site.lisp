@@ -4,9 +4,20 @@
 
 (defvar *maintainer-email* "jesse.alama@gmail.com")
 
+(defparameter available-rulesets
+  (list d-dialogue-rules 
+	e-dialogue-rules
+	nearly-classical-dialogue-rules
+	classical-dialogue-rules
+	d-dialogue-rules-minus-d11
+	d-dialogue-rules-minus-d12
+	d-dialogue-rules-literal-d10))
+
 (defclass ruleset-component ()
   ((ruleset :initarg :ruleset
-	    :accessor ruleset)))
+	    :initform nil
+	    :accessor ruleset
+	    :type (or (eql nil) ruleset))))
 
 (defclass signature-component ()
   ((signature :initarg :signature
@@ -278,14 +289,8 @@
       self
     (let ((game-len (dialogue-length game)))
     (if (and player statement stance reference)
-	(multiple-value-bind (rules-result messages)
-	    (evaluate-all-rules (dialogue-rules game)
-				game 
-				player 
-				game-len
-				statement 
-				stance
-				reference)
+	(multiple-value-bind (rules-result violated-rules)
+	    (eval-provisional-dialogue game player statement stance reference)
 	  (if rules-result
 	      (progn
 		(<:h1 "Success!")
@@ -346,8 +351,10 @@
 				   " are open attacks.  (Defensive moves are not colored.)")))))))
 		(<:p "At least one of the dialogue rules is violated by your proposed move:")
 		(<:ul
-		 (dolist (message messages)
-		   (<:li (<:as-html message))))
+		 (dolist (violated-rule violated-rules)
+		   (<:li "Rule " (<:as-html (name violated-rule))
+			 (<:br)
+			 "Description: " (<:as-html (description violated-rule)))))
 		(<ucw:form :method "POST"
 			   :action (call 'turn-editor 
 					 :game game
@@ -918,54 +925,91 @@ signature.")
 		   (call 'signature-editor
 			 :signature new-sig))))))
 
-(defcomponent rule-editor (game-component ruleset-component)
+(defcomponent rule-editor (game-component ruleset-component play-style-component)
   ())
 
-(defun render-broken-game (game)
-  (declare (ignore game))
-  (<:p "something's broken"))
-
 (defmethod render ((self rule-editor))
-  (let ((game (game self)))
-    (if (null game) ;; we need to edit the initial ruleset
-	(<:h1 "ok, let's edit the rules!")
-	(let ((ruleset (dialogue-rules game))
-	      (rules (rules ruleset))
-	      (ok? (eval-entire-dialogue game)))
-	  (unless ok?
-	    (<:h1 "The game is incoherent with respect to the current ruleset")
-	    (<:p "With the current ruleset, the game is incoherent.  Here is
+  (let* ((game (game self))
+	 (ruleset (dialogue-rules game))
+	 (rules (rules ruleset))
+	 (selected-ruleset))
+    (let (indices-and-violated-rules)
+      (loop 
+	 for turn-number from 1 upto (dialogue-length game)
+	 do
+	   (let ((truncated (copy-and-truncate-dialogue game turn-number)))
+	     (multiple-value-bind (ok? violators)
+		 (eval-entire-dialogue truncated :structural-rules-from-end t)
+	       (unless ok?
+		 (push (cons (1- turn-number) violators)
+		       indices-and-violated-rules))))
+	 finally
+	   (setf indices-and-violated-rules
+		 (reverse indices-and-violated-rules)))
+    (unless (null indices-and-violated-rules)
+      (<:h1 "The game is incoherent with respect to the current ruleset")
+      (<:p "With the current ruleset, the game is incoherent.  Here is
       a listing of the game, annotated with the violating moves:")
-	    (render-broken-game game))
-	  (<:h1 "The current ruleset")
-	  (<:p "A concise description of the ruleset currently in force in the game:")
-	  (<:blockquote
-	   (<:as-html (description ruleset)))
-	  (when ok?
-	    (<:p "Since the game is well-formed with the ruleset currently
+      (render-game game :moves-to-highlight (mapcar #'car indices-and-violated-rules))
+      (<:p "At least one move of the game is violated with these rules:")
+      (<:ul 
+       (dolist (index-and-violators indices-and-violated-rules)
+	 (destructuring-bind (index . violated-rules)
+	     index-and-violators
+	   (<:li "Move " (<:as-html index) " violates these rules:"
+	     (<:ul
+	      (dolist (rule violated-rules)
+		(<:li "Name: " (<:as-html (name rule))
+		      (<:br)
+		      "Description: " (<:as-html (description rule))))))))))
+    (<:h1 "The current ruleset")
+    (<:p "A concise description of the ruleset currently in force in the game:")
+    (<:blockquote
+     (<:as-html (description ruleset)))
+    (when (null indices-and-violated-rules)
+      (<:p "Since the game is well-formed with the ruleset currently
 	in force, you are welcome to " (<ucw:a :action (answer ruleset)
 					       "go back and continue playing the game")))
-	  (<:p "You are welcome to look more carefully at the rules and edit
+    (<:p "You are welcome to look more carefully at the rules and edit
     them, if you wish.  Here are the rules that constitute the current
     ruleset:")
-	  (if (null rules)
-	      (<:blockquote
-	       "(none)")
-	      (<:table
-	       (<:thead
-		(<:tr
-		 (<:th "Name")
-		 (<:th "Description")))
-	       (<:tbody
-		(dolist (rule rules)
-		  (with-slots (name description) 
-		      rule
-		    (<:tr
-		     (<:td :align "right" (<:as-html name))
-		     (<:td :align "left" (<:as-html description))))))))))))
+    (if (null rules)
+	(<:blockquote
+	 "(none)")
+	(<:table
+	 (<:thead
+	  (<:tr
+	   (<:th "Name")
+	   (<:th "Description")))
+	 (<:tbody
+	  (dolist (rule rules)
+	    (with-slots (name description) 
+		rule
+	      (<:tr
+	       (<:td :align "right" (<:as-html name))
+	       (<:td :align "left" (<:as-html description))))))))
+    (<ucw:form :action (let ((test-dialogue (make-instance 'dialogue
+							   :rules (if (null selected-ruleset)
+								      (dialogue-rules dialogue)
+								      selected-ruleset)
+							   :plays (dialogue-plays game)
+							   :signature (dialogue-signature game))))
+			 (if (eval-entire-dialogue test-dialogue)
+			     (answer (dialogue-rules test-dialogue))
+			     (answer (call 'rule-editor
+					   :game test-dialogue))))
+      (<:p "You may " (<ucw:a :action (answer (dialogue-rules game))
+			      "proceed without changing the current ruleset")
+	   (<:br)
+	   " or change the ruleset to: "
+	   (<ucw:select :accessor selected-ruleset
+	      (dolist (ruleset available-rulesets)
+		(<ucw:option :value ruleset
+			     (<:as-html (description ruleset)))))
+	   (<:submit :value "Use this ruleset instead of the current one"))))))
 
 (defun render-rule-editor (game)
-  (<ucw:form :action (setf (dialogue-signature game)
+  (<ucw:form :action (setf (dialogue-rules game)
 			     (call 'rule-editor
 				   :game game))
     (<:p "You are welcome to change the game's ruleset.  The ruleset
@@ -1357,15 +1401,6 @@ that all the rules in your edited ruleset are satisfied.")
 (defcomponent formula-entry-component (signature-component ruleset-component)
   ())
 
-(defparameter available-rulesets
-  (list d-dialogue-rules 
-	e-dialogue-rules
-	nearly-classical-dialogue-rules
-	classical-dialogue-rules
-	d-dialogue-rules-minus-d11
-	d-dialogue-rules-minus-d12
-	d-dialogue-rules-literal-d10))
-
 (defmethod render ((self formula-entry-component))
   (let (input-formula
 	selected-formula 
@@ -1398,14 +1433,18 @@ that all the rules in your edited ruleset are satisfied.")
 		 :play-style 'play-as-both-proponent-and-opponent
 		 :game (make-dialogue (funcall selected-translation $formula)
 				      sig
-				      selected-rules)))
+				      (if (null (ruleset self))
+					  selected-rules
+					  (ruleset self)))))
 	  (play-as-proponent-random-opponent
 	   (call 'turn-editor
 		 :play-style 'play-as-proponent-random-opponent
 		 :game (let ((initial-dialogue
 			      (make-dialogue (funcall selected-translation $formula)
 					     sig
-					     selected-rules)))
+					     (if (null (ruleset self))
+						 selected-rules
+						 (ruleset self)))))
 			 (let* ((next-opponent-attacks (next-attacks initial-dialogue 'o))
 				(next-opponent-defenses (next-defenses initial-dialogue 'o))
 				(all-opponent-moves (append next-opponent-attacks
@@ -1433,7 +1472,9 @@ that all the rules in your edited ruleset are satisfied.")
 		 :play-style 'play-as-opponent-random-proponent
 		 :game (make-dialogue (funcall selected-translation $formula)
 				      sig
-				      selected-rules))))))
+				      (if (null (ruleset self))
+					  selected-rules
+					  (ruleset self))))))))
     (let ((sig (signature self)))
       (<ucw:form :method "POST"
 		 :action $take-action
@@ -1487,13 +1528,15 @@ that all the rules in your edited ruleset are satisfied.")
 		(<ucw:option :value #'contrapositivify
 			     "Take the contrapositive of all implications"))))
        (<:tr :style "background-color:#7B942E;"
-	(<:td "Choose the ruleset to be used during the game:")
-	(<:td (<ucw:select :id "selected-rules"
-			   :size 1
-			   :accessor selected-rules
-		(dolist (ruleset available-rulesets)
-		  (<ucw:option :value ruleset
-				(<:as-html (description ruleset)))))))
+	(<:td "The ruleset to be used during the game:")
+	(<:td (if (null (ruleset self))
+		  (<ucw:select :id "selected-rules"
+			       :size 1
+			       :accessor selected-rules
+			       (dolist (ruleset available-rulesets)
+				 (<ucw:option :value ruleset
+					      (<:as-html (description ruleset)))))
+		  (<:as-html (description (ruleset self))))))
        (<:tr :style "background-color:#A3D800;"
          (<:td "Choose the style of play:")
 	 (<:td (<ucw:select :id "selected-play-style"
@@ -1526,9 +1569,7 @@ with which the game begins."))
 	(<:tr
 	 (<:td :colspan "2"
 	       (<:em (<:b "About the rules:")) " The rulesets in the
-above menu are some notable cases that have some logical content.  If
-you like, you can " (<ucw:a :action
-			    (setf ruleset (call 'rule-editor))					  "create a custom ruleset") ".  The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985.  You will be able to alter your choice of rules after the game has begun.")))))))))
+above menu are some notable cases that have some logical content.  You will be able to change your choice of ruleset once the game has started.  The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985; it was arguably the first papers to rigorously establish the equivalence between intuitionistic validity and existence of winning strategies for certain dialogue games.  You will be able to alter your choice of rules after the game has begun.")))))))))
 
 (defmethod render ((self start-game-component))
   (with-slots ((sig signature))
