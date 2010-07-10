@@ -220,10 +220,10 @@
 					rule-d01-which-disjunct
 					rule-d01-implication
 					rule-d01-negation
-					rule-d01-universal
-					rule-d01-term
-					rule-d01-which-instance
-					rule-d01-existential
+					;; rule-d01-universal
+					;; rule-d01-term
+					;; rule-d01-which-instance
+					;; rule-d01-existential
 					rule-d01-formula
 					rule-d02-alternating
 					rule-d02-formula
@@ -232,8 +232,9 @@
 					rule-d02-which-disjunct
 					rule-d02-implication
 					rule-d02-negation
-					rule-d02-universal
-					rule-d02-existential))
+					;; rule-d02-universal
+					;; rule-d02-existential
+					))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Dialogue rules
