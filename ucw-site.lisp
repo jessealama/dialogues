@@ -13,6 +13,18 @@
 	d-dialogue-rules-minus-d12
 	d-dialogue-rules-literal-d10))
 
+(defparameter available-translations
+  (list identity-translation
+	gödel-gentzen-translation 
+	double-negate-translation
+	double-negate-all-subformulas-translation
+	kuroda-translation
+	negate-atomic-subformulas-translation
+	double-negate-atomic-subformulas-translation
+	self-conjoin-atomic-subformulas-translation
+	self-disjoin-atomic-subformulas-translation
+	contrapositivify-translation))
+
 (defclass ruleset-component ()
   ((ruleset :initarg :ruleset
 	    :initform nil
@@ -1431,7 +1443,7 @@ that all the rules in your edited ruleset are satisfied.")
 	  (play-as-both-proponent-and-opponent
 	   (call 'turn-editor
 		 :play-style 'play-as-both-proponent-and-opponent
-		 :game (make-dialogue (funcall selected-translation $formula)
+		 :game (make-dialogue (apply-translation selected-translation $formula)
 				      sig
 				      (if (null (ruleset self))
 					  selected-rules
@@ -1440,7 +1452,7 @@ that all the rules in your edited ruleset are satisfied.")
 	   (call 'turn-editor
 		 :play-style 'play-as-proponent-random-opponent
 		 :game (let ((initial-dialogue
-			      (make-dialogue (funcall selected-translation $formula)
+			      (make-dialogue (apply-translation selected-translation $formula)
 					     sig
 					     (if (null (ruleset self))
 						 selected-rules
@@ -1470,7 +1482,7 @@ that all the rules in your edited ruleset are satisfied.")
 	  (play-as-opponent-random-proponent
 	   (call 'turn-editor
 		 :play-style 'play-as-opponent-random-proponent
-		 :game (make-dialogue (funcall selected-translation $formula)
+		 :game (make-dialogue (apply-translation selected-translation $formula)
 				      sig
 				      (if (null (ruleset self))
 					  selected-rules
@@ -1507,26 +1519,9 @@ that all the rules in your edited ruleset are satisfied.")
 	(<:td (<ucw:select :id "selected-translation"
 			   :size 1
 			   :accessor selected-translation
-	        (<ucw:option :value #'identity
-			     "Identity function (no change)")
-		(<ucw:option :value #'gödel-gentzen
-			     "Gödel-Gentzen negative translation")
-		;; (<ucw:option :value #'kuroda
-		;; 	     "Kuroda negative translation")
-		(<ucw:option :value #'dn-all-subformulas
-			      "Double negate all subformulas")
-		(<ucw:option :value #'double-negate
-			     "Double negate the whole formula")
-		(<ucw:option :value #'negate-atomic-subformulas
-			     "Negate atomic subformulas")
-		(<ucw:option :value #'double-negate-atomic-subformulas
-			     "Double negate atomic subformulas")
-		(<ucw:option :value #'self-conjoin-atomic-subformulas
-			     (<:as-is "Replace all atomic subformulas p by (p &and; p)"))
-		(<ucw:option :value #'self-disjoin-atomic-subformulas
-			     (<:as-is "Replace all atomic subformulas p by (p &or; p)"))
-		(<ucw:option :value #'contrapositivify
-			     "Take the contrapositive of all implications"))))
+	        (dolist (translation available-translations)
+		  (<ucw:option :value translation
+			       (<:as-html (description translation)))))))
        (<:tr :style "background-color:#7B942E;"
 	(<:td "The ruleset to be used during the game:")
 	(<:td (if (null (ruleset self))
