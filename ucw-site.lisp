@@ -1566,7 +1566,7 @@ with which the game begins."))
 	       (<:em (<:b "About the rules:")) " The rulesets in the
 above menu are some notable cases that have some logical content.  You will be able to change your choice of ruleset once the game has started.  The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985; it was arguably the first papers to rigorously establish the equivalence between intuitionistic validity and existence of winning strategies for certain dialogue games.  You will be able to alter your choice of rules after the game has begun."))
 	(<:tr
-	 (<td :colspan "2"
+	 (<:td :colspan "2"
 	      (<:em (<:b "About the play style:")) " The default mode of playing is to take on the role of both players: at each move, you'll see all possible moves that can be made, from the perspective of both players.  Two other play styles are supported: play as Proponent with a random Opponent, and play as Opponent with a random Proponent.")))))))))
 
 (defmethod render ((self start-game-component))
