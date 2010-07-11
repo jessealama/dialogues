@@ -2,9 +2,23 @@
 
 (in-package :dialogues)
 
+(defclass formula-translation ()
+  ((transformer :type function
+		:initarg :transformer
+		:initform #'identity
+		:accessor transformer)
+   (description :type string
+		:initarg :description
+		:initform "(no description was supplied)"
+		:accessor description)))
+
+(defun apply-translation (translation formula)
+  (funcall (transformer translation) formula))
+
 ;;; Gödel-Gentzen translation
 
-(defgeneric gödel-gentzen (formula))
+(defgeneric gödel-gentzen (formula)
+  (:documentation "The Gödel-Gentzen negative translation."))
 
 (defmethod gödel-gentzen ((formula atomic-formula))
   (negate (negate formula)))
@@ -32,14 +46,26 @@
   (negate (make-universal (bound-variable existential)
 			  (negate (gödel-gentzen (matrix existential))))))
 
+(defparameter gödel-gentzen-translation
+  (make-instance 'formula-translation
+		 :description "The Gödel-Gentzen negative translation"
+		 :transformer #'gödel-gentzen))
+
 ;;; Simple double negation
 
 (defun double-negate (formula)
+  "Double negate the whole formula"
   (negate (negate formula)))
+
+(defparameter double-negate-translation
+  (make-instance 'formula-translation
+		 :description "Double negate the whole formula"
+		 :transformer #'double-negate))
 
 ;;; All-subformulas translation
 
-(defgeneric dn-all-subformulas (formula))
+(defgeneric dn-all-subformulas (formula)
+  (:documentation "Double negate all subformulas"))
 
 (defmethod dn-all-subformulas ((formula atomic-formula))
   (negate (negate formula)))
@@ -56,6 +82,11 @@
   (make-instance (class-of gen)
 		 :bound-variable (bound-variable gen)
 		 :matrix (negate (negate (dn-all-subformulas (matrix gen))))))
+
+(defparameter double-negate-all-subformulas-translation
+  (make-instance 'formula-translation
+		 :description "Double negate all subformulas"
+		 :transformer #'dn-all-subformulas))
 
 ;;; Kuroda translation
 
@@ -78,9 +109,15 @@
 				      (kuroda-helper (matrix form)))))))))
     (negate (negate (kuroda-helper formula)))))
 
+(defparameter kuroda-translation
+  (make-instance 'formula-translation
+		 :description "The Kuroda translation"
+		 :transformer #'kuroda))
+
 ;;; Replace all atomic formulas by their negations
 
-(defgeneric negate-atomic-subformulas (formula))
+(defgeneric negate-atomic-subformulas (formula)
+  (:documentation "Negate atomic subformulas"))
 
 (defmethod negate-atomic-subformulas ((formula atomic-formula))
   (negate formula))
@@ -99,9 +136,15 @@
 		 :bound-variable (bound-variable gen)
 		 :matrix (negate-atomic-subformulas (matrix gen))))
 
+(defparameter negate-atomic-subformulas-translation
+  (make-instance 'formula-translation
+		 :description "Negate atomic subformulas"
+		 :transformer #'negate-atomic-subformulas))
+
 ;; Replace all atomic subformulas by their double negations
 
-(defgeneric double-negate-atomic-subformulas (formula))
+(defgeneric double-negate-atomic-subformulas (formula)
+  (:documentation "Double negate atomic subformulas"))
 
 (defmethod double-negate-atomic-subformulas ((formula atomic-formula))
   (negate (negate formula)))
@@ -120,9 +163,15 @@
 		 :bound-variable (bound-variable gen)
 		 :matrix (double-negate-atomic-subformulas (matrix gen))))
 
+(defparameter double-negate-atomic-subformulas-translation
+  (make-instance 'formula-translation
+		 :description "Double negate atomic subformulas"
+		 :transformer #'double-negate-atomic-subformulas))
+
 ;; Replace all atomic subformulas by their "self-conjunctions"
 
-(defgeneric self-conjoin-atomic-subformulas (formula))
+(defgeneric self-conjoin-atomic-subformulas (formula)
+  (:documentation "Replace all atomic subformulas p by (p &and; p)"))
 
 (defmethod self-conjoin-atomic-subformulas ((formula atomic-formula))
   (make-binary-conjunction formula formula))			   
@@ -141,9 +190,15 @@
 		 :bound-variable (bound-variable gen)
 		 :matrix (self-conjoin-atomic-subformulas (matrix gen))))
 
+(defparameter self-conjoin-atomic-subformulas-translation
+  (make-instance 'formula-translation
+		 :description "Replace all atomic subformulas p by (p &and; p)"
+		 :transformer #'self-conjoin-atomic-subformulas))
+
 ;; Replace all atomic subformulas by their "self-disjunctions"
 
-(defgeneric self-disjoin-atomic-subformulas (formula))
+(defgeneric self-disjoin-atomic-subformulas (formula)
+  (:documentation "Replace all atomic subformulas p by (p &or; p)"))
 
 (defmethod self-disjoin-atomic-subformulas ((formula atomic-formula))
   (make-binary-disjunction formula formula))			   
@@ -162,9 +217,15 @@
 		 :bound-variable (bound-variable gen)
 		 :matrix (self-disjoin-atomic-subformulas (matrix gen))))
 
+(defparameter self-disjoin-atomic-subformulas-translation
+  (make-instance 'formula-translation
+		 :description "Replace all atomic subformulas p by (p &or; p)"
+		 :transformer #'self-disjoin-atomic-subformulas))
+
 ;; Contrapositive of all implications
 
-(defgeneric contrapositivify (formula))
+(defgeneric contrapositivify (formula)
+  (:documentation "Take the contrapositive of all implications"))
 
 (defmethod contrapositivify ((formula atomic-formula))
   formula)
@@ -192,5 +253,17 @@
   (make-instance (class-of gen)
 		 :bound-variable (bound-variable gen)
 		 :matrix (contrapositivify (matrix gen))))
+
+(defparameter contrapositivify-translation
+  (make-instance 'formula-translation
+		 :description "Take the contrapositive of all implications"
+		 :transformer #'contrapositivify))
+
+;; Identity translation
+
+(defparameter identity-translation
+  (make-instance 'formula-translation
+		 :description "Identity function"
+		 :transformer #'identity))
 
 ;;; translations.lisp ends here
