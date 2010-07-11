@@ -81,7 +81,7 @@
 
 (defcomponent add-a-predicate (signature-component)
   ((proposed-name :initarg :name 
-		  :accessor proposed-name 
+		  :accessor proposed-name
 		  :initform nil)
    (validation-error-message :initarg :error-message
 			     :accessor validation-error-message
