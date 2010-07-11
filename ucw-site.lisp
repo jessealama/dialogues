@@ -176,9 +176,8 @@
 
 (defmethod render-signature ((sig finite-variable-propositional-signature))
   (with-slots (predicates) sig
-    (<:as-html "Predicates: ")
     (if (null predicates)
-	(<:em "(none)")
+	(<:em "(empty signature)")
 	(let ((first (car predicates)))
 	  (<:em (<:as-html first))
 	  (dolist (pred (cdr predicates))
