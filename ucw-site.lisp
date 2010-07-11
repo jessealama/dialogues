@@ -33,6 +33,7 @@
 
 (defclass signature-component ()
   ((signature :initarg :signature
+	      :initform pqrs-propositional-signature
 	      :type finite-variable-propositional-signature
 	      :accessor signature)))
 
