@@ -45,7 +45,7 @@
   (negate (negate formula)))
 
 (defmethod dn-all-subformulas ((formula unary-connective-formula))
-  (negate (negate (dn-all-subformulas (argument formula)))))
+  (negate (negate (negate (dn-all-subformulas (argument formula))))))
 
 (defmethod dn-all-subformulas ((formula binary-connective-formula))
   (negate (negate (make-instance (class-of formula)
