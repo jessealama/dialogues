@@ -504,8 +504,25 @@ attacks which, being symbols, do qualify as terms."
 (defun every-move (predicate dialogue &key end)
   (every predicate (subseq (dialogue-plays dialogue) 0 end)))
 
-(defun select-moves (predicate dialogue &key end)
-  (remove-if-not predicate (dialogue-plays dialogue) :end end))
+;; (defun select-moves (predicate dialogue &key start end)
+;;   (remove-if-not predicate (dialogue-plays dialogue) 
+;; 		 :start (if (null start)
+;; 			    0
+;; 			    start)
+;; 		 :end end))
+
+(defun select-moves (predicate dialogue &key end start)
+  (loop
+     with winners = nil
+     for elt in (subseq (dialogue-plays dialogue)
+			(if (null start)
+			    0
+			    start)
+			end)
+     do
+       (when (funcall predicate elt)
+	 (push elt winners))
+     finally (return winners)))
 
 (defun nth-move (dialogue n)
   (nth n (dialogue-plays dialogue)))
