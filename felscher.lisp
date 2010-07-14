@@ -297,29 +297,19 @@
 	     (return nil)))
        finally (return t))))
 
-;; (defparameter rule-d10-literal
-;;   (make-rule :name "d10-literal"
-;; 	     :precondition (and (evenp current-position)
-;; 			     (non-symbolic-attack-formula? current-statement)
-;; 			     (atomic-formula? current-statement))
-;; 	     :body (some-move #'(lambda (move)
-;; 				  (when (opponent-move? move)
-;; 				    (or (equal-statements? (move-statement move)
-;; 							   current-statement)
-;; 					(and (negation? (move-statement move))
-;; 					     (equal-statements? current-statement
-;; 								(unnegate (move-statement move)))))))
-;; 			      dialogue)
-;; 	     :description "Proponent may assert an atomic formula only if Opponent has either asserted that formula, or its negation, earlier in the dialogue."))
-
 (defparameter rule-d10-literal
   (make-structural-rule
    :name "d10-literal"
    :description "Proponent may assert an atomic formula only if Opponent has either asserted that formula, or its negation, earlier in the dialogue."
    :predicate
    (loop 
-      for move in (dialogue-plays dialogue)
-      for i from 0
+      with len = (dialogue-length dialogue)
+      for move in (if final-move-only
+		      (subseq (dialogue-plays dialogue) (1- len))
+		      (dialogue-plays dialogue))
+      for i from (if final-move-only
+		     (1- len)
+		     0)
       do
 	(let ((statement (move-statement move)))
 	  (if (and (proponent-move? move)
@@ -330,21 +320,13 @@
 		     (let ((other-statement (move-statement other-move)))
 		       (when (opponent-move? other-move)
 			 (or (equal-statements? other-statement statement)
-			     (and (negation? other-move)
-				(equal-statements? (unnegate other-statement)
-						   statement))))))
+			     (and (negation? other-statement)
+				  (equal-statements? (unnegate other-statement)
+						     statement))))))
 		 dialogue
 		 :end i)
 	      (return nil))))
       finally (return t))))
-
-;; (defparameter rule-d11
-;;   (make-defensive-rule 
-;;    :name "d11"
-;;    :body (let ((most-recent (most-recent-open-attack dialogue)))
-;; 	   (or (null most-recent)
-;; 	       (= most-recent current-reference)))
-;;    :description "You must defend against the most recent open attack."))
 
 (defparameter rule-d11
   (make-structural-rule
@@ -352,8 +334,13 @@
    :description "You must defend against the most recent open attack."
    :predicate
    (loop
-      for move in (dialogue-plays dialogue)
-      for i from 0
+      with len = (dialogue-length dialogue)
+      for move in (if final-move-only
+		      (subseq (dialogue-plays dialogue) (1- len))
+		      (dialogue-plays dialogue))
+      for i from (if final-move-only
+		     (1- len)
+		     0)
       do
 	(when (defensive-move? move)
 	  (let ((most-recent (most-recent-open-attack dialogue :end i))
@@ -364,25 +351,19 @@
 		  (return nil)))))
       finally (return t))))
 
-;; (defparameter rule-d12
-;;   (make-defensive-rule
-;;    :name "d12"
-;;    :body (null (select-moves #'(lambda (move)
-;; 				 (and (not (initial-move? move))
-;; 				      (defensive-move? move)
-;; 				      (= (move-reference move)
-;; 					 current-reference)))
-;; 			     dialogue))
-;;    :description "Attacks may be answered at most once."))
-
 (defparameter rule-d12
   (make-structural-rule
    :name "d12"
    :description "Attacks may be answered at most once."
    :predicate
    (loop 
-      for move in (dialogue-plays dialogue)
-      for i from 0
+      with len = (dialogue-length dialogue)
+      for move in (if final-move-only
+		      (subseq (dialogue-plays dialogue) (1- len))
+		      (dialogue-plays dialogue))
+      for i from (if final-move-only
+		     (1- len)
+		     0)
       do
 	(when (attacking-move? move)
 	  (unless (length-at-most (select-moves 
@@ -390,33 +371,25 @@
 				       (and (defensive-move? other-move)
 					    (= (move-reference other-move)
 					       i)))
-				   dialogue)
+				   dialogue
+				   :end i)
 				  1)
 	    (return nil)))
       finally (return t))))
-
-;; (defparameter rule-d13
-;;   (make-offensive-rule
-;;    :name "d13"
-;;    :precondition (eq current-player 'o)
-;;    :body (null (select-moves #'(lambda (move)
-;; 				 (and (not (initial-move? move))
-;; 				      (opponent-move? move)
-;; 				      (attacking-move? move)
-;; 				      (= (move-reference move)
-;; 					 current-reference)))
-;; 			     dialogue
-;; 			     :end current-position))
-;;    :description "A P-assertion may be attacked at most once."))
 
 (defparameter rule-d13
   (make-structural-rule
    :name "d13"
    :description "A P-assertion may be attacked at most once."
    :predicate
-   (loop 
-      for move in (dialogue-plays dialogue)
-      for i from 0
+   (loop
+      with len = (dialogue-length dialogue)
+      for move in (if final-move-only
+		      (subseq (dialogue-plays dialogue) (1- len))
+		      (dialogue-plays dialogue))
+      for i from (if final-move-only
+		     (1- len)
+		     0)
       do
 	(when (proponent-move? move)
 	  (unless (length-at-most (select-moves 
@@ -428,12 +401,6 @@
 				  1)
 	    (return nil)))
       finally (return t))))
-
-;; (defparameter rule-d13
-;;   (make-rule
-;;    :name "d13"
-;;    :precondition t
-;;    :body (length-at-most 
 
 (defparameter rule-e
    (make-structural-rule 
