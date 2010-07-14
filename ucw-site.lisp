@@ -217,7 +217,7 @@
     ("De Morgan &not;(P &or; Q) &rarr; (&not;P &and; &not;Q)" "de-morgan-not-or-implies-and" ,de-morgan-not-or-implies-and)
     ("De Morgan (&not;P &and; &not;Q) &rarr; &not;(P &or; Q)" "de-morgan-and-not-implies-not-or" ,de-morgan-and-not-implies-not-or)
     ("De Morgan (&not;P &or; &not;Q) &rarr; &not;(P &and; Q)" "de-morgan-or-not-implies-not-and" ,de-morgan-or-not-implies-not-and)
-    ("(P &rarr; &not;P) &or; (&not;P &rarr; P)" ,anti-connexive)))
+    ("(P &rarr; &not;P) &or; (&not;P &rarr; P)" "this-does-not-matter" ,anti-connexive)))
 
 (defcomponent formula-corrector (signature-component)
   ((text :initarg :text :accessor formula-corrector-text)))
