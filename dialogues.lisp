@@ -677,6 +677,10 @@ attacks which, being symbols, do qualify as terms."
 (defun opponent-loses? (dialogue)
   (not (opponent-wins? dialogue)))
 
+(defun freshly-extend-dialogue (dialogue player stance statement reference)
+  (let ((new-move (make-move player statement stance reference)))
+    (add-move-to-dialogue (copy-dialogue dialogue) new-move)))			  
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Playing games
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
