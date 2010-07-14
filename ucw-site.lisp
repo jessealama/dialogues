@@ -25,7 +25,8 @@
 	double-negate-atomic-subformulas-translation
 	self-conjoin-atomic-subformulas-translation
 	self-disjoin-atomic-subformulas-translation
-	contrapositivify-translation))
+	contrapositivify-translation
+	atomic->excluded-middle-translation))
 
 (defclass ruleset-component ()
   ((ruleset :initarg :ruleset

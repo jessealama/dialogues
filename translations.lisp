@@ -266,4 +266,32 @@
 		 :description "Identity function"
 		 :transformer #'identity))
 
+;; atomics to instances of excluded middle
+
+(defgeneric atomic->excluded-middle (formula))
+
+(defmethod atomic->excluded-middle ((form atomic-formula))
+  (make-binary-disjunction form
+			   (negate form)))
+
+(defmethod atomic->excluded-middle ((formula unary-connective-formula))
+  (make-instance (class-of formula)
+		 :argument (atomic->excluded-middle (argument formula))))
+
+(defmethod atomic->excluded-middle ((formula binary-connective-formula))
+  (make-instance (class-of formula)
+		 :lhs (atomic->excluded-middle (lhs formula))
+		 :rhs (atomic->excluded-middle (rhs formula))))
+
+(defmethod atomic->excluded-middle ((gen generalization))
+  (make-instance (class-of gen)
+		 :bound-variable (bound-variable gen)
+		 :matrix (atomic->excluded-middle (matrix gen))))
+
+(defparameter atomic->excluded-middle-translation
+  (make-instance 'formula-translation
+		 :description "Replace all atomic subformulas p by (p &or; &not;p)"
+		 :transformer #'atomic->excluded-middle))
+
+
 ;;; translations.lisp ends here
