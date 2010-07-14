@@ -538,6 +538,20 @@
 				      rule-d13))
 		 :description "D rules, but Proponent may assert an atomic formula only if Opponent has asserted the corresponding literal"))
 
+(defparameter d-dialogue-rules-minus-d10
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      ;; rule-d10
+				      rule-d11
+				      rule-d12
+				      rule-d13))
+		 :description "D rules, but Proponent may assert atomic formulas at any time"))
+
 (defparameter d-dialogue-rules-minus-d11
   (make-instance 'ruleset
 		 :rules (append argumentation-forms
