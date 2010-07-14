@@ -75,6 +75,10 @@
       (-> (v (¬ p) (¬ q))
 	  (¬ (& p q))))
 
+    (defparameter anti-connexive
+      (v (-> p (¬ p))
+	 (-> (¬ p) p)))
+
     ))
 
 ;;; famous-formulas.lisp ends here
