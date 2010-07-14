@@ -402,6 +402,30 @@
 	    (return nil)))
       finally (return t))))
 
+(defparameter rule-d13-symmetric
+  (make-structural-rule
+   :name "d13-symmetric"
+   :description "Assertions can be attacked at most once"
+   :predicate
+   (loop
+      with len = (dialogue-length dialogue)
+      for move in (if final-move-only
+		      (subseq (dialogue-plays dialogue) (1- len))
+		      (dialogue-plays dialogue))
+      for i from (if final-move-only
+		     (1- len)
+		     0)
+      do
+	(unless (length-at-most (select-moves 
+				 #'(lambda (other-move)
+				     (and (attacking-move? other-move)
+					  (= (move-reference other-move)
+					     i)))
+				 dialogue)
+				1)
+	  (return nil))
+      finally (return t))))
+
 (defparameter rule-e
    (make-structural-rule 
     :name "e"
@@ -579,6 +603,22 @@
 				      ;; rule-d12
 				      rule-d13))
 		 :description "D rules, but attacks may be answered any number of times"))
+
+(defparameter d-dialogue-rules-symmetric-d13
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      rule-d11
+				      rule-d12
+				      ;; rule-d13
+				      rule-d13-symmetric))
+		 :description "D rules, but attacks may be answered at most once"))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Playing games with Felscher's rules
