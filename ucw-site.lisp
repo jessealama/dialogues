@@ -1525,7 +1525,7 @@ that all the rules in your edited ruleset are satisfied.")
 			   :accessor selected-translation
 	        (dolist (translation available-translations)
 		  (<ucw:option :value translation
-			       (<:as-html (description translation)))))))
+			       (<:as-is (description translation)))))))
        (<:tr :style "background-color:#7B942E;"
 	(<:td "The ruleset to be used during the game:")
 	(<:td (if (null (ruleset self))
