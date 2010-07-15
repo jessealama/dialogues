@@ -79,6 +79,10 @@
       (v (-> p (¬ p))
 	 (-> (¬ p) p)))
 
+    (defparameter ex-falso-quodibet
+      (-> (& p (¬ p))
+	  q))
+
     ))
 
 ;;; famous-formulas.lisp ends here
