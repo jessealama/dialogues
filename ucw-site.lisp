@@ -212,7 +212,7 @@
     ("K formula" "k-formula" ,k-formula)
     ("B formula" "b-formula" ,b-formula)
     ("C formula" "c-formula" ,c-formula)
-    ("W formula" "w-formulas" ,w-formula)
+    ("W formula" "w-formula" ,w-formula)
     ("Scott's formula" "scott-formula" ,scott-formula)
     ("Smetanich's formula" "smetanich-formula" ,smetanich-formula)
     ("De Morgan &not;(P &and; Q) &rarr; (&not;P &or; &not;Q)" "de-morgan-not-and-implies-or-not" ,de-morgan-not-and-implies-or-not)
