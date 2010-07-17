@@ -215,12 +215,12 @@
     ("W formula" "w-formulas" ,w-formula)
     ("Scott's formula" "scott-formula" ,scott-formula)
     ("Smetanich's formula" "smetanich-formula" ,smetanich-formula)
-    ("De Morgan &not;(P &and; Q) &rarr; (&not;P &or; &not;Q)" "de-morgan-not-and-implies-or" ,de-morgan-not-and-implies-or)
-    ("De Morgan &not;(P &or; Q) &rarr; (&not;P &and; &not;Q)" "de-morgan-not-or-implies-and" ,de-morgan-not-or-implies-and)
+    ("De Morgan &not;(P &and; Q) &rarr; (&not;P &or; &not;Q)" "de-morgan-not-and-implies-or-not" ,de-morgan-not-and-implies-or-not)
+    ("De Morgan &not;(P &or; Q) &rarr; (&not;P &and; &not;Q)" "de-morgan-not-or-implies-and-not" ,de-morgan-not-or-implies-and-not)
     ("De Morgan (&not;P &and; &not;Q) &rarr; &not;(P &or; Q)" "de-morgan-and-not-implies-not-or" ,de-morgan-and-not-implies-not-or)
     ("De Morgan (&not;P &or; &not;Q) &rarr; &not;(P &and; Q)" "de-morgan-or-not-implies-not-and" ,de-morgan-or-not-implies-not-and)
     ("(P &rarr; &not;P) &or; (&not;P &rarr; P)" "anti-connexive-formula" ,anti-connexive-formula)
-    ("Ex falso quodlibet" "ex-falso-quodlibet" ,ex-falso-quodibet)
+    ("Ex falso quodlibet" "ex-falso-quodlibet" ,ex-falso-quodlibet)
     ("Implicational ex falso quodlibet" "implicational-ex-falso" ,implicational-ex-falso)
     ("Aristotle's thesis (positive antecedent)" "aristotles-thesis-positive-antecedent" ,aristotles-thesis-positive-antecedent)
     ("Aristotle's thesis (negative antecedent)" "aristotles-thesis-negative-antecdent" ,aristotles-thesis-negative-antecedent)))
@@ -242,14 +242,20 @@
    (<:li (<:tt "not") "."))
   (<:p "Atomic formulas are to be constructed according to the signature.  The case you use to write connectives and atomic formulas doesn't matter (anything you enter will be upcased).")
   (<:p "Here are some " (html-quote "famous formulas") " that can be referred to by name:")
-  (<:dl
+  (<:table :rules "all"
+   (<:thead
+    (<:tr
+     (<:th "Name")
+     (<:th "Identifier")
+     (<:th "Value")))
+   (<:tbody :style "border:1px solid;"
    (dolist (famous-formula famous-formulas)
      (destructuring-bind (long-name identifier-name value)
 	 famous-formula
-       (<:dt (<:b (<:as-is long-name)))
-       (<:dd "Value: " (render value)
-	     (<:br)
-	     "Identifier: " (<:tt (<:as-is identifier-name))))))
+       (<:tr
+	(<:td (<:as-is long-name))
+	(<:td (<:tt (<:as-is identifier-name)))
+	(<:td (render value)))))))
   (<:p "When constructing formulas manually, you can refer to these famous formulas by simply using their identifier name.  Example:")
   (<:blockquote
    (<:tt "(implies excluded-middle ex-falso-quodlibet)"))
