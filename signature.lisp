@@ -365,7 +365,7 @@ sense of EQL) but with different corresponding arities."
   (member sym (signature-predicates sig) :test #'eql))
 
 (defmethod belongs-to-signature? ((sig signature) (str string))
-  (belongs-to-signature? sig (symbolify str)))
+  (belongs-to-signature? sig (symbolify-here str)))
 
 (defmethod add-constant ((sig signature) (constant-sym symbol))
   (cond ((belongs-to-signature? sig constant-sym)
@@ -377,7 +377,7 @@ sense of EQL) but with different corresponding arities."
 
 (defmethod add-constant ((sig signature) (constant-str string))
   (if (valid-identifier-name? constant-str)
-      (add-constant sig (symbolify constant-str))
+      (add-constant sig (symbolify-here constant-str))
       (error 'unacceptable-identifier-name-error
 	     :text constant-str)))
 
@@ -386,7 +386,7 @@ sense of EQL) but with different corresponding arities."
 	(remove constant-sym (signature-constants sig))))
 
 (defmethod delete-constant ((sig signature) (constant-str string))
-  (delete-constant sig (symbolify constant-str)))
+  (delete-constant sig (symbolify-here constant-str)))
 
 (defmethod add-predicate ((sig finite-variable-propositional-signature)
 			  (pred-sym symbol)
@@ -405,7 +405,7 @@ sense of EQL) but with different corresponding arities."
 
 (defmethod add-predicate ((sig signature) (pred-str string) (arity integer))
   (if (valid-identifier-name? pred-str)
-      (add-predicate sig (symbolify pred-str) arity)
+      (add-predicate sig (symbolify-here pred-str) arity)
       (error 'unacceptable-identifier-name-error
 	     :text pred-str)))
 
@@ -420,7 +420,7 @@ sense of EQL) but with different corresponding arities."
 		(signature-predicates sig))))
 
 (defmethod delete-predicate ((sig signature) (pred-str string))
-  (delete-predicate sig (symbolify pred-str)))
+  (delete-predicate sig (symbolify-here pred-str)))
 
 (defmethod add-function ((sig signature) (func-sym symbol) (arity integer))
   (cond ((belongs-to-signature? sig func-sym)
@@ -434,9 +434,9 @@ sense of EQL) but with different corresponding arities."
 
 (defmethod add-function ((sig signature) (func-str string) (arity integer))
   (if (valid-identifier-name? func-str)
-      (add-function sig (symbolify func-str) arity)
+      (add-function sig (symbolify-here func-str) arity)
       (error 'unaccepptable-identifier-name-error
-	     :symbol (symbolify func-str))))
+	     :symbol (symbolify-here func-str))))
 
 (defmethod delete-function ((sig signature) func-sym)
   (setf (signature-functions sig)
@@ -444,7 +444,7 @@ sense of EQL) but with different corresponding arities."
 		(signature-functions sig))))
 
 (defmethod delete-function ((sig signature) (func-str string))
-  (delete-function sig (symbolify func-str)))
+  (delete-function sig (symbolify-here func-str)))
 
 (defun read-signature (prompt)
   (let (constants predicates functions)

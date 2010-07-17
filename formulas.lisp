@@ -1146,7 +1146,7 @@ value."
   (if (null list)
       (error 'parse-form-empty-list-supplied-error)
       (let ((first (first list)))
-	(op-and-args->formula (symbolify first (find-package :dialogues))
+	(op-and-args->formula (symbolify-here first)
 			      (cdr list)))))
 
 (defmethod op-and-args->term ((op symbol) arguments)
@@ -1156,7 +1156,7 @@ value."
 	   arguments-as-terms)))
 
 (defmethod form->formula ((sym symbol))
-  (make-atomic-formula (symbolify sym (find-package :dialogues))))
+  (make-atomic-formula (symbolify-here sym)))
 
 (defgeneric form->term (form)
   (:documentation "Attempt to understand FORM as a term."))
@@ -1164,7 +1164,7 @@ value."
 (defmethod form->term ((list list))
   (if (null list)
       (error 'parse-form-empty-list-supplied-error)
-      (op-and-args->term (symbolify (car list) (find-package :dialogues))
+      (op-and-args->term (symbolify-here (car list))
 			 (cdr list))))
 
 (defmethod form->term ((sym symbol))
