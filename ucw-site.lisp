@@ -205,6 +205,7 @@
   `(("Peirce's formula" "peirce-formula" ,peirce-formula)
     ("Excluded middle" "excluded-middle" ,excluded-middle)
     ("Weak excuded middle" "weak-excluded-middle" ,weak-excluded-middle)
+    ("Conditional excluded middle" "conditional-excluded-middle" ,conditional-excluded-middle)
     ("Dummett's formula" "dummett-formula" ,dummett-formula)
     ("Double negation introduction" "double-negation-intro" ,double-negation-intro)
     ("Double negation elimination" "double-negation-elim" ,double-negation-elimination)
@@ -219,7 +220,8 @@
     ("De Morgan (&not;P &and; &not;Q) &rarr; &not;(P &or; Q)" "de-morgan-and-not-implies-not-or" ,de-morgan-and-not-implies-not-or)
     ("De Morgan (&not;P &or; &not;Q) &rarr; &not;(P &and; Q)" "de-morgan-or-not-implies-not-and" ,de-morgan-or-not-implies-not-and)
     ("(P &rarr; &not;P) &or; (&not;P &rarr; P)" "this-does-not-matter" ,anti-connexive)
-    ("Ex falso quodlibet" "doesn't maatter" ,ex-falso-quodibet)))
+    ("Ex falso quodlibet" "doesn't maatter" ,ex-falso-quodibet)
+    ("Aristotle's thesis" "whatever" ,aristotles-thesis)))
 
 (defcomponent formula-corrector (signature-component)
   ((text :initarg :text :accessor formula-corrector-text)))

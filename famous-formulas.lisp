@@ -83,6 +83,12 @@
       (-> (& p (¬ p))
 	  q))
 
+    (defparameter aristotles-thesis
+      (¬ (-> p (¬ p))))
+
+    (defparameter conditional-excluded-middle
+      (v (-> p q) (-> p (¬ q))))
+
     ))
 
 ;;; famous-formulas.lisp ends here
