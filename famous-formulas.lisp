@@ -92,6 +92,9 @@
     (defparameter conditional-excluded-middle
       (v (-> p q) (-> p (¬ q))))
 
+    (defparameter implicational-ex-falso
+      (-> (¬ p) (-> p q)))
+
     ))
 
 ;;; famous-formulas.lisp ends here

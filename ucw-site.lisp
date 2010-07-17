@@ -221,6 +221,7 @@
     ("De Morgan (&not;P &or; &not;Q) &rarr; &not;(P &and; Q)" "de-morgan-or-not-implies-not-and" ,de-morgan-or-not-implies-not-and)
     ("(P &rarr; &not;P) &or; (&not;P &rarr; P)" "this-does-not-matter" ,anti-connexive)
     ("Ex falso quodlibet" "doesn't maatter" ,ex-falso-quodibet)
+    ("Implicational ex falso quodlibet" "doe" ,implicational-ex-falso)
     ("Aristotle's thesis (positive antecedent)" "whatever" ,aristotles-thesis-positive-antecedent)
     ("Aristotle's thesis (negative antecedent)" "whatever" ,aristotles-thesis-negative-antecedent)))
 
