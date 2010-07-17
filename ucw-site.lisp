@@ -1437,9 +1437,12 @@ that all the rules in your edited ruleset are satisfied.")
 			:signature sig))
 	      (let ((parsed-formula 
 		     (ucw-handler-case (parse-formula input-formula)
-		       (malformed-formula-error (call 'formula-corrector
-						      :text input-formula
-						      :signature sig)))))
+		       (end-of-file () (call 'formula-corrector
+					     :text input-formula
+					     :signature sig))
+		       (malformed-formula-error () (call 'formula-corrector
+							 :text input-formula
+							 :signature sig)))))
 		(if (belongs-to-signature? sig parsed-formula)
 		    parsed-formula
 		    (call 'formula-corrector
