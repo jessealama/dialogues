@@ -83,8 +83,11 @@
       (-> (& p (¬ p))
 	  q))
 
-    (defparameter aristotles-thesis
+    (defparameter aristotles-thesis-positive-antecedent
       (¬ (-> p (¬ p))))
+
+    (defparameter aristotles-thesis-negative-antecedent
+      (¬ (-> (¬ p) p)))
 
     (defparameter conditional-excluded-middle
       (v (-> p q) (-> p (¬ q))))

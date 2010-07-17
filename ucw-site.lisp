@@ -221,7 +221,8 @@
     ("De Morgan (&not;P &or; &not;Q) &rarr; &not;(P &and; Q)" "de-morgan-or-not-implies-not-and" ,de-morgan-or-not-implies-not-and)
     ("(P &rarr; &not;P) &or; (&not;P &rarr; P)" "this-does-not-matter" ,anti-connexive)
     ("Ex falso quodlibet" "doesn't maatter" ,ex-falso-quodibet)
-    ("Aristotle's thesis" "whatever" ,aristotles-thesis)))
+    ("Aristotle's thesis (positive antecedent)" "whatever" ,aristotles-thesis-positive-antecedent)
+    ("Aristotle's thesis (negative antecedent)" "whatever" ,aristotles-thesis-negative-antecedent)))
 
 (defcomponent formula-corrector (signature-component)
   ((text :initarg :text :accessor formula-corrector-text)))
