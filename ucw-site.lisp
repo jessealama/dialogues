@@ -254,7 +254,9 @@
     (<:p "We are unable to make sense of the formula, \""
 	 (if (stringp text)
 	     (<:as-html text)
-	     (render text)) "\" that you supplied.  The signature with respect to which you should enter a formula is:")
+	     (if (null text)
+		 (<:as-is "(weird -- NIL supplied)")
+		 (render text))) "\" that you supplied.  The signature with respect to which you should enter a formula is:")
     (render-signature sig)
     (formula-guide)
     (<:p "Please try again.")
