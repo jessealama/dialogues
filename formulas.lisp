@@ -1204,7 +1204,8 @@ value."
 			   (form->formula rhs)))
 
 (defun read-formula (&optional (stream *standard-input*))
-  (let ((input-form (read stream nil nil)))
+  (let ((input-form (let ((*package* (find-package :dialogues)))
+		      (read stream nil nil))))
     (let ((formula (form->formula input-form)))
       (if (formula? formula)
 	  formula
