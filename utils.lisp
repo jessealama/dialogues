@@ -230,6 +230,9 @@
 (defun symbolify (str &optional (package *package*))
   (intern (string-upcase str) package))
 
+(defun symbolify-here (str)
+  (symbolify str (find-package :dialogues)))
+
 ;; (defun intern-in-dialogue-package (name)
 ;;   (intern name *dialogue-package*))
 
