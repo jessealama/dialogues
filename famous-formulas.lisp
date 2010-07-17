@@ -2,97 +2,103 @@
 
 (in-package :dialogues)
 
+(defmacro define-famous-formula (name definition)
+  `(prog1
+     (defparameter ,name ,definition)
+     (defmethod form->formula ((op (eql ',name)))
+       ,name)))
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (let ((p (make-atomic-formula 'p))
 	(q (make-atomic-formula 'q))
 	(r (make-atomic-formula 'r)))
-    
-    (defparameter peirce-formula 
-      (-> (-> (-> p q) p) p))
 
-    (defparameter excluded-middle 
+    (define-famous-formula peirce-formula
+      (-> (-> (-> p q) p) p))
+    
+    (define-famous-formula excluded-middle 
       (v p (¬ p)))
 
-    (defparameter dummett-formula 
+    (define-famous-formula dummett-formula 
       (v (-> p q) (-> q p)))
 
-    (defparameter double-negation-intro
+    (define-famous-formula double-negation-introduction
       (-> p
 	  (¬ (¬ p))))
     
-    (defparameter double-negation-elimination
+    (define-famous-formula double-negation-elimination
       (-> (¬ (¬ p)) p))
     
-    (defparameter k-formula
+    (define-famous-formula k-formula
       (-> p (-> q p)))
     
-    (defparameter b-formula
+    (define-famous-formula b-formula
       (->
        (-> p q)
        (->
 	(-> r p)
 	(-> r q))))
 
-    (defparameter c-formula
+    (define-famous-formula c-formula
       (->
        (-> p
 	   (-> q r))
        (-> q
 	   (-> p r))))
 
-    (defparameter w-formula 
+    (define-famous-formula w-formula 
       (->
        (-> p
 	   (-> p q))
        (-> p q)))
 
-    (defparameter weak-excluded-middle
+    (define-famous-formula weak-excluded-middle
       (v
        (¬ p)
        (¬ (¬ p))))
     
-    (defparameter scott-formula 
+    (define-famous-formula scott-formula 
       (-> (-> (-> (¬ (¬ p)) p) (v p (¬ p)))
 	  (v (¬ p) (¬ (¬ p)))))
 
-    (defparameter smetanich-formula 
+    (define-famous-formula smetanich-formula 
       (-> (-> (¬ q) p) 
 	  (-> (-> (-> p q) p) p)))
     
-    (defparameter de-morgan-not-and-implies-or
+    (define-famous-formula de-morgan-not-and-implies-or
       (-> (¬ (& p q))
 	  (v (¬ p) (¬ q))))
 
-    (defparameter de-morgan-not-or-implies-and
+    (define-famous-formula de-morgan-not-or-implies-and
       (-> (¬ (v p q))
 	  (& (¬ p) (¬ q))))
 
-    (defparameter de-morgan-and-not-implies-not-or
+    (define-famous-formula de-morgan-and-not-implies-not-or
       (-> (& (¬ p) (¬ q))
 	  (¬ (v p q))))
 
-    (defparameter de-morgan-or-not-implies-not-and
+    (define-famous-formula de-morgan-or-not-implies-not-and
       (-> (v (¬ p) (¬ q))
 	  (¬ (& p q))))
 
-    (defparameter anti-connexive
+    (define-famous-formula anti-connexive-formula
       (v (-> p (¬ p))
 	 (-> (¬ p) p)))
 
-    (defparameter ex-falso-quodibet
+    (define-famous-formula ex-falso-quodlibet
       (-> (& p (¬ p))
 	  q))
 
-    (defparameter aristotles-thesis-positive-antecedent
+    (define-famous-formula aristotles-thesis-positive-antecedent
       (¬ (-> p (¬ p))))
 
-    (defparameter aristotles-thesis-negative-antecedent
+    (define-famous-formula aristotles-thesis-negative-antecedent
       (¬ (-> (¬ p) p)))
 
-    (defparameter conditional-excluded-middle
+    (define-famous-formula conditional-excluded-middle
       (v (-> p q) (-> p (¬ q))))
 
-    (defparameter implicational-ex-falso
+    (define-famous-formula implicational-ex-falso
       (-> (¬ p) (-> p q)))
 
     ))

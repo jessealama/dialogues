@@ -207,8 +207,8 @@
     ("Weak excuded middle" "weak-excluded-middle" ,weak-excluded-middle)
     ("Conditional excluded middle" "conditional-excluded-middle" ,conditional-excluded-middle)
     ("Dummett's formula" "dummett-formula" ,dummett-formula)
-    ("Double negation introduction" "double-negation-intro" ,double-negation-intro)
-    ("Double negation elimination" "double-negation-elim" ,double-negation-elimination)
+    ("Double negation introduction" "double-negation-introduction" ,double-negation-introduction)
+    ("Double negation elimination" "double-negation-elimination" ,double-negation-elimination)
     ("K formula" "k-formula" ,k-formula)
     ("B formula" "b-formula" ,b-formula)
     ("C formula" "c-formula" ,c-formula)
@@ -219,11 +219,11 @@
     ("De Morgan &not;(P &or; Q) &rarr; (&not;P &and; &not;Q)" "de-morgan-not-or-implies-and" ,de-morgan-not-or-implies-and)
     ("De Morgan (&not;P &and; &not;Q) &rarr; &not;(P &or; Q)" "de-morgan-and-not-implies-not-or" ,de-morgan-and-not-implies-not-or)
     ("De Morgan (&not;P &or; &not;Q) &rarr; &not;(P &and; Q)" "de-morgan-or-not-implies-not-and" ,de-morgan-or-not-implies-not-and)
-    ("(P &rarr; &not;P) &or; (&not;P &rarr; P)" "this-does-not-matter" ,anti-connexive)
-    ("Ex falso quodlibet" "doesn't maatter" ,ex-falso-quodibet)
-    ("Implicational ex falso quodlibet" "doe" ,implicational-ex-falso)
-    ("Aristotle's thesis (positive antecedent)" "whatever" ,aristotles-thesis-positive-antecedent)
-    ("Aristotle's thesis (negative antecedent)" "whatever" ,aristotles-thesis-negative-antecedent)))
+    ("(P &rarr; &not;P) &or; (&not;P &rarr; P)" "anti-connexive-formula" ,anti-connexive-formula)
+    ("Ex falso quodlibet" "ex-falso-quodlibet" ,ex-falso-quodibet)
+    ("Implicational ex falso quodlibet" "implicational-ex-falso" ,implicational-ex-falso)
+    ("Aristotle's thesis (positive antecedent)" "aristotles-thesis-positive-antecedent" ,aristotles-thesis-positive-antecedent)
+    ("Aristotle's thesis (negative antecedent)" "aristotles-thesis-negative-antecdent" ,aristotles-thesis-negative-antecedent)))
 
 (defcomponent formula-corrector (signature-component)
   ((text :initarg :text :accessor formula-corrector-text)))
@@ -240,7 +240,23 @@
    (<:li (<:tt "and") ",")
    (<:li (<:tt "or") ", and")
    (<:li (<:tt "not") "."))
-  (<:p "Atomic formulas are to be constructed according to the signature.  The case you use to write connectives and atomic formulas doesn't matter (anything you enter will be upcased)."))
+  (<:p "Atomic formulas are to be constructed according to the signature.  The case you use to write connectives and atomic formulas doesn't matter (anything you enter will be upcased).")
+  (<:p "Here are some " (html-quote "famous formulas") " that can be referred to by name:")
+  (<:dl
+   (dolist (famous-formula famous-formulas)
+     (destructuring-bind (long-name identifier-name value)
+	 famous-formula
+       (<:dt (<:b (<:as-is long-name)))
+       (<:dd "Value: " (render value)
+	     (<:br)
+	     "Identifier: " (<:tt (<:as-is identifier-name))))))
+  (<:p "When constructing formulas manually, you can refer to these famous formulas by simply using their identifier name.  Example:")
+  (<:blockquote
+   (<:tt "(implies excluded-middle ex-falso-quodlibet)"))
+  (<:p "will be interpreted as")
+  (<:blockquote
+   (render (-> excluded-middle ex-falso-quodlibet)))
+  (<:p "The famous formulas are rigidly defined: " (<:tt "peirce-formula") ", for example, refers to a specific formula composed of specific atomic subformulas in a fixed order.  If you want to express things such as " (<:tt "(or q (not q))") ", an instance of the excluded middle with the variable " (<:em "q") " instead of the variable " (<:em "p") ", then you have to type it manually; at present there is no way to influence the name of the atomic subformulas nor their order."))
 
 (defaction parse-formula-action (formula-str signature)
   (ucw-handler-case
@@ -1556,32 +1572,19 @@ that all the rules in your edited ruleset are satisfied.")
 		 (<ucw:option :value 'play-as-proponent-random-opponent
 			      "Play as Proponent (Opponent will choose its moves randomly)")
 		 (<ucw:option :value 'play-as-opponent-random-proponent
-			      "Play as Opponent (Propnent will choose its moves randomly)")))))
-       (<:tfoot
-	(<:tr
-	 (<:td :colspan "2"
-	       (<:em (<:b "About Lorenzen dialogue games:")) " Lorenzen
-dialogues are a formalism for capturing intuitionistic validity using games.  Since their invention and development in the late 1950s and 1960s, they have been extended from intuitionistic first-order logic so that they apply to different notions of validity, such as those of classical logic, modal logics, linear logic, etc.  For more information, consult " (<:a :href "http://plato.stanford.edu/entries/logic-dialogical/" "the entry on dialogue games") " in the " (<:em "Stanford Encyclopedia of Philosophy")))
-	(<:tr 
-	  (<:td :colspan "2"
-		(<:em (<:b "About the signature:")) " You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)  You will not be able to edit the signature once the game begins."))
-	(<:tr 
-	  (<:td :colspan "2"
-		(<:em (<:b "About the formula:")) " If the text box is not empty, its contents will be the initial formula of the game.  If the text box is empty, then the selected \"famous formula\" will be." 
-		(formula-guide)))
-	(<:tr 
-	 (<:td :colspan "2"
-	       (<:em (<:b "About the translation:")) " The default is the
+			      "Play as Opponent (Propnent will choose its moves randomly)"))))))
+      (<:p (<:em (<:b "About Lorenzen dialogue games:")) " Lorenzen
+dialogues are a formalism for capturing intuitionistic validity using games.  Since their invention and development in the late 1950s and 1960s, they have been extended from intuitionistic first-order logic so that they apply to different notions of validity, such as those of classical logic, modal logics, linear logic, etc.  For more information, consult " (<:a :href "http://plato.stanford.edu/entries/logic-dialogical/" "the entry on dialogue games") " in the " (<:em "Stanford Encyclopedia of Philosophy"))
+      (<:p (<:em (<:b "About the signature:")) " You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)  You will not be able to edit the signature once the game begins.")
+      (<:p (<:em (<:b "About the formula:")) " If the text box is not empty, its contents will be the initial formula of the game.  If the text box is empty, then the selected \"famous formula\" will be." 
+		(formula-guide))
+      (<:p (<:em (<:b "About the translation:")) " The default is the
 identity translation, so that whatever formula is chosen (or whatever
 formula is entered into the text box) will be, verbatim, the formula
-with which the game begins."))
-	(<:tr
-	 (<:td :colspan "2"
-	       (<:em (<:b "About the rules:")) " The rulesets in the
-above menu are some notable cases that have some logical content.  You will be able to change your choice of ruleset once the game has started.  The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985; it was arguably the first papers to rigorously establish the equivalence between intuitionistic validity and existence of winning strategies for certain dialogue games.  You will be able to alter your choice of rules after the game has begun."))
-	(<:tr
-	 (<:td :colspan "2"
-	      (<:em (<:b "About the play style:")) " The default mode of playing is to take on the role of both players: at each move, you'll see all possible moves that can be made, from the perspective of both players.  Two other play styles are supported: play as Proponent with a random Opponent, and play as Opponent with a random Proponent.")))))))))
+with which the game begins.")
+      (<:p (<:em (<:b "About the rules:")) " The rulesets in the
+above menu are some notable cases that have some logical content.  You will be able to change your choice of ruleset once the game has started.  The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985; it was arguably the first papers to rigorously establish the equivalence between intuitionistic validity and existence of winning strategies for certain dialogue games.  You will be able to alter your choice of rules after the game has begun.")
+      (<:p (<:em (<:b "About the play style:")) " The default mode of playing is to take on the role of both players: at each move, you'll see all possible moves that can be made, from the perspective of both players.  Two other play styles are supported: play as Proponent with a random Opponent, and play as Opponent with a random Proponent."))))))
 
 (defmethod render ((self start-game-component))
   (with-slots ((sig signature))
