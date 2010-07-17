@@ -13,6 +13,10 @@
 
 (push "/home/jesse/src/clbuild/systems/" asdf:*central-registry*)
 (push "/home/jesse/src/dialogues/" asdf:*central-registry*)
+
+;;; utf-8 input
+(setf sb-impl:*default-external-format* :utf-8)
+
 (asdf:oos 'asdf:load-op "dialogues")
 
 (in-package :dialogues)
