@@ -529,9 +529,9 @@ in TERM or FORMULA."))
 	     subst
 	     :key #'car))
 
-(defun remove-all-from-domain (subst vars)
+(defun remove-all-from-domain (subst vars &key (test #'equal-variables?))
   (remove-if #'(lambda (v)
-		 (member v vars :test #'equal-variables?))
+		 (member v vars :test test))
 	     subst
 	     :key #'car))
 
@@ -580,7 +580,7 @@ in TERM or FORMULA."))
 		     (apply-substitution subst subterm))
 		 (arguments term))))
 
-(defun compose-substitutions (subst-1 subst-2)
+(defun compose-substitutions (subst-1 subst-2 &key (test #'equal-variables?))
   "Compose the substitutions SUBST-1 and SUBST-2.  The order is
 important; this function is not commutative.  The order of the
 arguments to this function follows the ordinary definition of function
