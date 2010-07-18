@@ -703,6 +703,62 @@ sending the output to SUBST-1."
 			  :fail
 			  (compose-substitutions mgu-head mgu-tail))))))))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Unification of propositional formulas
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defgeneric unify-propositional-formulas-simply (formula-1 formula-2))
+
+(defmethod unify-propositional-formulas-simply ((formula-1 atomic-formula)
+						(formula-2 atomic-formula))
+  (if (equal-formulas? formula-1 formula-2)
+      nil
+      (list (cons formula-1 formula-2))))
+
+(defmethod unify-propositional-formulas-simply ((formula-1 atomic-formula)
+						(formula-2 composite-formula))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 unary-connective-formula)
+						(formula-2 atomic-formula))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 unary-connective-formula)
+						(formula-2 unary-connective-formula))
+  (unify-propositional-formulas-simply (argument formula-1)
+				       (argument formula-2)))
+
+(defmethod unify-propositional-formulas-simply ((formula-1 unary-connective-formula)
+						(formula-2 binary-connective-formula))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 binary-connective-formula)
+						(formula-2 atomic-formula))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 binary-connective-formula)
+						(formula-2 unary-connective-formula))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 binary-connective-formula)
+						(formula-2 binary-connective-formula))
+  (if (eql (class-of formula-1)
+	   (class-of formula-2))
+      (let* ((lhs-1 (lhs formula-1))
+	     (lhs-2 (lhs formula-2))
+	     (mgu-lhs (unify-propositional-formulas-simply lhs-1 lhs-2)))
+	(if (eq mgu-lhs :fail)
+	    :fail
+	    (let ((mgu-rhs (unify-propositional-formulas-simply
+			    (apply-substitution mgu-lhs (rhs formula-1))
+			    (apply-substitution mgu-lhs (rhs formula-2)))))
+	      (if (eq mgu-rhs :fail)
+		  :fail
+		  (compose-substitutions mgu-lhs
+					 mgu-rhs
+					 :test #'equal-formulas?)))))
+      :fail))
+
 (defun simple-substitution-for-var? (subst var)
   "Determine whether the substitution SUBST is a a simple substitution
 that maps the variable VAR to a value, and maps nothing else to a
