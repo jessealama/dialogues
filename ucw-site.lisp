@@ -223,7 +223,7 @@
     ("Ex falso quodlibet" "ex-falso-quodlibet" ,ex-falso-quodlibet)
     ("Implicational ex falso quodlibet" "implicational-ex-falso" ,implicational-ex-falso)
     ("Aristotle's thesis (positive antecedent)" "aristotles-thesis-positive-antecedent" ,aristotles-thesis-positive-antecedent)
-    ("Aristotle's thesis (negative antecedent)" "aristotles-thesis-negative-antecdent" ,aristotles-thesis-negative-antecedent)))
+    ("Aristotle's thesis (negative antecedent)" "aristotles-thesis-negative-antecedent" ,aristotles-thesis-negative-antecedent)))
 
 (defcomponent formula-corrector (signature-component)
   ((text :initarg :text :accessor formula-corrector-text)))
