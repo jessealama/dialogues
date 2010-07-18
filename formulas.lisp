@@ -520,6 +520,9 @@ in TERM or FORMULA."))
 (defun substitution-domain (subst)
   (mapcar #'car subst))
 
+(defun substitution-range (subst)
+  (mapcar #'cdr subst))
+
 (defun remove-from-domain (subst var)
   (remove-if #'(lambda (v)
 		 (equal-variables? v var))
