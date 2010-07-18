@@ -597,15 +597,17 @@ computed by taking an input x and applying it to SUBST-2 first, then
 sending the output to SUBST-1."
   (let ((new-subst nil))
     (dolist (var-value-2 subst-2)
-      (destructuring-bind (var-2 value-2)
+      (destructuring-bind (var-2 . value-2)
 	  var-value-2
 	(setf new-subst
 	      (acons var-2 
 		     (apply-substitution subst-1 value-2)
 		     new-subst))))
     (dolist (var-value-1 (remove-all-from-domain subst-1
-						 (substitution-domain subst-2)))
-      (destructuring-bind (var-1 value-1)
+						 (substitution-domain subst-2)
+						 :test test)
+	     new-subst)
+      (destructuring-bind (var-1 . value-1)
 	  var-value-1
 	(setf new-subst
 	      (acons var-1 value-1 new-subst))))))
