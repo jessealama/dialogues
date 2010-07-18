@@ -538,6 +538,9 @@ in TERM or FORMULA."))
 (defgeneric apply-substitution (subst formula-or-term)
   (:documentation "Apply the substitution SUBST to FORMULA-OR-TERM."))
 
+(defmethod apply-substitution ((subst (eql nil)) formula)
+  formula)
+
 (defmethod apply-substitution (subst (formula atomic-formula))
   (let ((pred (predicate formula))
 	(args (arguments formula)))
