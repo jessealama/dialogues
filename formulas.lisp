@@ -550,6 +550,10 @@ in TERM or FORMULA."))
 		       (apply-substitution subst arg))
 		   args))))
 
+(defmethod apply-substitution (subst (formula unary-connective-formula))
+  (make-instance (class-of formula)
+		 :argument (apply-substitution subst (argument formula))))
+
 (defmethod apply-substitution (subst (formula binary-connective-formula))
   (make-instance (class-of formula)
 		 :lhs (apply-substitution subst (lhs formula))
