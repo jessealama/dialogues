@@ -1276,6 +1276,11 @@ value."
 (defun contains-formula? (lst formula)
   (member formula lst :test #'equal-formulas?))
 
+(defun equal-atomic-formulas? (formula-1 formula-2)
+  (and (atomic-formula? formula-1)
+       (atomic-formula? formula-2)
+       (equal-formulas? formula-1 formula-2)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Reading formulas
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
