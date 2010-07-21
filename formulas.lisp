@@ -40,10 +40,13 @@
 
 (defgeneric make-atomic-formula (predicate &rest arguments))
 
-(defmethod make-atomic-formula ((predicate symbol) &rest arguments)
-  (make-instance 'atomic-formula
-		 :predicate predicate
-		 :args arguments))
+(let ((atomic-formula-store (make-hash-table)))
+  (defmethod make-atomic-formula ((predicate symbol) &rest arguments)
+    (or (gethash predicate atomic-formula-store)
+	(setf (gethash predicate atomic-formula-store)
+	      (make-instance 'atomic-formula
+			     :predicate predicate
+			     :args arguments)))))
 
 (defmethod belongs-to-signature? ((sig signature) (formula atomic-formula))
   (let ((pred (predicate formula))
