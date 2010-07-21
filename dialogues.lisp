@@ -259,15 +259,6 @@ attacks which, being symbols, do qualify as terms."
 (defun structural-rule? (thing)
   (typep thing 'structural-rule))
 
-;; (defmethod print-object ((rule dialogue-rule) stream)
-;;   (print-unreadable-object (rule stream :type t)
-;;     (with-slots (name description precondition-form body-form)
-;; 	rule
-;;       (format stream "Name: ~A~%" name)
-;;       (format stream "Description: ~A~%" description)
-;;       (format stream "Precondition: ~A~%" precondition-form)
-;;       (format stream "Body: ~A~%" body-form))))
-
 (defun attack? (stance)
   (eq stance 'a))
 
@@ -328,13 +319,7 @@ attacks which, being symbols, do qualify as terms."
   (print-unreadable-object (ruleset stream :type t)
     (with-slots (description rules)
 	ruleset
-      (format stream "Description: ~A~%" description)
-      (if (null rules)
-	  (format stream "Rules: (none)")
-	  (progn
-	    (format stream "Rules:~%")
-	    (dolist (rule rules)
-	      (format stream "* ~A~%" rule)))))))
+      (format stream "~A" description))))
 
 (defun eval-entire-dialogue (dialogue &key structural-rules-from-end)
   (loop 
