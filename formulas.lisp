@@ -514,8 +514,8 @@ in TERM or FORMULA."))
 ;;; Substitutions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun substitution-value (subst var)
-  (let ((bound (assoc var subst :test #'equal-variables?)))
+(defun substitution-value (subst var &key (test #'equal-variables?))
+  (let ((bound (assoc var subst :test test)))
     (if bound
 	(cdr bound)
 	:not-bound)))
@@ -525,6 +525,17 @@ in TERM or FORMULA."))
 
 (defun substitution-range (subst)
   (mapcar #'cdr subst))
+
+(defun complete-substitution (subst additional-vars)
+  "A substitution that is just like SUBST, but which explicitly maps
+variables in ADDITIONAL-VARS, if not already present in the domain of
+SUBST, to themselves."
+  (append subst
+	  (mapcar #'(lambda (var)
+		      (cons var var))
+		  (remove-if #'(lambda (var)
+				 (assoc var subst))
+			     additional-vars))))
 
 (defun remove-from-domain (subst var)
   (remove-if #'(lambda (v)
@@ -538,56 +549,60 @@ in TERM or FORMULA."))
 	     subst
 	     :key #'car))
 
-(defgeneric apply-substitution (subst formula-or-term)
+(defun compatible-substitutions? (subst-1 subst-2)
+  (or (equalp subst-1 subst-2)
+      (null (intersection (substitution-domain subst-1)
+			  (substitution-domain subst-2)))))
+
+(defgeneric apply-substitution (subst formula-or-term &key test)
   (:documentation "Apply the substitution SUBST to FORMULA-OR-TERM."))
 
-(defmethod apply-substitution ((subst (eql nil)) formula)
+(defmethod apply-substitution ((subst (eql nil)) formula &key test)
+  (declare (ignore test))
   formula)
 
-(defmethod apply-substitution (subst (formula atomic-formula))
-  (let ((pred (predicate formula))
-	(args (arguments formula)))
-    (apply #'make-atomic-formula
-	   pred
-	   (mapcar #'(lambda (arg)
-		       (apply-substitution subst arg))
-		   args))))
+(defmethod apply-substitution (subst (formula atomic-formula) &key test)
+  (let ((subst-val (substitution-value subst formula :test test)))
+    (if (eq subst-val :not-bound)
+	formula
+	subst-val)))
 
-(defmethod apply-substitution (subst (formula unary-connective-formula))
+(defmethod apply-substitution (subst (formula unary-connective-formula) &key test)
   (make-instance (class-of formula)
-		 :argument (apply-substitution subst (argument formula))))
+		 :argument (apply-substitution subst (argument formula) :test test)))
 
-(defmethod apply-substitution (subst (formula binary-connective-formula))
+(defmethod apply-substitution (subst (formula binary-connective-formula) &key test)
   (make-instance (class-of formula)
-		 :lhs (apply-substitution subst (lhs formula))
-		 :rhs (apply-substitution subst (rhs formula))))
+		 :lhs (apply-substitution subst (lhs formula) :test test)
+		 :rhs (apply-substitution subst (rhs formula) :test test)))
 
-(defmethod apply-substitution (subst (formula multiple-arity-connective-formula))
+(defmethod apply-substitution (subst (formula multiple-arity-connective-formula) &key test)
   (make-instance (class-of formula)
 		 :items (mapcar #'(lambda (item)
-				    (apply-substitution subst item))
+				    (apply-substitution subst item :test test))
 				(items formula))))
 
-(defmethod apply-substitution (subst (formula generalization))
+(defmethod apply-substitution (subst (formula generalization) &key test)
   (let ((bound-var (bound-variable formula))
 	(matrix (matrix formula)))
     (make-instance (class-of formula)
 		   :bound-variable bound-var
 		   :matrix (apply-substitution
 			    (remove-from-domain subst bound-var)
-			    matrix))))
+			    matrix
+			    :test test))))
 
-(defmethod apply-substitution (subst (term variable-term))
-  (let ((value (substitution-value subst term)))
+(defmethod apply-substitution (subst (term variable-term) &key test)
+  (let ((value (substitution-value subst term :test test)))
     (if (eql value :not-bound)
 	term
 	value)))
 
-(defmethod apply-substitution (subst (term function-term))
+(defmethod apply-substitution (subst (term function-term) &key test)
   (apply #'make-function-term
 	 (function-symbol term)
 	 (mapcar #'(lambda (subterm)
-		     (apply-substitution subst subterm))
+		     (apply-substitution subst subterm :test test))
 		 (arguments term))))
 
 (defun compose-substitutions (subst-1 subst-2 &key (test #'equal-variables?))
@@ -604,7 +619,7 @@ sending the output to SUBST-1."
 	  var-value-2
 	(setf new-subst
 	      (acons var-2 
-		     (apply-substitution subst-1 value-2)
+		     (apply-substitution subst-1 value-2 :test test)
 		     new-subst))))
     (dolist (var-value-1 (remove-all-from-domain subst-1
 						 (substitution-domain subst-2)
@@ -716,51 +731,339 @@ sending the output to SUBST-1."
 						(formula-2 atomic-formula))
   (if (equal-formulas? formula-1 formula-2)
       nil
-      (list (cons formula-1 formula-2))))
+      (acons formula-1 formula-2 nil)))
 
 (defmethod unify-propositional-formulas-simply ((formula-1 atomic-formula)
-						(formula-2 composite-formula))
+						(formula-2 negation))
   :fail)
 
-(defmethod unify-propositional-formulas-simply ((formula-1 unary-connective-formula)
+(defmethod unify-propositional-formulas-simply ((formula-1 atomic-formula)
+						(formula-2 binary-conjunction))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 atomic-formula)
+						(formula-2 binary-disjunction))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 atomic-formula)
+						(formula-2 implication))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 atomic-formula)
+						(formula-2 equivalence))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 negation)
 						(formula-2 atomic-formula))
   :fail)
 
-(defmethod unify-propositional-formulas-simply ((formula-1 unary-connective-formula)
-						(formula-2 unary-connective-formula))
+(defmethod unify-propositional-formulas-simply ((formula-1 negation)
+						(formula-2 negation))
   (unify-propositional-formulas-simply (argument formula-1)
 				       (argument formula-2)))
 
-(defmethod unify-propositional-formulas-simply ((formula-1 unary-connective-formula)
-						(formula-2 binary-connective-formula))
+(defmethod unify-propositional-formulas-simply ((formula-1 negation)
+						(formula-2 binary-conjunction))
   :fail)
 
-(defmethod unify-propositional-formulas-simply ((formula-1 binary-connective-formula)
+(defmethod unify-propositional-formulas-simply ((formula-1 negation)
+						(formula-2 binary-disjunction))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 negation)
+						(formula-2 implication))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 negation)
+						(formula-2 equivalence))
+  :fail)
+
+(defun unify-binary-connective-propositional-formulas-simply (formula-1 formula-2)
+  (let* ((lhs-1 (lhs formula-1))
+	 (lhs-2 (lhs formula-2))
+	 (mgu-lhs (unify-propositional-formulas-simply lhs-1 lhs-2)))
+    (if (eq mgu-lhs :fail)
+	:fail
+	(let ((mgu-rhs (unify-propositional-formulas-simply
+			(apply-substitution mgu-lhs (rhs formula-1) :test #'equal-atomic-formulas?)
+			(apply-substitution mgu-lhs (rhs formula-2) :test #'equal-atomic-formulas?))))
+	  (if (eq mgu-rhs :fail)
+	      :fail
+	      (compose-substitutions mgu-lhs
+				     mgu-rhs
+				     :test #'equal-atomic-formulas?))))))
+
+(defmethod unify-propositional-formulas-simply ((formula-1 binary-conjunction)
 						(formula-2 atomic-formula))
   :fail)
 
-(defmethod unify-propositional-formulas-simply ((formula-1 binary-connective-formula)
-						(formula-2 unary-connective-formula))
+(defmethod unify-propositional-formulas-simply ((formula-1 binary-conjunction)
+						(formula-2 negation))
   :fail)
 
-(defmethod unify-propositional-formulas-simply ((formula-1 binary-connective-formula)
-						(formula-2 binary-connective-formula))
-  (if (eql (class-of formula-1)
-	   (class-of formula-2))
-      (let* ((lhs-1 (lhs formula-1))
-	     (lhs-2 (lhs formula-2))
-	     (mgu-lhs (unify-propositional-formulas-simply lhs-1 lhs-2)))
-	(if (eq mgu-lhs :fail)
-	    :fail
-	    (let ((mgu-rhs (unify-propositional-formulas-simply
-			    (apply-substitution mgu-lhs (rhs formula-1))
-			    (apply-substitution mgu-lhs (rhs formula-2)))))
-	      (if (eq mgu-rhs :fail)
-		  :fail
-		  (compose-substitutions mgu-lhs
-					 mgu-rhs
-					 :test #'equal-formulas?)))))
-      :fail))
+(defmethod unify-propositional-formulas-simply ((formula-1 binary-conjunction)
+						(formula-2 binary-conjunction))
+  (unify-binary-connective-propositional-formulas-simply formula-1
+							 formula-2))
+
+(defmethod unify-propositional-formulas-simply ((formula-1 binary-conjunction)
+						(formula-2 binary-disjunction))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 binary-conjunction)
+						(formula-2 implication))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 binary-conjunction)
+						(formula-2 equivalence))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 binary-disjunction)
+						(formula-2 atomic-formula))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 binary-disjunction)
+						(formula-2 negation))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 binary-disjunction)
+						(formula-2 binary-conjunction))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 binary-disjunction)
+						(formula-2 binary-disjunction))
+  (unify-binary-connective-propositional-formulas-simply formula-1
+							 formula-2))
+
+(defmethod unify-propositional-formulas-simply ((formula-1 binary-disjunction)
+						(formula-2 implication))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 binary-disjunction)
+						(formula-2 equivalence))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 implication)
+						(formula-2 atomic-formula))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 implication)
+						(formula-2 negation))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 implication)
+						(formula-2 binary-conjunction))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 implication)
+						(formula-2 binary-disjunction))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 implication)
+						(formula-2 implication))
+  (unify-binary-connective-propositional-formulas-simply formula-1
+							 formula-2))
+
+(defmethod unify-propositional-formulas-simply ((formula-1 implication)
+						(formula-2 equivalence))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 equivalence)
+					       (formula-2 atomic-formula))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 equivalence)
+						(formula-2 negation))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 equivalence)
+						(formula-2 binary-conjunction))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 equivalence)
+						(formula-2 binary-disjunction))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 equivalence)
+						(formula-2 implication))
+  :fail)
+
+(defmethod unify-propositional-formulas-simply ((formula-1 equivalence)
+						(formula-2 equivalence))
+  (unify-binary-connective-propositional-formulas-simply formula-1
+							 formula-2))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Matchings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defgeneric match-formulas (formula-1 formula-2))
+
+(defgeneric match-formulas (formula-1 formula-2))
+
+(defmethod match-formulas ((formula-1 atomic-formula)
+						(formula-2 atomic-formula))
+  (if (equal-formulas? formula-1 formula-2)
+      nil
+      (acons formula-1 formula-2 nil)))
+
+(defmethod match-formulas ((formula-1 atomic-formula)
+						(formula-2 negation))
+  :fail)
+
+(defmethod match-formulas ((formula-1 atomic-formula)
+						(formula-2 binary-conjunction))
+  :fail)
+
+(defmethod match-formulas ((formula-1 atomic-formula)
+						(formula-2 binary-disjunction))
+  :fail)
+
+(defmethod match-formulas ((formula-1 atomic-formula)
+						(formula-2 implication))
+  :fail)
+
+(defmethod match-formulas ((formula-1 atomic-formula)
+						(formula-2 equivalence))
+  :fail)
+
+(defmethod match-formulas ((formula-1 negation)
+						(formula-2 atomic-formula))
+  :fail)
+
+(defmethod match-formulas ((formula-1 negation)
+						(formula-2 negation))
+  (match-formulas (argument formula-1)
+				       (argument formula-2)))
+
+(defmethod match-formulas ((formula-1 negation)
+						(formula-2 binary-conjunction))
+  :fail)
+
+(defmethod match-formulas ((formula-1 negation)
+						(formula-2 binary-disjunction))
+  :fail)
+
+(defmethod match-formulas ((formula-1 negation)
+						(formula-2 implication))
+  :fail)
+
+(defmethod match-formulas ((formula-1 negation)
+			   (formula-2 equivalence))
+  :fail)
+
+(defun match-binary-connective-propositional-formulas (formula-1 formula-2)
+  (let* ((lhs-1 (lhs formula-1))
+	 (lhs-2 (lhs formula-2))
+	 (match-lhs (match-formulas lhs-1 lhs-2)))
+    (if (eq match-lhs :fail)
+	:fail
+	(let ((match-rhs (match-formulas (rhs formula-1) (rhs formula-2))))
+	  (if (eq match-rhs :fail)
+	      :fail
+	      (if (compatible-substitutions? match-lhs match-rhs)
+		  (append match-lhs match-rhs)
+		  :fail))))))
+
+(defmethod match-formulas ((formula-1 binary-conjunction)
+						(formula-2 atomic-formula))
+  :fail)
+
+(defmethod match-formulas ((formula-1 binary-conjunction)
+						(formula-2 negation))
+  :fail)
+
+(defmethod match-formulas ((formula-1 binary-conjunction)
+						(formula-2 binary-conjunction))
+  (match-binary-connective-propositional-formulas formula-1
+						  formula-2))
+
+(defmethod match-formulas ((formula-1 binary-conjunction)
+						(formula-2 binary-disjunction))
+  :fail)
+
+(defmethod match-formulas ((formula-1 binary-conjunction)
+						(formula-2 implication))
+  :fail)
+
+(defmethod match-formulas ((formula-1 binary-conjunction)
+						(formula-2 equivalence))
+  :fail)
+
+(defmethod match-formulas ((formula-1 binary-disjunction)
+						(formula-2 atomic-formula))
+  :fail)
+
+(defmethod match-formulas ((formula-1 binary-disjunction)
+						(formula-2 negation))
+  :fail)
+
+(defmethod match-formulas ((formula-1 binary-disjunction)
+						(formula-2 binary-conjunction))
+  :fail)
+
+(defmethod match-formulas ((formula-1 binary-disjunction)
+						(formula-2 binary-disjunction))
+  (match-binary-connective-propositional-formulas formula-1
+						  formula-2))
+
+(defmethod match-formulas ((formula-1 binary-disjunction)
+						(formula-2 implication))
+  :fail)
+
+(defmethod match-formulas ((formula-1 binary-disjunction)
+						(formula-2 equivalence))
+  :fail)
+
+(defmethod match-formulas ((formula-1 implication)
+						(formula-2 atomic-formula))
+  :fail)
+
+(defmethod match-formulas ((formula-1 implication)
+						(formula-2 negation))
+  :fail)
+
+(defmethod match-formulas ((formula-1 implication)
+						(formula-2 binary-conjunction))
+  :fail)
+
+(defmethod match-formulas ((formula-1 implication)
+						(formula-2 binary-disjunction))
+  :fail)
+
+(defmethod match-formulas ((formula-1 implication)
+						(formula-2 implication))
+  (match-binary-connective-propositional-formulas formula-1
+						  formula-2))
+
+(defmethod match-formulas ((formula-1 implication)
+						(formula-2 equivalence))
+  :fail)
+
+(defmethod match-formulas ((formula-1 equivalence)
+					       (formula-2 atomic-formula))
+  :fail)
+
+(defmethod match-formulas ((formula-1 equivalence)
+						(formula-2 negation))
+  :fail)
+
+(defmethod match-formulas ((formula-1 equivalence)
+						(formula-2 binary-conjunction))
+  :fail)
+
+(defmethod match-formulas ((formula-1 equivalence)
+						(formula-2 binary-disjunction))
+  :fail)
+
+(defmethod match-formulas ((formula-1 equivalence)
+						(formula-2 implication))
+  :fail)
+
+(defmethod match-formulas ((formula-1 equivalence)
+						(formula-2 equivalence))
+  (match-binary-connective-propositional-formulas formula-1
+						  formula-2))
 
 (defun simple-substitution-for-var? (subst var)
   "Determine whether the substitution SUBST is a a simple substitution
