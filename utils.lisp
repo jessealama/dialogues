@@ -113,6 +113,24 @@
 	     (index (random len)))
 	(nth index lst))))
 
+(defun same-length (lst-1 lst-2)
+  (if (null lst-1)
+      (null lst-2)
+      (if (null lst-2)
+	  nil
+	  (same-length (cdr lst-1) (cdr lst-2)))))
+
+(defun first-n-satisfying (n pred lst)
+  (cond ((minusp n) (values nil lst))
+	((zerop n) (values nil lst))
+	((null lst) (values nil nil))
+	((funcall pred (car lst))
+	 (multiple-value-bind (winners tail)
+	     (first-n-satisfying (1- n) pred (cdr lst))
+	   (values (cons (car lst) winners) (cdr tail))))
+	(t
+	 (first-n-satisfying n pred (cdr lst)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Numbers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
