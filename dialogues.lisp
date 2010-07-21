@@ -650,6 +650,14 @@ attacks which, being symbols, do qualify as terms."
 			      statement-and-reference
 			    (make-move 'o statement 'd reference)))
 		      (next-moves-at-position diminished-dialogue 'o 'd position))))))
+
+(defun all-next-proponent-moves-at-position (dialogue position)
+  (remove-if-not #'proponent-move?
+		 (all-next-moves-at-position dialogue position)))
+
+(defun all-next-opponent-moves-at-position (dialogue position)
+  (remove-if-not #'opponent-move?
+		 (all-next-moves-at-position dialogue position)))
   
 (defun next-moves (dialogue player stance)
   (next-moves-at-position dialogue player stance (dialogue-length dialogue)))
