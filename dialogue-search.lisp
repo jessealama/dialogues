@@ -4,8 +4,14 @@
 
 (defstruct (dialogue-search-problem
 	     (:include problem))
-  (rules nil :type list)
+  (rules nil :type ruleset)
   (signature nil :type signature))
+
+(defmethod goal-test ((problem dialogue-search-problem) node)
+  (let ((game (node-state node)))
+    (and (proponent-move? (last-move game))
+	 (null (all-next-opponent-moves-at-position game 
+						    (dialogue-length game))))))
 
 (defmethod successors ((dsp dialogue-search-problem) node)
   (let ((dialogue-so-far (node-state node))
