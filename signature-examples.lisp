@@ -8,6 +8,9 @@
 (defconstant-if-unbound pqr-propositional-signature
     (make-finite-variable-propositional-signature 'p 'q 'r))
 
+(defconstant-if-unbound pq-propositional-signature
+    (make-finite-variable-propositional-signature 'p 'q))
+
 (defconstant-if-unbound unary-pqrs-signature-with-equality
     (make-infinite-variable-signature-with-equality :predicates '((p . 1)
 								  (q . 1)
