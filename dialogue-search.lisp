@@ -292,13 +292,40 @@ is assumed that OPPONENT-NODE is expanded."
 			     :expanded? t)))))
       :dialogue-tree-too-shallow))
 
-(defun winning-strategy (formula rules depth &optional starting-node)
-  (let ((tree-root (if starting-node
-		       (copy-search-tree-node starting-node)
-		       (copy-search-tree-node (dialogue-search-tree formula rules depth)))))
-    (proponent-ws-from-proponent-node tree-root)))
+(defvar winning-strategy-registry (make-hash-table :test #'equalp))
+
+(defun winning-strategy (formula ruleset depth &optional starting-node)
+  (let ((earlier-values (gethash formula winning-strategy-registry)))
+    (if earlier-values
+	(let ((gold (loop 
+		       for (rules d strategy) in earlier-values
+		       do
+			 (if (and (equal-rulesets? rules ruleset)
+				  (>= d depth))
+			     (return strategy))
+		       finally
+			 (return nil))))
+	  (if (null gold)
+	      (setf (gethash formula winning-strategy-registry)
+		    (let ((tree-root (if starting-node
+					 (copy-search-tree-node starting-node)
+					 (copy-search-tree-node (dialogue-search-tree formula
+										      ruleset
+										      depth)))))
+		      (proponent-ws-from-proponent-node tree-root)))
+	      gold))
+	(let ((solution (let ((tree-root (if starting-node
+					     (copy-search-tree-node starting-node)
+					     (copy-search-tree-node (dialogue-search-tree formula
+											  ruleset
+											  depth)))))
+			  (proponent-ws-from-proponent-node tree-root))))
+	  (setf (gethash formula winning-strategy-registry)
+		(list (list ruleset depth solution)))))))
 
 (defun explain-strategy (winning-strategy)
+  (declare (ignore winning-strategy))
+  (format t "implement something sensible here"))
   
 
 ;;; dialogue-search.lisp ends here
