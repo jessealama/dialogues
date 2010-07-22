@@ -154,7 +154,7 @@
     (define-famous-formula commutativity-of-disjunction
 	(-> (v p q) (v q p)))
 
-    (define-famous-formula commutativity-of-negation
+    (define-famous-formula commutativity-of-implication
 	(-> (-> p q) (-> q p)))
 
     (define-famous-formula associativity-of-conjunction
