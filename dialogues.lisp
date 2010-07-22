@@ -321,6 +321,9 @@ attacks which, being symbols, do qualify as terms."
 	ruleset
       (format stream "~A" description))))
 
+(defun equal-rulesets? (ruleset-1 ruleset-2)
+  (eq ruleset-1 ruleset-2)) ;; I don't have an interesting notion of equality
+
 (defun eval-entire-dialogue (dialogue &key structural-rules-from-end)
   (loop 
      with failures = nil
