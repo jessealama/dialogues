@@ -175,4 +175,130 @@ game tree developed down to depth DEPTH."
 		   formula
 		   depth))
 
+(defvar search-tree-directory (make-hash-table :test #'equal)
+  "A mapping from triples (FORMULA RULESET DEPTH) to search trees.
+
+It is represented as an association list with entries of the
+form (FORMULA . STUFF), where STUFF is a list of triples (RULESET
+DEPTH TREE).")
+
+(defun search-trees-for-formula (formula)
+  (gethash formula search-tree-directory nil))
+
+(defun search-trees-for-formula-with-rules (formula rules)
+  (remove-if-not #'(lambda (entry)
+		     (destructuring-bind (ruleset depth tree)
+			 entry
+		       (declare (ignore depth tree))
+		       (equal-rulesets? ruleset rules)))
+		 (search-trees-for-formula formula)))
+
+(defun search-tree-for-formula-with-depth (formula depth)
+  (remove-if-not #'(lambda (entry)
+		     (destructuring-bind (ruleset d tree)
+			 entry
+		       (declare (ignore ruleset tree))
+		       (= depth d)))
+		 (search-trees-for-formula formula)))
+
+(defun register-dialogue-tree (formula rules depth tree)
+  (let ((earlier (gethash formula search-tree-directory))
+	(entry (list rules depth tree)))
+    (cond ((null earlier) ; we've never seen FORMULA
+	   (setf (gethash formula search-tree-directory) (list entry)))
+	  (t
+	   (setf (gethash formula search-tree-directory)
+		 (append (list entry) earlier))))))
+
+(defun develop-dialogue-tree-to-depth (tree-root depth problem)
+  (let ((expandable-leaves (expandable-leaf-nodes tree-root)))
+    (dolist (leaf expandable-leaves tree-root)
+      (exhaustive-depth-limited-search problem depth leaf))))
+
+(defun dialogue-search-tree (formula rules depth)
+  (let ((earlier-entries (search-trees-for-formula-with-rules formula rules))
+	(problem (make-dialogue-search-problem :rules rules
+					       :initial-state (make-dialogue formula
+									     pqrs-propositional-signature
+									     rules))))
+    (let ((tree (loop
+		   for entry in earlier-entries
+		   do
+		     (destructuring-bind (ruleset d root)
+			 entry
+		       (when (equal-rulesets? ruleset rules)
+			 (when (>= d depth)
+			   (return root))))
+		   finally
+		     (return (create-start-node problem)))))
+      (cond ((>= (node-depth tree) depth)
+	     tree)
+	    (t
+	     (let ((new-tree (develop-dialogue-tree-to-depth tree depth problem)))
+	       (register-dialogue-tree formula rules depth new-tree)
+	       new-tree))))))
+
+(defun copy-search-tree-node (node)
+  (make-node :state (node-state node)
+	     :parent (node-parent node)
+	     :action (node-action node)
+	     :successors (mapcar #'copy-search-tree-node (node-successors node))
+	     :depth (node-depth node)
+	     :expanded? (node-expanded? node)))
+
+(defun proponent-ws-from-opponent-node (opponent-node)
+  "Find a winning strategy from OPPONENT-NODE, which is supposed to
+represent a move just played by opponent.
+Return :DIALOGUE-TREE-TOO-SHALLOW if there are any unexpanded nodes that,
+if expanded, could make a difference in the determination of the
+existence of a winning strategy.  Return NIL if there are no winning
+strategies for Proponent starting from OPPONENT-NODE.  If there are,
+return a copy of OPPONENT-NODE that contains the winning strategy.  It
+is assumed that OPPONENT-NODE is expanded."
+  (let ((opponent-succs (node-successors opponent-node)))
+    (if (node-expanded? opponent-node)
+	(if (null opponent-succs)
+	    nil
+	    (let ((strategies (mapcar #'proponent-ws-from-proponent-node
+				      opponent-succs)))
+	      (if (every #'null strategies)
+		  nil
+		  (if (every #'(lambda (thing)
+				 (eq thing :dialogue-tree-too-shallow))
+			     strategies)
+		      :dialogue-tree-too-shallow
+		      (let ((winner (find-if #'node-p strategies)))
+			(make-node :state (node-state opponent-node)
+				   :parent (node-parent opponent-node)
+				   :action (node-action opponent-node)
+				   :successors (list winner)
+				   :depth (node-depth opponent-node)
+				   :expanded? t))))))
+	:dialogue-tree-too-shallow)))
+
+(defun proponent-ws-from-proponent-node (proponent-node)
+  (if (node-expanded? proponent-node)
+      (let ((succs (node-successors proponent-node)))
+	(let ((strategies (mapcar #'proponent-ws-from-opponent-node succs)))
+	  (if (member nil strategies)
+	      nil
+	      (if (member :dialogue-tree-too-shallow strategies)
+		  :dialogue-tree-too-shallow
+		  (make-node :state (node-state proponent-node)
+			     :parent (node-parent proponent-node)
+			     :action (node-action proponent-node)
+			     :successors strategies
+			     :depth (node-depth proponent-node)
+			     :expanded? t)))))
+      :dialogue-tree-too-shallow))
+
+(defun winning-strategy (formula rules depth &optional starting-node)
+  (let ((tree-root (if starting-node
+		       (copy-search-tree-node starting-node)
+		       (copy-search-tree-node (dialogue-search-tree formula rules depth)))))
+    (proponent-ws-from-proponent-node tree-root)))
+
+(defun explain-strategy (winning-strategy)
+  
+
 ;;; dialogue-search.lisp ends here
