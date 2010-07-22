@@ -364,9 +364,22 @@ attacks which, being symbols, do qualify as terms."
 (defmethod print-object ((game dialogue) stream)
   (print-unreadable-object (game stream :type t)
     (with-slots (rules signature plays) game
-      (format stream 
-	      "rules: ~A~%signature: ~A~%moves: ~A"
-	      rules signature plays))))
+      (format stream "rules: ~A~%" rules)
+      (format stream "signature: ~A~%" signature)
+      (format stream "moves: ")
+      (if (null plays)
+	  (format stream "(none)~%")
+	  (loop
+	     initially (format stream "~%")
+	     for i from 0
+	     for move in plays
+	     do
+	       (with-slots (player statement stance reference)
+		   move
+		   (if (and (null stance)
+			    (null reference))
+		       (format stream "~d ~A ~A (initial move)~%" i player statement)
+		       (format stream "~d ~A ~A [~A,~A]~%" i player statement stance reference))))))))
 
 (defun make-dialogue (formula signature rules)
   (make-instance 'dialogue
