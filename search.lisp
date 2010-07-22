@@ -187,6 +187,20 @@ how the node was obtained, starting from an initial node."
         (t (loop for n in (expand node problem) do
 		(let ((solution (depth-limited-search problem limit n)))
 		  (when solution (return solution)))))))
+
+(defun exhaustive-depth-limited-search (problem &optional limit
+			              (node (create-start-node problem)))
+  "Search depth-first, but only up to LIMIT branches deep in the tree.
+Expand until there are no more nodes of depth less than LIMIT that are
+unexpanded."
+  (let ((to-do (list node)))
+    (until (null to-do)
+      (let ((current-node (pop to-do)))
+	(when (< (node-depth current-node) limit)
+	  (unless (node-expanded? current-node)
+	    (expand current-node problem))
+	  (dolist (successor (node-successors current-node))
+	    (push successor to-do)))))))
 						       
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Avoiding repeated states
