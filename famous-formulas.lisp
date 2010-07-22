@@ -102,6 +102,12 @@
     (define-famous-formula implicational-ex-falso
 	(-> (¬ p) (-> p q)))
 
+    (define-famous-formula wkp
+	(-> (-> (¬ p)
+		(v (¬ p) (¬ r)))
+	    (v (-> (¬ p) (¬ q))
+	       (-> (¬ p) (¬ r)))))
+
     ))
 
 ;;; famous-formulas.lisp ends here
