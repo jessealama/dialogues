@@ -64,17 +64,21 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 (defun expand (node problem)
   (unless (node-expanded? node)
     (setf (node-expanded? node) t)
-    (incf (problem-num-expanded problem))
-    (let ((nodes nil))
-      (loop for successor in (successors problem node) do
-	   (destructuring-bind (action . state)
-	       successor
-	     (push (make-node :parent node 
-			      :action action 
-			      :state state
-			      :depth (1+ (node-depth node)))
-		   nodes)))
-      nodes)))
+    (incf (problem-num-expanded problem)))
+  (loop 
+     with nodes = nil
+     for successor in (successors problem node)
+     do
+       (destructuring-bind (action . state)
+	   successor
+	 (push (make-node :parent node 
+			  :action action 
+			  :state state
+			  :depth (1+ (node-depth node)))
+	       nodes))
+     finally
+       (setf (node-successors node) nodes)
+       (return nodes)))
 
 (defun create-start-node (problem)
   "Make the starting node, corresponding to the problem's initial state."
