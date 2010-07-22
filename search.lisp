@@ -84,6 +84,19 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
   "Make the starting node, corresponding to the problem's initial state."
   (make-node :state (problem-initial-state problem)))
 
+(defun leaf-nodes (node)
+  "All nodes reachable from NODE (via the successor function) that are either unexpanded or have no successors (and are expanded)."
+  (if (node-expanded? node)
+      (let ((succ (node-successors node)))
+	(if (null succ)
+	    (list node)
+	    (apply #'append (mapcar #'leaf-nodes succ))))
+      (list node)))
+
+(defun expandable-leaf-nodes (node)
+  "All leaf nodes reachable from NODE that can be expanded."
+  (remove-if #'node-expanded? (leaf-nodes node)))
+
 (defun make-initial-queue (initial-state 
 			   &key (queueing-function #'enqueue-at-end))
   (let ((q (make-empty-queue)))
