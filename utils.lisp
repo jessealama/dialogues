@@ -58,8 +58,10 @@
 
 (defmacro push-all (objs lst)
   (let ((obj (gensym)))
-    `(dolist (,obj ,objs)
-       (push ,obj ,lst))))
+    `(if (null ,objs)
+	 ,lst
+	 (dolist (,obj ,objs ,lst)
+	   (push ,obj ,lst)))))
 
 (defun equal-length? (lst-1 lst-2)
   (if lst-1
