@@ -23,6 +23,14 @@ also contains some bookkeeping information."
   (expanded? nil)           ; any successors examined?
   )
 
+
+
+(defmethod print-object ((node node) stream)
+  (print-unreadable-object (node stream :type t)
+    (with-slots (state)
+	node
+      (format stream "~A" state))))
+
 (defmethod successors ((problem problem) node)
   "Return an alist of (action . state) pairs, reachable from this state."
   (declare (ignore node))
