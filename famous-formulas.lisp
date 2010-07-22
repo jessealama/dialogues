@@ -12,7 +12,8 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (let ((p (make-atomic-formula 'p))
 	(q (make-atomic-formula 'q))
-	(r (make-atomic-formula 'r)))
+	(r (make-atomic-formula 'r))
+	(s (make-atomic-formula 's)))
     
     (define-famous-formula peirce-formula
 	(-> (-> (-> p q) p) p))
@@ -107,6 +108,106 @@
 		(v (¬ p) (¬ r)))
 	    (v (-> (¬ p) (¬ q))
 	       (-> (¬ p) (¬ r)))))
+
+    (define-famous-formula modus-ponens
+	(-> (& (-> p q) p) q))
+    
+    (define-famous-formula modus-tollens
+	(-> (& (-> p q) (¬ q)) (¬ p)))
+
+    (define-famous-formula hypothetical-syllogism
+	(-> (& (-> p q) (-> q r))
+	    (-> p r)))
+
+    (define-famous-formula disjunctive-syllogism
+	(-> (& (v p q) (¬ p)) (¬ q)))
+
+    (define-famous-formula constructive-dilemma
+	(-> (& (-> p q)
+	       (-> r s))
+	    (-> (v p r)
+		(v q s))))
+
+    (define-famous-formula destructive-dilemma
+	(-> (& (-> p q)
+	       (-> r s))
+	    (-> (v (¬ r) (¬ s))
+		(v (¬ p) (¬ q)))))
+
+    (define-famous-formula conjunction-elimination
+	(-> (& p q) p))
+
+    (define-famous-formula conjunction-introduction
+	(-> p (-> q (& p q))))
+
+    (define-famous-formula disjunction-introduction
+	(-> p (v p q)))
+
+    (define-famous-formula composition
+	(-> (& (-> p q)
+	       (-> p r))
+	    (-> p (& q r))))
+
+    (define-famous-formula commutivity-of-conjunction
+	(-> (& p q) (& q p)))
+
+    (define-famous-formula commutativity-of-disjunction
+	(-> (v p q) (v q p)))
+
+    (define-famous-formula commutativity-of-negation
+	(-> (-> p q) (-> q p)))
+
+    (define-famous-formula associativity-of-conjunction
+	(-> (& p (& q r)) (& (& p q) r)))
+
+    (define-famous-formula associativity-of-disjunction
+	(-> (v p (v p r)) (v (v p q) r)))
+
+    (define-famous-formula associativity-of-implication
+	(-> (-> p (-> q r))
+	    (-> (-> p q) r)))
+
+    (define-famous-formula distributivity-of-conjunction-over-disjunction-conjunctive-antecedent
+	(-> (& p (v p r)) (v (& p q) (& p r))))
+
+    (define-famous-formula distributivity-of-conjunction-over-disjunction-disjunctive-antecedent
+	(-> (v (& p q) (& p r))
+	    (& p (v q r))))
+
+    (define-famous-formula distributivity-of-disjunction-over-conjunction-disjunctive-antecedent
+	(-> (v p (& q r))
+	    (& (v p q) (v p r))))
+
+    (define-famous-formula distributivity-of-disjunction-over-conjunction-conjunctive-antecedent
+	(-> (& (v p q) (v p r))
+	    (v p (& q r))))
+
+    (define-famous-formula transposition
+	(-> (-> p q) (-> (¬ q) (¬ p))))
+
+    (define-famous-formula material-implication-implicational-antecedent
+	(-> (-> p q)
+	    (v (¬ p) q)))
+
+    (define-famous-formula material-implication-disjunctive-antecedent
+	(-> (v (¬ p) q)
+	    (-> p q)))
+
+    (define-famous-formula material-equivalence-conjunctive-antecedent
+	(-> (& (-> p q) (-> q p))
+	    (v (& p q) (& (¬ p) (¬ q)))))
+
+    (define-famous-formula material-equivalence-disjunctive-antecedent
+	(-> (v (& p q) (& (¬ p) (¬ q)))
+	    (& (-> p q) (-> q p))))
+
+    (define-famous-formula exportation-conjunctive-antecedent
+	(-> (-> (& p q) r)
+	    (-> p (-> q r))))
+
+    (define-famous-formula exportation-implicational-antecedent
+	(-> (-> p (-> q r))
+	    (-> (& p q) r)))
 
     ))
 
