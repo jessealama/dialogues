@@ -220,7 +220,7 @@
     ("De Morgan (&not;P &and; &not;Q) &rarr; &not;(P &or; Q)" "de-morgan-and-not-implies-not-or" ,de-morgan-and-not-implies-not-or)
     ("De Morgan (&not;P &or; &not;Q) &rarr; &not;(P &and; Q)" "de-morgan-or-not-implies-not-and" ,de-morgan-or-not-implies-not-and)
     ("(P &rarr; &not;P) &or; (&not;P &rarr; P)" "anti-connexive-formula" ,anti-connexive-formula)
-    ("Ex falso quodlibet" "ex-falso-quodlibet" ,ex-falso-quodlibet)
+    ("Ex contradictione quodlibet" "ex-contradictione-quodlibet" ,ex-contradictione-quodlibet)
     ("Implicational ex falso quodlibet" "implicational-ex-falso" ,implicational-ex-falso)
     ("WKP" "wkp" ,wkp)
     ("Aristotle's thesis (positive antecedent)" "aristotles-thesis-positive-antecedent" ,aristotles-thesis-positive-antecedent)
@@ -300,7 +300,7 @@
 	(<:td (render value)))))))
   (<:p "When constructing formulas manually, you can refer to these famous formulas by simply using their identifier name.  Example:")
   (<:blockquote
-   (<:tt "(implies excluded-middle ex-falso-quodlibet)"))
+   (<:tt "(implies excluded-middle ex-contradictione-quodlibet)"))
   (<:p "will be interpreted as")
   (<:blockquote
    (render (-> excluded-middle ex-falso-quodlibet)))

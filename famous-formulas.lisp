@@ -87,7 +87,7 @@
 	(v (-> p (¬ p))
 	   (-> (¬ p) p)))
 
-    (define-famous-formula ex-falso-quodlibet
+    (define-famous-formula ex-contradictione-quodlibet
 	(-> (& p (¬ p))
 	    q))
 
