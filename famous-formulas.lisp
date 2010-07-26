@@ -193,6 +193,12 @@
 	(-> (v (¬ p) q)
 	    (-> p q)))
 
+    (define-famous-formula material-implication-negative-antecedent
+	(-> (-> p q) (¬ (& p (¬ q)))))
+
+    (define-famous-formula material-implication-negative-consequent
+	(-> (¬ (& p (¬ q))) (-> p q)))
+
     (define-famous-formula material-equivalence-conjunctive-antecedent
 	(-> (& (-> p q) (-> q p))
 	    (v (& p q) (& (¬ p) (¬ q)))))
@@ -208,6 +214,43 @@
     (define-famous-formula exportation-implicational-antecedent
 	(-> (-> p (-> q r))
 	    (-> (& p q) r)))
+
+    (define-famous-formula conjunctive-idempotency-conjunctive-antecedent
+	(-> (& p p) p))
+
+    (define-famous-formula conjunctive-idempotency-conjunctive-consequent
+	(-> p (& p p)))
+
+    (define-famous-formula disjunctive-idempotenency-disjunctive-antecedent
+	(-> (v p p) p))
+
+    (define-famous-formula disjunctive-idempotenency-disjunctive-consequent
+	(-> p (v p p)))
+
+    (define-famous-formula disjunctive-absorption-disjunctive-antecedent
+	(-> (v p (& p q)) p))
+
+    (define-famous-formula disjunctive-absorption-disjunctive-consequent
+	(converse disjunctive-absorption-disjunctive-antecedent))
+
+    (define-famous-formula conjunctive-absorption-conjunctive-antecedent
+	(-> (& p (v p q)) p))
+
+    (define-famous-formula conjunctive-absorption-conjunctive-consequent
+	(converse conjunctive-absorption-conjunctive-antecedent))
+
+    (define-famous-formula frege-formula
+	(-> (-> p (-> q r))
+	    (-> (-> p q)
+		(-> p r))))
+
+    (define-famous-formula contraposition-positive-antecedent
+	(-> (-> p q)
+	    (-> (¬ q) (¬ p))))
+
+    (define-famous-formula contraposition-negative-antecedent
+	(-> (-> (¬ q) (¬ p))
+	    (-> p q)))
 
     ))
 
