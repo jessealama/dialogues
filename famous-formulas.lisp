@@ -105,7 +105,7 @@
 
     (define-famous-formula wkp
 	(-> (-> (¬ p)
-		(v (¬ p) (¬ r)))
+		(v (¬ q) (¬ r)))
 	    (v (-> (¬ p) (¬ q))
 	       (-> (¬ p) (¬ r)))))
 
