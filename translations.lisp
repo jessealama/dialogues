@@ -293,5 +293,18 @@
 		 :description "Replace all atomic subformulas p by (p &or; &not;p)"
 		 :transformer #'atomic->excluded-middle))
 
+;;; converse
+
+(defun converse (formula)
+  (if (implication? formula)
+      (make-implication (consequent formula)
+			(antecedent formula))
+      formula))
+
+(defparameter converse-translation
+  (make-instance 'formula-translation
+		 :description "Take the converse of an implication (but do nothing to non-implications)"
+		 :transformer #'converse))
+
 
 ;;; translations.lisp ends here
