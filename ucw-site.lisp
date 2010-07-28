@@ -304,7 +304,7 @@
    (<:tt "(implies excluded-middle ex-contradictione-quodlibet)"))
   (<:p "will be interpreted as")
   (<:blockquote
-   (render (-> excluded-middle ex-falso-quodlibet)))
+   (render (-> excluded-middle ex-contradictione-quodlibet)))
   (<:p "The famous formulas are rigidly defined: " (<:tt "peirce-formula") ", for example, refers to a specific formula composed of specific atomic subformulas in a fixed order.  If you want to express things such as " (<:tt "(or q (not q))") ", an instance of the excluded middle with the variable " (<:em "q") " instead of the variable " (<:em "p") ", then you have to type it manually; at present there is no way to influence the name of the atomic subformulas nor their order."))
 
 (defaction parse-formula-action (formula-str signature)
