@@ -13,7 +13,10 @@
 	d-dialogue-rules-minus-d11
 	d-dialogue-rules-minus-d12
 	d-dialogue-rules-symmetric-d13
-	d-dialogue-rules-literal-d10))
+	d-dialogue-rules-literal-d10
+	d-dialogue-rules-inverted
+	e-dialogue-rules-inverted
+	classical-dialogue-rules-inverted))
 
 (defparameter available-translations
   (list identity-translation
@@ -676,14 +679,20 @@ meaning of the dialogue rules.")
 		(<:td (<ucw:input :type "text"
 				  :id "input-statement"
 				  :accessor input-statement)
-		        (<ucw:select :accessor selected-symbolic-attack
-				     :size 1
-		          (<ucw:option :value attack-left-conjunct 
+		      (<ucw:select :accessor selected-symbolic-attack
+				   :size 1
+			  (<ucw:option :value attack-left-conjunct 
 				       "Attack the left conjunct")
 			  (<ucw:option :value attack-right-conjunct
 				       "Attack the right conjunct")
 			  (<ucw:option :value which-disjunct?
-				       "Request that a disjunct be chosen"))))
+				       "Request that a disjunct be chosen")
+		          (<ucw:option :value attack-left-disjunct 
+				       "Attack the left disjunct")
+			  (<ucw:option :value attack-right-disjunct
+				       "Attack the right disjunct")
+			  (<ucw:option :value which-conjunct?
+				       "Request that a conjunct be chosen"))))
 	       (<:caption :style "caption-side:bottom;"
 	         (<ucw:submit :value "Make a move"
 			      :action $take-action))))))))
@@ -1350,15 +1359,29 @@ that all the rules in your edited ruleset are satisfied.")
   (<:as-is "&and;")
   (<:sub "L"))
 
+(defmethod render ((sa (eql attack-left-disjunct)))
+  (<:as-is "&or;")
+  (<:sub "L"))
+
 (defmethod render-plainly ((sa (eql attack-left-conjunct)))
   "&and;(L)")
+
+(defmethod render-plainly ((sa (eql attack-left-disjunct)))
+  "&or;(L)")
 
 (defmethod render ((sa (eql attack-right-conjunct)))
   (<:as-is "&and;")
   (<:sub "R"))
 
+(defmethod render ((sa (eql attack-right-disjunct)))
+  (<:as-is "&or;")
+  (<:sub "R"))
+
 (defmethod render-plainly ((sa (eql attack-right-conjunct)))
   "&and;(R)")
+
+(defmethod render-plainly ((sa (eql attack-right-disjunct)))
+  "&or;(R)")
 
 (defmethod render ((sa (eql which-instance?)))
   (<:as-is "?"))
@@ -1369,8 +1392,14 @@ that all the rules in your edited ruleset are satisfied.")
 (defmethod render ((sa (eql which-disjunct?)))
   (<:as-is "?"))
 
+(defmethod render ((sa (eql which-conjunct?)))
+  (<:as-is "?"))
+
 (defmethod render-plainly ((sa (eql which-disjunct?)))
   "?")	   
+
+(defmethod render-plainly ((sa (eql which-conjunct?)))
+  "?")
 
 (defmethod render :around ((formula unary-connective-formula))
   (call-next-method)
