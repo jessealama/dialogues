@@ -144,15 +144,15 @@
   (:documentation "A list of all formulas of depth DEPTH from
 SIGNATURE, modulo some notion of equivalence that depends on SIGNATURE."))
 
-(let ((reduced-enumeration-table (make-hash-table :test #'equal)))
-  (defmethod reduced-enumeration :around (depth (sig signature))
-    (let* ((key (cons depth sig))
-	   (old-val (gethash key reduced-enumeration-table)))
-      (if (null old-val)
-	  (let ((new-val (call-next-method)))
-	    (setf (gethash key reduced-enumeration-table) new-val))
-	  (progn
-	    old-val)))))
+(defparameter reduced-enumeration-table (make-hash-table :test #'equal))
+
+(defmethod reduced-enumeration :around (depth (sig signature))
+  (let* ((key (cons depth sig))
+	 (old-val (gethash key reduced-enumeration-table)))
+    (if (null old-val)
+	(let ((new-val (call-next-method)))
+	  (setf (gethash key reduced-enumeration-table) new-val))
+	old-val)))
 
 (defun reduce-formula-list (lst)
   (remove-duplicates lst
