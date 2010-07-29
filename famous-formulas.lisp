@@ -168,7 +168,7 @@
 	    (-> (-> p q) r)))
 
     (define-famous-formula distributivity-of-conjunction-over-disjunction-conjunctive-antecedent
-	(-> (& p (v p r)) (v (& p q) (& p r))))
+	(-> (& p (v q r)) (v (& p q) (& p r))))
 
     (define-famous-formula distributivity-of-conjunction-over-disjunction-disjunctive-antecedent
 	(-> (v (& p q) (& p r))
