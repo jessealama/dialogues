@@ -7,6 +7,11 @@
   (rules nil :type (or (eql nil) ruleset))
   (signature nil :type (or (eql nil) signature)))
 
+(defstruct (ncl-search-problem
+	     (:include problem))
+  (rules nil :type (or (eql nil) ruleset))
+  (signature nil :type (or (eql nil) signature)))
+
 (defmethod successors ((dsp dialogue-search-problem) node)
   (let ((dialogue-so-far (node-state node))
 	(extensions nil))
@@ -24,6 +29,28 @@
 								 index))))
 			    next-moves)
 		    extensions))))))
+
+(defmethod successors ((ncl ncl-search-problem) node)
+  (let* ((dialogue-so-far (node-state node))
+	 (last-move (last-move dialogue-so-far)))
+    (if (and (opponent-move? last-move)
+	     (defensive-move? last-move))
+	nil
+	(let (extensions)
+	  (dolist (player '(p o) extensions)
+	    (dolist (stance '(a d))
+	      (let ((next-moves (next-moves dialogue-so-far player stance)))
+		(push-all (mapcar #'(lambda (next-move)
+				      (destructuring-bind (statement index)
+					  next-move
+					(cons (list player stance index statement)
+					      (freshly-extend-dialogue dialogue-so-far
+								       player
+								       stance
+								       statement
+								       index))))
+				  next-moves)
+			  extensions))))))))
 
 (defun dialogue-search-bfs (rules initial-statement signature &optional more-nodes)
   (if (belongs-to-signature? signature initial-statement)
@@ -217,10 +244,16 @@ DEPTH TREE).")
 
 (defun dialogue-search-tree (formula rules depth)
   (let ((earlier-entries (search-trees-for-formula-with-rules formula rules))
-	(problem (make-dialogue-search-problem :rules rules
-					       :initial-state (make-dialogue formula
-									     pqrs-propositional-signature
-									     rules))))
+	(problem (if (eq rules nearly-classical-dialogue-rules)
+		     (make-ncl-search-problem
+		      :initial-state (make-dialogue formula
+						    pqrs-propositional-signature
+						    rules)
+		      :rules rules)
+		     (make-dialogue-search-problem :rules rules
+						   :initial-state (make-dialogue formula
+										 pqrs-propositional-signature
+										 rules)))))
     (let ((tree (loop
 		   for entry in earlier-entries
 		   do
@@ -246,7 +279,7 @@ DEPTH TREE).")
 	     :depth (node-depth node)
 	     :expanded? (node-expanded? node)))
 
-(defun proponent-ws-from-opponent-node (opponent-node)
+(defun proponent-ws-from-opponent-node (opponent-node &optional ruleset)
   "Find a winning strategy from OPPONENT-NODE, which is supposed to
 represent a move just played by opponent.
 Return :DIALOGUE-TREE-TOO-SHALLOW if there are any unexpanded nodes that,
@@ -255,31 +288,37 @@ existence of a winning strategy.  Return NIL if there are no winning
 strategies for Proponent starting from OPPONENT-NODE.  If there are,
 return a copy of OPPONENT-NODE that contains the winning strategy.  It
 is assumed that OPPONENT-NODE is expanded."
-  (let ((opponent-succs (node-successors opponent-node)))
-    (if (node-expanded? opponent-node)
-	(if (null opponent-succs)
-	    nil
-	    (let ((strategies (mapcar #'proponent-ws-from-proponent-node
-				      opponent-succs)))
-	      (if (every #'null strategies)
-		  nil
-		  (if (every #'(lambda (thing)
-				 (eq thing :dialogue-tree-too-shallow))
-			     strategies)
-		      :dialogue-tree-too-shallow
-		      (let ((winner (find-if #'node-p strategies)))
-			(make-node :state (node-state opponent-node)
-				   :parent (node-parent opponent-node)
-				   :action (node-action opponent-node)
-				   :successors (list winner)
-				   :depth (node-depth opponent-node)
-				   :expanded? t))))))
-	:dialogue-tree-too-shallow)))
+  (if (and (eq ruleset nearly-classical-dialogue-rules)
+	   (let* ((state (node-state opponent-node))
+		  (last-move (last-move state)))
+	     (defensive-move? last-move)))
+      nil
+      (let ((opponent-succs (node-successors opponent-node)))
+	(if (node-expanded? opponent-node)
+	    (if (null opponent-succs)
+		nil
+		(let ((strategies (mapcar #'(lambda (node)
+					      (proponent-ws-from-proponent-node node ruleset))
+					  opponent-succs)))
+		  (if (every #'null strategies)
+		      nil
+		      (let ((maybe-winner (find-if #'node-p strategies)))
+			(if (node-p maybe-winner)
+			    (make-node :state (node-state opponent-node)
+				       :parent (node-parent opponent-node)
+				       :action (node-action opponent-node)
+				       :successors (list maybe-winner)
+				       :depth (node-depth opponent-node)
+				       :expanded? t)
+			    :dialogue-tree-too-shallow)))))
+	    :dialogue-tree-too-shallow))))
 
-(defun proponent-ws-from-proponent-node (proponent-node)
+(defun proponent-ws-from-proponent-node (proponent-node &optional ruleset)
   (if (node-expanded? proponent-node)
       (let ((succs (node-successors proponent-node)))
-	(let ((strategies (mapcar #'proponent-ws-from-opponent-node succs)))
+	(let ((strategies (mapcar #'(lambda (node)
+				      (proponent-ws-from-opponent-node node ruleset))
+				  succs)))
 	  (if (member nil strategies)
 	      nil
 	      (if (member :dialogue-tree-too-shallow strategies)
@@ -297,31 +336,35 @@ is assumed that OPPONENT-NODE is expanded."
 (defun winning-strategy (formula ruleset depth &optional starting-node)
   (let ((earlier-values (gethash formula winning-strategy-registry)))
     (if earlier-values
-	(let ((gold (loop 
-		       for (rules d strategy) in earlier-values
-		       do
-			 (if (and (equal-rulesets? rules ruleset)
-				  (>= d depth))
-			     (return strategy))
-		       finally
-			 (return nil))))
-	  (if (null gold)
-	      (setf (gethash formula winning-strategy-registry)
-		    (let ((tree-root (if starting-node
-					 (copy-search-tree-node starting-node)
-					 (copy-search-tree-node (dialogue-search-tree formula
-										      ruleset
-										      depth)))))
-		      (proponent-ws-from-proponent-node tree-root)))
-	      gold))
+	(multiple-value-bind (gold found-gold?)
+	    (loop
+	       for (rules d strategy) in earlier-values
+	       do
+		 (if (and (equal-rulesets? rules ruleset)
+			  (>= d depth))
+		     (return (values strategy t)))
+	       finally
+		 (return (values nil nil)))
+	  (if found-gold?
+	      gold
+	      (let ((tree-root (if starting-node
+				   (copy-search-tree-node starting-node)
+				   (copy-search-tree-node (dialogue-search-tree formula
+										ruleset
+										depth)))))
+		(setf (gethash formula winning-strategy-registry)
+		      (append (list (list ruleset depth (proponent-ws-from-proponent-node tree-root ruleset)))
+			      earlier-values))
+		  tree-root)))
 	(let ((solution (let ((tree-root (if starting-node
 					     (copy-search-tree-node starting-node)
 					     (copy-search-tree-node (dialogue-search-tree formula
 											  ruleset
 											  depth)))))
-			  (proponent-ws-from-proponent-node tree-root))))
+			  (proponent-ws-from-proponent-node tree-root ruleset))))
 	  (setf (gethash formula winning-strategy-registry)
-		(list (list ruleset depth solution)))))))
+		(list (list ruleset depth solution)))
+	  solution))))
 
 (defun explain-strategy (winning-strategy)
   (declare (ignore winning-strategy))
