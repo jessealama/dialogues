@@ -347,15 +347,15 @@ is assumed that OPPONENT-NODE is expanded."
 		 (return (values nil nil)))
 	  (if found-gold?
 	      gold
-	      (let ((tree-root (if starting-node
-				   (copy-search-tree-node starting-node)
-				   (copy-search-tree-node (dialogue-search-tree formula
-										ruleset
-										depth)))))
+	      (let* ((tree-root (if starting-node
+				    (copy-search-tree-node starting-node)
+				    (copy-search-tree-node (dialogue-search-tree formula
+										 ruleset
+										 depth))))
+		     (solution (proponent-ws-from-proponent-node tree-root ruleset)))
 		(setf (gethash formula winning-strategy-registry)
-		      (append (list (list ruleset depth (proponent-ws-from-proponent-node tree-root ruleset)))
-			      earlier-values))
-		  tree-root)))
+		      (append (list (list ruleset depth solution)) earlier-values))
+		  solution)))
 	(let ((solution (let ((tree-root (if starting-node
 					     (copy-search-tree-node starting-node)
 					     (copy-search-tree-node (dialogue-search-tree formula
