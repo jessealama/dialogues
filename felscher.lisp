@@ -517,7 +517,7 @@
 				      ;; rule-d12
 				      rule-d13
 				      ))
-		 :description "N (D10 + D13)"))
+		 :description "N rules (D10 + D13)"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Some variants of Felscher's rules
