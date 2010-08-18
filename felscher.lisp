@@ -517,7 +517,7 @@
 				      ;; rule-d12
 				      rule-d13
 				      ))
-		 :description "Nearly (?) classical logic (drop Felscher's D11 and D12)"))
+		 :description "N (D10 + D13)"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Some variants of Felscher's rules
