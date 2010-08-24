@@ -457,7 +457,7 @@
 				   " are closed attacks; rows in "
 				   (<:span :style "background-color:#CCCCFF"
 					   "blue")
-				   " are open attacks.  (Defensive moves are not colored.)")))))))
+				   " are open attacks.  (Defensive moves are not colored, nor is the initial move, since it is neither an attack nor a defense.)")))))))
 		(<:p "At least one of the dialogue rules is violated by your proposed move:")
 		(<:ul
 		 (dolist (violated-rule violated-rules)
@@ -1382,7 +1382,7 @@ that all the rules in your edited ruleset are satisfied.")
 		 " are closed attacks; rows in "
 		 (<:span :style "background-color:#CCCCFF"
 			 "blue")
-		 " are open attacks.  (Defensive moves are not colored.) A dagger " (<:as-is "(&#8224;)") " in the Notes column indicates that alternative moves were available; follow the link to see them and rewind the game to explore an alternative course."))))))
+		 " are open attacks.  (Defensive moves are not colored, nor is the initial move, since it is neither an attack nor a defense.) A dagger " (<:as-is "(&#8224;)") " in the Notes column indicates that alternative moves were available; follow the link to see them and rewind the game to explore an alternative course."))))))
 
 (defgeneric render-plainly (statement))
 
