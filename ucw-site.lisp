@@ -1143,7 +1143,7 @@ signature.")
       (cond (success?
 	     (let ((winning-play (node-state result)))
 	       (<:h1 "Success")
-	       (<:p "Here is a continuation of the initial game that leads to a win in no more than " (<:as-html depth) " " (if (= depth 1) (<:as-is "move") (<:as-is "moves")) " beyond the end of the initial game:")
+	       (<:p "Here is a continuation of the initial game that leads to a win no more than " (<:as-html depth) " " (if (= depth 1) (<:as-is "move") (<:as-is "moves")) " beyond the end of the initial game:")
 	       (<:div :style "border:1px solid"
 	         (render-game winning-play))))
 	     ((null result)
