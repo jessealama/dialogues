@@ -324,6 +324,22 @@ attacks which, being symbols, do qualify as terms."
 (defun equal-rulesets? (ruleset-1 ruleset-2)
   (eq ruleset-1 ruleset-2)) ;; I don't have an interesting notion of equality
 
+(defun fast-eval-entire-dialogue (dialogue &key structural-rules-from-end)
+  "Evaluate all rules, but return only whether every rule passes.
+This function is used in cases where it doesn't matter what rules
+fail, only whether all of them are satisfied."
+  (loop 
+     with ruleset = (dialogue-rules dialogue)
+     for rule in (rules ruleset)
+     do
+       (let (rule-passes)
+	 (if (structural-rule? rule)
+	     (setf rule-passes (evaluate-structural-rule rule dialogue :from-end structural-rules-from-end))
+	     (setf rule-passes (evaluate-particle-rule rule dialogue)))
+	 (unless rule-passes
+	   (return nil)))
+     finally (return t)))
+
 (defun eval-entire-dialogue (dialogue &key structural-rules-from-end)
   (loop 
      with failures = nil
@@ -639,7 +655,7 @@ attacks which, being symbols, do qualify as terms."
 	  (dolist (statement (append subformulas symbolic-attacks))
 	    (let* ((provisional-move (make-move player statement stance index))
 		   (provisional-extension (provisionally-extend-dialogue dialogue provisional-move)))
-	      (when (eval-entire-dialogue provisional-extension)
+	      (when (fast-eval-entire-dialogue provisional-extension)
 		(push (list statement index)
 		      result))))))))
 
