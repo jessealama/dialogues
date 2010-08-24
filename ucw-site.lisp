@@ -1181,7 +1181,7 @@ signature.")
    (<:p "Number of moves: "
 	(<ucw:select :size 1
 		     :accessor search-depth
-	  (dotimes (i 10)
+	  (dotimes (i 15)
 	    (<ucw:option :value (1+ i) (<:as-html (1+ i)))))
 	" "
 	(<:submit :value "Search for a winning play")))))
