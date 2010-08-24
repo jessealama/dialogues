@@ -1157,9 +1157,9 @@ signature.")
 		  (<:as-is "&le; ")
 		  (<:as-html depth) " " 
 		  (if (= depth 1)
-		      "move"
-		      "moves") " "
-		      "from the end of the current game.  The search was terminated because of the depth limit."))))))
+		      (<:as-is "move")
+		      (<:as-is "moves"))
+		  " from the end of the current game.  The search was terminated because of the depth limit."))))))
 
 (defun render-win-searcher (game)
   (declare (ignorable game))
