@@ -143,3 +143,14 @@
 * TODO Playing online with other human players.
 * TODO Define a function for checking for fixed-points.
   What's the definition, and how to I implement it?
+* TODO Define a variant of EVAL-ENTIRE-DIALOGUE that simply returns NIL on failure
+  We need a variant that terminates with failure as quickly as
+  possible.  Currently, EVAL-ENTIRE-DIALOGUE not only signals success
+  or failure, but gathers all the rules that are violated.  In some
+  contexts, we don't care what rules are violated; if even one is
+  violated, we need to stop immediately.
+
+  This could boost performance significantly.
+* DONE Design a bounded breadth-first search algorithm that indicates whether it failed due to the depth cutoff 
+  CLOSED: [2010-08-24 Tue 15:00]
+  The moment we find a node whose depth exceeds the limit, terminate the search and say that the depth limit is exceeded.

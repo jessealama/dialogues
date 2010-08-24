@@ -16,7 +16,14 @@
 	d-dialogue-rules-literal-d10
 	d-dialogue-rules-inverted
 	e-dialogue-rules-inverted
-	classical-dialogue-rules-inverted))
+	classical-dialogue-rules-inverted
+	only-particle-rules
+	particle-rules+d10
+	particle-rules+d11
+	particle-rules+d12
+	particle-rules+d13
+	particle-rules+e
+	jesse-kludge))
 
 (defparameter available-translations
   (list identity-translation
@@ -61,7 +68,8 @@
 
 (defclass play-style-component ()
   ((play-style :accessor play-style
-	       :initarg :play-style)))
+	       :initarg :play-style
+	       :initform nil)))
 
 (defmethod render ((self signature-editor))
   (with-slots ((sig signature))
@@ -182,9 +190,10 @@
 (defgeneric render-signature (signature))
 
 (defmethod render-signature ((sig finite-variable-propositional-signature))
+  (<:em "Predicates: ")
   (with-slots (predicates) sig
     (if (null predicates)
-	(<:em "(empty signature)")
+	(<:em "(none)")
 	(let ((first (car predicates)))
 	  (<:em (<:as-html first))
 	  (dolist (pred (cdr predicates))
@@ -1114,6 +1123,61 @@ signature.")
 			     (<:as-html (description ruleset)))))
 	   (<:submit :value "Use this ruleset instead of the current one"))))))
 
+(defcomponent winning-play-searcher (game-component play-style-component)
+  ((depth :initarg :depth
+	  :accessor depth)))
+
+(defcomponent winning-strategy-searcher (game-component play-style-component)
+  ((depth :initarg :depth
+	  :accessor depth)))
+
+(defmethod render ((self winning-play-searcher))
+  (with-slots (game depth play-style)
+      self
+    (<:h1 "The game so far")
+    (<:div :style "border:1px solid"
+	   (render-game game 
+			:play-style play-style
+			:indicate-alternatives t))
+    (multiple-value-bind (success? result)
+	(bounded-dialogue-search-bfs (dialogue-rules game)
+				     (initial-statement game)
+				     (dialogue-signature game)
+				     depth
+				     game)
+      (cond (success?
+	     (let ((winning-play (node-state result)))
+	       (<:p "Success!  Here's what I found:")
+	       (render-game winning-play)
+	       (<:p "I hope you like it.")))
+	     ((null result)
+	     (<:p "Sorry, not only is there is no winning play that continues from the game above no more than " (<:as-html depth) (if (= depth 1) "move" "moves") ", there is actually " (<:em "no") " winning play at all that continues from the game above."))
+	    (t ;; :cut-off
+	     (<:p "Sorry, but I couldn't find a winning play "
+		  (<:as-is "&le; ")
+		  (<:as-html depth) " " 
+		  (if (= depth 1)
+		      "move"
+		      "moves") " "
+		      "from the end of the current game.  The search was terminated because of the depth limit."))))))
+
+(defun render-win-searcher (game)
+  (declare (ignorable game))
+  (let (search-depth)
+  (<:p "From the current state of the game, you can search for a " (<:em "winning play") " or a " (<:em "winning strategy") ".  A winning play is a sequence of moves that leads to a win for Proponent, whereas a winning strategy is a way of playing the game in such a way that Proponent can win the game no matter what Opponent does. (Winning strategies are generally not sequences; they are more complicated objects than winning plays.")
+  (<:p "Select the number of moves beyond the end of the current game that should be searched, and choose the kind of object for which to search. " (<:b "Note:") " generally, the greater the depth, the more time it will take to compute an answer; be patient.")
+  (<:p (<:b "Warning:") " this functionality is under development; use at your own risk.")
+  (<ucw:form :action (call 'winning-play-searcher
+			   :depth search-depth
+			   :game game)
+   (<:p "Number of moves: "
+	(<ucw:select :size 1
+		     :accessor search-depth
+	  (dotimes (i 10)
+	    (<ucw:option :value i (<:as-html i))))
+	" "
+	(<:submit :value "Search for a winning play")))))
+
 (defun render-rule-editor (game)
   (<ucw:form :action (setf (dialogue-rules game)
 			     (call 'rule-editor
@@ -1139,7 +1203,6 @@ that all the rules in your edited ruleset are satisfied.")
 				(default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
 			   (call 'initial-formula-window :body default-sgc))
 	  (<:submit :value "Quit")))
-		 
 
 (defmethod render ((self turn-editor))
     (let* ((game (game self))
@@ -1157,6 +1220,8 @@ that all the rules in your edited ruleset are satisfied.")
 	 (render-available-proponent-moves game))
 	(play-as-opponent-random-proponent
 	 (render-available-opponent-moves game)))
+      (<:h1 "...or search for a win...")
+      (render-win-searcher game)
       (<:h1 "...or enter your move manually...")
       (render-manual-move-entry-form game play-style)
       ;; (when (> game-len 1)

@@ -7,6 +7,11 @@
   (rules nil :type (or (eql nil) ruleset))
   (signature nil :type (or (eql nil) signature)))
 
+(defmethod goal-test ((problem dialogue-search-problem) node)
+  (expand node problem)
+  (and (null (node-successors node))
+       (proponent-move? (last-move (node-state node)))))
+
 (defstruct (ncl-search-problem
 	     (:include problem))
   (rules nil :type (or (eql nil) ruleset))
@@ -79,15 +84,22 @@
 	(no-cycles-depth-first-search-for-bottom problem #'equal-dialogues?))
       (error "The initial statement ~A is not a formula according to the given signature ~A" initial-statement signature)))
 
-(defun bounded-dialogue-search (rules initial-statement signature depth)
+(defun bounded-dialogue-search-dfs (rules initial-statement signature depth &optional (initial-state (make-dialogue initial-statement signature rules)))
   (if (belongs-to-signature? signature initial-statement)
-      (let* ((initial-state (make-dialogue initial-statement signature rules))
-	     (problem (make-dialogue-search-problem :initial-state initial-state
-						    :signature signature
-						    :rules rules)))
-	(depth-limited-search problem depth))
+      (let ((problem (make-dialogue-search-problem :initial-state initial-state
+						   :signature signature
+						   :rules rules)))
+	(depth-limited-dfs-search problem depth))
       (error "The initial statement ~A is not a formula according to the given signature ~A" initial-statement signature)))
-  
+
+(defun bounded-dialogue-search-bfs (rules initial-statement signature depth &optional (initial-state (make-dialogue initial-statement signature rules)))
+  (if (belongs-to-signature? signature initial-statement)
+      (let ((problem (make-dialogue-search-problem :initial-state initial-state
+						   :signature signature
+						   :rules rules)))
+	(bounded-breadth-first-search problem depth))
+      (error "The initial statement ~A is not a formula according to the given signature ~A" initial-statement signature)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Searching for strategies
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

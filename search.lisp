@@ -62,23 +62,25 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
   1)
 
 (defun expand (node problem)
-  (unless (node-expanded? node)
-    (setf (node-expanded? node) t)
-    (incf (problem-num-expanded problem)))
-  (loop 
-     with nodes = nil
-     for successor in (successors problem node)
-     do
-       (destructuring-bind (action . state)
-	   successor
-	 (push (make-node :parent node 
-			  :action action 
-			  :state state
-			  :depth (1+ (node-depth node)))
-	       nodes))
-     finally
-       (setf (node-successors node) nodes)
-       (return nodes)))
+  (if (node-expanded? node)
+      (node-successors node)
+      (progn
+	(setf (node-expanded? node) t)
+	(incf (problem-num-expanded problem))
+	(loop 
+	   with nodes = nil
+	   for successor in (successors problem node)
+	   do
+	     (destructuring-bind (action . state)
+		 successor
+	       (push (make-node :parent node 
+				:action action 
+				:state state
+				:depth (1+ (node-depth node)))
+		     nodes))
+	   finally
+	     (setf (node-successors node) nodes)
+	     (return nodes)))))
 
 (defun create-start-node (problem)
   "Make the starting node, corresponding to the problem's initial state."
@@ -115,6 +117,19 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 	 (if (goal-test problem node) (return node))
 	 (funcall queueing-function nodes (expand node problem))))))
 
+(defun general-bounded-search (problem queueing-function depth)
+  "Expand nodes according to the specification of PROBLEM until we
+  find a solution or run out of nodes to expand or exceed the
+  specified DEPTH.  QUEUING-FN decides which nodes to look at
+  first."
+  (let ((nodes (make-initial-queue (problem-initial-state problem)
+				   :queueing-function queueing-function)))
+    (let (node)
+      (loop (if (empty-queue? nodes) (return (values nil nil)))
+	 (setf node (remove-front nodes))
+	 (if (> (node-depth node) depth) (return (values nil :cut-off)))
+	 (if (goal-test problem node) (return (values t node)))
+	 (funcall queueing-function nodes (expand node problem))))))
 
 (defun general-search-with-nodes (problem queueing-function &optional queue)
   (let ((nodes (or queue
@@ -156,6 +171,11 @@ how the node was obtained, starting from an initial node."
   "Search the shallowest nodes in the search tree first."
   (general-search problem #'enqueue-at-end))
 
+(defun bounded-breadth-first-search (problem depth)
+  "Search the shallowest nodes in the search tree first, but don't go
+deeper than DEPTH."
+  (general-bounded-search problem #'enqueue-at-end depth))
+
 (defun breadth-first-search-for-bottom-with-nodes (problem &optional queue)
   "Search the shallowest nodes in the search tree first."
   (general-search-for-bottom problem #'enqueue-at-end queue))
@@ -177,8 +197,7 @@ how the node was obtained, starting from an initial node."
        (let ((solution (depth-limited-search problem depth)))
 	 (unless (eq solution :cut-off) (return solution)))))
 
-(defun depth-limited-search (problem &optional limit
-			              (node (create-start-node problem)))
+(defun depth-limited-dfs-search (problem &optional limit (node (create-start-node problem)))
   "Search depth-first, but only up to LIMIT branches deep in the tree."
   (cond ((goal-test problem node) node)
         ((and (integerp limit)
@@ -186,7 +205,9 @@ how the node was obtained, starting from an initial node."
 	 :cut-off)
         (t (loop for n in (expand node problem) do
 		(let ((solution (depth-limited-search problem limit n)))
-		  (when solution (return solution)))))))
+		  (when (and solution
+			     (not (eq solution :cut-off)))
+		    (return solution)))))))
 
 (defun exhaustive-depth-limited-search (problem &optional limit
 			              (node (create-start-node problem)))
