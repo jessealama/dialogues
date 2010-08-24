@@ -1182,7 +1182,7 @@ signature.")
 	(<ucw:select :size 1
 		     :accessor search-depth
 	  (dotimes (i 10)
-	    (<ucw:option :value i (<:as-html i))))
+	    (<ucw:option :value (1+ i) (<:as-html (1+ i)))))
 	" "
 	(<:submit :value "Search for a winning play")))))
 
