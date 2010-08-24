@@ -194,7 +194,7 @@ deeper than DEPTH."
 (defun iterative-deepening-search (problem)
   "Do a series of depth-limited searches, increasing depth each time."
   (loop for depth = 0 do
-       (let ((solution (depth-limited-search problem depth)))
+       (let ((solution (depth-limited-dfs-search problem depth)))
 	 (unless (eq solution :cut-off) (return solution)))))
 
 (defun depth-limited-dfs-search (problem &optional limit (node (create-start-node problem)))
@@ -204,7 +204,7 @@ deeper than DEPTH."
 	      (>= (node-depth node) limit))
 	 :cut-off)
         (t (loop for n in (expand node problem) do
-		(let ((solution (depth-limited-search problem limit n)))
+		(let ((solution (depth-limited-dfs-search problem limit n)))
 		  (when (and solution
 			     (not (eq solution :cut-off)))
 		    (return solution)))))))
