@@ -474,6 +474,20 @@
 				      rule-d13))
 		 :description "D rules (basic rules for intuitionistic logic)"))
 
+(defparameter jesse-kludge
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms 
+				(list ;; rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      ;; rule-d10-literal
+				      rule-d11
+				      rule-d12
+				      rule-d13))
+		 :description "The Jesse Kludge Special"))
+
 (defparameter e-dialogue-rules
   (make-instance 'ruleset
 		 :rules (append argumentation-forms 
@@ -518,6 +532,101 @@
 				      rule-d13
 				      ))
 		 :description "N rules (D10 + D13)"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;  Minimal rulesets
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defparameter only-particle-rules
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      ;; rule-d10
+				      ;; rule-d11
+				      ;; rule-d12
+				      ;; rule-d13
+				      ))
+		 :description "Only particle rules."))
+
+(defparameter particle-rules+d10
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      ;; rule-d11
+				      ;; rule-d12
+				      ;; rule-d13
+				      ))
+		 :description "Only particle rules + D10."))
+
+(defparameter particle-rules+d11
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      ;; rule-d10
+				      rule-d11
+				      ;; rule-d12
+				      ;; rule-d13
+				      ))
+		 :description "Only particle rules + D11."))
+
+(defparameter particle-rules+d12
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      ;; rule-d10
+				      ;; rule-d11
+				      rule-d12
+				      ;; rule-d13
+				      ))
+		 :description "Only particle rules + D12."))
+
+(defparameter particle-rules+d13
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      ;; rule-d10
+				      ;; rule-d11
+				      ;; rule-d12
+				      rule-d13
+				      ))
+		 :description "Only particle rules + D13."))
+
+(defparameter particle-rules+e
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      ;; rule-d10
+				      ;; rule-d11
+				      ;; rule-d12
+				      ;; rule-d13
+				      rule-e
+				      ))
+		 :description "Only particle rules + E."))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Some variants of Felscher's rules
