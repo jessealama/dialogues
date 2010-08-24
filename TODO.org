@@ -143,7 +143,8 @@
 * TODO Playing online with other human players.
 * TODO Define a function for checking for fixed-points.
   What's the definition, and how to I implement it?
-* TODO Define a variant of EVAL-ENTIRE-DIALOGUE that simply returns NIL on failure
+* DONE Define a variant of EVAL-ENTIRE-DIALOGUE that simply returns NIL on failure
+  CLOSED: [2010-08-25 Wed 00:46]
   We need a variant that terminates with failure as quickly as
   possible.  Currently, EVAL-ENTIRE-DIALOGUE not only signals success
   or failure, but gathers all the rules that are violated.  In some
