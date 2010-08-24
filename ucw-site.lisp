@@ -1134,11 +1134,6 @@ signature.")
 (defmethod render ((self winning-play-searcher))
   (with-slots (game depth play-style)
       self
-    (<:h1 "The game so far")
-    (<:div :style "border:1px solid"
-	   (render-game game 
-			:play-style play-style
-			:indicate-alternatives t))
     (multiple-value-bind (success? result)
 	(bounded-dialogue-search-bfs (dialogue-rules game)
 				     (initial-statement game)
@@ -1147,29 +1142,42 @@ signature.")
 				     game)
       (cond (success?
 	     (let ((winning-play (node-state result)))
-	       (<:p "Success!  Here's what I found:")
-	       (render-game winning-play)
-	       (<:p "I hope you like it.")))
+	       (<:h1 "Success")
+	       (<:p "Here is a continuation of the initial game that leads to a win in no more than " (<:as-html depth) (if (= depth 1) (<:as-is "move") (<:as-is "moves")) " beyond the end of the initial game:")
+	       (<:div :style "border:1px solid"
+	         (render-game winning-play))))
 	     ((null result)
-	     (<:p "Sorry, not only is there is no winning play that continues from the game above no more than " (<:as-html depth) (if (= depth 1) "move" "moves") ", there is actually " (<:em "no") " winning play at all that continues from the game above."))
+	      (<:h1 "Ouch!")
+	      (<:p "Not only is there is no winning play that continues from the game above no more than " (<:as-html depth) (if (= depth 1) "move" "moves") ", there is actually " (<:em "no") " winning play at all that extends the initial game."))
 	    (t ;; :cut-off
-	     (<:p "Sorry, but I couldn't find a winning play "
+	     (<:h1 "Cut off!")
+	     (<:p "No winning play "
 		  (<:as-is "&le; ")
 		  (<:as-html depth) " " 
 		  (if (= depth 1)
 		      (<:as-is "move")
 		      (<:as-is "moves"))
-		  " from the end of the current game.  The search was terminated because of the depth limit."))))))
+		  " from the end of the current game was found.  The search was terminated because of the depth limit."))))
+    (<ucw:form :method "POST"
+	       :action (call 'turn-editor
+			     :game game
+			     :play-style play-style)
+      (<:submit :value "Go back to the original game"))
+    (<ucw:form :method "POST"
+	       :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
+			      (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
+			 (call 'initial-formula-window :body default-sgc))
+      (<:submit :value "Quit"))))
 
-(defun render-win-searcher (game)
-  (declare (ignorable game))
+(defun render-win-searcher (game play-style)
   (let (search-depth)
   (<:p "From the current state of the game, you can search for a " (<:em "winning play") " or a " (<:em "winning strategy") ".  A winning play is a sequence of moves that leads to a win for Proponent, whereas a winning strategy is a way of playing the game in such a way that Proponent can win the game no matter what Opponent does. (Winning strategies are generally not sequences; they are more complicated objects than winning plays.)")
   (<:p "Select the number of moves beyond the end of the current game that should be searched, and choose the kind of object for which to search. " (<:b "Note:") " generally, the greater the depth, the more time it will take to compute an answer; be patient.")
   (<:p (<:b "Warning:") " this functionality is under development; use at your own risk.  Search for winning strategies is currently unimplemented.")
   (<ucw:form :action (call 'winning-play-searcher
 			   :depth search-depth
-			   :game game)
+			   :game game
+			   :play-style play-style)
    (<:p "Number of moves: "
 	(<ucw:select :size 1
 		     :accessor search-depth
@@ -1221,7 +1229,7 @@ that all the rules in your edited ruleset are satisfied.")
 	(play-as-opponent-random-proponent
 	 (render-available-opponent-moves game)))
       (<:h1 "...or search for a win...")
-      (render-win-searcher game)
+      (render-win-searcher game play-style)
       (<:h1 "...or enter your move manually...")
       (render-manual-move-entry-form game play-style)
       ;; (when (> game-len 1)
