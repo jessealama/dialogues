@@ -154,3 +154,10 @@
 * DONE Design a bounded breadth-first search algorithm that indicates whether it failed due to the depth cutoff 
   CLOSED: [2010-08-24 Tue 15:00]
   The moment we find a node whose depth exceeds the limit, terminate the search and say that the depth limit is exceeded.
+* TODO If a winning play is found, permit looking for another one.
+  There's generally more than one winning play.
+  
+  The same goes for strategies.  (Though finding multiple winning
+  strategies will require more work.)
+
+  Continuations would be a nice way to do this.
