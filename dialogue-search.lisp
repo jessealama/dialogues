@@ -179,14 +179,11 @@
 RULES.  \"Valid\" means that Proponent has a winning strategy in the
 game tree developed down to depth DEPTH."
   (let ((dialogue (make-dialogue statement signature rules)))
-    (multiple-value-bind (ok? violators)
-	(eval-entire-dialogue dialogue)
-      (declare (ignore violators))
-      (if ok?
-	  (proponent-has-winning-strategy? dialogue depth 1)
-	  (error 'inappropriate-initial-statement-error
-		 :rules rules
-		 :statement statement)))))
+    (if (fast-eval-entire-dialogue dialogue)
+	(proponent-has-winning-strategy? dialogue depth 1)
+	(error 'inappropriate-initial-statement-error
+	       :rules rules
+	       :statement statement))))
 
 (defun classify-formulas (formulas rules signature search-depth)
   (let (inappropriate valid invalid cutoff)
