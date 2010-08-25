@@ -1135,7 +1135,13 @@ signature.")
 
 (defcomponent winning-strategy-searcher (game-component play-style-component)
   ((depth :initarg :depth
-	  :accessor depth)))
+	  :accessor depth)
+   (queue :initarg :queue
+	  :accessor queue
+	  :initform nil)
+   (success :initarg :success
+	    :accessor success
+	    :initform nil)))
 
 (defmethod render ((self winning-play-searcher))
   (with-slots (game depth play-style queue success)
@@ -1194,6 +1200,116 @@ signature.")
 			 (call 'initial-formula-window :body default-sgc))
       (<:submit :value "Quit")))))
 
+(defun render-move-at-depth-as-table (move depth)
+  (with-slots (player statement stance reference)
+      move
+    (<:table
+     (<:tr
+      (<:td (<:as-html depth))
+      (<:td (<:as-html player))
+      (<:td (render statement))
+      (<:td (if (initial-move? move)
+		(<:em "(initial move)")
+		(if (attacking-move? move)
+		    (<:as-html "[A," reference "]")
+		    (<:as-html "[D," reference "]"))))))))
+
+(defun render-final-move-as-table-row (node)
+  (let* ((game (node-state node))
+	 (move (last-move game)))
+    (render-move-at-depth-as-table move (node-depth node))))
+
+(defun render-final-move-with-padding (node width)
+  (let ((cleft-point (/ width 2)))
+    (loop
+       for i from 1 upto (floor cleft-point)
+       do
+	 (<:td)
+       finally 
+	 (<:td
+	  (render-final-move-as-table-row node)))
+    (loop
+       for i from (1+ (ceiling cleft-point)) upto width
+       do
+	 (<:td))))
+
+(defun render-strategy (strategy)
+  (let ((first-splitter (first-splitting-descendant strategy)))
+    (if (null first-splitter)
+	(<:table
+	 (let ((current-node strategy))
+	   (until (null (node-successors current-node))
+	     (<:tr
+	      (<:td
+	       (render-final-move-with-padding current-node 0)))
+	     (setf current-node (car (node-successors current-node))))
+	   (<:tr
+	    (<:td (render-final-move-with-padding current-node 0)))))
+	(let* ((succs (node-successors first-splitter))
+	       (num-succs (length succs)))
+	  (<:table
+	   (let ((current-node strategy))
+	     (until (eq current-node first-splitter)
+	       (<:tr
+		(render-final-move-with-padding current-node num-succs)
+		(setf current-node (car (node-successors current-node))))))
+	   (<:tr
+	    (render-final-move-with-padding first-splitter num-succs))
+	   (<:tr
+	    (if (evenp num-succs)
+		(progn
+		  (loop
+		     with cleft-point = (/ num-succs 2)
+		     for i from 0 upto cleft-point
+		     with succ = (nth i succs)
+		     do
+		       (<:td (render-strategy succ)))
+		  (<:td)
+		  (loop
+		     with cleft-point = (/ num-succs 2)
+		     for i from cleft-point upto (1- num-succs)
+		     with succ = (nth i succs)
+		     do
+		       (<:td (render-strategy succ))))
+		(loop
+		   for i from 0 upto (1- num-succs)
+		   with succ = (nth i succs)
+		   do
+		     (<:td (render-strategy succ))))))))))
+		 
+(defmethod render ((self winning-strategy-searcher))
+  (with-slots (game depth play-style queue success)
+      self
+    (let ((game-as-tree (dialogue->search-tree game)))
+      (let ((result (winning-strategy (initial-statement game)
+				      (dialogue-rules game)
+				      depth
+				      game-as-tree)))
+	(cond ((null result)
+	      (<:h1 "Ouch!")
+	      (<:p "Not only is there is no winning strategy that continues from the game above no more than " (<:as-html depth) " " (if (= depth 1) "move" "moves") ", there is actually " (<:em "no") " winning strategy at all that extends the initial game."))
+	      ((eq result :dialogue-tree-too-shallow)
+	       (<:h1 "Cutoff!")
+	       (<:p "I couldn't find a winning strategy that extends the initial game at most " (<:as-html depth) " " (if (= depth 1) (<:as-is "move") (<:as-is "moves")) " beyond the end of the initial game.  The search was terminated because we reached the depth cutoff."))
+	      (t ; something interesting
+	       (let ((strat result))
+		 (<:h1 "Success")
+		 (<:p "Here is a continuation of the initial game for which Proponent has a winning strategy in no more than " (<:as-html depth) " " (if (= depth 1) (<:as-is "move") (<:as-is "moves")) " beyond the end of the initial game:")
+		 (render-strategy strat))))))
+    (<ucw:form :method "POST"
+	       :action (call 'turn-editor
+			     :game game
+			     :play-style play-style)
+      (<:submit :value "Go back to the original game"))
+    (<ucw:form :method "POST"
+	       :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
+			      (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
+			 (call 'initial-formula-window :body default-sgc))
+      (<:submit :value "Quit"))))
+
+(defconstant max-search-depth 15
+  "The maximum depth to which we permit searching for winning plays and winning strategies.")
+
 (defun render-win-searcher (game play-style)
   (let (search-depth)
   (<:p "From the current state of the game, you can search for a " (<:em "winning play") " or a " (<:em "winning strategy") ".  A winning play is a sequence of moves that leads to a win for Proponent, whereas a winning strategy is a way of playing the game in such a way that Proponent can win the game no matter what Opponent does. (Winning strategies are generally not sequences; they are more complicated objects than winning plays.)")
@@ -1206,10 +1322,21 @@ signature.")
    (<:p "Number of moves: "
 	(<ucw:select :size 1
 		     :accessor search-depth
-	  (dotimes (i 15)
+	  (dotimes (i max-search-depth)
 	    (<ucw:option :value (1+ i) (<:as-html (1+ i)))))
 	" "
-	(<:submit :value "Search for a winning play")))))
+	(<:submit :value "Search for a winning play")))
+  (<ucw:form :action (call 'winning-strategy-searcher
+			   :depth search-depth
+			   :game game
+			   :play-style play-style)
+   (<:p "Number of moves: "
+	(<ucw:select :size 1
+		     :accessor search-depth
+	  (dotimes (i max-search-depth)
+	    (<ucw:option :value (1+ i) (<:as-html (1+ i)))))
+	" "
+	(<:submit :value "Search for a winning strategy")))))
 
 (defun render-rule-editor (game)
   (<ucw:form :action (setf (dialogue-rules game)
