@@ -92,12 +92,15 @@
 	(depth-limited-dfs-search problem depth))
       (error "The initial statement ~A is not a formula according to the given signature ~A" initial-statement signature)))
 
-(defun bounded-dialogue-search-bfs (rules initial-statement signature depth &optional (initial-state (make-dialogue initial-statement signature rules)))
+(defun bounded-dialogue-search-bfs (rules initial-statement signature depth
+				    &optional (initial-state (make-dialogue initial-statement signature rules))
+				              initial-queue)
+				    
   (if (belongs-to-signature? signature initial-statement)
       (let ((problem (make-dialogue-search-problem :initial-state initial-state
 						   :signature signature
 						   :rules rules)))
-	(bounded-breadth-first-search problem depth))
+	(bounded-breadth-first-search-with-nodes problem depth initial-queue))
       (error "The initial statement ~A is not a formula according to the given signature ~A" initial-statement signature)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
