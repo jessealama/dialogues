@@ -107,7 +107,7 @@ linear sequence), return NIL."
     (if (null succs)
 	nil
 	(if (null (cdr succs))
-	    (first-splitting-descendant (first succs))
+	    (first-splitting-descendent (first succs))
 	    node))))
 
 (defun make-initial-queue (initial-state 

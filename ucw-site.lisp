@@ -1234,7 +1234,7 @@ signature.")
 	 (<:td))))
 
 (defun render-strategy (strategy)
-  (let ((first-splitter (first-splitting-descendant strategy)))
+  (let ((first-splitter (first-splitting-descendent strategy)))
     (if (null first-splitter)
 	(<:table
 	 (let ((current-node strategy))
