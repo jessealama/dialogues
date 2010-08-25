@@ -294,6 +294,32 @@ DEPTH TREE).")
 	     :depth (node-depth node)
 	     :expanded? (node-expanded? node)))
 
+(defun dialogue->search-tree (dialogue)
+  "Construct a search tree (a sequence, in fact) from DIALOGUE."
+  (let (nodes)
+    (dotimes (i (dialogue-length dialogue)) ; first construct the nodes
+      (push (make-node :state (truncate-dialogue dialogue i)
+		       :parent nil
+		       :action nil
+		       :successors nil
+		       :depth i)
+	    nodes))
+    (setf nodes (nreverse nodes))
+    (loop
+       for node-parent in nodes
+       for node-successor in (cdr nodes)
+       do
+	 (setf (node-parent node-successor) node-parent
+	       (node-successors node-parent) (list node-successor)
+	       (node-expanded? node-parent) t))
+    (car (last nodes))))
+
+(defun proponent-node? (node)
+  (proponent-move? (last-move (node-state node))))
+
+(defun opponent-node? (node)
+  (opponent-move? (last-move (node-state node))))
+
 (defun proponent-ws-from-opponent-node (opponent-node &optional ruleset)
   "Find a winning strategy from OPPONENT-NODE, which is supposed to
 represent a move just played by opponent.
