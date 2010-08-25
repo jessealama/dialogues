@@ -1226,7 +1226,7 @@ signature.")
        do
 	 (<:td)
        finally 
-	 (<:td
+	 (<:td 
 	  (render-final-move-as-table-row node)))
     (loop
        for i from (1+ (ceiling cleft-point)) upto width
@@ -1247,40 +1247,45 @@ signature.")
 	    (<:td (render-final-move-with-padding current-node 0)))))
 	(let* ((succs (node-successors first-splitter))
 	       (num-succs (length succs)))
-	  (<:table
-	   (let ((current-node strategy))
-	     (until (eq current-node first-splitter)
-	       (<:tr
-		(render-final-move-with-padding current-node num-succs)
-		(setf current-node (car (node-successors current-node))))))
-	   (<:tr
-	    (render-final-move-with-padding first-splitter num-succs))
-	   (<:tr
-	    (if (evenp num-succs)
-		(progn
-		  (loop
-		     with cleft-point = (/ num-succs 2)
-		     for i from 0 upto cleft-point
-		     with succ = (nth i succs)
-		     do
-		       (<:td (render-strategy succ)))
-		  (<:td)
-		  (loop
-		     with cleft-point = (/ num-succs 2)
-		     for i from cleft-point upto (1- num-succs)
-		     with succ = (nth i succs)
-		     do
-		       (<:td (render-strategy succ))))
-		(loop
-		   for i from 0 upto (1- num-succs)
-		   with succ = (nth i succs)
-		   do
-		     (<:td (render-strategy succ))))))))))
+	  (<:table :rules "groups"
+		   :frame "void"
+	   (<:thead
+	    (let ((current-node strategy))
+	      (until (eq current-node first-splitter)
+		(<:tr
+		 (render-final-move-with-padding current-node num-succs))
+		(setf current-node (car (node-successors current-node)))))
+	    (<:tr
+	     (render-final-move-with-padding first-splitter num-succs)))
+	   (<:tbody
+	    (<:tr
+	     (if (evenp num-succs)
+		 (progn
+		   (loop
+		      with cleft-point = (/ num-succs 2)
+		      for i from 0 upto cleft-point
+		      with succ = (nth i succs)
+		      do
+			(<:td (render-strategy succ)))
+		   (<:td)
+		   (loop
+		      with cleft-point = (/ num-succs 2)
+		      for i from cleft-point upto (1- num-succs)
+		      with succ = (nth i succs)
+		      do
+			(<:td (render-strategy succ))))
+		 (loop
+		    for i from 0 upto (1- num-succs)
+		    with succ = (nth i succs)
+		    do
+		      (<:td (render-strategy succ)))))))))))
 		 
 (defmethod render ((self winning-strategy-searcher))
   (with-slots (game depth play-style queue success)
       self
-    (let ((game-as-tree (dialogue->search-tree game)))
+    (let ((game-as-tree (dialogue-search-tree (initial-statement game)
+					      (dialogue-rules game)
+					      depth)))
       (let ((result (winning-strategy (initial-statement game)
 				      (dialogue-rules game)
 				      depth
