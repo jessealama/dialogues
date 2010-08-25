@@ -1173,7 +1173,7 @@ signature.")
      (if (empty-queue? more-nodes)
 	 (<:p "The search was exhaustive; there are no more options left to consider and there would be none even if the depth restriction were dropped.")
 	 (if (eq result :cut-off)
-	      (<:p "When the search terminated, there were still possible moves left to consider; since the search was terminated by the depth cutoff, it's possible that there are winning plays that extend the initial game, but all of them are too deep.")
+	      (<:p "When the search terminated, there were still possible moves left to consider; since the search was terminated by the depth cutoff, it's possible that there are further winning plays that extend the initial game, but all of them are too deep.")
 	      (<ucw:form :method "POST"
 			 :action (call 'winning-play-searcher
 				       :game game
