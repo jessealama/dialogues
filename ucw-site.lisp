@@ -1125,21 +1125,28 @@ signature.")
 
 (defcomponent winning-play-searcher (game-component play-style-component)
   ((depth :initarg :depth
-	  :accessor depth)))
+	  :accessor depth)
+   (queue :initarg :queue
+	  :accessor queue
+	  :initform nil)
+   (success :initarg :success
+	    :accessor success
+	    :initform nil)))
 
 (defcomponent winning-strategy-searcher (game-component play-style-component)
   ((depth :initarg :depth
 	  :accessor depth)))
 
 (defmethod render ((self winning-play-searcher))
-  (with-slots (game depth play-style)
+  (with-slots (game depth play-style queue success)
       self
-    (multiple-value-bind (success? result)
+    (multiple-value-bind (success? result more-nodes)
 	(bounded-dialogue-search-bfs (dialogue-rules game)
 				     (initial-statement game)
 				     (dialogue-signature game)
 				     depth
-				     game)
+				     game
+				     queue)
       (cond (success?
 	     (let ((winning-play (node-state result)))
 	       (<:h1 "Success")
@@ -1150,14 +1157,32 @@ signature.")
 	      (<:h1 "Ouch!")
 	      (<:p "Not only is there is no winning play that continues from the game above no more than " (<:as-html depth) " " (if (= depth 1) "move" "moves") ", there is actually " (<:em "no") " winning play at all that extends the initial game."))
 	    (t ;; :cut-off
-	     (<:h1 "Cut off!")
-	     (<:p "No winning play "
-		  (<:as-is "&le; ")
-		  (<:as-html depth) " " 
-		  (if (= depth 1)
-		      (<:as-is "move")
-		      (<:as-is "moves"))
-		  " from the end of the current game was found.  The search was terminated because of the depth limit."))))
+	     (if success
+		 (progn
+		   (<:h1 "No more winning plays")
+		   (<:p "No more winning plays are available, given the depth limit."))
+		 (progn
+		   (<:h1 "Cut off!")
+		   (<:p "No winning play "
+			(<:as-is "&le; ")
+			(<:as-html depth) " " 
+			(if (= depth 1)
+			    (<:as-is "move")
+			    (<:as-is "moves"))
+			" from the end of the current game was found.  The search was terminated because of the depth limit.")))))
+     (if (empty-queue? more-nodes)
+	 (<:p "The search was exhaustive; there are no more options left to consider and there would be none even if the depth restriction were dropped.")
+	 (if (eq result :cut-off)
+	      (<:p "When the search terminated, there were still possible moves left to consider; since the search was terminated by the depth cutoff, it's possible that there are winning plays that extend the initial game, but all of them are too deep.")
+	      (<ucw:form :method "POST"
+			 :action (call 'winning-play-searcher
+				       :game game
+				       :depth depth
+				       :play-style play-style
+				       :queue more-nodes
+				       :success t)
+	        (<:p "When the search terminated, there were still possible moves left to consider; there may be further winning plays different from this one.")
+		(<:submit :value "Search for another winning play"))))
     (<ucw:form :method "POST"
 	       :action (call 'turn-editor
 			     :game game
@@ -1167,7 +1192,7 @@ signature.")
 	       :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
 			      (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
 			 (call 'initial-formula-window :body default-sgc))
-      (<:submit :value "Quit"))))
+      (<:submit :value "Quit")))))
 
 (defun render-win-searcher (game play-style)
   (let (search-depth)
