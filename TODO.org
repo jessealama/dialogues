@@ -194,3 +194,4 @@ would be nice.  The sidebar would include the following links:
       formula:" to "Translation", and link the word to a pop-up window
       w/ the info currently at the bottom of the page.
     - Ditto for rules & play style.
+* TODO Display strategies
