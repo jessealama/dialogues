@@ -372,37 +372,47 @@ is assumed that OPPONENT-NODE is expanded."
 (defvar winning-strategy-registry (make-hash-table :test #'equalp))
 
 (defun winning-strategy (formula ruleset depth &optional starting-node)
-  (let ((earlier-values (gethash formula winning-strategy-registry)))
-    (if earlier-values
-	(multiple-value-bind (gold found-gold?)
-	    (loop
-	       for (rules d strategy) in earlier-values
-	       do
-		 (if (and (equal-rulesets? rules ruleset)
-			  (>= d depth))
-		     (return (values strategy t)))
-	       finally
-		 (return (values nil nil)))
-	  (if found-gold?
-	      gold
-	      (let* ((tree-root (if starting-node
-				    (copy-search-tree-node starting-node)
-				    (copy-search-tree-node (dialogue-search-tree formula
-										 ruleset
-										 depth))))
-		     (solution (proponent-ws-from-proponent-node tree-root ruleset)))
-		(setf (gethash formula winning-strategy-registry)
-		      (append (list (list ruleset depth solution)) earlier-values))
-		  solution)))
-	(let ((solution (let ((tree-root (if starting-node
-					     (copy-search-tree-node starting-node)
-					     (copy-search-tree-node (dialogue-search-tree formula
-											  ruleset
-											  depth)))))
-			  (proponent-ws-from-proponent-node tree-root ruleset))))
-	  (setf (gethash formula winning-strategy-registry)
-		(list (list ruleset depth solution)))
-	  solution))))
+  (let ((root (if starting-node
+		  (copy-search-tree-node starting-node)
+		  (copy-search-tree-node (dialogue-search-tree formula
+							       ruleset
+							       depth)))))
+    (proponent-ws-from-proponent-node root ruleset)))
+
+;; (defun winning-strategy (formula ruleset depth &optional starting-node)
+;;   (let ((earlier-values (gethash formula winning-strategy-registry)))
+;;     (if earlier-values
+;; 	(multiple-value-bind (gold found-gold?)
+;; 	    (loop
+;; 	       for (rules d strategy) in earlier-values
+;; 	       do
+;; 		 (if (equal-rulesets? rules ruleset)
+;; 		     (if (<= d depth)
+;; 			 (return (values strategy t))
+;; 			 (when (<= (length-of-longest-path strategy) d)
+;; 			   (return (values strategy t))))
+;; 	       finally
+;; 		 (return (values nil nil)))
+;; 	  (if found-gold?
+;; 	      gold
+;; 	      (let* ((tree-root (if starting-node
+;; 				    (copy-search-tree-node starting-node)
+;; 				    (copy-search-tree-node (dialogue-search-tree formula
+;; 										 ruleset
+;; 										 depth))))
+;; 		     (solution (proponent-ws-from-proponent-node tree-root ruleset)))
+;; 		(setf (gethash formula winning-strategy-registry)
+;; 		      (append (list (list ruleset depth solution)) earlier-values))
+;; 		  solution)))
+;; 	(let ((solution (let ((tree-root (if starting-node
+;; 					     (copy-search-tree-node starting-node)
+;; 					     (copy-search-tree-node (dialogue-search-tree formula
+;; 											  ruleset
+;; 											  depth)))))
+;; 			  (proponent-ws-from-proponent-node tree-root ruleset))))
+;; 	  (setf (gethash formula winning-strategy-registry)
+;; 		(list (list ruleset depth solution)))
+;; 	  solution))))
 
 (defun explain-strategy (winning-strategy)
   (declare (ignore winning-strategy))
