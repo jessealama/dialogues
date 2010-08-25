@@ -99,6 +99,17 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
   "All leaf nodes reachable from NODE that can be expanded."
   (remove-if #'node-expanded? (leaf-nodes node)))
 
+(defun first-splitting-descendant (node)
+  "The first descendant of NODE that has multiple successors.  If
+there are no such nodes (i.e., the set of descendents of NODE forms a
+linear sequence), return NIL."
+  (let ((succs (node-successors node)))
+    (if (null succs)
+	nil
+	(if (null (cdr succs))
+	    (first-splitting-descendant (first succs))
+	    node))))
+
 (defun make-initial-queue (initial-state 
 			   &key (queueing-function #'enqueue-at-end))
   (let ((q (make-empty-queue)))
