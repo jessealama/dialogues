@@ -1230,13 +1230,12 @@ signature.")
     (loop
        for i from 1 upto (floor cleft-point)
        do
-	 (<:td (<:as-is "&nbsp;"))
-       finally 
-	 (<:td (render-final-move-as-table-row node)))
+	 (<:td))
+    (<:td (render-final-move-as-table-row node))
     (loop
        for i from (1+ (ceiling cleft-point)) upto width
        do
-	 (<:td (<:as-is "&nbsp;")))))
+	 (<:td))))
 
 (defun render-strategy (strategy)
   (let ((first-splitter (first-splitting-descendent strategy)))
@@ -1245,11 +1244,10 @@ signature.")
 	 (let ((current-node strategy))
 	   (until (null (node-successors current-node))
 	     (<:tr
-	      (<:td
-	       (render-final-move-with-padding current-node 0)))
+	       (render-final-move-with-padding current-node 0))
 	     (setf current-node (car (node-successors current-node))))
 	   (<:tr
-	    (<:td (render-final-move-with-padding current-node 0)))))
+	    (render-final-move-with-padding current-node 0))))
 	(let* ((succs (node-successors first-splitter))
 	       (num-succs (length succs)))
 	  (<:table :rules "groups"
