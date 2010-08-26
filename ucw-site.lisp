@@ -1352,7 +1352,6 @@ signature.")
   (let (search-depth)
   (<:p "From the current state of the game, you can search for a " (<:em "winning play") " or a " (<:em "winning strategy") ".  A winning play is a sequence of moves that leads to a win for Proponent, whereas a winning strategy is a way of playing the game in such a way that Proponent can win the game no matter what Opponent does. (Winning strategies are generally not sequences; they are more complicated objects than winning plays.)")
   (<:p "Select the number of moves beyond the end of the current game that should be searched, and choose the kind of object for which to search. " (<:b "Note:") " generally, the greater the depth, the more time it will take to compute an answer; be patient.")
-  (<:p (<:b "Warning:") " this functionality is under development; use at your own risk.  Search for winning strategies is currently unimplemented.")
   (<ucw:form :action (call 'winning-play-searcher
 			   :depth search-depth
 			   :game game
