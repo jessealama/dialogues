@@ -1280,8 +1280,7 @@ signature.")
 		      do
 			(<:td (render-strategy succ))))
 		 (loop
-		    for i from 0 upto (1- num-succs)
-		    with succ = (nth i succs)
+		    for succ in succs
 		    do
 		      (<:td (render-strategy succ)))))))))))
 		 
