@@ -1205,10 +1205,14 @@ signature.")
       move
     (<:table
      (<:tr
-      (<:td (<:as-html depth))
-      (<:td (<:as-html player))
-      (<:td (render statement))
-      (<:td (if (initial-move? move)
+      (<:td :align "left"
+	    (<:as-html depth))
+      (<:td :align "center"
+	    (<:as-html player))
+      (<:td :align "left"
+	    (render statement))
+      (<:td :align "left"
+	    (if (initial-move? move)
 		(<:em "(initial move)")
 		(if (attacking-move? move)
 		    (<:as-html "[A," reference "]")
@@ -1224,14 +1228,13 @@ signature.")
     (loop
        for i from 1 upto (floor cleft-point)
        do
-	 (<:td)
+	 (<:td (<:as-is "&nbsp;"))
        finally 
-	 (<:td 
-	  (render-final-move-as-table-row node)))
+	 (<:td (render-final-move-as-table-row node)))
     (loop
        for i from (1+ (ceiling cleft-point)) upto width
        do
-	 (<:td))))
+	 (<:td (<:as-is "&nbsp;")))))
 
 (defun render-strategy (strategy)
   (let ((first-splitter (first-splitting-descendent strategy)))
@@ -1267,7 +1270,7 @@ signature.")
 		      with succ = (nth i succs)
 		      do
 			(<:td (render-strategy succ)))
-		   (<:td)
+		   (<:td (<:as-is "&nbsp;"))
 		   (loop
 		      with cleft-point = (/ num-succs 2)
 		      for i from cleft-point upto (1- num-succs)
