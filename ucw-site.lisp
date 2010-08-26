@@ -1237,29 +1237,60 @@ signature.")
        do
 	 (<:td))))
 
+(defun render-node-as-table-row (node)
+  (let* ((game (node-state node))
+	 (move (last-move game))
+	 (depth (node-depth node)))
+    (with-slots (player statement stance reference)
+	move
+      (<:tr
+       (<:td :align "left"
+	     (<:as-html depth))
+       (<:td :align "center"
+	     (<:as-html player))
+       (<:td :align "left"
+	     (render statement))
+       (<:td :align "left"
+	     (if (initial-move? move)
+		 (<:em "(initial move)")
+		 (if (attacking-move? move)
+		     (<:as-html "[A," reference "]")
+		     (<:as-html "[D," reference "]"))))))))
+  
+(defun render-segment-from-to-with-padding-as-row (begin end padding)
+  "Given search tree nodes BEGIN and END, render a single HTML table
+  row representing the dialogue from BEGIN to END.  The row will
+  contain 2*PADDING + 1 columns; PADDING empty columns will be put on
+  the left and the right of the sequence.  It is assumed that there is
+  a path from BEGIN to END; the path is constrcted simply taking
+  unique successors, starting at BEGIN, until we reach END.  The moves
+  of the game between BEGIN and END will be put into a single HTML
+  table element."
+  (<:tr
+   (dotimes (i padding)
+     (<:td))
+   (<:td :align "center"
+     (<:table
+      (let ((current-node begin))
+	(until (eq current-node end)
+	  (render-node-as-table-row current-node)
+	  (setf current-node (first (node-successors current-node))))
+	(render-node-as-table-row end))))
+   (dotimes (i padding)
+     (<:td))))
+
 (defun render-strategy (strategy)
   (let ((first-splitter (first-splitting-descendent strategy)))
     (if (null first-splitter)
-	(<:table
-	 (let ((current-node strategy))
-	   (until (null (node-successors current-node))
-	     (<:tr
-	       (render-final-move-with-padding current-node 0))
-	     (setf current-node (car (node-successors current-node))))
-	   (<:tr
-	    (render-final-move-with-padding current-node 0))))
+	(let ((leaf (first (leaf-nodes strategy))))
+	  (<:table
+	   (render-segment-from-to-with-padding-as-row strategy leaf 0)))
 	(let* ((succs (node-successors first-splitter))
 	       (num-succs (length succs)))
 	  (<:table :rules "groups"
 		   :frame "void"
 	   (<:thead
-	    (let ((current-node strategy))
-	      (until (eq current-node first-splitter)
-		(<:tr
-		 (render-final-move-with-padding current-node num-succs))
-		(setf current-node (car (node-successors current-node)))))
-	    (<:tr
-	     (render-final-move-with-padding first-splitter num-succs)))
+	    (render-segment-from-to-with-padding-as-row strategy first-splitter (floor (/ num-succs 2))))
 	   (<:tbody
 	    (<:tr
 	     (if (evenp num-succs)
@@ -1269,18 +1300,21 @@ signature.")
 		      for i from 0 upto (1- cleft-point)
 		      with succ = (nth i succs)
 		      do
-			(<:td (render-strategy succ)))
+			(<:td :align "center"
+			      (render-strategy succ)))
 		   (<:td)
 		   (loop
 		      with cleft-point = (/ num-succs 2)
 		      for i from cleft-point upto (1- num-succs)
 		      with succ = (nth i succs)
 		      do
-			(<:td (render-strategy succ))))
+			(<:td :align "center"
+			      (render-strategy succ))))
 		 (loop
 		    for succ in succs
 		    do
-		      (<:td (render-strategy succ)))))))))))
+		      (<:td :align "center"
+			    (render-strategy succ)))))))))))
 		 
 (defmethod render ((self winning-strategy-searcher))
   (with-slots (game depth play-style queue success)
