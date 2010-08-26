@@ -1286,34 +1286,31 @@ signature.")
 (defmethod render ((self winning-strategy-searcher))
   (with-slots (game depth play-style queue success)
       self
-    (let ((game-as-tree (dialogue-search-tree (initial-statement game)
-					      (dialogue-rules game)
-					      depth)))
-      (let ((result (winning-strategy (initial-statement game)
-				      (dialogue-rules game)
-				      depth
-				      game-as-tree)))
-	(cond ((null result)
-	      (<:h1 "Ouch!")
-	      (<:p "Not only is there is no winning strategy that continues from the game above no more than " (<:as-html depth) " " (if (= depth 1) "move" "moves") ", there is actually " (<:em "no") " winning strategy at all that extends the initial game."))
-	      ((eq result :dialogue-tree-too-shallow)
-	       (<:h1 "Cutoff!")
-	       (<:p "I couldn't find a winning strategy that extends the initial game at most " (<:as-html depth) " " (if (= depth 1) (<:as-is "move") (<:as-is "moves")) " beyond the end of the initial game.  The search was terminated because we reached the depth cutoff."))
-	      (t ; something interesting
-	       (let ((strat result))
-		 (<:h1 "Success")
-		 (<:p "Here is a continuation of the initial game for which Proponent has a winning strategy in no more than " (<:as-html depth) " " (if (= depth 1) (<:as-is "move") (<:as-is "moves")) " beyond the end of the initial game:")
-		 (render-strategy strat))))))
-    (<ucw:form :method "POST"
+    (let ((result (winning-strategy (initial-statement game)
+				    (dialogue-rules game)
+				    depth
+				    game)))
+      (cond ((null result)
+	     (<:h1 "Ouch!")
+	     (<:p "Not only is there is no winning strategy that continues from the game above no more than " (<:as-html depth) " " (if (= depth 1) "move" "moves") ", there is actually " (<:em "no") " winning strategy at all that extends the initial game."))
+	    ((eq result :dialogue-tree-too-shallow)
+	     (<:h1 "Cutoff!")
+	     (<:p "I couldn't find a winning strategy that extends the initial game at most " (<:as-html depth) " " (if (= depth 1) (<:as-is "move") (<:as-is "moves")) " beyond the end of the initial game.  The search was terminated because we reached the depth cutoff."))
+	    (t ; something interesting
+	     (let ((strat result))
+	       (<:h1 "Success")
+	       (<:p "Here is a continuation of the initial game for which Proponent has a winning strategy in no more than " (<:as-html depth) " " (if (= depth 1) (<:as-is "move") (<:as-is "moves")) " beyond the end of the initial game:")
+	       (render-strategy strat)))))
+    (<ucw:form :method "post"
 	       :action (call 'turn-editor
 			     :game game
 			     :play-style play-style)
       (<:submit :value "Go back to the original game"))
-    (<ucw:form :method "POST"
+    (<ucw:form :method "post"
 	       :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
 			      (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
 			 (call 'initial-formula-window :body default-sgc))
-      (<:submit :value "Quit"))))
+    (<:submit :value "Quit"))))
 
 (defconstant max-search-depth 15
   "The maximum depth to which we permit searching for winning plays and winning strategies.")

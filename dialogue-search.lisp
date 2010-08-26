@@ -371,12 +371,13 @@ is assumed that OPPONENT-NODE is expanded."
 
 (defvar winning-strategy-registry (make-hash-table :test #'equalp))
 
-(defun winning-strategy (formula ruleset depth &optional starting-node)
-  (let ((root (if starting-node
-		  (copy-search-tree-node starting-node)
-		  (copy-search-tree-node (dialogue-search-tree formula
-							       ruleset
-							       depth)))))
+(defun winning-strategy (formula ruleset depth &optional dialogue)
+  (let* ((problem (make-dialogue-search-problem :rules ruleset
+						:initial-state (or dialogue
+								   (make-dialogue formula
+										  pqrs-propositional-signature
+										  ruleset))))
+	 (root (develop-dialogue-tree-to-depth (create-start-node problem) depth problem)))
     (proponent-ws-from-proponent-node root ruleset)))
 
 ;; (defun winning-strategy (formula ruleset depth &optional starting-node)
