@@ -153,7 +153,7 @@
       (<:p "The current signature is:")
       (render-signature sig)
       (<:p "The new predicate name should be different from the names of currently existing predicates.  It should be different from the empty string and should not contain any whitespace characters.")
-      (<ucw:form :method "POST"
+      (<ucw:form :method "post"
 		 :action (answer (insert-predicate sig input-predicate-name))
         (<:label :for "new-predicate-name" "New predicate name")
 	(<ucw:input :type "text" 
@@ -174,7 +174,7 @@
 	  self
 	(<:h1 "Deleting a predicate")
 	(if (signature-predicates sig)
-	    (<ucw:form :method "POST"
+	    (<ucw:form :method "post"
 		       :action $take-action
 	      (<:p "Choose a predicate to be deleted from the signature:")
 	      (<ucw:select :size 1
@@ -212,7 +212,8 @@
 (defcomponent initial-formula-window (standard-window-component)
   ()
   (:default-initargs
-      :title "play a lorenzen dialogue game"))
+      :title "play a lorenzen dialogue game"
+      :doctype yaclml:+xhtml-strict-doctype+))
 
 (defparameter famous-formulas
   `(("Peirce's formula" "peirce-formula" ,peirce-formula)
@@ -346,7 +347,7 @@
     (render-signature sig)
     (formula-guide)
     (<:p "Please try again.")
-    (<ucw:form :method "POST"
+    (<ucw:form :method "post"
 	       :action (parse-formula-action input-formula sig)
       (<:p "Enter a formula in the above signature.  If you wish, you can "
 	   (<ucw:a :action 
@@ -464,7 +465,7 @@
 		   (<:li "Rule " (<:as-html (name violated-rule))
 			 (<:br)
 			 "Description: " (<:as-html (description violated-rule)))))
-		(<ucw:form :method "POST"
+		(<ucw:form :method "post"
 			   :action (call 'turn-editor 
 					 :game game
 					 :play-style (play-style self))
@@ -661,7 +662,7 @@ set of dialogue rules (such as Felscher's D-rules or E-rules), then it
 will inadmissible and you will see which of the rules are violated by
 your move.  Entering moves manully is a good way to explore the
 meaning of the dialogue rules.")
-      (<ucw:form :method "POST"
+      (<ucw:form :method "post"
 		 :action $take-action
       (<:table :style "border:1px solid;"
 	       (<:tr 
@@ -977,7 +978,7 @@ asserted in the next move."))
 current turn number.  Moves of the game after the selected number will
 be discarded, and the state of the game will be rewound so that the
 current turn number is the selected one.")
-    (<ucw:form :method "POST"
+    (<ucw:form :method "post"
 	       :action (call 'turn-editor
 			     :game (truncate-dialogue game
 						      rewind-point)
@@ -1176,29 +1177,30 @@ signature.")
 			    (<:as-is "move")
 			    (<:as-is "moves"))
 			" from the end of the current game was found.  The search was terminated because of the depth limit.")))))
-     (if (empty-queue? more-nodes)
-	 (<:p "The search was exhaustive; there are no more options left to consider and there would be none even if the depth restriction were dropped.")
-	 (if (eq result :cut-off)
-	      (<:p "When the search terminated, there were still possible moves left to consider; since the search was terminated by the depth cutoff, it's possible that there are " (when success (<:as-is "further ")) "winning plays that extend the initial game, but all of them are too deep.")
-	      (<ucw:form :method "POST"
-			 :action (call 'winning-play-searcher
-				       :game game
-				       :depth depth
-				       :play-style play-style
-				       :queue more-nodes
-				       :success t)
-	        (<:p "When the search terminated, there were still possible moves left to consider; there may be further winning plays different from this one.")
-		(<:submit :value "Search for another winning play"))))
-    (<ucw:form :method "POST"
-	       :action (call 'turn-editor
-			     :game game
-			     :play-style play-style)
-      (<:submit :value "Go back to the original game"))
-    (<ucw:form :method "POST"
-	       :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
-			      (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
-			 (call 'initial-formula-window :body default-sgc))
-      (<:submit :value "Quit")))))
+      (<:fieldset
+       (if (empty-queue? more-nodes)
+	   (<:p "The search was exhaustive; there are no more options left to consider and there would be none even if the depth restriction were dropped.")
+	   (if (eq result :cut-off)
+	       (<:p "When the search terminated, there were still possible moves left to consider; since the search was terminated by the depth cutoff, it's possible that there are " (when success (<:as-is "further ")) "winning plays that extend the initial game, but all of them are too deep.")
+	       (<ucw:form :method "post"
+			  :action (call 'winning-play-searcher
+					:game game
+					:depth depth
+					:play-style play-style
+					:queue more-nodes
+					:success t)
+			  (<:p "When the search terminated, there were still possible moves left to consider; there may be further winning plays different from this one.")
+			  (<:submit :value "Search for another winning play"))))
+       (<ucw:form :method "post"
+		  :action (call 'turn-editor
+				:game game
+				:play-style play-style)
+         (<:submit :value "Go back to the original game"))
+       (<ucw:form :method "post"
+		  :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
+				 (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
+			    (call 'initial-formula-window :body default-sgc))
+         (<:submit :value "Quit"))))))
 
 (defun render-move-at-depth-as-table (move depth)
   (with-slots (player statement stance reference)
@@ -1363,7 +1365,7 @@ that all the rules in your edited ruleset are satisfied.")
 
 (defun render-quit-form ()
   (<:p "Quitting the game will discard whatever progress you've made so far and return you to the initial page.")
-  (<ucw:form :method "POST"
+  (<ucw:form :method "post"
 	     :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
 				(default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
 			   (call 'initial-formula-window :body default-sgc))
@@ -1835,7 +1837,7 @@ that all the rules in your edited ruleset are satisfied.")
 					  selected-rules
 					  (ruleset self))))))))
     (let ((sig (signature self)))
-      (<ucw:form :method "POST"
+      (<ucw:form :method "post"
 		 :action $take-action
       (<:table :style "border:1px solid;"
       (<:caption :style "caption-side:bottom;"
