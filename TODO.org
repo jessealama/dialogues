@@ -210,3 +210,5 @@ would be nice.  The sidebar would include the following links:
   long time -- would you like to continue, tune the parameters of the
   search, or quit?  If the user chooses to continue, we could then
   give them another 60 seconds.  And so forth.
+
+  http://cl-cookbook.sourceforge.net/process.html
