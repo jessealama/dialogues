@@ -196,3 +196,17 @@ would be nice.  The sidebar would include the following links:
     - Ditto for rules & play style.
 * DONE Display strategies
   CLOSED: [2010-08-25 Wed 18:36]
+* TODO Spawn threads for search procedures
+  The server can spin out of control if its given a search task that
+  takes too long.  It seems that the only thing I can do when this
+  happens is kill and restart the whole lisp process, which sucks.
+  Unacceptable, really.
+
+  The idea would be that threads could be used throttle resources,
+  specifically time.  We could implement a hard time cutoff, say, 60
+  seconds.  We could then proceed a couple of ways.  We could just
+  terminate the search and say "sorry" to the user.  Or we could
+  generate an intermediate page, saying that the search is going on a
+  long time -- would you like to continue, tune the parameters of the
+  search, or quit?  If the user chooses to continue, we could then
+  give them another 60 seconds.  And so forth.
