@@ -212,3 +212,5 @@ would be nice.  The sidebar would include the following links:
   give them another 60 seconds.  And so forth.
 
   http://cl-cookbook.sourceforge.net/process.html
+* TODO List the ruleset in force when displaying winning strategies
+  Show it also when the search for a winning strategy fails.
