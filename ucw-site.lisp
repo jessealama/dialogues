@@ -27,7 +27,7 @@
 
 (defparameter available-translations
   (list identity-translation
-	gödel-gentzen-translation 
+	goedel-gentzen-translation 
 	double-negate-translation
 	double-negate-all-subformulas-translation
 	kuroda-translation

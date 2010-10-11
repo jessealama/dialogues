@@ -19,17 +19,17 @@
 	(-> (-> (-> p q) p) p))
     
     (define-famous-formula excluded-middle 
-	(v p (¬ p)))
+	(v p (neg p)))
     
     (define-famous-formula dummett-formula 
 	(v (-> p q) (-> q p)))
     
     (define-famous-formula double-negation-introduction
 	(-> p
-	    (¬ (¬ p))))
+	    (neg (neg p))))
     
     (define-famous-formula double-negation-elimination
-	(-> (¬ (¬ p)) p))
+	(-> (neg (neg p)) p))
     
     (define-famous-formula k-formula
 	(-> p (-> q p)))
@@ -56,71 +56,71 @@
 
     (define-famous-formula weak-excluded-middle
 	(v
-	 (¬ p)
-	 (¬ (¬ p))))
+	 (neg p)
+	 (neg (neg p))))
     
     (define-famous-formula scott-formula 
-	(-> (-> (-> (¬ (¬ p)) p) (v p (¬ p)))
-	    (v (¬ p) (¬ (¬ p)))))
+	(-> (-> (-> (neg (neg p)) p) (v p (neg p)))
+	    (v (neg p) (neg (neg p)))))
 
     (define-famous-formula smetanich-formula 
-	(-> (-> (¬ q) p) 
+	(-> (-> (neg q) p) 
 	    (-> (-> (-> p q) p) p)))
     
     (define-famous-formula de-morgan-not-and-implies-or-not
-	(-> (¬ (& p q))
-	    (v (¬ p) (¬ q))))
+	(-> (neg (& p q))
+	    (v (neg p) (neg q))))
 
     (define-famous-formula de-morgan-not-or-implies-and-not
-	(-> (¬ (v p q))
-	    (& (¬ p) (¬ q))))
+	(-> (neg (v p q))
+	    (& (neg p) (neg q))))
 
     (define-famous-formula de-morgan-and-not-implies-not-or
-	(-> (& (¬ p) (¬ q))
-	    (¬ (v p q))))
+	(-> (& (neg p) (neg q))
+	    (neg (v p q))))
 
     (define-famous-formula de-morgan-or-not-implies-not-and
-	(-> (v (¬ p) (¬ q))
-	    (¬ (& p q))))
+	(-> (v (neg p) (neg q))
+	    (neg (& p q))))
 
     (define-famous-formula anti-connexive-formula
-	(v (-> p (¬ p))
-	   (-> (¬ p) p)))
+	(v (-> p (neg p))
+	   (-> (neg p) p)))
 
     (define-famous-formula ex-contradictione-quodlibet
-	(-> (& p (¬ p))
+	(-> (& p (neg p))
 	    q))
 
     (define-famous-formula aristotles-thesis-positive-antecedent
-	(¬ (-> p (¬ p))))
+	(neg (-> p (neg p))))
 
     (define-famous-formula aristotles-thesis-negative-antecedent
-	(¬ (-> (¬ p) p)))
+	(neg (-> (neg p) p)))
 
     (define-famous-formula conditional-excluded-middle
-	(v (-> p q) (-> p (¬ q))))
+	(v (-> p q) (-> p (neg q))))
 
     (define-famous-formula implicational-ex-falso
-	(-> (¬ p) (-> p q)))
+	(-> (neg p) (-> p q)))
 
     (define-famous-formula wkp
-	(-> (-> (¬ p)
-		(v (¬ q) (¬ r)))
-	    (v (-> (¬ p) (¬ q))
-	       (-> (¬ p) (¬ r)))))
+	(-> (-> (neg p)
+		(v (neg q) (neg r)))
+	    (v (-> (neg p) (neg q))
+	       (-> (neg p) (neg r)))))
 
     (define-famous-formula modus-ponens
 	(-> (& (-> p q) p) q))
     
     (define-famous-formula modus-tollens
-	(-> (& (-> p q) (¬ q)) (¬ p)))
+	(-> (& (-> p q) (neg q)) (neg p)))
 
     (define-famous-formula hypothetical-syllogism
 	(-> (& (-> p q) (-> q r))
 	    (-> p r)))
 
     (define-famous-formula disjunctive-syllogism
-	(-> (& (v p q) (¬ p)) (¬ q)))
+	(-> (& (v p q) (neg p)) (neg q)))
 
     (define-famous-formula constructive-dilemma
 	(-> (& (-> p q)
@@ -131,8 +131,8 @@
     (define-famous-formula destructive-dilemma
 	(-> (& (-> p q)
 	       (-> r s))
-	    (-> (v (¬ r) (¬ s))
-		(v (¬ p) (¬ q)))))
+	    (-> (v (neg r) (neg s))
+		(v (neg p) (neg q)))))
 
     (define-famous-formula conjunction-elimination
 	(-> (& p q) p))
@@ -183,28 +183,28 @@
 	    (v p (& q r))))
 
     (define-famous-formula transposition
-	(-> (-> p q) (-> (¬ q) (¬ p))))
+	(-> (-> p q) (-> (neg q) (neg p))))
 
     (define-famous-formula material-implication-implicational-antecedent
 	(-> (-> p q)
-	    (v (¬ p) q)))
+	    (v (neg p) q)))
 
     (define-famous-formula material-implication-disjunctive-antecedent
-	(-> (v (¬ p) q)
+	(-> (v (neg p) q)
 	    (-> p q)))
 
     (define-famous-formula material-implication-negative-antecedent
-	(-> (-> p q) (¬ (& p (¬ q)))))
+	(-> (-> p q) (neg (& p (neg q)))))
 
     (define-famous-formula material-implication-negative-consequent
-	(-> (¬ (& p (¬ q))) (-> p q)))
+	(-> (neg (& p (neg q))) (-> p q)))
 
     (define-famous-formula material-equivalence-conjunctive-antecedent
 	(-> (& (-> p q) (-> q p))
-	    (v (& p q) (& (¬ p) (¬ q)))))
+	    (v (& p q) (& (neg p) (neg q)))))
 
     (define-famous-formula material-equivalence-disjunctive-antecedent
-	(-> (v (& p q) (& (¬ p) (¬ q)))
+	(-> (v (& p q) (& (neg p) (neg q)))
 	    (& (-> p q) (-> q p))))
 
     (define-famous-formula exportation-conjunctive-antecedent
@@ -246,10 +246,10 @@
 
     (define-famous-formula contraposition-positive-antecedent
 	(-> (-> p q)
-	    (-> (¬ q) (¬ p))))
+	    (-> (neg q) (neg p))))
 
     (define-famous-formula contraposition-negative-antecedent
-	(-> (-> (¬ q) (¬ p))
+	(-> (-> (neg q) (neg p))
 	    (-> p q)))
 
     ))

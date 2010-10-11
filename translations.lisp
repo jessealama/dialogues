@@ -17,39 +17,39 @@
 
 ;;; Gödel-Gentzen translation
 
-(defgeneric gödel-gentzen (formula)
-  (:documentation "The Gödel-Gentzen negative translation."))
+(defgeneric goedel-gentzen (formula)
+  (:documentation "The Goedel-Gentzen negative translation."))
 
-(defmethod gödel-gentzen ((formula atomic-formula))
+(defmethod goedel-gentzen ((formula atomic-formula))
   (negate (negate formula)))
 
-(defmethod gödel-gentzen ((negation negation))
-  (negate (gödel-gentzen (unnegate negation))))
+(defmethod goedel-gentzen ((negation negation))
+  (negate (goedel-gentzen (unnegate negation))))
 
-(defmethod gödel-gentzen ((conjunction binary-conjunction))
-  (make-binary-conjunction (gödel-gentzen (lhs conjunction))
-			   (gödel-gentzen (rhs conjunction))))
+(defmethod goedel-gentzen ((conjunction binary-conjunction))
+  (make-binary-conjunction (goedel-gentzen (lhs conjunction))
+			   (goedel-gentzen (rhs conjunction))))
 
-(defmethod gödel-gentzen ((disjunction binary-disjunction))
-  (negate (make-binary-conjunction (negate (gödel-gentzen (lhs disjunction)))
-				   (negate (gödel-gentzen (rhs disjunction))))))
+(defmethod goedel-gentzen ((disjunction binary-disjunction))
+  (negate (make-binary-conjunction (negate (goedel-gentzen (lhs disjunction)))
+				   (negate (goedel-gentzen (rhs disjunction))))))
 
-(defmethod gödel-gentzen ((implication implication))
-  (make-implication (gödel-gentzen (antecedent implication))
-		    (gödel-gentzen (consequent implication))))
+(defmethod goedel-gentzen ((implication implication))
+  (make-implication (goedel-gentzen (antecedent implication))
+		    (goedel-gentzen (consequent implication))))
 
-(defmethod gödel-gentzen ((universal universal-generalization))
+(defmethod goedel-gentzen ((universal universal-generalization))
   (make-universal (bound-variable universal)
-		  (gödel-gentzen (matrix universal))))
+		  (goedel-gentzen (matrix universal))))
 
-(defmethod gödel-gentzen ((existential existential-generalization))
+(defmethod goedel-gentzen ((existential existential-generalization))
   (negate (make-universal (bound-variable existential)
-			  (negate (gödel-gentzen (matrix existential))))))
+			  (negate (goedel-gentzen (matrix existential))))))
 
-(defparameter gödel-gentzen-translation
+(defparameter goedel-gentzen-translation
   (make-instance 'formula-translation
-		 :description "The Gödel-Gentzen negative translation"
-		 :transformer #'gödel-gentzen))
+		 :description "The Goedel-Gentzen negative translation"
+		 :transformer #'goedel-gentzen))
 
 ;;; Simple double negation
 
