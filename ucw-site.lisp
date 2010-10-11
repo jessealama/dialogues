@@ -23,8 +23,7 @@
 	particle-rules+d11
 	particle-rules+d12
 	particle-rules+d13
-	particle-rules+e
-	jesse-kludge))
+	particle-rules+e))
 
 (defparameter available-translations
   (list identity-translation
