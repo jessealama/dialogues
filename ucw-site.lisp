@@ -1794,7 +1794,8 @@ that all the rules in your edited ruleset are satisfied.")
   ())
 
 (defmethod render ((self manual-formula-editor-component))
-  (let (input-formula)
+  (let ((input-formula nil)
+	(sig (signature self)))
     (symbol-macrolet 
 	(($formula
 	  (let ((parsed-formula 
@@ -1818,7 +1819,8 @@ that all the rules in your edited ruleset are satisfied.")
 		 :action $formula
 		 (<ucw:input :type "text"
 			     :accessor input-formula)
-		 (<:submit :value "Use this formula")))))
+		 (<:submit :value "Use this formula"))
+      (formula-guide))))
 
 (defmethod render ((self formula-entry-component))
   (let (input-formula
@@ -1830,7 +1832,8 @@ that all the rules in your edited ruleset are satisfied.")
       (($formula
 	(let ((sig (signature self)))
 	  (if (eq selected-formula t)
-	      (call 'formula-entry-component)
+	      (call 'manual-formula-editor-component
+		    :signature sig)
 	      (if (belongs-to-signature? sig selected-formula)
 		  selected-formula
 		  (call 'formula-corrector
@@ -1898,23 +1901,17 @@ that all the rules in your edited ruleset are satisfied.")
        (<:tr :style "background-color:#F063CD;"
 	(<:td "Formula:")
 	(<:td
-	 (<:table
-	  (<:tr 
-	   (<:td (<ucw:input :type "text" 
-			     :accessor input-formula 
-			     :id "input-formula")))
-	  (<:tr
-	   (<:td (<ucw:select :id "selected-formula" 
-			      :size 1 
-			      :accessor selected-formula
-		   (dolist (famous-formula (cons 't famous-formulas))
-		     (if (eq famous-formula t)
-			 (<ucw:option :value t
-				      (<:as-is "(enter a formula manually)"))
-			 (destructuring-bind (long-name short-name formula)
-			     famous-formula
-			   (declare (ignore short-name))
-			   (<ucw:option :value formula (<:as-is long-name)))))))))))
+	 (<ucw:select :id "selected-formula" 
+		      :size 1 
+		      :accessor selected-formula
+	   (dolist (famous-formula (cons 't famous-formulas))
+	     (if (eq famous-formula t)
+		 (<ucw:option :value t
+			      (<:as-is "(enter a formula manually)"))
+		 (destructuring-bind (long-name short-name formula)
+		     famous-formula
+		   (declare (ignore short-name))
+		   (<ucw:option :value formula (<:as-is long-name))))))))
        (<:tr :style "background-color:#A7007D;"
 	(<:td "Translation:")
 	(<:td (<ucw:select :id "selected-translation"
@@ -1947,8 +1944,7 @@ that all the rules in your edited ruleset are satisfied.")
       (<:p (<:em (<:b "About Lorenzen dialogue games:")) " Lorenzen
 dialogues are a formalism for capturing intuitionistic validity using games.  Since their invention and development in the late 1950s and 1960s, they have been extended from intuitionistic first-order logic so that they apply to different notions of validity, such as those of classical logic, modal logics, linear logic, etc.  For more information, consult " (<:a :href "http://plato.stanford.edu/entries/logic-dialogical/" "the entry on dialogue games") " in the " (<:em "Stanford Encyclopedia of Philosophy") ".")
       (<:p (<:em (<:b "About the signature:")) " You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)  You will not be able to edit the signature once the game begins.")
-      (<:p (<:em (<:b "About the formula:")) " If the text box is not empty, its contents will be the initial formula of the game.  If the text box is empty, then the selected \"famous formula\" will be." 
-		(formula-guide))
+      (<:p (<:em (<:b "About the formula:")) " If the text box is not empty, its contents will be the initial formula of the game.  If the text box is empty, then the selected \"famous formula\" will be.")
       (<:p (<:em (<:b "About the translation:")) " The default is the
 identity translation, so that whatever formula is chosen (or whatever
 formula is entered into the text box) will be, verbatim, the formula
