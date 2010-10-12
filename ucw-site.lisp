@@ -1789,6 +1789,37 @@ that all the rules in your edited ruleset are satisfied.")
 (defcomponent formula-entry-component (signature-component ruleset-component)
   ())
 
+
+(defcomponent manual-formula-editor-component (signature-component)
+  ())
+
+(defmethod render ((self manual-formula-editor-component))
+  (let (input-formula)
+    (symbol-macrolet 
+	(($formula
+	  (let ((parsed-formula 
+		 (ucw-handler-case (parse-formula input-formula)
+		   (end-of-file () (call 'formula-corrector
+					 :text input-formula
+					 :signature sig))
+		   (malformed-formula-error () (call 'formula-corrector
+						     :text input-formula
+						     :signature sig)))))
+	    (if (belongs-to-signature? sig parsed-formula)
+		(answer parsed-formula)
+		(call 'formula-corrector
+		      :text parsed-formula
+		      :signature sig)))))
+      (<:h1 "Enter a formula")
+      (<:p "The signature that you should use is:")
+      (<:blockquote
+       (render-signature (signature self)))
+      (<ucw:form :method "POST"
+		 :action $formula
+		 (<ucw:input :type "text"
+			     :accessor input-formula)
+		 (<:submit :value "Use this formula")))))
+
 (defmethod render ((self formula-entry-component))
   (let (input-formula
 	selected-formula 
@@ -1798,25 +1829,14 @@ that all the rules in your edited ruleset are satisfied.")
   (symbol-macrolet
       (($formula
 	(let ((sig (signature self)))
-	  (if (empty-string? input-formula)
+	  (if (eq selected-formula t)
+	      (call 'formula-entry-component)
 	      (if (belongs-to-signature? sig selected-formula)
 		  selected-formula
 		  (call 'formula-corrector
 			:text selected-formula
-			:signature sig))
-	      (let ((parsed-formula 
-		     (ucw-handler-case (parse-formula input-formula)
-		       (end-of-file () (call 'formula-corrector
-					     :text input-formula
-					     :signature sig))
-		       (malformed-formula-error () (call 'formula-corrector
-							 :text input-formula
-							 :signature sig)))))
-		(if (belongs-to-signature? sig parsed-formula)
-		    parsed-formula
-		    (call 'formula-corrector
-			  :text parsed-formula
-			  :signature sig))))))
+			:signature sig))))))
+	      
        ($take-action
 	(ecase selected-play-style
 	  (play-as-both-proponent-and-opponent
@@ -1888,11 +1908,14 @@ that all the rules in your edited ruleset are satisfied.")
 	   (<:td (<ucw:select :id "selected-formula" 
 			      :size 1 
 			      :accessor selected-formula
-		   (dolist (famous-formula famous-formulas)
-		     (destructuring-bind (long-name short-name formula)
-			 famous-formula
-		       (declare (ignore short-name))
-		       (<ucw:option :value formula (<:as-is long-name))))))))))
+		   (dolist (famous-formula (cons 't famous-formulas))
+		     (if (eq famous-formula t)
+			 (<ucw:option :value t
+				      (<:as-is "(enter a formula manually)"))
+			 (destructuring-bind (long-name short-name formula)
+			     famous-formula
+			   (declare (ignore short-name))
+			   (<ucw:option :value formula (<:as-is long-name)))))))))))
        (<:tr :style "background-color:#A7007D;"
 	(<:td "Select a translation to be applied to the selected formula:")
 	(<:td (<ucw:select :id "selected-translation"
@@ -1933,7 +1956,7 @@ formula is entered into the text box) will be, verbatim, the formula
 with which the game begins.")
       (<:p (<:em (<:b "About the rules:")) " The rulesets in the
 above menu are some notable cases that have some logical content.  You will be able to change your choice of ruleset once the game has started.  The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985; it was arguably the first papers to rigorously establish the equivalence between intuitionistic validity and existence of winning strategies for certain dialogue games.  You will be able to alter your choice of rules after the game has begun.")
-      (<:p (<:em (<:b "About the play style:")) " The default mode of playing is to take on the role of both players: at each move, you'll see all possible moves that can be made, from the perspective of both players.  Two other play styles are supported: play as Proponent with a random Opponent, and play as Opponent with a random Proponent."))))))
+      (<:p (<:em (<:b "About the play style:")) " The default mode of playing is to take on the role of both players: at each move, you'll see all possible moves that can be made, from the perspective of both players.  Two other play styles are supported: play as Proponent with a random Opponent, and play as Opponent with a random Proponent.")))))
 
 (defmethod render ((self start-game-component))
   (with-slots ((sig signature))
