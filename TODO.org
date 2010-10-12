@@ -164,36 +164,36 @@
 
   Continuations would be a nice way to do this.
 * TODO Sara's style suggestions
-  - There is too much text, on both the front page and the internal
+** TODO There is too much text, on both the front page and the internal
 pages.
-  - A navigational sidebar (and also maybe a pretty heading banner?)
-would be nice.  The sidebar would include the following links:
-       - "Play a game"
-       - "Search for a winning play"
-       - "Search for a winning strategy"
-       - "About dialogical logic"
-       - "About the website"
-       - a link to the blog? (if not linked from the "about dl"
-         page)
-       - a contact link
-  - Not entirely sure what should then go onto the main front page;
+** TODO A navigational sidebar (and also maybe a pretty heading banner?)
+would be nice.
+   The sidebar would include the following links:
+   - "Play a game"
+   - "Search for a winning play"
+   - "Search for a winning strategy"
+   - "About dialogical logic"
+   - "About the website"
+   - a link to the blog? (if not linked from the "about dl" page)
+   - a contact link
+** TODO Not entirely sure what should then go onto the main front page;
     I would start with nothing for the time being.
-  - For the "play the game" page
-    - remove "about Lorenzen dialogue games", since that goes into
-      the "about dl" page.
-    - Change "The signature that will be used" to just "Signature",
-      and link "Signature" to a pop-up window that allows you to edit
-      the sig.
-    - Change "Enter a formula or choose a famous formula from the
-      menu" to "Formula", and have just the drop-down menu, with one
-      option being "enter a formula manually", which goes to another
-      pop-up window.  Not entirely sure yet where the table of famous
-      formula names should go, or the info about LISP notation.  The
-      latter can probably just remain on "play the game" page.
-    - Change "Select a translation to be applied to the selected
-      formula:" to "Translation", and link the word to a pop-up window
-      w/ the info currently at the bottom of the page.
-    - Ditto for rules & play style.
+** TODO For the "play the game" page
+*** TODO remove "about Lorenzen dialogue games"
+    since that goes into the "about dl" page.
+*** DONE Change "The signature that will be used" to just "Signature"
+    CLOSED: [2010-10-12 Tue 16:20]
+*** TODO Link "Signature" to a pop-up window that allows you to edit the sig.
+*** DONE Change "Enter a formula or choose a famous formula from the menu" to "Formula"
+    CLOSED: [2010-10-12 Tue 16:21]
+*** TODO Have just the drop-down menu, with one option being "enter a formula manually", which goes to another pop-up window.
+    Not entirely sure yet where the table of famous formula names
+    should go, or the info about LISP notation.  The latter can
+    probably just remain on "play the game" page.
+*** DONE Change "Select a translation to be applied to the selected formula:" to "Translation"
+    CLOSED: [2010-10-12 Tue 16:21]
+*** TODO Link the word "Translation" to a pop-up window w/ the info currently at the bottom of the page.
+**** TODO Ditto for rules & play style.
 * DONE Display strategies
   CLOSED: [2010-08-25 Wed 18:36]
 * TODO Spawn threads for search procedures
@@ -214,3 +214,4 @@ would be nice.  The sidebar would include the following links:
   http://cl-cookbook.sourceforge.net/process.html
 * TODO List the ruleset in force when displaying winning strategies
   Show it also when the search for a winning strategy fails.
+* TODO Use 26 letters instead of just 4

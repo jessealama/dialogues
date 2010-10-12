@@ -74,7 +74,7 @@
 (defmethod render ((self signature-editor))
   (with-slots ((sig signature))
       self
-    (<:p "The signature that will be used during the game is:")
+    (<:p "Signature:")
     (render-signature sig)
     (<:p
      "[" (<ucw:a :action (call 'add-a-predicate
@@ -1894,10 +1894,10 @@ that all the rules in your edited ruleset are satisfied.")
 		 (<:submit :value "Let's play"))
        (<:tbody :style "border:1px solid;"
        (<:tr :style "background-color:#F0B2E0;"
-	(<:td "The signature that will be used:")
+	(<:td "Signature:")
 	(<:td (render-signature sig)))
        (<:tr :style "background-color:#F063CD;"
-	(<:td "Enter a formula or choose a famous formula from the menu:")
+	(<:td "Formula:")
 	(<:td
 	 (<:table
 	  (<:tr 
@@ -1917,7 +1917,7 @@ that all the rules in your edited ruleset are satisfied.")
 			   (declare (ignore short-name))
 			   (<ucw:option :value formula (<:as-is long-name)))))))))))
        (<:tr :style "background-color:#A7007D;"
-	(<:td "Select a translation to be applied to the selected formula:")
+	(<:td "Translation:")
 	(<:td (<ucw:select :id "selected-translation"
 			   :size 1
 			   :accessor selected-translation
@@ -1925,7 +1925,7 @@ that all the rules in your edited ruleset are satisfied.")
 		  (<ucw:option :value translation
 			       (<:as-is (description translation)))))))
        (<:tr :style "background-color:#7B942E;"
-	(<:td "The ruleset to be used during the game:")
+	(<:td "Ruleset:")
 	(<:td (if (null (ruleset self))
 		  (<ucw:select :id "selected-rules"
 			       :size 1
