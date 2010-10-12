@@ -214,3 +214,4 @@ would be nice.
   http://cl-cookbook.sourceforge.net/process.html
 * TODO List the ruleset in force when displaying winning strategies
   Show it also when the search for a winning strategy fails.
+* TODO Use 26 letters instead of just 4
