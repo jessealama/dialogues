@@ -501,7 +501,7 @@
 				      rule-d12
 				      rule-d13
 				      rule-e))
-		 :description "E rules (D rules + Opponment must always respond to the immediately previous move)"))
+		 :description "E rules (D rules + Opponent must always respond to the immediately previous move)"))
 
 (defparameter classical-dialogue-rules
   (make-instance 'ruleset
