@@ -296,7 +296,7 @@
    (<:li (<:tt "and") ",")
    (<:li (<:tt "or") ", and")
    (<:li (<:tt "not") "."))
-  (<:p "Atomic formulas are to be constructed according to the signature.  The case you use to write connectives and atomic formulas doesn't matter (anything you enter will be upcased).")
+  (<:p "Atomic formulas are simply the letters of the alphabet A, B, " (<:as-is "&hellip;") ", Z.  The case you use to write connectives and atomic formulas doesn't matter (anything you enter will be upcased).")
   (<:p "Here are some " (html-quote "famous formulas") " that can be referred to by name:")
   (<:table :rules "all"
    (<:thead
@@ -1789,7 +1789,6 @@ that all the rules in your edited ruleset are satisfied.")
 (defcomponent formula-entry-component (signature-component ruleset-component)
   ())
 
-
 (defcomponent manual-formula-editor-component (signature-component)
   ())
 
@@ -1821,6 +1820,40 @@ that all the rules in your edited ruleset are satisfied.")
 			     :accessor input-formula)
 		 (<:submit :value "Use this formula"))
       (formula-guide))))
+
+(defcomponent ruleset-info ()
+  ())
+
+(defmethod render ((self ruleset-info))
+  (<:p (<:em (<:b "About the rules:")) " The rulesets in the
+above menu are some notable cases that have some logical content.  You will be able to change your choice of ruleset once the game has started.  The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985; it was arguably the first papers to rigorously establish the equivalence between intuitionistic validity and existence of winning strategies for certain dialogue games.  You will be able to alter your choice of rules after the game has begun."))
+
+(defcomponent signature-info ()
+  ())
+
+(defmethod render ((self signature-info))
+  (<:p (<:em (<:b "About the signature:")) "The signature is propositional, whose atoms are simply the letters of the alphabet: A, B, C, ... Z."))
+
+(defcomponent translation-info ()
+  ())
+
+(defmethod render ((self translation-info))
+  (<:p (<:em (<:b "About the translation:")) " The default is the
+identity translation, so that whatever formula is chosen (or whatever
+formula is entered into the text box) will be, verbatim, the formula
+with which the game begins."))
+
+(defcomponent formula-info ()
+  ())
+
+(defmethod render ((self formula-info))
+  (formula-guide))
+
+(defcomponent play-style-info ()
+  ())
+
+(defmethod render ((self play-style-info))
+  (<:p (<:em (<:b "About the play style:")) " The default mode of playing is to take on the role of both players: at each move, you'll see all possible moves that can be made, from the perspective of both players.  Two other play styles are supported: play as Proponent with a random Opponent, and play as Opponent with a random Proponent."))
 
 (defmethod render ((self formula-entry-component))
   (let (input-formula
@@ -1899,7 +1932,8 @@ that all the rules in your edited ruleset are satisfied.")
        ;; 	(<:td "Signature:")
        ;; 	(<:td (render-signature sig)))
        (<:tr :style "background-color:#F063CD;"
-	(<:td "Formula:")
+	(<:td (<ucw:a :action (call 'formula-info)
+		      "Formula:"))
 	(<:td
 	 (<ucw:select :id "selected-formula" 
 		      :size 1 
@@ -1913,7 +1947,8 @@ that all the rules in your edited ruleset are satisfied.")
 		   (declare (ignore short-name))
 		   (<ucw:option :value formula (<:as-is long-name))))))))
        (<:tr :style "background-color:#A7007D;"
-	(<:td "Translation:")
+	(<:td (<ucw:a :action (call 'translation-info)
+		      "Translation:"))
 	(<:td (<ucw:select :id "selected-translation"
 			   :size 1
 			   :accessor selected-translation
@@ -1921,7 +1956,8 @@ that all the rules in your edited ruleset are satisfied.")
 		  (<ucw:option :value translation
 			       (<:as-is (description translation)))))))
        (<:tr :style "background-color:#7B942E;"
-	(<:td "Ruleset:")
+	(<:td (<ucw:a :action (call 'ruleset-info)
+		      "Ruleset:"))
 	(<:td (if (null (ruleset self))
 		  (<ucw:select :id "selected-rules"
 			       :size 1
@@ -1931,7 +1967,8 @@ that all the rules in your edited ruleset are satisfied.")
 					      (<:as-html (description ruleset)))))
 		  (<:as-html (description (ruleset self))))))
        (<:tr :style "background-color:#A3D800;"
-         (<:td "Choose the style of play:")
+         (<:td (<ucw:a :action (call 'play-style-info)
+		       "Play style:"))
 	 (<:td (<ucw:select :id "selected-play-style"
 			    :size 1
 			    :accessor selected-play-style
@@ -1942,16 +1979,8 @@ that all the rules in your edited ruleset are satisfied.")
 		 (<ucw:option :value 'play-as-opponent-random-proponent
 			      "Play as Opponent (Propnent will choose its moves randomly)"))))))
       (<:p (<:em (<:b "About Lorenzen dialogue games:")) " Lorenzen
-dialogues are a formalism for capturing intuitionistic validity using games.  Since their invention and development in the late 1950s and 1960s, they have been extended from intuitionistic first-order logic so that they apply to different notions of validity, such as those of classical logic, modal logics, linear logic, etc.  For more information, consult " (<:a :href "http://plato.stanford.edu/entries/logic-dialogical/" "the entry on dialogue games") " in the " (<:em "Stanford Encyclopedia of Philosophy") ".")
-      ; (<:p (<:em (<:b "About the signature:")) " You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)  You will not be able to edit the signature once the game begins.")
-      (<:p (<:em (<:b "About the formula:")) " If the text box is not empty, its contents will be the initial formula of the game.  If the text box is empty, then the selected \"famous formula\" will be.")
-      (<:p (<:em (<:b "About the translation:")) " The default is the
-identity translation, so that whatever formula is chosen (or whatever
-formula is entered into the text box) will be, verbatim, the formula
-with which the game begins.")
-      (<:p (<:em (<:b "About the rules:")) " The rulesets in the
-above menu are some notable cases that have some logical content.  You will be able to change your choice of ruleset once the game has started.  The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985; it was arguably the first papers to rigorously establish the equivalence between intuitionistic validity and existence of winning strategies for certain dialogue games.  You will be able to alter your choice of rules after the game has begun.")
-      (<:p (<:em (<:b "About the play style:")) " The default mode of playing is to take on the role of both players: at each move, you'll see all possible moves that can be made, from the perspective of both players.  Two other play styles are supported: play as Proponent with a random Opponent, and play as Opponent with a random Proponent."))))))
+dialogues are a formalism for capturing intuitionistic validity using games.  Since their invention and development in the late 1950s and 1960s, they have been extended from intuitionistic first-order logic so that they apply to different notions of validity, such as those of classical logic, modal logics, linear logic, etc.  For more information, consult " (<:a :href "http://plato.stanford.edu/entries/logic-dialogical/" "the entry on dialogue games") " in the " (<:em "Stanford Encyclopedia of Philosophy") "."))))))
+
 
 (defmethod render ((self start-game-component))
   (with-slots ((sig signature))
