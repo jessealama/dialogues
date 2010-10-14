@@ -252,6 +252,43 @@
 	(-> (-> (neg q) (neg p))
 	    (-> p q)))
 
+    (define-famous-formula connexive-ax-1
+	(-> (-> p q) (-> (-> q r) (-> p r))))
+
+    (define-famous-formula connexive-ax-2
+	(-> (-> (-> p p) q) q))
+
+    (define-famous-formula connexive-ax-3
+	(-> (-> p q) (-> (& p r) (& q r))))
+
+    (define-famous-formula connexive-ax-4
+	(-> (& q q) (-> p p)))
+
+    (define-famous-formula connexive-ax-5
+	(-> (& p (& q r)) (& q (& p r))))
+
+    (define-famous-formula connexive-ax-6
+	(-> (& p p) (-> (-> p p) (& p p))))
+
+    (define-famous-formula connexive-ax-7
+	(-> p (& p (& p p))))
+
+    (define-famous-formula connexive-ax-8
+	(-> (& (-> p (neg q)) q) (neg p)))
+
+    (define-famous-formula connexive-ax-9
+	(-> (& p (neg (& p (neg q)))) q))
+
+    (define-famous-formula connexive-ax-10
+	(neg (& p (neg (& p p)))))
+
+    (define-famous-formula connexive-ax-11
+	(v (v (neg p) (-> (-> p p) p))
+	   (-> (v (-> p p) (-> p p)) p)))
+
+    (define-famous-formula connexive-ax-12
+	(-> (-> p p) (neg (-> p (neg p)))))
+
     ))
 
 ;;; famous-formulas.lisp ends here
