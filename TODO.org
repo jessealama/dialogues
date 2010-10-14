@@ -183,7 +183,8 @@ would be nice.
     since that goes into the "about dl" page.
 *** DONE Change "The signature that will be used" to just "Signature"
     CLOSED: [2010-10-12 Tue 16:20]
-*** TODO Link "Signature" to a pop-up window that allows you to edit the sig.
+*** CANCELED Link "Signature" to a pop-up window that allows you to edit the sig.
+    CLOSED: [2010-10-14 Thu 11:14]
 *** DONE Change "Enter a formula or choose a famous formula from the menu" to "Formula"
     CLOSED: [2010-10-12 Tue 16:21]
 *** TODO Have just the drop-down menu, with one option being "enter a formula manually", which goes to another pop-up window.

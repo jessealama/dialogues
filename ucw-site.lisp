@@ -47,7 +47,7 @@
 
 (defclass signature-component ()
   ((signature :initarg :signature
-	      :initform pqrs-propositional-signature
+	      :initform alphabetic-propositional-signature
 	      :type finite-variable-propositional-signature
 	      :accessor signature)))
 
@@ -116,7 +116,7 @@
   (<:p "What next?  You can either go back with your browser or simply " 
        (<ucw:a :action
 	       (let* ((default-fec (make-instance 'formula-entry-component 
-						  :signature (copy-signature pqrs-propositional-signature)))
+						  :signature (copy-signature alphabetic-propositional-signature)))
 		      (default-sgc (make-instance 'start-game-component 
 						  :formula-entry-component default-fec)))
 		 (call 'initial-formula-window :body default-sgc))
@@ -204,7 +204,7 @@
     ()
   (let* ((default-fec (make-instance 'formula-entry-component 
 				     :signature (copy-signature
-						 pqrs-propositional-signature)))
+						 alphabetic-propositional-signature)))
 	 (default-sgc (make-instance 'start-game-component 
 				     :formula-entry-component default-fec)))
     (call 'initial-formula-window :body default-sgc)))
@@ -1197,7 +1197,7 @@ signature.")
 				:play-style play-style)
          (<:submit :value "Go back to the original game"))
        (<ucw:form :method "post"
-		  :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
+		  :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature alphabetic-propositional-signature)))
 				 (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
 			    (call 'initial-formula-window :body default-sgc))
          (<:submit :value "Quit"))))))
@@ -1340,7 +1340,7 @@ signature.")
 			     :play-style play-style)
       (<:submit :value "Go back to the original game"))
     (<ucw:form :method "post"
-	       :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
+	       :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature alphabetic-propositional-signature)))
 			      (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
 			 (call 'initial-formula-window :body default-sgc))
     (<:submit :value "Quit"))))
@@ -1396,7 +1396,7 @@ that all the rules in your edited ruleset are satisfied.")
 (defun render-quit-form ()
   (<:p "Quitting the game will discard whatever progress you've made so far and return you to the initial page.")
   (<ucw:form :method "post"
-	     :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature pqrs-propositional-signature)))
+	     :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature alphabetic-propositional-signature)))
 				(default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
 			   (call 'initial-formula-window :body default-sgc))
 	  (<:submit :value "Quit")))
@@ -1873,9 +1873,9 @@ that all the rules in your edited ruleset are satisfied.")
       (<:caption :style "caption-side:bottom;"
 		 (<:submit :value "Let's play"))
        (<:tbody :style "border:1px solid;"
-       (<:tr :style "background-color:#F0B2E0;"
-	(<:td "Signature:")
-	(<:td (render-signature sig)))
+       ;; (<:tr :style "background-color:#F0B2E0;"
+       ;; 	(<:td "Signature:")
+       ;; 	(<:td (render-signature sig)))
        (<:tr :style "background-color:#F063CD;"
 	(<:td "Formula:")
 	(<:td
@@ -1924,9 +1924,8 @@ that all the rules in your edited ruleset are satisfied.")
 			      "Play as Opponent (Propnent will choose its moves randomly)"))))))
       (<:p (<:em (<:b "About Lorenzen dialogue games:")) " Lorenzen
 dialogues are a formalism for capturing intuitionistic validity using games.  Since their invention and development in the late 1950s and 1960s, they have been extended from intuitionistic first-order logic so that they apply to different notions of validity, such as those of classical logic, modal logics, linear logic, etc.  For more information, consult " (<:a :href "http://plato.stanford.edu/entries/logic-dialogical/" "the entry on dialogue games") " in the " (<:em "Stanford Encyclopedia of Philosophy") ".")
-      (<:p (<:em (<:b "About the signature:")) " You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)  You will not be able to edit the signature once the game begins.")
-      (<:p (<:em (<:b "About the formula:")) " If the text box is not empty, its contents will be the initial formula of the game.  If the text box is empty, then the selected \"famous formula\" will be." 
-		(formula-guide))
+      ; (<:p (<:em (<:b "About the signature:")) " You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)  You will not be able to edit the signature once the game begins.")
+      (<:p (<:em (<:b "About the formula:")) " If the text box is not empty, its contents will be the initial formula of the game.  If the text box is empty, then the selected \"famous formula\" will be.")
       (<:p (<:em (<:b "About the translation:")) " The default is the
 identity translation, so that whatever formula is chosen (or whatever
 formula is entered into the text box) will be, verbatim, the formula
