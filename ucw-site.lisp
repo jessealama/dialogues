@@ -108,9 +108,10 @@ dialogues are a formalism for capturing intuitionistic validity using games.  Si
       :doctype yaclml:+xhtml-strict-doctype+
       :body
       (make-instance 'tabbed-pane
-		     :current-component-key 'start-game
-		     :contents `((start-game . ,(make-instance 'start-game-component))
-				 (about . ,(make-instance 'about-component))))))
+		     :current-component-key "play a game"
+		     :key-test #'string=
+		     :contents `(("play a game" . ,(make-instance 'start-game-component))
+				 ("about dialogues" . ,(make-instance 'about-component))))))
 
 (defparameter famous-formulas
   `(("Peirce's formula" "peirce-formula" ,peirce-formula)
