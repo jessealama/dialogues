@@ -1333,7 +1333,8 @@ signature.")
 	     (let ((strat result))
 	       (<:h1 "Success")
 	       (<:p "Here is a continuation of the initial game for which Proponent has a winning strategy in no more than " (<:as-html depth) " " (if (= depth 1) (<:as-is "move") (<:as-is "moves")) " beyond the end of the initial game:")
-	       (render-strategy strat)))))
+	       (<:div :style "border:1px solid;"
+	         (render-strategy strat))))))
     (<ucw:form :method "post"
 	       :action (call 'turn-editor
 			     :game game
