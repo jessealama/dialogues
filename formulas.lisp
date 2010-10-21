@@ -104,8 +104,10 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (belongs-to-signature? sig (argument formula)))
 
 (defmethod print-object :around ((formula unary-connective-formula) stream)
+  (format stream "(")
   (call-next-method)
-  (format stream "~A" (argument formula)))
+  (format stream "~A" (argument formula))
+  (format stream ")"))
 
 (defclass negation (unary-connective-formula)
   nil)

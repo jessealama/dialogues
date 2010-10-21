@@ -1403,6 +1403,7 @@ that all the rules in your edited ruleset are satisfied.")
 
 (defmethod render ((self turn-editor))
     (let* ((game (game self))
+	   (game-len (dialogue-length game))
 	   (play-style (play-style self)))
       (<:h1 "The game so far")
       (<:div :style "border:1px solid"
