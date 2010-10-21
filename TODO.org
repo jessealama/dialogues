@@ -216,3 +216,7 @@ would be nice.
 * TODO List the ruleset in force when displaying winning strategies
   Show it also when the search for a winning strategy fails.
 * TODO Use 26 letters instead of just 4
+* TODO Restore the rewind button
+* TODO Name (if any) and translation of the original formula displayed in the "Game so far" table
+* TODO Make "dialogical logic" appear somewhere in the page
+  For search enging harvesting.
