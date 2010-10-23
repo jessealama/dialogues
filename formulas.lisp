@@ -56,9 +56,9 @@
 		    (belongs-to-signature? sig arg))
 		args))))
 
-(defparameter contradiction (make-atomic-formula '⊥))
+(defparameter contradiction (make-atomic-formula 'bottom))
 
-(defparameter top (make-atomic-formula '⊤))
+(defparameter top (make-atomic-formula 'top))
 
 (defun make-equation (lhs rhs)
   (make-atomic-formula '= lhs rhs))
@@ -121,7 +121,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (typep thing 'negation))
 
 (defmethod print-object ((neg negation) stream)
-  (format stream "¬"))
+  (format stream "not"))
 
 (defgeneric negate (thing))
 
@@ -170,7 +170,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (typep thing 'implication))
 
 (defmethod print-object ((implication implication) stream)
-  (format stream "→"))
+  (format stream "-->"))
 
 (defgeneric make-implication (antecedent consequent))
 
@@ -195,7 +195,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (typep thing 'equivalence))
 
 (defmethod print-object ((equiv equivalence) stream)
-  (format stream "↔"))
+  (format stream "<-->"))
 
 (defun make-equivalence (lhs rhs)
   (make-instance 'equivalence
@@ -211,7 +211,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (typep thing 'binary-disjunction))
 
 (defmethod print-object ((bin-dis binary-disjunction) stream)
-  (format stream "⋁"))
+  (format stream "or"))
 
 (defgeneric make-binary-disjunction (lhs rhs))
 
@@ -226,7 +226,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (eql (class-of thing) 'multiple-arity-disjunction))
 
 (defmethod print-object ((mad multiple-arity-disjunction) stream)
-  (format stream "⋁"))
+  (format stream "or"))
 
 (defmethod make-binary-disjunction ((lhs formula) (rhs formula))
   (make-instance 'binary-disjunction
@@ -276,7 +276,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (typep thing 'binary-conjunction))
 
 (defmethod print-object ((con binary-conjunction) stream)
-  (format stream "⋀"))
+  (format stream "and"))
 
 (defclass multiple-arity-conjunction (multiple-arity-connective-formula)
   nil)
@@ -289,7 +289,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (eql (class-of thing) 'multiple-arity-conjunction))
 
 (defmethod print-object ((mac multiple-arity-conjunction) stream)
-  (format stream "⋁"))
+  (format stream "and"))
 
 (defun make-binary-conjunction (lhs rhs)
   (make-instance 'binary-conjunction
@@ -350,7 +350,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (eql (class-of thing) 'universal-generalization))
 
 (defmethod print-object ((uni-gen universal-generalization) stream)
-  (format stream "∀"))
+  (format stream "all"))
 
 (defclass existential-generalization (generalization)
   nil)
@@ -359,7 +359,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (eql (class-of thing) 'existential-generalization))
 
 (defmethod print-object ((exi-gen existential-generalization) stream)
-  (format stream "∃"))
+  (format stream "exists"))
 
 (defun make-universal (var formula)
   (make-instance 'universal-generalization
@@ -1645,7 +1645,7 @@ value."
 (defmacro v (lhs rhs)
   `(make-binary-disjunction ,lhs ,rhs))
 
-(defmacro ¬ (argument)
+(defmacro neg (argument)
   `(negate ,argument))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

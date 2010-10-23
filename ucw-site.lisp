@@ -27,7 +27,7 @@
 
 (defparameter available-translations
   (list identity-translation
-	gödel-gentzen-translation 
+	goedel-gentzen-translation 
 	double-negate-translation
 	double-negate-all-subformulas-translation
 	kuroda-translation
@@ -51,15 +51,6 @@
 	      :type finite-variable-propositional-signature
 	      :accessor signature)))
 
-(defcomponent signature-editor (signature-component)
-  ())
-
-(defaction save-signature ((self signature-editor) new-predicate-symbol)
-  (add-predicate (signature self) 
-		 (intern-in-dialogue-package new-predicate-symbol)
-		 0)
-  (answer (signature self)))
-
 (defclass game-component ()
   ((game :accessor game
 	 :initarg :game
@@ -70,37 +61,6 @@
   ((play-style :accessor play-style
 	       :initarg :play-style
 	       :initform nil)))
-
-(defmethod render ((self signature-editor))
-  (with-slots ((sig signature))
-      self
-    (<:p "Signature:")
-    (render-signature sig)
-    (<:p
-     "[" (<ucw:a :action (call 'add-a-predicate
-			       :signature sig
-			       :name nil)
-		 "add a predicate") 
-     "]"
-     " "
-     "["
-     (<ucw:a :action (call 'delete-a-predicate :signature sig)
-	     "delete a predicate")
-     "]"
-     " "
-     "["
-     (<ucw:a :action (answer sig) "proceed")
-     "]")))
-
-;; adding a predicate
-
-(defcomponent add-a-predicate (signature-component)
-  ((proposed-name :initarg :name 
-		  :accessor proposed-name
-		  :initform nil)
-   (validation-error-message :initarg :error-message
-			     :accessor validation-error-message
-			     :initform nil)))
 
 (defmethod handle-toplevel-condition ((app (eql *dialogue-application*))
 				      condition
@@ -114,106 +74,44 @@
 						    *maintainer-email*)
 				 "notify the site maintainer") " about this.")
   (<:p "What next?  You can either go back with your browser or simply " 
-       (<ucw:a :action
-	       (let* ((default-fec (make-instance 'formula-entry-component 
-						  :signature (copy-signature alphabetic-propositional-signature)))
-		      (default-sgc (make-instance 'start-game-component 
-						  :formula-entry-component default-fec)))
-		 (call 'initial-formula-window :body default-sgc))
+       (<ucw:a :action (call 'start-game-component)
 	       "quit and start over") "."))
 
-(defaction insert-predicate (signature pred-name)
-  (ucw-handler-case (add-predicate signature pred-name 0)
-    (unacceptable-identifier-name-error (c)
-      (let ((text (unacceptable-identifier-name-error-text c)))
-	(answer
-	 (call 'add-a-predicate
-	       :signature signature
-	       :error-message (format nil "The predicate name that you gave previously, \"~A\", contains a whitespace character and is thus unacceptable." text)
-	       :name text))))
-    (symbol-already-present-error (c)
-      (let ((text (symbol-already-present-error-symbol c)))
-	(answer
-	 (call 'add-a-predicate
-	       :signature signature
-	       :error-message (format nil "The predicate name that you gave previously, \"~A\", already belongs to the signature." text)
-	       :name text))))
-    (:no-error (result)
-	       (answer result))))
+;; (defgeneric render-signature (signature))
 
-(defmethod render ((self add-a-predicate))
-  (let (input-predicate-name)
-    (with-slots ((new-name proposed-name) 
-		 (sig signature) 
-		 (message validation-error-message))
-	self
-      (when message
-	(<:div :class "error-message"
-	  (<:p (<:as-html message) " " "Please try again.")))
-      (<:p "The current signature is:")
-      (render-signature sig)
-      (<:p "The new predicate name should be different from the names of currently existing predicates.  It should be different from the empty string and should not contain any whitespace characters.")
-      (<ucw:form :method "post"
-		 :action (answer (insert-predicate sig input-predicate-name))
-        (<:label :for "new-predicate-name" "New predicate name")
-	(<ucw:input :type "text" 
-		    :id "new-predicate-name"
-		    :accessor input-predicate-name)
-	(<:submit :value "Add this predicate")))))
-
-;; deleting a predicate
-
-(defcomponent delete-a-predicate ()
-  ())
-
-(defmethod render ((self delete-a-predicate))
-  (let (selected-predicate)
-    (symbol-macrolet 
-	(($take-action (answer (delete-predicate (signature self) selected-predicate))))
-      (with-slots ((sig signature))
-	  self
-	(<:h1 "Deleting a predicate")
-	(if (signature-predicates sig)
-	    (<ucw:form :method "post"
-		       :action $take-action
-	      (<:p "Choose a predicate to be deleted from the signature:")
-	      (<ucw:select :size 1
-			   :accessor selected-predicate
-	        (dolist (pred (signature-predicates sig))
-		  (<ucw:option :value pred
-			       (<:as-html pred))))
-	      (<ucw:submit :value "Delete this predicate"
-			   :action $take-action))
-	    (<:p "There are no predicates in the signature; none can be deleted. " (<ucw:a :action (answer (signature self))
-											  "Proceed") "."))))))
-
-(defgeneric render-signature (signature))
-
-(defmethod render-signature ((sig finite-variable-propositional-signature))
-  (<:em "Predicates: ")
-  (with-slots (predicates) sig
-    (if (null predicates)
-	(<:em "(none)")
-	(let ((first (car predicates)))
-	  (<:em (<:as-html first))
-	  (dolist (pred (cdr predicates))
-	    (<:as-is ", ")
-	    (<:em (<:as-html pred)))))))
+;; (defmethod render-signature ((sig finite-variable-propositional-signature))
+;;   (<:em "Predicates: ")
+;;   (with-slots (predicates) sig
+;;     (if (null predicates)
+;; 	(<:em "(none)")
+;; 	(let ((first (car predicates)))
+;; 	  (<:em (<:as-html first))
+;; 	  (dolist (pred (cdr predicates))
+;; 	    (<:as-is ", ")
+;; 	    (<:em (<:as-html pred)))))))
 
 (defentry-point "" (:application *dialogue-application*)
     ()
-  (let* ((default-fec (make-instance 'formula-entry-component 
-				     :signature (copy-signature
-						 alphabetic-propositional-signature)))
-	 (default-sgc (make-instance 'start-game-component 
-				     :formula-entry-component default-fec)))
-    (call 'initial-formula-window :body default-sgc)))
+    (call 'initial-formula-window))
+
+(defcomponent about-component ()
+  ())
+
+(defmethod render ((self about-component))
+  (<:p (<:em (<:b "About Lorenzen dialogue games:")) " Lorenzen
+dialogues are a formalism for capturing intuitionistic validity using games.  Since their invention and development in the late 1950s and 1960s, they have been extended from intuitionistic first-order logic so that they apply to different notions of validity, such as those of classical logic, modal logics, linear logic, etc.  For more information, consult " (<:a :href "http://plato.stanford.edu/entries/logic-dialogical/" "the entry on dialogue games") " in the " (<:em "Stanford Encyclopedia of Philosophy") "."))
 
 (defcomponent initial-formula-window (standard-window-component)
   ()
   (:default-initargs
       :title "play a lorenzen dialogue game"
-      :doctype yaclml:+xhtml-strict-doctype+))
+      :doctype yaclml:+xhtml-strict-doctype+
+      :body
+      (make-instance 'tabbed-pane
+		     :current-component-key "play a game"
+		     :key-test #'string=
+		     :contents `(("play a game" . ,(make-instance 'start-game-component))
+				 ("about dialogues" . ,(make-instance 'about-component))))))
 
 (defparameter famous-formulas
   `(("Peirce's formula" "peirce-formula" ,peirce-formula)
@@ -279,7 +177,19 @@
     ("Conjunctive absorption (conjunctive consequent)" "conjunctive-absorption-conjunctive-consequent" ,conjunctive-absorption-conjunctive-consequent)
     ("Frege formula" "frege-formula" ,frege-formula)
     ("Contrapositive (positive antecedent)" "contraposition-positive-antecedent" ,contraposition-positive-antecedent)
-    ("Contrapositive (negative antecedent)" "contraposition-negative-antecedent" ,contraposition-negative-antecedent)))    
+    ("Contrapositive (negative antecedent)" "contraposition-negative-antecedent" ,contraposition-negative-antecedent)
+    ("McColl's Connexive Axiom 1" "connexive-ax-1" ,connexive-ax-1)
+    ("McColl's Connexive Axiom 2" "connexive-ax-2" ,connexive-ax-2)
+    ("McColl's Connexive Axiom 3" "connexive-ax-3" ,connexive-ax-3)
+    ("McColl's Connexive Axiom 4" "connexive-ax-4" ,connexive-ax-4)
+    ("McColl's Connexive Axiom 5" "connexive-ax-5" ,connexive-ax-5)
+    ("McColl's Connexive Axiom 6" "connexive-ax-6" ,connexive-ax-6)
+    ("McColl's Connexive Axiom 7" "connexive-ax-7" ,connexive-ax-7)
+    ("McColl's Connexive Axiom 8" "connexive-ax-8" ,connexive-ax-8)
+    ("McColl's Connexive Axiom 9" "connexive-ax-9" ,connexive-ax-9)
+    ("McColl's Connexive Axiom 10" "connexive-ax-10" ,connexive-ax-10)
+    ("McColl's Connexive Axiom 11" "connexive-ax-11" ,connexive-ax-11)
+    ("McColl's Connexive Axiom 12" "connexive-ax-12" ,connexive-ax-12)))
 
 (defcomponent formula-corrector (signature-component)
   ((text :initarg :text :accessor formula-corrector-text)))
@@ -296,7 +206,7 @@
    (<:li (<:tt "and") ",")
    (<:li (<:tt "or") ", and")
    (<:li (<:tt "not") "."))
-  (<:p "Atomic formulas are to be constructed according to the signature.  The case you use to write connectives and atomic formulas doesn't matter (anything you enter will be upcased).")
+  (<:p "Atomic formulas are simply the letters of the alphabet A, B, " (<:as-is "&hellip;") ", Z.  The case you use to write connectives and atomic formulas doesn't matter (anything you enter will be upcased).")
   (<:p "Here are some " (html-quote "famous formulas") " that can be referred to by name:")
   (<:table :rules "all"
    (<:thead
@@ -343,35 +253,13 @@
 	     (<:as-html text)
 	     (if (null text)
 		 (<:as-is "(weird -- NIL supplied)")
-		 (render text))) "\" that you supplied.  The signature with respect to which you should enter a formula is:")
-    (render-signature sig)
+		 (render text))) "\" that you supplied.")
+    ;; (render-signature sig)
     (formula-guide)
     (<:p "Please try again.")
     (<ucw:form :method "post"
 	       :action (parse-formula-action input-formula sig)
-      (<:p "Enter a formula in the above signature.  If you wish, you can "
-	   (<ucw:a :action 
-		   (let ((new-signature (call 'signature-editor :signature sig)))
-		     (if (formula? text)
-			 (if (belongs-to-signature? new-signature text)
-			     (answer text)
-			     (answer
-			      (call 'formula-corrector
-				    :text text
-				    :signature new-signature)))
-			 (ucw-handler-case
-			     (answer (parse-formula 
-				      (formula-corrector-text self)))
-			   (end-of-file ()
-			    (answer (call 'formula-corrector
-					  :text input-formula
-					  :signature new-signature)))
-			   (malformed-formula-error 
-			    () 
-			    (answer (call 'formula-corrector
-					  :text input-formula
-					  :signature new-signature))))))
-		   "edit the signature") ". (If edit the signature and the formula that you provided becomes well-formed in the new signature, then you will go back to where you were before you came here.  If, after editing the signature, the formula is still not valid, you will come back to this page.)")
+      (<:p "Enter a formula in the above signature.")
 	(<ucw:input :type "text"
 		    :id "formula-input"
 		    :accessor input-formula)
@@ -993,54 +881,6 @@ current turn number is the selected one.")
 	(<:td
 	 (<:submit :value "Rewind the game to this turn"))))))))
 
-(defun render-signature-editor (game)
-  (let ((sig (dialogue-signature game)))
-    (<:p "The signature being used in this game is:")
-    (<:blockquote
-     (render-signature sig))
-    (<:p "You are welcome to edit the signature, if you wish.")
-    (<:p "Bear in mind, though, that editing the signature will make
-no substantive difference to the game unless you are working with
-custom dialogue rules:")
-    (<:ul
-     (<:li "if you " (<:b "delete") " predicates from the signature,
-some formulas occuring in the game that are well-formed now with
-respect to the current signature may become malformed with respect to
-the diminished signature, thus rendering the game incoherent.  Yet if
-all the formulas occuring in the game remain well-formed with respect
-to the diminished signature, the set of formulas that can be asserted
-in the game from this point forward is unchanged, when working with
-the usual dialogue rules (Felscher's D-rules or E-rules) because
-formulas occuring in games that adhere to these rules are all
-subformulas of the initial formula;")
-     (<:li "if you " (<:b "add" ) " predicates to the signature, you
-conceivably enlarge the set of assertions that can be asserted later
-in the game, but this is not the case when using the usual dialogue
-rules (such as Felscher's D-rules and E-rules); only in the presence
-of custom dialogue rules can adding predicates to the signature now
-make a difference."))
-    (<:p "If you edit the signature, all the assertions made so far in
-the game will be evaluated to ensure that they are well-formed
-formulas in the modified signature. If any of the assertions cease to
-be well-formed formulas, you will be required to further edit the
-signature to ensure that they are well-formed.  If all assertions are
-well-formed, you will be brought back to this page after editing the
-signature.")
-    (<:blockquote
-     (<:em "(This functionality is not yet implemented.)"))
-    (<ucw:submit 
-     :value "Edit the signature"
-     :action (let* ((new-sig (call 'signature-editor
-				  :signature sig))
-		    (malformed (remove-if-not #'(lambda (assertion)
-						  (belongs-to-signature? new-sig
-									 assertion))
-					     (dialogue-assertions game))))
-	       (if (null malformed)
-		   (setf (signature game) new-sig)
-		   (call 'signature-editor
-			 :signature new-sig))))))
-
 (defcomponent rule-editor (game-component ruleset-component play-style-component)
   ())
 
@@ -1066,7 +906,8 @@ signature.")
       (<:h1 "The game is incoherent with respect to the current ruleset")
       (<:p "With the current ruleset, the game is incoherent.  Here is
       a listing of the game, annotated with the violating moves:")
-      (render-game game :moves-to-highlight (mapcar #'car indices-and-violated-rules))
+      (<:div :style "border:1px solid;"
+        (render-game game :moves-to-highlight (mapcar #'car indices-and-violated-rules)))
       (<:p "At least one move of the game is violated with these rules:")
       (<:ul 
        (dolist (index-and-violators indices-and-violated-rules)
@@ -1197,9 +1038,7 @@ signature.")
 				:play-style play-style)
          (<:submit :value "Go back to the original game"))
        (<ucw:form :method "post"
-		  :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature alphabetic-propositional-signature)))
-				 (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
-			    (call 'initial-formula-window :body default-sgc))
+		  :action (call 'start-game-component)
          (<:submit :value "Quit"))))))
 
 (defun render-move-at-depth-as-table (move depth)
@@ -1341,9 +1180,7 @@ signature.")
 			     :play-style play-style)
       (<:submit :value "Go back to the original game"))
     (<ucw:form :method "post"
-	       :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature alphabetic-propositional-signature)))
-			      (default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
-			 (call 'initial-formula-window :body default-sgc))
+	       :action (call 'start-game-component)
     (<:submit :value "Quit"))))
 
 (defconstant max-search-depth 15
@@ -1397,9 +1234,7 @@ that all the rules in your edited ruleset are satisfied.")
 (defun render-quit-form ()
   (<:p "Quitting the game will discard whatever progress you've made so far and return you to the initial page.")
   (<ucw:form :method "post"
-	     :action (let* ((default-fec (make-instance 'formula-entry-component :signature (copy-signature alphabetic-propositional-signature)))
-				(default-sgc (make-instance 'start-game-component :formula-entry-component default-fec)))
-			   (call 'initial-formula-window :body default-sgc))
+	     :action (call 'start-game-component)
 	  (<:submit :value "Quit")))
 
 (defmethod render ((self turn-editor))
@@ -1423,11 +1258,9 @@ that all the rules in your edited ruleset are satisfied.")
       (render-win-searcher game play-style)
       (<:h1 "...or enter your move manually...")
       (render-manual-move-entry-form game play-style)
-      ;; (when (> game-len 1)
-      ;; 	(<:h1 "...or rewind the game...")
-      ;; 	(render-rewind-form game play-style))
-      ;; (<:h1 "...or edit the signature...")
-      ;; (render-signature-editor game)
+      (when (> game-len 1)
+      	(<:h1 "...or rewind the game...")
+      	(render-rewind-form game play-style))
       (<:h1 "...or edit the dialogue rules...")
       (render-rule-editor game)
       (<:h1 "...or quit.")
@@ -1445,9 +1278,10 @@ that all the rules in your edited ruleset are satisfied.")
   	(move-number (move-number self)))
     (<:h1 "Alternatives were available")
     (<:p "The game so far is:")
-    (render-game game
-		 :play-style play-style
-		 :moves-to-highlight (list move-number))
+    (<:div :style "border:1px solid;"
+      (render-game game
+		   :play-style play-style
+		   :moves-to-highlight (list move-number)))
     (<:p "Alternatives at move " (<:as-html move-number) ":")
     (<:ul
      (dolist (play (all-next-moves-at-position game move-number))
@@ -1540,7 +1374,7 @@ that all the rules in your edited ruleset are satisfied.")
 (defun render-game (game &key indicate-alternatives
 		              play-style
 		              moves-to-highlight)
-  (render-signature (dialogue-signature game))
+  ;; (render-signature (dialogue-signature game))
   (let ((ruleset (dialogue-rules game)))
     (<:p (<:em "Ruleset: ")
 	 (<:as-html (description ruleset))))
@@ -1783,15 +1617,76 @@ that all the rules in your edited ruleset are satisfied.")
 				    (cdr args)))
 		     ")")))))
 
-(defcomponent start-game-component ()
-  ((formula-entry-component :component t
-			    :initarg :formula-entry-component
-			    :accessor formula-entry-component)))
-
-(defcomponent formula-entry-component (signature-component ruleset-component)
+(defcomponent start-game-component (signature-component ruleset-component)
   ())
 
-(defmethod render ((self formula-entry-component))
+(defcomponent manual-formula-editor-component (signature-component)
+  ())
+
+(defmethod render ((self manual-formula-editor-component))
+  (let ((input-formula nil)
+	(sig (signature self)))
+    (symbol-macrolet 
+	(($formula
+	  (let ((parsed-formula 
+		 (ucw-handler-case (parse-formula input-formula)
+		   (end-of-file () (call 'formula-corrector
+					 :text input-formula
+					 :signature sig))
+		   (malformed-formula-error () (call 'formula-corrector
+						     :text input-formula
+						     :signature sig)))))
+	    (if (belongs-to-signature? sig parsed-formula)
+		(answer parsed-formula)
+		(call 'formula-corrector
+		      :text parsed-formula
+		      :signature sig)))))
+      (<:h1 "Enter a formula")
+      ;; (<:p "The signature that you should use is:")
+      ;; (<:blockquote
+      ;; (render-signature (signature self)))
+      (<ucw:form :method "POST"
+		 :action $formula
+		 (<ucw:input :type "text"
+			     :accessor input-formula)
+		 (<:submit :value "Use this formula"))
+      (formula-guide))))
+
+(defcomponent ruleset-info ()
+  ())
+
+(defmethod render ((self ruleset-info))
+  (<:p (<:em (<:b "About the rules:")) " The rulesets in the
+above menu are some notable cases that have some logical content.  You will be able to change your choice of ruleset once the game has started.  The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985; it was arguably the first papers to rigorously establish the equivalence between intuitionistic validity and existence of winning strategies for certain dialogue games.  You will be able to alter your choice of rules after the game has begun."))
+
+(defcomponent signature-info ()
+  ())
+
+(defmethod render ((self signature-info))
+  (<:p (<:em (<:b "About the signature:")) "The signature is propositional, whose atoms are simply the letters of the alphabet: A, B, C, ... Z."))
+
+(defcomponent translation-info ()
+  ())
+
+(defmethod render ((self translation-info))
+  (<:p (<:em (<:b "About the translation:")) " The default is the
+identity translation, so that whatever formula is chosen (or whatever
+formula is entered into the text box) will be, verbatim, the formula
+with which the game begins."))
+
+(defcomponent formula-info ()
+  ())
+
+(defmethod render ((self formula-info))
+  (formula-guide))
+
+(defcomponent play-style-info ()
+  ())
+
+(defmethod render ((self play-style-info))
+  (<:p (<:em (<:b "About the play style:")) " The default mode of playing is to take on the role of both players: at each move, you'll see all possible moves that can be made, from the perspective of both players.  Two other play styles are supported: play as Proponent with a random Opponent, and play as Opponent with a random Proponent."))
+
+(defmethod render ((self start-game-component))
   (let (input-formula
 	selected-formula 
 	selected-rules
@@ -1800,25 +1695,14 @@ that all the rules in your edited ruleset are satisfied.")
   (symbol-macrolet
       (($formula
 	(let ((sig (signature self)))
-	  (if (empty-string? input-formula)
+	  (if (eq selected-formula t)
+	      (call 'manual-formula-editor-component
+		    :signature sig)
 	      (if (belongs-to-signature? sig selected-formula)
 		  selected-formula
 		  (call 'formula-corrector
 			:text selected-formula
-			:signature sig))
-	      (let ((parsed-formula 
-		     (ucw-handler-case (parse-formula input-formula)
-		       (end-of-file () (call 'formula-corrector
-					     :text input-formula
-					     :signature sig))
-		       (malformed-formula-error () (call 'formula-corrector
-							 :text input-formula
-							 :signature sig)))))
-		(if (belongs-to-signature? sig parsed-formula)
-		    parsed-formula
-		    (call 'formula-corrector
-			  :text parsed-formula
-			  :signature sig))))))
+			:signature sig)))))
        ($take-action
 	(ecase selected-play-style
 	  (play-as-both-proponent-and-opponent
@@ -1875,28 +1759,24 @@ that all the rules in your edited ruleset are satisfied.")
       (<:caption :style "caption-side:bottom;"
 		 (<:submit :value "Let's play"))
        (<:tbody :style "border:1px solid;"
-       ;; (<:tr :style "background-color:#F0B2E0;"
-       ;; 	(<:td "Signature:")
-       ;; 	(<:td (render-signature sig)))
        (<:tr :style "background-color:#F063CD;"
-	(<:td "Formula:")
+	(<:td (<ucw:a :action (call 'formula-info)
+		      "Formula:"))
 	(<:td
-	 (<:table
-	  (<:tr 
-	   (<:td (<ucw:input :type "text" 
-			     :accessor input-formula 
-			     :id "input-formula")))
-	  (<:tr
-	   (<:td (<ucw:select :id "selected-formula" 
-			      :size 1 
-			      :accessor selected-formula
-		   (dolist (famous-formula famous-formulas)
-		     (destructuring-bind (long-name short-name formula)
-			 famous-formula
-		       (declare (ignore short-name))
-		       (<ucw:option :value formula (<:as-is long-name))))))))))
+	 (<ucw:select :id "selected-formula" 
+		      :size 1 
+		      :accessor selected-formula
+	   (dolist (famous-formula (cons 't famous-formulas))
+	     (if (eq famous-formula t)
+		 (<ucw:option :value t
+			      (<:as-is "(enter a formula manually)"))
+		 (destructuring-bind (long-name short-name formula)
+		     famous-formula
+		   (declare (ignore short-name))
+		   (<ucw:option :value formula (<:as-is long-name))))))))
        (<:tr :style "background-color:#A7007D;"
-	(<:td "Translation:")
+	(<:td (<ucw:a :action (call 'translation-info)
+		      "Translation:"))
 	(<:td (<ucw:select :id "selected-translation"
 			   :size 1
 			   :accessor selected-translation
@@ -1904,7 +1784,8 @@ that all the rules in your edited ruleset are satisfied.")
 		  (<ucw:option :value translation
 			       (<:as-is (description translation)))))))
        (<:tr :style "background-color:#7B942E;"
-	(<:td "Ruleset:")
+	(<:td (<ucw:a :action (call 'ruleset-info)
+		      "Ruleset:"))
 	(<:td (if (null (ruleset self))
 		  (<ucw:select :id "selected-rules"
 			       :size 1
@@ -1914,7 +1795,8 @@ that all the rules in your edited ruleset are satisfied.")
 					      (<:as-html (description ruleset)))))
 		  (<:as-html (description (ruleset self))))))
        (<:tr :style "background-color:#A3D800;"
-         (<:td "Choose the style of play:")
+         (<:td (<ucw:a :action (call 'play-style-info)
+		       "Play style:"))
 	 (<:td (<ucw:select :id "selected-play-style"
 			    :size 1
 			    :accessor selected-play-style
@@ -1923,22 +1805,6 @@ that all the rules in your edited ruleset are satisfied.")
 		 (<ucw:option :value 'play-as-proponent-random-opponent
 			      "Play as Proponent (Opponent will choose its moves randomly)")
 		 (<ucw:option :value 'play-as-opponent-random-proponent
-			      "Play as Opponent (Propnent will choose its moves randomly)"))))))
-      (<:p (<:em (<:b "About Lorenzen dialogue games:")) " Lorenzen
-dialogues are a formalism for capturing intuitionistic validity using games.  Since their invention and development in the late 1950s and 1960s, they have been extended from intuitionistic first-order logic so that they apply to different notions of validity, such as those of classical logic, modal logics, linear logic, etc.  For more information, consult " (<:a :href "http://plato.stanford.edu/entries/logic-dialogical/" "the entry on dialogue games") " in the " (<:em "Stanford Encyclopedia of Philosophy") ".")
-      ; (<:p (<:em (<:b "About the signature:")) " You can " (<ucw:a :action (call 'signature-editor :signature sig) "edit the signature") ", if you wish. (If you choose to edit the signature, you'll come back here when you're finished.)  You will not be able to edit the signature once the game begins.")
-      (<:p (<:em (<:b "About the formula:")) " If the text box is not empty, its contents will be the initial formula of the game.  If the text box is empty, then the selected \"famous formula\" will be.")
-      (<:p (<:em (<:b "About the translation:")) " The default is the
-identity translation, so that whatever formula is chosen (or whatever
-formula is entered into the text box) will be, verbatim, the formula
-with which the game begins.")
-      (<:p (<:em (<:b "About the rules:")) " The rulesets in the
-above menu are some notable cases that have some logical content.  You will be able to change your choice of ruleset once the game has started.  The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985; it was arguably the first papers to rigorously establish the equivalence between intuitionistic validity and existence of winning strategies for certain dialogue games.  You will be able to alter your choice of rules after the game has begun.")
-      (<:p (<:em (<:b "About the play style:")) " The default mode of playing is to take on the role of both players: at each move, you'll see all possible moves that can be made, from the perspective of both players.  Two other play styles are supported: play as Proponent with a random Opponent, and play as Opponent with a random Proponent."))))))
-
-(defmethod render ((self start-game-component))
-  (with-slots ((sig signature))
-      self
-    (render (formula-entry-component self))))
+			      "Play as Opponent (Propnent will choose its moves randomly)")))))))))))
 
 ;;; ucw-site.lisp ends here
