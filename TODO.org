@@ -224,3 +224,6 @@ would be nice.
   For search enging harvesting.
 * TODO Flesh out the "about this site" page
   a link to my email, maybe the github stuff, and some details about how the games were coded.
+* TODO Display the initial state of the game in the cutoff and hard negative search pages
+  Right now, it just says "cutoff!" and "ouch!".  It would be useful
+  if the game from which the failed search began were displayed.
