@@ -227,3 +227,15 @@ would be nice.
 * TODO Display the initial state of the game in the cutoff and hard negative search pages
   Right now, it just says "cutoff!" and "ouch!".  It would be useful
   if the game from which the failed search began were displayed.
+* TODO Bug in search for winning strategy
+  Example discovered by Sara:
+  - ruleset: Peirce with E+modified D10 rules.
+  - do Opponent's only move, then Proponent's.
+  - then, have O defend against that move
+  - then change your mind, hit backspace to go back a page in your browser
+  - go down to search for a win,
+  - search for a winning strat up to 15.
+
+  The result should be that the search is cut off, but instead we get
+  that the formula is provably invalid.
+  
