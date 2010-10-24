@@ -222,3 +222,5 @@ would be nice.
 * TODO Name (if any) and translation of the original formula displayed in the "Game so far" table
 * TODO Make "dialogical logic" appear somewhere in the page
   For search enging harvesting.
+* TODO Flesh out the "about this site" page
+  a link to my email, maybe the github stuff, and some details about how the games were coded.
