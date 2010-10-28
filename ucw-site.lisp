@@ -172,9 +172,7 @@ saying.)")
   (<:h2 "Implementation")
   (<:p "This site was written in Common Lisp using
 the " (<:a :href "http://common-lisp.net/project/ucw/" :title "UnCommon
-Web" "UnCommon Web") " system.  The Common Lisp implementation is " (<:a :href "http://www.sbcl.org" :title "Steel Bank Common Lisp" "SBCL") ".  You can follow the development on " (<:a :href "http://github.com/jessealama/dialogues" :title "dialogues on github" "github") ".")
-  (<:h2 "Contact")
-  (<:address (<:a :href "mailto:jesse.alama@gmail.com" :title "Email the maintainer" "Email the maintainer")))
+Web" "UnCommon Web") " system.  The Common Lisp implementation is " (<:a :href "http://www.sbcl.org" :title "Steel Bank Common Lisp" "SBCL") ".  You can follow the development on " (<:a :href "http://github.com/jessealama/dialogues" :title "dialogues on github" "github") "."))
 
 (defparameter famous-formulas
   `(("Peirce's formula" "peirce-formula" ,peirce-formula)
