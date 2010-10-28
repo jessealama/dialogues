@@ -166,7 +166,8 @@
 * TODO Sara's style suggestions
 ** TODO There is too much text, on both the front page and the internal
 pages.
-** TODO A navigational sidebar (and also maybe a pretty heading banner?)
+** DONE A navigational sidebar (and also maybe a pretty heading banner?)
+   CLOSED: [2010-10-28 Thu 19:04]
 would be nice.
    The sidebar would include the following links:
    - "Play a game"
