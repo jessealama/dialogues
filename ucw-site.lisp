@@ -109,7 +109,11 @@ consult " (<:a :href "http://plato.stanford.edu/entries/logic-dialogical/" "the
 entry on dialogue games") " in the " (<:em "Stanford Encyclopedia of
 Philosophy") ".")
   (<:p "There's also " (<:a :href "http://dialogue-games.blogspot.com/" :title "TONIGHT: Proponent v. Opponent" "a blog") " about dialogue games and dialogical logic, to which the maintainer of this web site contributes.")
-  (<:p "The " (<:a :href "http://www-ls.informatik.uni-tuebingen.de/difos/" :title "Dialogical Foundations of Semantics" "homepage for the research project for which this site was designed") " also contains some valuable information."))
+  (<:p "The " (<:a :href "http://www-ls.informatik.uni-tuebingen.de/difos/" :title "Dialogical Foundations of Semantics" "homepage for the research project for which this site was designed") " also contains some valuable information.")
+  (<:hr)
+  (<:address
+   (<:a :href "mailto:jesse.alama@gmail.com"
+	"Contact the site maintainer")))
 
 (defcomponent initial-formula-window (standard-window-component)
   ()
@@ -122,7 +126,19 @@ Philosophy") ".")
 		     :key-test #'string=
 		     :contents `(("play a game" . ,(make-instance 'start-game-component))
 				 ("about dialogical logic" . ,(make-instance 'about-component))
-				 ("about this site" . ,(make-instance 'about-this-site-component))))))
+				 ("about this site" . ,(make-instance 'about-this-site-component))
+				 ("contact" . ,(make-instance 'contact-page))))))
+
+(defcomponent contact-page ()
+  ())
+
+(defmethod render ((self contact-page))
+  (<:h1 "Contact")
+  (<:p "Questions? Bugs? Feature requests?  Comments?  You're welcome to email the site maintainer; use the address below." )
+  (<:blockquote
+   (<:address
+    (<:a :href "mailto:jesse.alama@gmail.com"
+	 "jesse.alama@gmail.com"))))
 
 (defcomponent about-this-site-component ()
   ())

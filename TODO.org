@@ -258,4 +258,5 @@ would be nice.
   Fermüller games have the further property of permitting formulas to
   be initially granted before the dialogue begins.  We'd need some way
   of dealing with these.
-* TODO Ensure that there's a "Contact the site maintainer" footer at the bottom of every page.
+* DONE Ensure that there's a "Contact the site maintainer" footer at the bottom of every page.
+  CLOSED: [2010-10-28 Thu 19:14]
