@@ -220,7 +220,8 @@ would be nice.
 * DONE Restore the rewind button
   CLOSED: [2010-10-24 Sun 10:56]
 * TODO Name (if any) and translation of the original formula displayed in the "Game so far" table
-* TODO Make "dialogical logic" appear somewhere in the page
+* DONE Make "dialogical logic" appear somewhere in the page
+  CLOSED: [2010-10-28 Thu 15:15]
   For search enging harvesting.
 * TODO Flesh out the "about this site" page
   a link to my email, maybe the github stuff, and some details about how the games were coded.

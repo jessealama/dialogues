@@ -111,7 +111,7 @@ dialogues are a formalism for capturing intuitionistic validity using games.  Si
 		     :current-component-key "play a game"
 		     :key-test #'string=
 		     :contents `(("play a game" . ,(make-instance 'start-game-component))
-				 ("about dialogues" . ,(make-instance 'about-component))))))
+				 ("about dialogical logic" . ,(make-instance 'about-component))))))
 
 (defparameter famous-formulas
   `(("Peirce's formula" "peirce-formula" ,peirce-formula)
