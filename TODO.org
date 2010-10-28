@@ -240,3 +240,19 @@ would be nice.
   The result should be that the search is cut off, but instead we get
   that the formula is provably invalid.
   
+* TODO Implement Fermüller-style Ei-dialogues
+  These are rather different from Felscher-style dialogues, which is
+  what we've been using all along.  In trying to make sense of
+  Fermüller's "Parallel dialogue games and hypersequents for
+  intermediate logics", I'm having some trouble understanding
+  precisely what kinds of moves are permitted, especially for
+  Proponent (for Opponent I have better intuitions about what moves
+  are permitted because the E rule is in force).
+
+  How to present these?  We may need to offer two buttons: given an
+  initial formula, a translation, and a ruleset, choose to play either
+  a Felscher-style game or a Fermüller-style game.
+
+  Fermüller games have the further property of permitting formulas to
+  be initially granted before the dialogue begins.  We'd need some way
+  of dealing with these.
