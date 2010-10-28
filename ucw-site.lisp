@@ -111,7 +111,44 @@ dialogues are a formalism for capturing intuitionistic validity using games.  Si
 		     :current-component-key "play a game"
 		     :key-test #'string=
 		     :contents `(("play a game" . ,(make-instance 'start-game-component))
-				 ("about dialogical logic" . ,(make-instance 'about-component))))))
+				 ("about dialogical logic" . ,(make-instance 'about-component))
+				 ("about this site" . ,(make-instance 'about-this-site-component))))))
+
+(defcomponent about-this-site-component ()
+  ())
+
+(defmethod render ((self about-this-site-component))
+  (<:h1 "About this site")
+  (<:h2 "History and motivation")
+  (<:p "This site was created as an attempt to understand dialogue
+games and dialogical logic.")
+  (<:p "Playing these games by hand, with pencil and paper, often led
+to pitfalls because I would often fail to see some possible moves that
+could be made in a game, owing to the awkward nature of some of the
+rules that are commonly used.  I thus wrote some software for playing
+dialogue games that helped me to play them and make statements with
+confidence about their properties.")
+  (<:p "A web application on top of what I had made seemed valuable to me for various reasons:")
+  (<:ul
+   (<:li (<:b "disseminating dialogical games") " in the world of
+mathematical and philosophical logic.  If some student somewhere plays
+just one or two dialogue games and gets hooked, this site will have
+served this purpose;")
+   (<:li (<:b "enabling collaboration") " between researchers working
+on dialogical logic.  The idea is to be able to play concrete games or
+search for winning strategies and share the results with other
+researchers.  Different researchers would have a common, reliable,
+objective presentation of the games, so as to learn from or resolve
+disputes about them;"))
+  (<:p "(Of course, as a hacker, I also wanted to
+just " (<:em "make") " this thing.  But perhaps that goes without
+saying.)")
+  (<:h2 "Implementation")
+  (<:p "This site was written in Common Lisp using
+the " (<:a :href "http://common-lisp.net/project/ucw/" :title "UnCommon
+Web" "UnCommon Web") " system.  The Common Lisp implementation is " (<:a :href "http://www.sbcl.org" :title "Steel Bank Common Lisp" "SBCL") ".  You can follow the development on " (<:a :href "http://github.com/jessealama/dialogues" :title "dialogues on github" "github") ".")
+  (<:h2 "Contact")
+  (<:address (<:a :href "mailto:jesse.alama@gmail.com" :title "Email the maintainer" "Email the maintainer")))
 
 (defparameter famous-formulas
   `(("Peirce's formula" "peirce-formula" ,peirce-formula)

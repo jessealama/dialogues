@@ -223,7 +223,8 @@ would be nice.
 * DONE Make "dialogical logic" appear somewhere in the page
   CLOSED: [2010-10-28 Thu 15:15]
   For search enging harvesting.
-* TODO Flesh out the "about this site" page
+* DONE Flesh out the "about this site" page
+  CLOSED: [2010-10-28 Thu 18:41]
   a link to my email, maybe the github stuff, and some details about how the games were coded.
 * TODO Display the initial state of the game in the cutoff and hard negative search pages
   Right now, it just says "cutoff!" and "ouch!".  It would be useful
