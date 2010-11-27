@@ -108,7 +108,7 @@ linear logic, etc.  For more information,
 consult " (<:a :href "http://plato.stanford.edu/entries/logic-dialogical/" "the
 entry on dialogue games") " in the " (<:em "Stanford Encyclopedia of
 Philosophy") ".")
-  (<:p "Dialogue games come in various flavors.  The particular style and notation of dialogue game employed on this site is due to W. Felscher, " (<:as-is "&ldquo;") "Dialogues, strategies, and intuitionistic provability" (<:as-is "&rdquo;") "," (<:i "Annals of Pure and Applied Logic") " " (<:b "28") ", pp. 217" (<:as-is "&ndash;") "254.")
+  (<:p "Dialogue games come in various flavors.  The particular style and notation of dialogue game employed on this site is due to W. Felscher, " (<:as-is "&ldquo;") "Dialogues, strategies, and intuitionistic provability" (<:as-is "&rdquo;") ", " (<:i "Annals of Pure and Applied Logic") " " (<:b "28") ", pp. 217" (<:as-is "&ndash;") "254.")
   (<:p "There's also " (<:a :href "http://dialogue-games.blogspot.com/" :title "TONIGHT: Proponent v. Opponent" "a blog") " about dialogue games and dialogical logic, to which the maintainer of this web site contributes.")
   (<:p "The " (<:a :href "http://www-ls.informatik.uni-tuebingen.de/difos/" :title "Dialogical Foundations of Semantics" "homepage for the research project for which this site was designed") " also contains some valuable information.")
   (<:hr)
