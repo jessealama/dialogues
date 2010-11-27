@@ -120,7 +120,7 @@ Philosophy") ".")
 (defcomponent initial-formula-window (standard-window-component)
   ()
   (:default-initargs
-      :title "play a lorenzen dialogue game"
+      :title "explore dialogical logic with lorenzen dialogue games"
       :doctype yaclml:+xhtml-strict-doctype+
       :body
       (make-instance 'tabbed-pane
