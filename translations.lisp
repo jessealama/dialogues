@@ -259,6 +259,39 @@
 		 :description "Take the contrapositive of all implications"
 		 :transformer #'contrapositivify))
 
+;; Contrapositive of an implication (but don't contrapositivify any
+;; inner implications)
+
+(defgeneric contrapositive (formula)
+  (:documentation "Take the contrapositive of an implications (but do nothing inside the formula)"))
+
+(defmethod contrapositive ((formula atomic-formula))
+  formula)
+
+(defmethod contrapositive ((formula binary-conjunction))
+  formula)
+
+(defmethod contrapositive ((formula binary-disjunction))
+  formula)
+
+(defmethod contrapositive ((neg negation))
+  neg)
+
+(defmethod contrapositive ((equiv equivalence))
+  equiv)
+
+(defmethod contrapositive ((imp implication))
+  (make-implication (negate (consequent imp))
+		    (negate (antecedent imp))))
+
+(defmethod contrapositive ((gen generalization))
+  gen)
+
+(defparameter contrapositive-translation
+  (make-instance 'formula-translation
+		 :description "Take the contrapositive of all implications (but do nothing inside the formula)"
+		 :transformer #'contrapositive))
+
 ;; Identity translation
 
 (defparameter identity-translation

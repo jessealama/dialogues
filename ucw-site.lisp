@@ -36,6 +36,7 @@
 	self-conjoin-atomic-subformulas-translation
 	self-disjoin-atomic-subformulas-translation
 	contrapositivify-translation
+	contrapositive-translation
 	atomic->excluded-middle-translation
 	converse-translation))
 
