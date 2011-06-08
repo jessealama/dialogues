@@ -303,7 +303,7 @@
 	  (-> p (v p q))
 	  (-> q (v p q))
 	  (-> (-> p r) (-> (-> q r) (-> (v p q) r)))
-	  (-> (-> p q) (-> (-> p (not q)) (not p)))
-	  (-> (not p) (-> p q)))))
+	  (-> (-> p q) (-> (-> p (neg q)) (neg p)))
+	  (-> (neg p) (-> p q)))))
 
 ;;; famous-formulas.lisp ends here
