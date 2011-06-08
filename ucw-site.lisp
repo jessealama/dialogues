@@ -24,7 +24,8 @@
 	particle-rules+d12
 	particle-rules+d13
 	particle-rules+e
-	sara-ad-hoc-rules))
+	sara-ad-hoc-rules
+	sara-ad-hoc-rules-2))
 
 (defparameter available-translations
   (list identity-translation

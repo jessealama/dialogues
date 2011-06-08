@@ -546,6 +546,19 @@
 				      rule-d13))
 		 :description "D10, D12, D13"))
 
+(defparameter sara-ad-hoc-rules-2
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      rule-d11
+				      rule-d13))
+		 :description "D10, D11, D13"))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;  Minimal rulesets
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
