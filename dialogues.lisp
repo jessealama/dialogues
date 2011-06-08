@@ -612,6 +612,11 @@ fail, only whether all of them are satisfied."
     (when open-attacks
       (car open-attacks))))
 
+(defun earliest-open-attack (dialogue &key end)
+  (let ((open-attacks (open-attack-indices dialogue :end end)))
+    (when open-attacks
+      (car (last open-attacks)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Evaluating rules
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

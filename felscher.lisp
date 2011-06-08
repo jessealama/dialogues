@@ -351,6 +351,29 @@
 		  (return nil)))))
       finally (return t))))
 
+(defparameter rule-d11-queue
+  (make-structural-rule
+   :name "d11"
+   :description "You must defend against the earliest open attack."
+   :predicate
+   (loop
+      with len = (dialogue-length dialogue)
+      for move in (if final-move-only
+		      (subseq (dialogue-plays dialogue) (1- len))
+		      (dialogue-plays dialogue))
+      for i from (if final-move-only
+		     (1- len)
+		     0)
+      do
+	(when (defensive-move? move)
+	  (let ((earliest (earliest-open-attack dialogue :end i))
+		(reference (move-reference move)))
+	    (if (null earliest)
+		(return nil)
+		(unless (= earliest reference)
+		  (return nil)))))
+      finally (return t))))
+
 (defparameter rule-d12
   (make-structural-rule
    :name "d12"
@@ -483,6 +506,20 @@
 				      rule-d13))
 		 :description "The Jesse Kludge Special"))
 
+(defparameter d-dialogue-rules-queue
+(make-instance 'ruleset
+		 :rules (append argumentation-forms 
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      rule-d11-queue
+				      rule-d12
+				      rule-d13))
+		 :description "D rules (basic rules for intuitionistic logic) with queue-style D11"))
+
 (defparameter e-dialogue-rules
   (make-instance 'ruleset
 		 :rules (append argumentation-forms 
@@ -497,6 +534,21 @@
 				      rule-d13
 				      rule-e))
 		 :description "E rules (D rules + Opponent must always respond to the immediately previous move)"))
+
+(defparameter e-dialogue-rules-queue
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms 
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      rule-d11
+				      rule-d12
+				      rule-d13
+				      rule-e))
+		 :description "E rules (D rules + Opponent must always respond to the immediately previous move), with queue-style D11"))
 
 (defparameter classical-dialogue-rules
   (make-instance 'ruleset

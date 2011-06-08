@@ -6,7 +6,9 @@
 
 (defparameter available-rulesets
   (list d-dialogue-rules 
+	d-dialogue-rules-queue
 	e-dialogue-rules
+	e-dialogue-rules-queue
 	nearly-classical-dialogue-rules
 	classical-dialogue-rules
 	d-dialogue-rules-minus-d10
