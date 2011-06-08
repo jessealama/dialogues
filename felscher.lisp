@@ -357,25 +357,20 @@
    :description "Attacks may be answered at most once."
    :predicate
    (loop 
-      with len = (dialogue-length dialogue)
-      for move in (if final-move-only
-		      (subseq (dialogue-plays dialogue) (1- len))
-		      (dialogue-plays dialogue))
-      for i from (if final-move-only
-		     (1- len)
-		     0)
+      named outer-loop
+      for move-1 in (dialogue-plays dialogue)
       do
-	(when (attacking-move? move)
-	  (unless (length-at-most (select-moves 
-				   #'(lambda (other-move)
-				       (and (defensive-move? other-move)
-					    (= (move-reference other-move)
-					       i)))
-				   dialogue
-				   :end i)
-				  1)
-	    (return nil)))
-      finally (return t))))
+	(when (defensive-move? move-1)
+	  (loop
+	     for move-2 in (dialogue-plays dialogue)
+	     do
+	       (when (defensive-move? move-2)
+		 (unless (eq move-1 move-2)
+		   (when (= (move-reference move-1)
+			    (move-reference move-2))
+		     (return-from outer-loop nil))))))
+      finally
+	(return-from outer-loop t))))
 
 (defparameter rule-d13
   (make-structural-rule
