@@ -1514,7 +1514,7 @@ that all the rules in your edited ruleset are satisfied.")
 		     (render-plainly (car args))
 		     (apply #'concat-strings
 			    (mapcar #'(lambda (arg)
-					(format ",~A" (render-plainly arg)))
+					(format nil ",~A" (render-plainly arg)))
 				    (cdr args)))
 		     ")")))))
 
@@ -1678,7 +1678,7 @@ that all the rules in your edited ruleset are satisfied.")
 		     (apply #'concatenate
 			    'string
 			    (mapcar #'(lambda (arg)
-					(format ",~A" (render-plainly arg)))
+					(format nil ",~A" (render-plainly arg)))
 				    (cdr args)))
 		     ")")))))
 

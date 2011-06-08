@@ -158,7 +158,7 @@
        (go start)
      start
        (format prompt-stream "What is the name of the unsorted variable?  (It cannot be the empty string, nor can it have spaces in its name.)~%")
-       (format "~A " prompt)
+       (format prompt-stream "~A " prompt)
        (setf proposed-name (read-line input-stream))
        (cond ((empty-string? proposed-name)
 	      (format prompt-stream "The empty string is not an acceptable name for a variable.  Please try again.~%")
@@ -193,7 +193,7 @@
 	       (let ((index (read-number-in-interval 1 num-preds)))
 		 (setf proposed-sort (nth (1- index) unary-preds))
 		 (format prompt-stream "What is the name of the variable of sort ~A?  (It cannot be the empty string, nor can it have spaces in its name.)~%" proposed-sort)
-		 (format "~A " prompt)
+		 (format prompt-stream "~A " prompt)
 		 (setf proposed-name (read-line input-stream))
 		 (cond ((empty-string? proposed-name)
 			(format prompt-stream "The empty string is not an acceptable name for a variable.  Please try again.~%")
