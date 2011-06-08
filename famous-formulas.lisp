@@ -291,4 +291,19 @@
 
     ))
 
+(defparameter il-axioms
+  (let ((p (make-atomic-formula 'p))
+	(q (make-atomic-formula 'q))
+	(r (make-atomic-formula 'r)))
+    (list (-> p (-> q p))
+	  (-> (-> p q) (-> (-> p (-> q r)) (-> p r)))
+	  (-> p (-> q (& p q)))
+	  (-> (& p q) p)
+	  (-> (& p q) q)
+	  (-> p (v p q))
+	  (-> q (v p q))
+	  (-> (-> p r) (-> (-> q r) (-> (v p q) r)))
+	  (-> (-> p q) (-> (-> p (not q)) (not p)))
+	  (-> (not p) (-> p q)))))
+
 ;;; famous-formulas.lisp ends here
