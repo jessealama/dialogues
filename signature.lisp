@@ -514,7 +514,7 @@ sense of EQL) but with different corresponding arities."
        (msg "Returning to the first prompt...")
        (go start)
      end)
-    (make-instance 'signature
+    (make-instance 'first-order-signature
 		   :predicates predicates
 		   :functions functions
 		   :constants constants)))
