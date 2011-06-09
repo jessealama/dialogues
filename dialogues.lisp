@@ -41,6 +41,11 @@
   (let ((player (move-player move)))
     (string= player "O")))
 
+(defun other-player (player)
+  (case player
+      (p 'o)
+      (o 'p)))
+
 (defclass move ()
   ((player :initarg :player
 	   :accessor move-player)
@@ -535,6 +540,10 @@ fail, only whether all of them are satisfied."
 (defun every-move (predicate dialogue &key end)
   (every predicate (subseq (dialogue-plays dialogue) 0 end)))
 
+(defun every-defensive-move (predicate dialogue &key end)
+  (every predicate (remove-if-not #'defensive-move?
+				  (subseq (dialogue-plays dialogue) 0 end))))
+
 ;; (defun select-moves (predicate dialogue &key start end)
 ;;   (remove-if-not predicate (dialogue-plays dialogue) 
 ;; 		 :start (if (null start)
@@ -616,6 +625,26 @@ fail, only whether all of them are satisfied."
   (let ((open-attacks (open-attack-indices dialogue :end end)))
     (when open-attacks
       (car (last open-attacks)))))
+
+(defun earliest-open-attack-for-player (dialogue player &key end)
+  "The smallest index (starting from 0) of the attacking move by
+  PLAYER in DIALOGUE to which there is no response."
+  (loop
+     with plays = (dialogue-plays dialogue)
+     for i from 1 upto (if end end (length plays))
+     for move in (cdr plays)
+     do
+       (when (attacking-move? move)
+	 (let ((move-player (move-player move)))
+	   (when (eql player move-player)
+	     (unless (some #'(lambda (other-move)
+			       (and (not (eql (move-player other-move) player))
+				    (defensive-move? other-move)
+				    (= (move-reference other-move) i)))
+			   plays)
+	       (return i)))))
+     finally
+       (return nil)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Evaluating rules
