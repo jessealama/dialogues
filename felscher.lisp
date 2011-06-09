@@ -353,26 +353,35 @@
 
 (defparameter rule-d11-queue
   (make-structural-rule
-   :name "d11"
+   :name "d11-queue"
    :description "You must defend against the earliest open attack."
    :predicate
-   (loop
-      with len = (dialogue-length dialogue)
-      for move in (if final-move-only
-		      (subseq (dialogue-plays dialogue) (1- len))
-		      (dialogue-plays dialogue))
-      for i from (if final-move-only
-		     (1- len)
-		     0)
-      do
-	(when (defensive-move? move)
-	  (let ((earliest (earliest-open-attack dialogue :end i))
-		(reference (move-reference move)))
-	    (if (null earliest)
-		(return nil)
-		(unless (= earliest reference)
-		  (return nil)))))
-      finally (return t))))
+   (if final-move-only
+       (let ((final-move (last-move dialogue)))
+	 (if (defensive-move? final-move)
+	     (= (move-reference final-move)
+		(earliest-open-attack-by-player-excluding-move dialogue
+							       (other-player
+								(move-player final-move))
+							       final-move))
+	     t))
+       (queue-ok dialogue))))
+
+(defun earliest-open-attack-by-player-excluding-move (dialogue player move)
+  (earliest-open-attack-for-player
+   (truncate-dialogue dialogue
+		      (position move (dialogue-plays dialogue))) 
+   player))
+
+(defun queue-ok (dialogue)
+  (every-defensive-move
+   #'(lambda (defense)
+       (= (move-reference defense)
+	  (earliest-open-attack-by-player-excluding-move dialogue
+							 (other-player
+							  (move-player defense))
+							 defense)))
+   dialogue))
 
 (defparameter rule-d12
   (make-structural-rule
