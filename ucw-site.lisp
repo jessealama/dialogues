@@ -616,7 +616,7 @@ follow the links there to make the corresponding moves.  Here, you can
 enter a move manually.  If the move you enter is different from any of
 the moves in the previous section, and if you are using some standard
 set of dialogue rules (such as Felscher's D-rules or E-rules), then it
-will inadmissible and you will see which of the rules are violated by
+will be inadmissible and you will see which of the rules are violated by
 your move.  Entering moves manully is a good way to explore the
 meaning of the dialogue rules.")
       (<ucw:form :method "post"
