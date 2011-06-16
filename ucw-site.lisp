@@ -330,6 +330,7 @@ Web" "UnCommon Web") " system.  The Common Lisp implementation is " (<:a :href "
       (<:p "Enter a formula in the above signature.")
 	(<ucw:input :type "text"
 		    :id "formula-input"
+		    :size "160"
 		    :accessor input-formula)
 	(<:submit :value "Use this formula"))))
 
