@@ -1717,6 +1717,7 @@ that all the rules in your edited ruleset are satisfied.")
       (<ucw:form :method "POST"
 		 :action $formula
 		 (<ucw:input :type "text"
+			     :size "160"
 			     :accessor input-formula)
 		 (<:submit :value "Use this formula"))
       (formula-guide))))
