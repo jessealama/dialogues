@@ -9,7 +9,7 @@
     :initarg :move
     :documentation "The move taken at this node")
    (parent
-    :type strategy-node
+    :type (or null strategy-node)
     :accessor parent
     :initarg :parent
     :initform nil
