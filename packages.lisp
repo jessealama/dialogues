@@ -2,7 +2,7 @@
 (in-package :cl-user)
 
 (defpackage :dialogues
-  (:use :cl :ucw :ucw-core :cl-ppcre)
+  (:use :cl :ucw :ucw-core :cl-ppcre :alexandria)
   (:export ; utils
            #:EMPTY-STRING? ; funny: this has nothing to do with dialogues
 

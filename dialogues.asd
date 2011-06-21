@@ -34,7 +34,7 @@ UCW."
   :author "Jesse Alama <jesse.alama@gmail.com>"
   :maintainer "Jesse Alama <jesse.alama@gmail.com>"
   :serial t
-  :depends-on (:ucw :cl-ppcre)
+  :depends-on (:ucw :cl-ppcre :alexandria)
   :components ((:file "packages")
 	       (:file "utils")
 	       (:file "signature")
