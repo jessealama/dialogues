@@ -755,12 +755,12 @@ fail, only whether all of them are satisfied."
 	  (next-opponent-defenses dialogue)))
 
 (defun proponent-wins? (dialogue)
-  (and (proponent-move? (last-player dialogue))
+  (and (proponent-move? (last-move dialogue))
        (null (next-moves dialogue 'o 'a))
        (null (next-moves dialogue 'o 'd))))
 
 (defun opponent-wins? (dialogue)
-  (and (opponent-move? (last-player dialogue))
+  (and (opponent-move? (last-move dialogue))
        (null (next-moves dialogue 'p 'a))
        (null (next-moves dialogue 'p 'd))))
 
