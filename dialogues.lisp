@@ -731,8 +731,28 @@ fail, only whether all of them are satisfied."
 (defun next-attacks (dialogue player)
   (next-moves dialogue player 'a))
 
+(defun next-proponent-attacks (dialogue)
+  (next-moves dialogue 'p 'a))
+
+(defun next-opponent-attacks (dialogue)
+  (next-moves dialogue 'p 'a))
+
 (defun next-defenses (dialogue player)
   (next-moves dialogue player 'd))
+
+(defun next-proponent-defenses (dialogue)
+  (next-moves dialogue 'p 'd))
+
+(defun next-opponent-defenses (dialogue)
+  (next-moves dialogue 'o 'd))
+
+(defun next-proponent-moves (dialogue)
+  (append (next-proponent-attacks dialogue)
+	  (next-proponent-defenses dialogue)))
+
+(defun next-opponent-moves (dialogue)
+  (append (next-opponent-attacks dialogue)
+	  (next-opponent-defenses dialogue)))
 
 (defun proponent-wins? (dialogue)
   (and (proponent-move? (last-player dialogue))
