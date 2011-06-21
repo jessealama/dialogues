@@ -91,9 +91,7 @@ Proponent."
     (all-nodes (root strategy))))
 
 (defun fully-expanded? (strategy)
-  (with-slots (root)
-      strategy
-    (every #'node-expanded? (nodes strategy))))
+  (every #'expanded? (nodes strategy)))
 
 (defun leaves (root)
   "Leaf nodes reachable from ROOT"
