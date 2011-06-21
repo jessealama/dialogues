@@ -62,6 +62,11 @@
 	 :initform nil
 	 :type (or (eql nil) dialogue))))
 
+(defclass strategy-component ()
+  ((strategy-root :accessor strategy-root
+		  :initarg :root
+		  :initform nil)))
+
 (defclass play-style-component ()
   ((play-style :accessor play-style
 	       :initarg :play-style
