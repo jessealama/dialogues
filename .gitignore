@@ -1,3 +1,6 @@
 .DS_Store
 /felscher.fasl
 /ucw-site.fasl
+/dialogues.fasl
+/strategy.lisp~
+/strategy.fasl
