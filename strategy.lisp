@@ -85,9 +85,8 @@ Proponent."
 		 node
 	       (if children
 		   (cons node
-			 (append children
-				 (reduce #'append
-					 (mapcar #'all-nodes children))))
+			 (reduce #'append
+				 (mapcar #'all-nodes children)))
 		   (list node)))))
     (all-nodes (root strategy))))
 
