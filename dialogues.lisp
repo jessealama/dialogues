@@ -544,6 +544,10 @@ fail, only whether all of them are satisfied."
   (every predicate (remove-if-not #'defensive-move?
 				  (subseq (dialogue-plays dialogue) 0 end))))
 
+(defun every-proponent-move (predicate dialogue &key end)
+  (every predicate (remove-if-not #'proponent-move?
+				  (subseq (dialogue-plays dialogue) 0 end))))
+
 ;; (defun select-moves (predicate dialogue &key start end)
 ;;   (remove-if-not predicate (dialogue-plays dialogue) 
 ;; 		 :start (if (null start)
