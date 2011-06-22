@@ -1876,10 +1876,10 @@ with which the game begins."))
 			    :size 1
 			    :accessor selected-play-style
 	         (<ucw:option :value 'play-as-both-proponent-and-opponent
-			      "Play as both proponent and opponent")
+			      "Play a game as both proponent and opponent")
 		 (<ucw:option :value 'play-as-proponent-random-opponent
-			      "Play as Proponent (Opponent will choose its moves randomly)")
+			      "Play a game as Proponent (Opponent will choose its moves randomly)")
 		 (<ucw:option :value 'play-as-opponent-random-proponent
-			      "Play as Opponent (Propnent will choose its moves randomly)")))))))))))
+			      "Play a game as Opponent (Propnent will choose its moves randomly)")))))))))))
 
 ;;; ucw-site.lisp ends here
