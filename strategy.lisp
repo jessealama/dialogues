@@ -37,7 +37,7 @@
   (print-unreadable-object (node stream :type t)
     (with-slots (children move expanded)
 	node
-      (format stream "~a (with ~d children; ~:[unexpanded~;expanded~]"
+      (format stream "~a (with ~d children; ~:[unexpanded~;expanded~])"
 	      move (length children) expanded))))
 
 (defun node->dialogue (strategy-node ruleset)
