@@ -423,4 +423,35 @@ the strategy.  If there no such node, return NIL."
 (defmethod render ((strategy strategy))
   (render-node-with-depth (root strategy) 0))
 
+(defun render-node-with-depth-and-alternative (node depth alternative)
+  (let ((children (children node)))
+    (if children
+	(let ((num-children (length children)))
+	  (<:table
+	   (<:tr :valign "top"
+		 (<:td :colspan num-children
+		       :align "center"
+		       (<:as-html depth) " " (render (move node))))
+	   (<:tr :valign "top"
+		 (dolist (child children)
+		   (if (eq (parent child) alternative)
+		       (<:td :bgcolor "indigo"
+			     :style "font-style:bold;color:white;"
+			     (render-node-with-depth-and-alternative child
+								     (1+ depth)
+								     alternative))
+		       (<:td (render-node-with-depth-and-alternative child
+								     (1+ depth)
+								     alternative)))))))
+	(<:table
+	 (<:tr
+	  (<:td (<:as-is depth) " " (render (move node))))))))
+
+(defun render-strategy-with-alternative-node (strategy alternative)
+  "Render STRATEGY, with the children of strategy node ALTERNATIVE in
+  a distinctive color."
+  (render-node-with-depth-and-alternative (root strategy)
+					  0
+					  alternative))
+
 ;;; strategy.lisp ends here
