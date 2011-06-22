@@ -382,4 +382,36 @@ the strategy.  If there no such node, return NIL."
 		(node->strategy winner rules))
 	    winning-pro-nodes)))
 
+;; HTML representation of strategies and strategy nodes
+
+(defmethod render ((move move))
+  (with-slots (player statement stance reference)
+      move
+    (<:as-is player)
+    (<:as-is " ")
+    (render statement)
+    (<:as-is " ")
+    (if (and stance reference)
+	(<:as-is (format nil "[~a,~d]" stance reference)) 
+	(<:as-is (format nil "(initial move)")))))
+
+(defun render-node-with-depth (node depth)
+  (let ((children (children node)))
+    (if children
+	(let ((num-children (length children)))
+	  (<:table
+	   (<:tr :valign "top"
+	    (<:td :colspan num-children
+		  :align "center"
+		  (<:as-html depth) " " (render (move node))))
+	   (<:tr :valign "top"
+	    (dolist (child children)
+	      (<:td (render-node-with-depth child (1+ depth)))))))
+	(<:table
+	 (<:tr
+	  (<:td (<:as-is depth) " " (render (move node))))))))
+
+(defmethod render ((strategy strategy))
+  (render-node-with-depth (root strategy) 0))
+
 ;;; strategy.lisp ends here
