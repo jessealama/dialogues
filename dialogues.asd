@@ -50,6 +50,7 @@ UCW."
 	       (:file "search")
 	       (:file "figure")
 	       (:file "felscher")
+	       (:file "strategy")
 	       (:file "dialogue-search")
 	       (:file "ucw-utils")
 	       (:file "ucw-server")
