@@ -108,7 +108,9 @@
 	(progn
 	  (if opp-choice
 	      (progn
-		(render (node->strategy opp-choice (ruleset (strategy self))))
+		(render-strategy-with-alternative-node
+		 (node->strategy opp-choice (ruleset (strategy self)))
+		 opp-choice)
 		(setf (choice-node self) opp-choice)
 		(<:p "Multiple moves are available to Proponent.  Choose one:")
 		(<:ul
