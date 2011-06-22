@@ -261,22 +261,46 @@ the strategy.  If there no such node, return NIL."
        (msg "Please choose among the following alternatives for Proponent:")
        (loop
 	  with prop-nodes = (children opp-choice-node)
+	  with num-choices = (length prop-nodes)
 	  for prop-node in prop-nodes
 	  for prop-move = (move prop-node)
 	  for i from 1
 	  do
-	    (msg "~d: ~a" i prop-move)
+	    (with-slots (statement stance reference)
+		prop-move
+	      (ecase stance
+		(a (msg "~d: Attack move ~d by asserting ~a" i reference statement))
+		(d (msg "~d: Defend against the attack of move ~d by asserting ~a" i reference statement))))
 	  finally
+	    (msg "Enter:")
+	    (msg "* A number between 1 and ~d to choose a move," num-choices)
+	    (msg "* P to print the dialogue determined by the current Opponent node, or")
+	    (msg "* Q to quit")
+	    (format t "~a" prompt)
 	    (let ((response (read-number-in-interval-or-symbol 1
 							       (length prop-nodes)
-							       'q)))
+							       'p 'q)))
 	      (when (integerp response)
 		(setf (children opp-choice-node)
 		      (list (nth (1- response)
 				 (children opp-choice-node))))
 		(go next-proponent-choice))
 	      (ecase response
+		(p (go print-dialogue-then-make-choice))
 		(q (go quit)))))
+     print-dialogue-then-make-choice
+       (let ((game (node->dialogue opp-choice-node rules)))
+	 (loop
+	    for move in (dialogue-plays game)
+	    for i from 1
+	    do
+	      (with-slots (player statement stance reference)
+		  move
+		(if (initial-move? move)
+		    (format t "~d: ~a ~a (initial move)" i player statement)
+		    (format t "~d: ~a ~a [~a,~d]" i player statement stance reference))
+		(terpri))))
+       (go make-choice)
      quit
        (msg "Thanks for playing, I hope you had fun."))
     strategy))
