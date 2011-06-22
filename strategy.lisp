@@ -245,8 +245,9 @@ the strategy.  If there no such node, return NIL."
      make-choice
        (msg "Please choose among the following alternatives for Proponent:")
        (loop
-	  with prop-moves = (children opp-choice-node)
-	  for prop-move in prop-moves
+	  with prop-nodes = (children opp-choice-node)
+	  for prop-node in prop-nodes
+	  for prop-move = (move prop-node)
 	  for i from 1
 	  do
 	    (msg "~d: ~a" i prop-move)
