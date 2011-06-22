@@ -170,18 +170,27 @@ the strategy.  If there no such node, return NIL."
 (defmethod proponent-node? ((node strategy-node))
   (proponent-move? (move node)))
 
-(defun first-proponent-choice-wrt-ruleset (node ruleset)
+(defun strategy-node-depth (node)
+  (let ((p (parent node))) 
+    (if (null p)
+	0
+	(1+ (strategy-node-depth p)))))
+
+(defun first-proponent-choice-wrt-ruleset (node ruleset &optional (max-depth 20))
   (unless (expanded? node)
     (expand-strategy-node node ruleset))
-  (let ((children (children node)))
-    (when children
-      (if (proponent-node? node)
-	  (some #'(lambda (node)
-		    (first-proponent-choice-wrt-ruleset node ruleset))
-		children)
-	  (if (cdr children)
-	      node
-	      (first-proponent-choice-wrt-ruleset (first children) ruleset))))))
+  (let ((d (strategy-node-depth node)))
+    (if (< d max-depth)
+	(let ((children (children node)))
+	  (when children
+	    (if (proponent-node? node)
+		(some #'(lambda (node)
+			  (first-proponent-choice-wrt-ruleset node ruleset max-depth))
+		      children)
+		(if (cdr children)
+		    node
+		    (first-proponent-choice-wrt-ruleset (first children) ruleset max-depth)))))
+	:too-deep)))
 
 (defclass strategy-with-choices (strategy)
   ((choices
