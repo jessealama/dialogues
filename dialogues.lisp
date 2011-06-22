@@ -735,7 +735,7 @@ fail, only whether all of them are satisfied."
   (next-moves dialogue 'p 'a))
 
 (defun next-opponent-attacks (dialogue)
-  (next-moves dialogue 'p 'a))
+  (next-moves dialogue 'o 'a))
 
 (defun next-defenses (dialogue player)
   (next-moves dialogue player 'd))
