@@ -104,7 +104,7 @@
     (<:p (<:b "Ruleset:") " " (<:format (description (ruleset strategy))))
     (<:p (<:b "Heuristic rules:") " " (<:em "(none)"))
     (if (eq opp-choice :too-deep)
-	(<:p "I couldn't find the first place where Proponent has a choice before I hit depth 15; sorry, we can't play any more.  Please try some other formula.")
+	(<:p "I couldn't find the first place where Proponent has a choice before I hit depth 20; sorry, we can't play any more.  Please try some other formula.")
 	(progn
 	  (if opp-choice
 	      (progn
