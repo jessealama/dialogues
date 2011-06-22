@@ -615,6 +615,44 @@
 				      rule-d13))
 		 :description "D10, D11, D13"))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Heuristic rules
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun repetition-in-dialogue? (move dialogue)
+  "Whether there is a move in DIALOGUE equal to MOVE (but not
+  identical to it, in the sense of EQ)"
+  (find-if #'(lambda (other-move)
+		  (and (not (eq move other-move))
+		       (equal-moves? move other-move)))
+	   (dialogue-plays dialogue)))
+
+(defparameter proponent-no-repeats
+  (make-structural-rule
+   :name "proponent-no-repeats"
+   :description "Proponent cannot repeat moves"
+   :predicate
+   (every-proponent-move #'(lambda (pro-move)
+			     (not (repetition-in-dialogue? pro-move dialogue)))
+			 dialogue)))
+
+(defparameter e-dialogue-rules-no-pro-repetitions
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms 
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      rule-d11
+				      rule-d12
+				      rule-d13
+				      rule-e
+				      proponent-no-repeats))
+		 :description "E rules (D rules + Opponent must always respond to the immediately previous move); Proponent repetitions disallowed"))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;  Minimal rulesets
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
