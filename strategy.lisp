@@ -378,6 +378,8 @@ the strategy.  If there no such node, return NIL."
        (go make-choice)
      quit
        (msg "Thanks for playing, I hope you had fun."))
-    strategy))
+    (mapcar #'(lambda (winner)
+		(node->strategy winner rules))
+	    winning-pro-nodes)))
 
 ;;; strategy.lisp ends here
