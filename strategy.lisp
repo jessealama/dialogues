@@ -253,7 +253,7 @@ the strategy.  If there no such node, return NIL."
 	    (msg "~d: ~a" i prop-move)
 	  finally
 	    (let ((response (read-number-in-interval-or-symbol 1
-							       (length prop-moves)
+							       (length prop-nodes)
 							       'q)))
 	      (when (integerp response)
 		(setf (children opp-choice-node)
