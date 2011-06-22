@@ -135,8 +135,8 @@
 							   (current-choice self))
 						 (push child (alternatives self)))))				 
 				   (if (eq stance 'a)
-				       (<:format "~d: Attack move #~d by asserting " i reference)
-				       (<:format "~d: Defend against the attack of move #~d by asserting " i reference))
+				       (<:format "Attack move #~d by asserting " reference)
+				       (<:format "Defend against the attack of move #~d by asserting " reference))
 				   (render statement))))))))
 	      (progn
 		(if (winning-strategy? strategy)
