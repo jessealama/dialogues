@@ -386,7 +386,7 @@ fail, only whether all of them are satisfied."
   (print-unreadable-object (game stream :type t)
     (with-slots (rules signature plays) game
       (format stream "rules: ~A~%" rules)
-      (format stream "signature: ~A~%" signature)
+      ;; (format stream "signature: ~A~%" signature)
       (format stream "moves: ")
       (if (null plays)
 	  (format stream "(none)~%")
