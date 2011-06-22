@@ -195,6 +195,10 @@ the strategy.  If there no such node, return NIL."
 (defun play-strategy-search-game (rules &optional (signature alphabetic-propositional-signature) initial-formula)
   (let ((strategy nil)
 	(opp-choice-node nil)
+	(current-choice nil)
+	(winning-pro-nodes nil)
+	(losing-pro-nodes)
+	(alternatives nil)
 	(statement nil)
 	(prompt "> "))
     (tagbody (go greetings)
@@ -265,9 +269,65 @@ the strategy.  If there no such node, return NIL."
        (msg "No additional choices remain for Proponent.")
        (msg "Checking whether the selected strategy is actually a strategy...")
        (if (winning-strategy? strategy)
-	   (msg "Congratulations! You found a winning strategy")
-	   (msg "I'm sorry to say that the choices you've made for~%Proponent do not amount to a winning strategy.~%"))
-       (go quit)
+	   (progn
+	     (msg "Congratulations! You found a winning strategy")
+	     (push current-choice winning-pro-nodes))
+	   (progn
+	     (msg "I'm sorry to say that there is no winning strategy for Proponent~%that is consistent with the choices you've made so far.~%")
+	     (push current-choice losing-pro-nodes)))
+       (go explore-alternatives)
+     explore-alternatives
+       (if alternatives
+	   (progn
+	     (msg "Alternative choices are available:")
+	     (loop
+		for i from 1
+		for alternative in alternatives
+		for alternative-move = (move alternative)
+		do
+		  (with-slots (statement stance reference)
+		      alternative-move
+		    (if (eq stance 'a)
+			(format t "* ~d: Attack move #~d by asserting ~a" i reference statement)
+			(format t "* ~d: Defend against the attack of move #~d by asserting ~a" i reference statement)))
+		  (terpri))
+	     (msg "Enter:")
+	     (msg "* A number between 1 and ~d," (length alternatives))
+	     (msg "* P to print the dialogue associated with one of the alternatives~%    (you will be prompted to enter a number), or")
+	     (msg "* Q to quit.")
+	     (format t "~a " prompt)
+	     (let ((response (read-number-in-interval-or-symbol 1 (length alternatives) 'p 'q)))
+	       (if (integerp response)
+		   (progn
+		     (setf current-choice (nth (1- response) alternatives))
+		     (setf (children (parent current-choice))
+			   (list current-choice))
+		     (setf alternatives (remove current-choice alternatives))
+		     (go next-proponent-choice))
+		   (ecase response
+		     (p (go prompt-then-print-alternative))
+		     (q (go quit))))))
+	   (progn
+	     (msg "I'm afraid no alternatives remain.")
+	     (go quit)))
+     prompt-then-print-alternative
+       (msg "Enter a number between 1 and ~d to see the dialogue~%corresponding to that alternative:" (length alternatives))
+       (format t "~a " prompt)
+       (let ((response (read-number-in-interval 1 (length alternatives))))
+	 (msg "The dialogue determined by alternative ~d goes as follows:" response)
+	 (let ((alternative (nth (1- response) alternatives)))
+	   (let ((game (node->dialogue alternative rules)))
+	     (loop
+		for move in (dialogue-plays game)
+		for i from 0
+		do
+		  (with-slots (player statement stance reference)
+		      move
+		    (if (initial-move? move)
+			(format t "~d: ~a ~a (initial move)" i player statement)
+			(format t "~d: ~a ~a [~a,~d]" i player statement stance reference))
+		    (terpri))))))
+       (go explore-alternatives)
      make-choice
        (msg "Please choose among the following alternatives for Proponent:")
        (loop
@@ -292,9 +352,13 @@ the strategy.  If there no such node, return NIL."
 							       (length prop-nodes)
 							       'p 'q)))
 	      (when (integerp response)
-		(setf (children opp-choice-node)
-		      (list (nth (1- response)
-				 (children opp-choice-node))))
+		(let ((children (children opp-choice-node)))
+		  (setf (children opp-choice-node)
+		      (list (nth (1- response) children))
+		      current-choice (nth (1- response) children))
+		  (dolist (child children)
+		    (unless (eq child current-choice)
+		      (push child alternatives))))
 		(go next-proponent-choice))
 	      (ecase response
 		(p (go print-dialogue-then-make-choice))
