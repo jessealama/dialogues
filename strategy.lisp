@@ -47,7 +47,7 @@
   (with-slots (parent move)
       strategy-node
     (if parent
-	(add-move-to-dialogue (dialogue parent) move)
+	(add-move-to-dialogue (node->dialogue parent ruleset) move)
 	(make-dialogue (move-statement move)
 		       alphabetic-propositional-signature ;; ugh
 		       ruleset))))
