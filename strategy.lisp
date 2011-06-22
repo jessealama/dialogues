@@ -367,7 +367,7 @@ the strategy.  If there no such node, return NIL."
        (let ((game (node->dialogue opp-choice-node rules)))
 	 (loop
 	    for move in (dialogue-plays game)
-	    for i from 1
+	    for i from 0
 	    do
 	      (with-slots (player statement stance reference)
 		  move
