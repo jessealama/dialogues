@@ -62,10 +62,105 @@
 	 :initform nil
 	 :type (or (eql nil) dialogue))))
 
-(defclass strategy-component ()
-  ((strategy-root :accessor strategy-root
-		  :initarg :root
-		  :initform nil)))
+(defcomponent strategy-editor ()
+  ((strategy :accessor strategy
+	     :initarg :strategy
+	     :initform nil
+	     :type (or null strategy))
+   (choice-node
+    :accessor choice-node
+    :initarg :choice-node
+    :initform nil
+    :type (or null strategy-node)
+    :documentation "The Opponent node that has multiple Proponent responses that we are exploring")
+   (current-choice
+    :accessor current-choice
+    :initarg :current-choice
+    :initform nil
+    :type (or null strategy-node)
+    :documentation "The Proponent node that was most recently selected for exploration.")
+   (winning-nodes
+    :accessor winning-nodes
+    :initarg :winning-nodes
+    :initform nil
+    :type list
+    :documentation "The list of Proponent nodes that have led to a winning strategy.")
+   (losing-nodes
+    :accessor losing-nodes
+    :initarg :losing-nodes
+    :initform nil
+    :type list
+    :documentation "The list of Proponent nodes that have led to a loss (i.e., a failure to find a winning strategy).")
+   (alternatives
+    :accessor alternatives
+    :initarg :alternatives
+    :initform nil
+    :type list
+    :documentation "The list of alternatives (which are Proponent nodes) that are yet to be explored.")))
+
+(defmethod render ((self strategy-editor))
+  (let* ((strategy (strategy self))
+	 (opp-choice (first-proponent-choice strategy)))
+    (if (eq opp-choice :too-deep)
+	(<:p "I couldn't find the first place where Proponent has a choice before I hit depth 15; sorry, we can't play any more.  Please try some other formula.")
+	(progn
+	  (if opp-choice
+	      (progn
+		(render (node->strategy opp-choice (ruleset (strategy self))))
+		(setf (choice-node self) opp-choice)
+		(<:p "Multiple moves are available to Proponent.  Choose one:")
+		(<:ul
+		 (loop
+		    with prop-nodes = (children opp-choice)
+		    with num-children = (length prop-nodes)
+		    for prop-node in prop-nodes
+		    for prop-move = (move prop-node)
+		    for i from 1
+		    do
+		      (let ((i i))
+			(with-slots (statement stance reference)
+			    prop-move
+			  (<:li
+			   (<ucw:a :action (progn
+					     (setf (children opp-choice)
+						   (list (nth (1- i) prop-nodes))
+						   (current-choice self)
+						   (nth (1- i) prop-nodes))
+					     (dolist (child prop-nodes)
+					       (unless (eq child
+							   (current-choice self))
+						 (push child (alternatives self)))))				 
+				   (if (eq stance 'a)
+				       (<:format "~d: Attack move #~d by asserting " i reference)
+				       (<:format "~d: Defend against the attack of move #~d by asserting " i reference))
+				   (render statement))))))))
+	      (progn
+		(if (winning-strategy? strategy)
+		    (progn
+		      (<:p "Congratulations!  You've found a winning strategy.  Here it is:")
+		      (render strategy))
+		    
+		    (<:p "I'm sorry to say that there is no winning strategy consistent with your choices so far."))
+		(let ((alternatives (alternatives self)))
+		  (if alternatives
+		      (progn
+			(<:p "There are unexplored alternatives:")
+			(<:ul
+			 (dolist (alternative alternatives)
+			   (let ((alternative-move (move alternative)))
+			     (with-slots (player statement stance reference)
+				 alternative-move
+			       (if (eq stance 'a)
+				   (<:li (format nil "Have ~a attack move #~d by asserting " player reference)
+					 (render statement))
+				   (<:li (format nil "Have ~a defend aginst the attack of move ~d by asserting " player reference)
+					 (render statement))))))))
+		      (progn
+			(<:p "There are no more alternatives."))))))))
+    
+    (<ucw:form :method "get"
+	       :action (call 'start-game-component)
+	       (<:submit :value "Quit"))))
 
 (defclass play-style-component ()
   ((play-style :accessor play-style
@@ -1780,6 +1875,19 @@ with which the game begins."))
 			:signature sig)))))
        ($take-action
 	(ecase selected-play-style
+	  (interactive-strategy-search
+	   (let* ((initial-move (make-move 'p
+					   (apply-translation selected-translation $formula)
+					   nil
+					   nil))
+		  (root (make-instance 'strategy-node :move initial-move))
+		  (strat (make-instance 'strategy
+					:ruleset (if (null (ruleset self))
+						     selected-rules
+						     (ruleset self))
+					:root root)))
+	     (call 'strategy-editor
+		   :strategy strat)))
 	  (play-as-both-proponent-and-opponent
 	   (call 'turn-editor
 		 :play-style 'play-as-both-proponent-and-opponent
@@ -1880,6 +1988,8 @@ with which the game begins."))
 		 (<ucw:option :value 'play-as-proponent-random-opponent
 			      "Play a game as Proponent (Opponent will choose its moves randomly)")
 		 (<ucw:option :value 'play-as-opponent-random-proponent
-			      "Play a game as Opponent (Propnent will choose its moves randomly)")))))))))))
+			      "Play a game as Opponent (Propnent will choose its moves randomly)")
+		 (<ucw:option :value 'interactive-strategy-search
+			      "Search for a winning strategy")))))))))))
 
 ;;; ucw-site.lisp ends here
