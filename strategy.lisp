@@ -33,6 +33,13 @@
   to be considering only certain kinds of subtrees of ful dialogue
   trees, among which winning strategies can be found."))
 
+(defmethod print-object ((node strategy-node) stream)
+  (print-unreadable-object (node stream :type t)
+    (with-slots (children move expanded)
+	node
+      (format stream "~a (with ~d children; ~:[unexpanded~;expanded~]"
+	      move (length children) expanded))))
+
 (defun node->dialogue (strategy-node ruleset)
   "By following the edges from a strategy node to its parent until we
   reach a root, strategy nodes can be considered the end of a unique
