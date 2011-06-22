@@ -148,7 +148,7 @@
 		(let ((alternatives (alternatives self)))
 		  (if alternatives
 		      (progn
-			(<:p "There are unexplored alternatives:")
+			(<:p "There are unexplored alternatives (functionality not yet implemented, please complain loudly):")
 			(<:ul
 			 (dolist (alternative alternatives)
 			   (let ((alternative-move (move alternative)))
