@@ -232,7 +232,7 @@ the strategy.  If there no such node, return NIL."
        (let ((opp-choice (first-proponent-choice strategy)))
 	 (if opp-choice
 	     (progn
-	       (setf opp-choice-node opp-choice-node)
+	       (setf opp-choice-node opp-choice)
 	       (go make-choice))
 	     (go no-more-choices)))
      no-more-choices
