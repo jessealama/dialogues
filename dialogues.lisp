@@ -747,12 +747,10 @@ fail, only whether all of them are satisfied."
   (next-moves dialogue 'o 'd))
 
 (defun next-proponent-moves (dialogue)
-  (append (next-proponent-attacks dialogue)
-	  (next-proponent-defenses dialogue)))
+  (all-next-proponent-moves-at-position dialogue (dialogue-length dialogue)))
 
 (defun next-opponent-moves (dialogue)
-  (append (next-opponent-attacks dialogue)
-	  (next-opponent-defenses dialogue)))
+  (all-next-opponent-moves-at-position dialogue (dialogue-length dialogue)))
 
 (defun proponent-wins? (dialogue)
   (and (proponent-move? (last-move dialogue))
