@@ -85,6 +85,21 @@ Proponent."
     :accessor ruleset
     :documentation "The ruleset by which this strategy is intended to adhere.")))
 
+(defmethod print-object ((strategy strategy) stream)
+  (labels ((print-node (node)
+	     (with-slots (move children)
+		 node
+	       (with-slots (player statement stance reference)
+		   move
+		 (if (and stance reference)
+		     (format stream "({~a ~a [~a,~d]} " player statement stance reference)
+		     (format stream "({~a ~a (initial move)} " player statement))
+		 (dolist (child children)
+		   (print-node child))
+		 (format stream ")")))))
+    (print-unreadable-object (strategy stream :type t)
+      (print-node (root strategy)))))
+
 (defun nodes (strategy)
   "A list of all nodes of STRATEGY reachable from its root."
   (labels ((all-nodes (node)
