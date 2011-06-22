@@ -259,7 +259,7 @@ the strategy.  If there no such node, return NIL."
 		(setf (children opp-choice-node)
 		      (list (nth (1- response)
 				 (children opp-choice-node))))
-		(go make-choice))
+		(go next-proponent-choice))
 	      (ecase response
 		(q (go quit)))))
      quit
