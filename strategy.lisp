@@ -134,6 +134,9 @@ the strategy.  If there no such node, return NIL."
   (first-proponent-choice-wrt-ruleset (root strategy)
 				      (ruleset strategy)))
 
+(defmethod proponent-node? ((node strategy-node))
+  (proponent-move? (move node)))
+
 (defun first-proponent-choice-wrt-ruleset (node ruleset)
   (unless (expanded? node)
     (expand-strategy-node node ruleset))

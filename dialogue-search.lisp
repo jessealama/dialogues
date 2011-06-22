@@ -311,7 +311,9 @@ DEPTH TREE).")
 	       (node-expanded? node-parent) t))
     (car (last nodes))))
 
-(defun proponent-node? (node)
+(defgeneric proponent-node? (node))
+
+(defmethod proponent-node? ((node node))
   (proponent-move? (last-move (node-state node))))
 
 (defun opponent-node? (node)
