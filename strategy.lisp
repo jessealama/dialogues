@@ -112,6 +112,17 @@ Proponent."
 		   (list node)))))
     (all-nodes (root strategy))))
 
+(defun node->strategy (node ruleset)
+  "From NODE determine a strategy (with respect to RULESET) by finding
+  the root from which NODE comes"
+  (labels ((find-root (n)
+	     (if (null (parent n))
+		 n
+		 (find-root (parent n)))))
+    (make-instance 'strategy
+		   :root (find-root node)
+		   :ruleset ruleset)))
+
 (defun fully-expanded? (strategy)
   (every #'expanded? (nodes strategy)))
 
