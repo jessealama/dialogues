@@ -54,7 +54,7 @@
 	    :type (or null ruleset))
    (heuristics
     :initarg :heuristics
-    :initform nil
+    :initform available-heuristics
     :type list
     :accessor heuristics
     :documentation "Heuristic rules that, in addition to RULESET, are also in effect.")))
