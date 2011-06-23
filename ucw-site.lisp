@@ -48,7 +48,7 @@
   ((ruleset :initarg :ruleset
 	    :initform nil
 	    :accessor ruleset
-	    :type (or (eql nil) ruleset))
+	    :type (or null ruleset))
    (heuristics
     :initarg :heuristics
     :initform nil
