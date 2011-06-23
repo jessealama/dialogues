@@ -48,7 +48,13 @@
   ((ruleset :initarg :ruleset
 	    :initform nil
 	    :accessor ruleset
-	    :type (or (eql nil) ruleset))))
+	    :type (or (eql nil) ruleset))
+   (heuristics
+    :initarg :heuristics
+    :initform nil
+    :type list
+    :accessor heuristics
+    :documentation "Heuristic rules that, in addition to RULESET, are also in effect.")))
 
 (defclass signature-component ()
   ((signature :initarg :signature
