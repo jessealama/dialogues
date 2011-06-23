@@ -1206,7 +1206,7 @@ current turn number is the selected one.")
 					:queue more-nodes
 					:success t)
 			  (<:p "When the search terminated, there were still possible moves left to consider; there may be further winning plays different from this one.")
-			  (<:submit :value "Search for another winning play"))))
+			  (<:submit :value "Interactively search for another winning play"))))
        (<ucw:form :method "post"
 		  :action (call 'turn-editor
 				:game game
