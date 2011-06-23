@@ -329,6 +329,10 @@ attacks which, being symbols, do qualify as terms."
 (defun equal-rulesets? (ruleset-1 ruleset-2)
   (eq ruleset-1 ruleset-2)) ;; I don't have an interesting notion of equality
 
+(defun add-rule-to-ruleset (rule ruleset)
+  (pushnew rule (rules ruleset))
+  ruleset)
+
 (defun fast-eval-entire-dialogue (dialogue &key structural-rules-from-end)
   "Evaluate all rules, but return only whether every rule passes.
 This function is used in cases where it doesn't matter what rules
