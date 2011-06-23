@@ -107,6 +107,12 @@
     :type list
     :documentation "The list of alternatives (which are Proponent nodes) that are yet to be explored.")))
 
+(defun render-available-heuristics ()
+  (dolist (heuristic available-heuristics)
+    (let ((desc (description heuristic)))
+      (<:input :type "checkbox"
+	       :value desc))))
+
 (defun render-heuristics (heuristic-list)
   (if (null heuristic-list)
       (<:em "(none)")
@@ -1889,7 +1895,8 @@ with which the game begins."))
 	selected-formula 
 	selected-rules
 	selected-translation
-	selected-play-style)
+	selected-play-style
+	pro-no-repeat-heuristic)
   (symbol-macrolet
       (($formula
 	(let ((sig (signature self)))
@@ -1911,11 +1918,17 @@ with which the game begins."))
 		  (root (make-instance 'strategy-node :move initial-move))
 		  (strat (make-instance 'strategy
 					:ruleset (if (null (ruleset self))
-						     selected-rules
-						     (ruleset self))
+						     (if pro-no-repeat-heuristic
+							 (add-rule-to-ruleset proponent-no-repeats selected-rules)
+							 selected-rules)
+						     (if pro-no-repeat-heuristic
+							 (add-rule-to-ruleset proponent-no-repeats (ruleset self))
+							 (ruleset self)))
 					:root root)))
 	     (call 'strategy-editor
-		   :strategy strat)))
+		   :strategy strat
+		   :heuristics (when pro-no-repeat-heuristic
+				 (list proponent-no-repeats)))))
 	  (play-as-both-proponent-and-opponent
 	   (call 'turn-editor
 		 :play-style 'play-as-both-proponent-and-opponent
@@ -2007,7 +2020,14 @@ with which the game begins."))
 		  (<:as-html (description (ruleset self))))))
        (<:tr
 	(<:td "Heuristic rules:")
-	(<:td))
+	(<:td (dolist (heuristic available-heuristics)
+		(let ((desc (description heuristic)))
+		  (<ucw:input :type "checkbox"
+			      :id "pro-no-repeat-heuristic"
+			      :name "pro-no-repeat-heuristic"
+			      :value nil
+			      :accessor pro-no-repeat-heuristic)
+		  (<:as-is desc)))))
        (<:tr :style "background-color:#A3D800;"
          (<:td (<ucw:a :action (call 'play-style-info)
 		       "Play style:"))
