@@ -107,11 +107,24 @@
     :type list
     :documentation "The list of alternatives (which are Proponent nodes) that are yet to be explored.")))
 
+(defun render-heuristics (heuristic-list)
+  (if (null heuristic-list)
+      (<:em "(none)")
+      (loop
+	 with num-heuristics = (length heuristic-list)
+	 for heuristic in heuristic-list
+	 for i from 1 upto num-heuristics
+	 for description = (description heuristic)
+	 do
+	   (<:as-is description)
+	   (unless (= i num-heuristics)
+	     (<:as-is ", ")))))
+
 (defmethod render ((self strategy-editor))
   (let* ((strategy (strategy self))
 	 (opp-choice (first-proponent-choice strategy)))
     (<:p (<:b "Ruleset:") " " (<:format (description (ruleset strategy))))
-    (<:p (<:b "Heuristic rules:") " " (<:em "(none)"))
+    (<:p (<:b "Heuristic rules:") " " (render-heuristics (heuristics self)))
     (if (eq opp-choice :too-deep)
 	(<:p "I couldn't find the first place where Proponent has a choice before I hit depth 20; sorry, we can't play any more.  Please try some other formula.")
 	(progn
