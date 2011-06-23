@@ -157,9 +157,9 @@
 			     (with-slots (player statement stance reference)
 				 alternative-move
 			       (if (eq stance 'a)
-				   (<:li (format nil "Have ~a attack move #~d by asserting " player reference)
+				   (<:li (<:format "Have ~a attack move #~d by asserting " player reference)
 					 (render statement))
-				   (<:li (format nil "Have ~a defend aginst the attack of move ~d by asserting " player reference)
+				   (<:li (<:format "Have ~a defend aginst the attack of move ~d by asserting " player reference)
 					 (render statement))))))))
 		      (progn
 			(<:p "There are no more alternatives."))))))))
