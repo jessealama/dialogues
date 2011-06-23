@@ -157,10 +157,10 @@
 			  (<:li
 			   (<ucw:a :action (progn
 					     (setf (children opp-choice)
-						   (list (nth (1- i) prop-nodes))
+						   (list (nth (1- i) prop-nodes-sorted))
 						   (current-choice self)
-						   (nth (1- i) prop-nodes))
-					     (dolist (child prop-nodes)
+						   (nth (1- i) prop-nodes-sorted))
+					     (dolist (child prop-nodes-sorted)
 					       (unless (eq child
 							   (current-choice self))
 						 (push child (alternatives self)))))				 
