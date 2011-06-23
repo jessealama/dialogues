@@ -29,6 +29,9 @@
 	sara-ad-hoc-rules
 	sara-ad-hoc-rules-2))
 
+(defparameter available-heuristics
+  (list proponent-no-repeats))
+
 (defparameter available-translations
   (list identity-translation
 	goedel-gentzen-translation 
