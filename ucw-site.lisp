@@ -71,7 +71,7 @@
 	 :initform nil
 	 :type (or (eql nil) dialogue))))
 
-(defcomponent strategy-editor ()
+(defcomponent strategy-editor (ruleset-component)
   ((strategy :accessor strategy
 	     :initarg :strategy
 	     :initform nil
