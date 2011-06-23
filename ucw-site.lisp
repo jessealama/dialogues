@@ -468,7 +468,7 @@ Web" "UnCommon Web") " system.  The Common Lisp implementation is " (<:a :href "
 		    :accessor input-formula)
 	(<:submit :value "Use this formula"))))
 
-(defcomponent turn-editor (game-component play-style-component)
+(defcomponent turn-editor (game-component play-style-component ruleset-component)
   ())
 
 (defcomponent turn-evaluator (game-component play-style-component)
@@ -1110,7 +1110,8 @@ current turn number is the selected one.")
       (<:p "With the current ruleset, the game is incoherent.  Here is
       a listing of the game, annotated with the violating moves:")
       (<:div :style "border:1px solid;"
-        (render-game game :moves-to-highlight (mapcar #'car indices-and-violated-rules)))
+        (render-game game :moves-to-highlight (mapcar #'car indices-and-violated-rules)
+		     :heuristics (heuristics self)))
       (<:p "At least one move of the game is violated with these rules:")
       (<:ul 
        (dolist (index-and-violators indices-and-violated-rules)
@@ -1203,7 +1204,8 @@ current turn number is the selected one.")
 	       (<:h1 "Success")
 	       (<:p "Here is a continuation of the initial game that leads to a win no more than " (<:as-html depth) " " (if (= depth 1) (<:as-is "move") (<:as-is "moves")) " beyond the end of the initial game:")
 	       (<:div :style "border:1px solid"
-	         (render-game winning-play))))
+	         (render-game winning-play
+			      :heuristics (heuristics self)))))
 	     ((null result)
 	      (<:h1 "Ouch!")
 	      (<:p "Not only is there is no winning play that continues from the game above no more than " (<:as-html depth) " " (if (= depth 1) "move" "moves") ", there is actually " (<:em "no") " winning play at all that extends the initial game."))
@@ -1448,6 +1450,7 @@ that all the rules in your edited ruleset are satisfied.")
       (<:div :style "border:1px solid"
         (render-game game 
 		     :play-style play-style
+		     :heuristics (heuristics self)
 		     :indicate-alternatives t))
       (<:h1 "Choose from the available moves...")
       (ecase (play-style self)
@@ -1484,6 +1487,7 @@ that all the rules in your edited ruleset are satisfied.")
     (<:div :style "border:1px solid;"
       (render-game game
 		   :play-style play-style
+		   :heuristics (heuristics self)
 		   :moves-to-highlight (list move-number)))
     (<:p "Alternatives at move " (<:as-html move-number) ":")
     (<:ul
@@ -1576,11 +1580,14 @@ that all the rules in your edited ruleset are satisfied.")
 
 (defun render-game (game &key indicate-alternatives
 		              play-style
+		              heuristics
 		              moves-to-highlight)
   ;; (render-signature (dialogue-signature game))
   (let ((ruleset (dialogue-rules game)))
     (<:p (<:em "Ruleset: ")
-	 (<:as-html (description ruleset))))
+	 (<:as-html (description ruleset)))
+    (<:p (<:em "Heuristics: ")
+	 (render-heuristics heuristics)))
   (<:hr)
   (<:table 
    (<:colgroup :span "2" :align "center")
@@ -1908,6 +1915,16 @@ with which the game begins."))
 		  (call 'formula-corrector
 			:text selected-formula
 			:signature sig)))))
+       ($heuristics (when pro-no-repeat-heuristic
+		      (list proponent-no-repeats)))
+       ($ruleset
+	(if (null (ruleset self))
+	    (if pro-no-repeat-heuristic
+		(add-rule-to-ruleset proponent-no-repeats (copy-ruleset selected-rules))
+		selected-rules)
+	    (if pro-no-repeat-heuristic
+		(add-rule-to-ruleset proponent-no-repeats (copy-ruleset (ruleset self)))
+		(ruleset-self))))
        ($take-action
 	(ecase selected-play-style
 	  (interactive-strategy-search
@@ -1917,35 +1934,26 @@ with which the game begins."))
 					   nil))
 		  (root (make-instance 'strategy-node :move initial-move))
 		  (strat (make-instance 'strategy
-					:ruleset (if (null (ruleset self))
-						     (if pro-no-repeat-heuristic
-							 (add-rule-to-ruleset proponent-no-repeats selected-rules)
-							 selected-rules)
-						     (if pro-no-repeat-heuristic
-							 (add-rule-to-ruleset proponent-no-repeats (ruleset self))
-							 (ruleset self)))
+					:ruleset $ruleset
 					:root root)))
 	     (call 'strategy-editor
 		   :strategy strat
-		   :heuristics (when pro-no-repeat-heuristic
-				 (list proponent-no-repeats)))))
+		   :heuristics $heuristics)))
 	  (play-as-both-proponent-and-opponent
 	   (call 'turn-editor
 		 :play-style 'play-as-both-proponent-and-opponent
+		 :heuristics $heuristics
 		 :game (make-dialogue (apply-translation selected-translation $formula)
 				      sig
-				      (if (null (ruleset self))
-					  selected-rules
-					  (ruleset self)))))
+				      $ruleset)))
 	  (play-as-proponent-random-opponent
 	   (call 'turn-editor
 		 :play-style 'play-as-proponent-random-opponent
+		 :heuristics $heurstics
 		 :game (let ((initial-dialogue
 			      (make-dialogue (apply-translation selected-translation $formula)
 					     sig
-					     (if (null (ruleset self))
-						 selected-rules
-						 (ruleset self)))))
+					     $ruleset)))
 			 (let* ((next-opponent-attacks (next-attacks initial-dialogue 'o))
 				(next-opponent-defenses (next-defenses initial-dialogue 'o))
 				(all-opponent-moves (append next-opponent-attacks
@@ -1953,29 +1961,32 @@ with which the game begins."))
 			   (if (null all-opponent-moves)
 			       (call 'turn-editor
 				     :play-style 'play-as-proponent-random-opponent
+				     :heuristics $heuristics
 				     :game initial-dialog)
 			       (let ((random-move (random-element all-opponent-moves)))
 				 (destructuring-bind (statement reference)
 				     random-move
 				   (if (member random-move next-opponent-attacks)
 				       (call 'turn-editor
+				 
 					     :play-style 'play-as-proponent-random-opponent
+					     :heuristics $heuristics
 					     :game (add-move-to-dialogue-at-position initial-dialogue
 										     (make-move 'o statement 'a reference)
 										     1))
 				       (call 'turn-editor
 					     :play-style 'play-as-proponent-random-opponent
+					     :heuristics $heuristics
 					     :game (add-move-to-dialogue-at-position initial-dialogue
 										     (make-move 'o statement 'd reference)
 										     1))))))))))
 	  (play-as-opponent-random-proponent
 	   (call 'turn-editor
 		 :play-style 'play-as-opponent-random-proponent
+		 :heuristics $heuristics
 		 :game (make-dialogue (apply-translation selected-translation $formula)
 				      sig
-				      (if (null (ruleset self))
-					  selected-rules
-					  (ruleset self))))))))
+				      $ruleset))))))
     (let ((sig (signature self)))
       (<ucw:form :method "post"
 		 :action $take-action
