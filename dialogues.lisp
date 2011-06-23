@@ -329,6 +329,11 @@ attacks which, being symbols, do qualify as terms."
 (defun equal-rulesets? (ruleset-1 ruleset-2)
   (eq ruleset-1 ruleset-2)) ;; I don't have an interesting notion of equality
 
+(defun copy-ruleset (ruleset)
+  (make-instance 'ruleset
+		 :rules (copy-list (rules ruleset))
+		 :description (description ruleset)))
+
 (defun add-rule-to-ruleset (rule ruleset)
   (pushnew rule (rules ruleset))
   ruleset)
