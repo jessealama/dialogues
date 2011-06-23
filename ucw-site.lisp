@@ -1989,6 +1989,9 @@ with which the game begins."))
 				 (<ucw:option :value ruleset
 					      (<:as-html (description ruleset)))))
 		  (<:as-html (description (ruleset self))))))
+       (<:tr
+	(<:td "Heuristic rules:")
+	(<:td))
        (<:tr :style "background-color:#A3D800;"
          (<:td (<ucw:a :action (call 'play-style-info)
 		       "Play style:"))
