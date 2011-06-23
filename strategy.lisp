@@ -180,7 +180,7 @@ the strategy.  If there no such node, return NIL."
 	0
 	(1+ (strategy-node-depth p)))))
 
-(defun first-proponent-choice-wrt-ruleset (node ruleset &optional (max-depth 20))
+(defun first-proponent-choice-wrt-ruleset (node ruleset &optional (max-depth 40))
   (unless (expanded? node)
     (expand-strategy-node node ruleset))
   (let ((d (strategy-node-depth node)))
