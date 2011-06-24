@@ -94,6 +94,15 @@ dialogue it represents, with respect to that ruleset, is won by
 Proponent."
   (proponent-wins? (node->dialogue node ruleset)))
 
+(defgeneric first-splitter (thing)
+  (:documentation "Find the shallowest node of THING that has multiple children."))
+
+(defmethod first-splitter ((node strategy-node))
+  (let ((children (children node)))
+    (cond ((null children) nil)
+	  ((null (cdr children)) (first-splitter (first children)))
+	  (t node))))
+
 (defclass strategy ()
   ((root
     :type strategy-node
@@ -150,13 +159,18 @@ Proponent."
 (defun fully-expanded? (strategy)
   (every #'expanded? (nodes strategy)))
 
-(defun leaves (root)
-  "Leaf nodes reachable from ROOT"
+(defgeneric leaves (thing)
+  (:documentation "Leaf nodes reachable from ROOT"))
+
+(defmethod leaves ((node strategy-node))  
   (with-slots (children)
-      root
+      node
     (if (null children)
-	(list root)
+	(list node)
 	(reduce #'append (mapcar #'leaves children)))))
+
+(defmethod leaves ((strategy strategy))
+  (leaves (root strategy)))
 
 (defun winning-strategy-form? (strategy)
   "Determine whether STRATEGY has the graph-theoretic structure that a winning strategy has: (1) every node of odd depth (start counting at 0) has exactly one child"
@@ -438,57 +452,109 @@ the strategy.  If there no such node, return NIL."
 	(<:td (<:format "[~a,~d]" stance reference))
 	(<:td (<:em "(initial move)")))))
 
+(defmethod first-splitter ((strategy strategy))
+  (first-splitter (root strategy)))
 
+(defun render-strategy-node-as-table-row (node &optional alternatives)
+  (let ((move (move node))
+	(depth (strategy-node-depth node)))
+    (with-slots (player statement stance reference)
+	move
+      (if (member node alternatives)
+	  (<:tr :bgcolor "indigo"
+		:nowrap "nowrap"
+		:style "font-style:bold;color:white;"
+	   (<:td :align "left"
+		 (<:as-html depth))
+	   (<:td :align "center"
+		 (<:as-html player))
+	   (<:td :align "left"
+		 :nowrap "nowrap"
+		 (render statement))
+	   (<:td :align "left"
+		 (if (initial-move? move)
+		     (<:em "(initial move)")
+		     (if (attacking-move? move)
+			 (<:as-html "[A," reference "]")
+			 (<:as-html "[D," reference "]")))))
+	  (<:tr :nowrap "nowrap"
+	   (<:td :align "left"
+		 (<:as-html depth))
+	   (<:td :align "center"
+		 (<:as-html player))
+	   (<:td :align "left"
+		 :nowrap "nowrap"
+		 (render statement))
+	   (<:td :align "left"
+		 (if (initial-move? move)
+		     (<:em "(initial move)")
+		     (if (attacking-move? move)
+			 (<:as-html "[A," reference "]")
+			 (<:as-html "[D," reference "]")))))))))
 
-(defun render-node-with-depth (node depth)
-  (let ((children (children node)))
-    (if children
-	(let ((num-children (length children)))
+(defun render-segment-with-padding-as-row (begin end padding &optional alternatives)
+  "Given strategy nodes BEGIN and END, emit an HTML table
+  row representing the dialogue from BEGIN to END.  The row will
+  contain 2*PADDING + 1 columns; PADDING empty columns will be put on
+  the left and the right of the sequence.  It is assumed that there is
+  a path from BEGIN to END; the path is constrcted simply taking
+  unique successors, starting at BEGIN, until we reach END.  The moves
+  of the game between BEGIN and END will be put into a single HTML
+  table element."
+  (symbol-macrolet
+      (($padding (dotimes (i padding) (<:td))))
+    (<:tr
+     $padding
+     (<:td :align "center"
+       (<:table
+	(loop
+	   for current-node = begin then (first (children current-node))
+	   do
+	     (render-strategy-node-as-table-row current-node alternatives)
+	     (when (eq current-node end)
+	       (return)))))
+     $padding)))
+
+(defun render-node-with-alternative (node alternative)
+  (let ((first-splitter (first-splitter node)))
+    (if (null first-splitter)
+	(let ((leaf (first (leaves node))))
 	  (<:table
-	   (<:tr :valign "top"
-		 (<:td :colspan num-children
-		       :align "center"
-		       (<:as-html depth) " " (render (move node))))
-	   (<:tr :valign "top"
-		 (dolist (child children)
-		   (<:td (render-node-with-depth child (1+ depth)))))))
-	(<:table
-	 (<:tr
-	  (<:td (<:as-is depth) " " (render (move node))))))))
+	   (render-segment-with-padding-as-row node leaf 0 (children alternative))))
+	(let* ((succs (children first-splitter))
+	       (num-succs (length succs)))
+	  (<:table :rules "groups"
+		   :frame "void"
+	    (<:thead
+	     (render-segment-with-padding-as-row node first-splitter (floor (/ num-succs 2)) (children alternative)))
+	    (<:tbody
+	     (<:tr
+	      (if (evenp num-succs)
+		  (progn
+		    (loop
+		       with cleft-point = (/ num-succs 2)
+		       for i from 0 upto (1- cleft-point)
+		       with succ = (nth i succs)
+		       do
+			 (<:td :align "center"
+			   (render-node-with-alternative succ alternative)))
+		    (<:td)
+		    (loop
+		       with cleft-point = (/ num-succs 2)
+		       for i from cleft-point upto (1- num-succs)
+		       with succ = (nth i succs)
+		       do
+			 (<:td :align "center"
+			   (render-node-with-alternative succ alternative))))
+		  (loop
+		     for succ in succs
+		     do
+		       (<:td :align "center"
+		         (render-node-with-alternative succ alternative)))))))))))
 
-(defmethod render ((strategy strategy))
-  (render-node-with-depth (root strategy) 0))
-
-(defun render-node-with-depth-and-alternative (node depth alternative)
-  (let ((children (children node)))
-    (if children
-	(let ((num-children (length children))
-	      (children-sorted (sort (copy-list children) #'node-reference->)))
-	  (<:table
-	   (<:tr :valign "top"
-		 (<:td :colspan num-children
-		       :align "center"
-		       (<:as-html depth) " " (render (move node))))
-	   (<:tr :valign "top"
-		 (dolist (child children-sorted)
-		   (if (eq (parent child) alternative)
-		       (<:td :bgcolor "indigo"
-			     :style "font-style:bold;color:white;"
-			     (render-node-with-depth-and-alternative child
-								     (1+ depth)
-								     alternative))
-		       (<:td (render-node-with-depth-and-alternative child
-								     (1+ depth)
-								     alternative)))))))
-	(<:table
-	 (<:tr
-	  (<:td (<:as-is depth) " " (render (move node))))))))
-
-(defun render-strategy-with-alternative-node (strategy alternative)
+(defun render-strategy-with-alternative (strategy alternative)
   "Render STRATEGY, with the children of strategy node ALTERNATIVE in
   a distinctive color."
-  (render-node-with-depth-and-alternative (root strategy)
-					  0
-					  alternative))
+  (render-node-with-alternative (root strategy) alternative))
 
 ;;; strategy.lisp ends here

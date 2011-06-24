@@ -136,7 +136,7 @@
 	(progn
 	  (if opp-choice
 	      (progn
-		(render-strategy-with-alternative-node
+		(render-strategy-with-alternative
 		 (node->strategy opp-choice (ruleset (strategy self)))
 		 opp-choice)
 		(setf (choice-node self) opp-choice)
