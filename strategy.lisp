@@ -56,6 +56,10 @@
   (< (move-reference (move node-1))
      (move-reference (move node-2))))
 
+(defun node-reference-> (node-1 node-2)
+  (> (move-reference (move node-1))
+     (move-reference (move node-2))))
+
 (defun expand-strategy-node (node ruleset)
   (let* ((dialogue (node->dialogue node ruleset))
 	 (move (move node))
