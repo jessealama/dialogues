@@ -145,7 +145,7 @@
 		 (loop
 		    with prop-nodes = (children opp-choice)
 		    with prop-nodes-sorted = (sort (copy-list prop-nodes)
-						   #'node-reference-<)
+						   #'node-reference->)
 		    with num-children = (length prop-nodes-sorted)
 		    for prop-node in prop-nodes-sorted
 		    for prop-move = (move prop-node)
