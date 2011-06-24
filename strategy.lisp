@@ -462,14 +462,15 @@ the strategy.  If there no such node, return NIL."
 (defun render-node-with-depth-and-alternative (node depth alternative)
   (let ((children (children node)))
     (if children
-	(let ((num-children (length children)))
+	(let ((num-children (length children))
+	      (children-sorted (sort (copy-list children) #'node-reference->)))
 	  (<:table
 	   (<:tr :valign "top"
 		 (<:td :colspan num-children
 		       :align "center"
 		       (<:as-html depth) " " (render (move node))))
 	   (<:tr :valign "top"
-		 (dolist (child children)
+		 (dolist (child children-sorted)
 		   (if (eq (parent child) alternative)
 		       (<:td :bgcolor "indigo"
 			     :style "font-style:bold;color:white;"
