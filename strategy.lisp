@@ -408,18 +408,30 @@ the strategy.  If there no such node, return NIL."
 	(<:as-is (format nil "[~a,~d]" stance reference)) 
 	(<:as-is (format nil "(initial move)")))))
 
+(defun render-as-table-row (move)
+  (with-slots (player statement stance reference)
+      move
+    (<:tr
+     (<:td (<:as-is player))
+     (<:td (render statement))) 
+    (if (and stance reference)
+	(<:td (<:format "[~a,~d]" stance reference))
+	(<:td (<:em "(initial move)")))))
+
+
+
 (defun render-node-with-depth (node depth)
   (let ((children (children node)))
     (if children
 	(let ((num-children (length children)))
 	  (<:table
 	   (<:tr :valign "top"
-	    (<:td :colspan num-children
-		  :align "center"
-		  (<:as-html depth) " " (render (move node))))
+		 (<:td :colspan num-children
+		       :align "center"
+		       (<:as-html depth) " " (render (move node))))
 	   (<:tr :valign "top"
-	    (dolist (child children)
-	      (<:td (render-node-with-depth child (1+ depth)))))))
+		 (dolist (child children)
+		   (<:td (render-node-with-depth child (1+ depth)))))))
 	(<:table
 	 (<:tr
 	  (<:td (<:as-is depth) " " (render (move node))))))))
