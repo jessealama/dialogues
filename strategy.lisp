@@ -463,6 +463,7 @@ the strategy.  If there no such node, return NIL."
       (if (member node alternatives)
 	  (<:tr :bgcolor "indigo"
 		:nowrap "nowrap"
+		:valign "top"
 		:style "font-style:bold;color:white;"
 	   (<:td :align "left"
 		 (<:as-html depth))
@@ -478,6 +479,7 @@ the strategy.  If there no such node, return NIL."
 			 (<:as-html "[A," reference "]")
 			 (<:as-html "[D," reference "]")))))
 	  (<:tr :nowrap "nowrap"
+		:valign "top"
 	   (<:td :align "left"
 		 (<:as-html depth))
 	   (<:td :align "center"
@@ -503,7 +505,7 @@ the strategy.  If there no such node, return NIL."
   table element."
   (symbol-macrolet
       (($padding (dotimes (i padding) (<:td))))
-    (<:tr
+    (<:tr :valign "top"
      $padding
      (<:td :align "center"
        (<:table
@@ -528,7 +530,7 @@ the strategy.  If there no such node, return NIL."
 	    (<:thead
 	     (render-segment-with-padding-as-row node first-splitter (floor (/ num-succs 2)) (children alternative)))
 	    (<:tbody
-	     (<:tr
+	     (<:tr :valign "top"
 	      (if (evenp num-succs)
 		  (progn
 		    (loop
