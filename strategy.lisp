@@ -522,13 +522,17 @@ the strategy.  If there no such node, return NIL."
     (if (null first-splitter)
 	(let ((leaf (first (leaves node))))
 	  (<:table
-	   (render-segment-with-padding-as-row node leaf 0 (children alternative))))
+	   (render-segment-with-padding-as-row node leaf 0 (when alternative
+							     (children alternative)))))
 	(let* ((succs (children first-splitter))
 	       (num-succs (length succs)))
 	  (<:table :rules "groups"
 		   :frame "void"
 	    (<:thead
-	     (render-segment-with-padding-as-row node first-splitter (floor (/ num-succs 2)) (children alternative)))
+	     (render-segment-with-padding-as-row node first-splitter
+						 (floor (/ num-succs 2))
+						 (when alternative
+						   (children alternative))))
 	    (<:tbody
 	     (<:tr :valign "top"
 	      (if (evenp num-succs)
@@ -539,7 +543,9 @@ the strategy.  If there no such node, return NIL."
 		       for succ = (nth i succs)
 		       do
 			 (<:td :align "center"
-			   (render-node-with-alternative succ alternative)))
+			   (render-node-with-alternative succ
+							 (when alternative
+							   alternative))))
 		    (<:td)
 		    (loop
 		       with cleft-point = (/ num-succs 2)
@@ -547,7 +553,8 @@ the strategy.  If there no such node, return NIL."
 		       for succ = (nth i succs)
 		       do
 			 (<:td :align "center"
-			   (render-node-with-alternative succ alternative))))
+			   (render-node-with-alternative succ (when alternative
+								alternative)))))
 		  (loop
 		     for succ in succs
 		     do
