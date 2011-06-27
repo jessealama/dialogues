@@ -536,7 +536,7 @@ the strategy.  If there no such node, return NIL."
 		    (loop
 		       with cleft-point = (/ num-succs 2)
 		       for i from 0 upto (1- cleft-point)
-		       with succ = (nth i succs)
+		       for succ = (nth i succs)
 		       do
 			 (<:td :align "center"
 			   (render-node-with-alternative succ alternative)))
@@ -544,7 +544,7 @@ the strategy.  If there no such node, return NIL."
 		    (loop
 		       with cleft-point = (/ num-succs 2)
 		       for i from cleft-point upto (1- num-succs)
-		       with succ = (nth i succs)
+		       for succ = (nth i succs)
 		       do
 			 (<:td :align "center"
 			   (render-node-with-alternative succ alternative))))
