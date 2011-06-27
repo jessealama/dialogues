@@ -172,7 +172,7 @@
 		(if (winning-strategy? strategy)
 		    (progn
 		      (<:p "Congratulations!  You've found a winning strategy.  Here it is:")
-		      (render strategy))
+		      (render-strategy-with-alternative strategy nil))
 		    
 		    (<:p "I'm sorry to say that there is no winning strategy consistent with your choices so far."))
 		(let ((alternatives (alternatives self)))
