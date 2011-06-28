@@ -351,6 +351,33 @@
 		  (return nil)))))
       finally (return t))))
 
+(defparameter rule-d11-most-recent-attack
+  (make-structural-rule
+   :name "d11-most-recent-attack"
+   :description "You must defend against the most recent attack."
+   :predicate
+   (loop
+      with len = (dialogue-length dialogue)
+      for move in (if final-move-only
+		      (subseq (dialogue-plays dialogue) (1- len))
+		      (dialogue-plays dialogue))
+      for i from (if final-move-only
+		     (1- len)
+		     0)
+      do
+	(when (defensive-move? move)
+	  (let* ((player (move-player move))
+		 (reference (move-reference move))
+		 (other-player (other-player player))
+		 (later-moves (subseq (dialogue-plays dialogue) (1+ reference) i))
+		 (later-attacks-by-other-player (remove-if-not #'(lambda (other-move)
+								   (and (eq (move-player other-move) other-player)
+									(attacking-move? other-move)))
+							       later-moves)))
+	    (when later-attacks-by-other-player
+	      (return nil))))
+      finally (return t))))
+
 (defparameter rule-d11-queue
   (make-structural-rule
    :name "d11-queue"
@@ -573,6 +600,21 @@
 				      rule-d13
 				      rule-e))
 		 :description "Classical logic rules (drop Felscher's D11 and D12, but add rule E)"))
+
+(defparameter conjectural-classical-dialogue-rules
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms 
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      rule-d11-most-recent-attack
+				      ; rule-d12
+				      rule-d13
+				      rule-e))
+		 :description "Conjectural classical logic rules (drop D11 and D12, add rule E, add most-recent-attack D11)"))
 
 (defparameter nearly-classical-dialogue-rules
   (make-instance 'ruleset
