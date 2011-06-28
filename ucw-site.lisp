@@ -11,6 +11,7 @@
 	e-dialogue-rules-queue
 	nearly-classical-dialogue-rules
 	classical-dialogue-rules
+	conjectural-classical-dialogue-rules
 	d-dialogue-rules-minus-d10
 	d-dialogue-rules-minus-d11
 	e-dialogue-rules-minus-d11
