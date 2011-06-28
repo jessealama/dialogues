@@ -434,7 +434,7 @@
 (defparameter rule-d13
   (make-structural-rule
    :name "D13"
-   :description "A P-assertion may be attacked at most once."
+   :description "Proponent's assertions may be attacked at most once."
    :predicate
    (loop
       with len = (dialogue-length dialogue)
