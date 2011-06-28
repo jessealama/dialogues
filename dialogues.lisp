@@ -315,6 +315,11 @@ attacks which, being symbols, do qualify as terms."
 	  :accessor rules
 	  :initform nil
 	  :type list)
+   (name
+    :initarg :name
+    :accessor name
+    :initform "(no name was supplied)"
+    :type string)
    (description :initarg :description
 		:accessor description
 		:initform "(no description was supplied)"
