@@ -832,7 +832,22 @@
 				      ;; rule-d11
 				      rule-d12
 				      rule-d13))
-		 :description "D rules, but you may defend against any open attack"))
+		 :description "D rules, but you may defend against any open attack (D11 absent)"))
+
+(defparameter e-dialogue-rules-minus-d11
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      ;; rule-d11
+				      rule-d12
+				      rule-d13
+				      rule-e))
+		 :description "E rules, but you may defend against any open attack (D11 absent)"))
 
 (defparameter d-dialogue-rules-minus-d12
   (make-instance 'ruleset
@@ -846,7 +861,22 @@
 				      rule-d11
 				      ;; rule-d12
 				      rule-d13))
-		 :description "D rules, but attacks may be answered any number of times"))
+		 :description "D rules, but attacks may be answered any number of times (D12 absent)"))
+
+(defparameter e-dialogue-rules-minus-d12
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      rule-d11
+				      ;; rule-d12
+				      rule-d13
+				      rule-e))
+		 :description "E rules, but attacks may be answered any number of times (D12 absent)"))
 
 (defparameter d-dialogue-rules-symmetric-d13
   (make-instance 'ruleset

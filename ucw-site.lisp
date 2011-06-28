@@ -13,7 +13,9 @@
 	classical-dialogue-rules
 	d-dialogue-rules-minus-d10
 	d-dialogue-rules-minus-d11
+	e-dialogue-rules-minus-d11
 	d-dialogue-rules-minus-d12
+	e-dialogue-rules-minus-d12
 	d-dialogue-rules-symmetric-d13
 	d-dialogue-rules-literal-d10
 	e-dialogue-rules-literal-d10
