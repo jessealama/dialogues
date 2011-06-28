@@ -1157,8 +1157,10 @@ current turn number is the selected one.")
       (<:p "With the current ruleset, the game is incoherent.  Here is
       a listing of the game, annotated with the violating moves:")
       (<:div :style "border:1px solid;"
-        (render-game game :moves-to-highlight (mapcar #'car indices-and-violated-rules)
-		     :heuristics (heuristics self)))
+        (render-game game
+		     :moves-to-highlight (mapcar #'car indices-and-violated-rules)
+		     :heuristics (heuristics self)
+		     :extra-rules (extra-rules self)))
       (<:p "At least one move of the game is violated with these rules:")
       (<:ul 
        (dolist (index-and-violators indices-and-violated-rules)
@@ -1252,6 +1254,7 @@ current turn number is the selected one.")
 	       (<:p "Here is a continuation of the initial game that leads to a win no more than " (<:as-html depth) " " (if (= depth 1) (<:as-is "move") (<:as-is "moves")) " beyond the end of the initial game:")
 	       (<:div :style "border:1px solid"
 	         (render-game winning-play
+			      :extra-rules (extra-rules self)
 			      :heuristics (heuristics self)))))
 	     ((null result)
 	      (<:h1 "Ouch!")
@@ -1497,6 +1500,7 @@ that all the rules in your edited ruleset are satisfied.")
       (<:div :style "border:1px solid"
         (render-game game 
 		     :play-style play-style
+		     :extra-rules (extra-rules self)
 		     :heuristics (heuristics self)
 		     :indicate-alternatives t))
       (<:h1 "Choose from the available moves...")
@@ -1534,6 +1538,7 @@ that all the rules in your edited ruleset are satisfied.")
     (<:div :style "border:1px solid;"
       (render-game game
 		   :play-style play-style
+		   :extra-rules (extra-rules self)
 		   :heuristics (heuristics self)
 		   :moves-to-highlight (list move-number)))
     (<:p "Alternatives at move " (<:as-html move-number) ":")
@@ -1628,12 +1633,27 @@ that all the rules in your edited ruleset are satisfied.")
 (defun render-game (game &key indicate-alternatives
 		              play-style
 		              heuristics
+		              extra-rules
 		              moves-to-highlight)
   ;; (render-signature (dialogue-signature game))
   (let ((ruleset (dialogue-rules game)))
-    (<:p (<:em "Ruleset: ")
-	 (<:as-html (description ruleset)))
-    (<:p (<:em "Heuristics: ")
+    (<:p (<:em "Base ruleset: ")
+	 (progn
+	   (<:strong (<:as-html (name ruleset)))
+	   ": "
+	   (<:as-html (description ruleset))))
+    (<:p (<:em "Extra rules:")
+	 (if extra-rules
+	     (<:ul
+	      (dolist (rule extra-rules)
+		(<:li
+		 (<:strong (<:as-html (name rule)))
+		 ": "
+		 (<:as-html (description rule)))))
+	     (progn
+	       (<:as-html " ")
+	       (<:em "(none)"))))
+    (<:p (<:em "Heuristic rules: ")
 	 (render-heuristics heuristics)))
   (<:hr)
   (<:table 
@@ -1944,16 +1964,16 @@ with which the game begins."))
 (defmethod render ((self play-style-info))
   (<:p (<:em (<:b "About the play style:")) " The default mode of playing is to take on the role of both players: at each move, you'll see all possible moves that can be made, from the perspective of both players.  Two other play styles are supported: play as Proponent with a random Opponent, and play as Opponent with a random Proponent."))
 
-(defmacro ruleset-row (ruleset selector)
+(defmacro ruleset-row (ruleset)
   (let ((id (format nil "~a-radio" ruleset)))
     `(<:tr
       :valign "top"
       (<:td
        :nowrap "nowrap"
        (<ucw:input :type "radio"
-		   :accessor ,selector
 		   :name "selected-rules"
-		   :value ,ruleset
+		   :accessor (name ,ruleset)
+		   :value (name ,ruleset)
 		   :id ,id)
        (<:label
 	:for ,id
@@ -1961,9 +1981,13 @@ with which the game begins."))
       (<:td
        (<:as-html (description ,ruleset))))))
 
-(defmacro rule-checkbox-row (rule)
-  (let* ((selector (intern (format nil "~a-checked" rule) :dialogues))
-	 (id (format nil "~a-checkbox" rule)))
+(defmacro ruleset-option (ruleset)
+  `(<ucw:option
+    :value ',ruleset
+    (<:as-html (name ,ruleset) ": " (description ,ruleset))))
+
+(defmacro rule-checkbox-row (rule selector)
+  (let ((id (format nil "~a-checkbox" rule)))
     `(<:tr
       :valign "top"
       (<:td
@@ -1971,7 +1995,8 @@ with which the game begins."))
        (<ucw:input
 	:type "checkbox"
 	:accessor ,selector
-	:value ,rule
+	:name (name ,rule)
+	:value ',rule
 	:id ,id)
        (<:label
 	:for ,id
@@ -2049,17 +2074,16 @@ with which the game begins."))
        ($ruleset
 	(or (ruleset self)
 	    (copy-ruleset
-	     (cond (d-dialogue-rules-selected
-		    d-dialogue-rules)
-		   (e-dialogue-rules-selected
-		    e-dialogue-rules)
-		   (classical-dialogue-rules-selected
-		    classical-dialogue-rules)
-		   (nearly-classical-dialogue-rules-selected
-		    nearly-classical-dialogue-rules)
-		   (t (make-instance 'ruleset
-				     :name "(No name)"
-				     :description "An ad hoc ruleset"))))))
+	     (ecase selected-rules
+	       (d-dialogue-rules d-dialogue-rules)
+	       (e-dialogue-rules e-dialogue-rules)
+	       (classical-dialogue-rules classical-dialogue-rules)
+	       (nearly-classical-dialogue-rules nearly-classical-dialogue-rules)
+	       (skeletal-rules skeletal-rules)))))
+       ($trimmed-extra-rules
+	(remove-if #'(lambda (rule)
+		       (member rule (rules $ruleset)))
+		   $extra-rules))
        ($actual-ruleset
 	(make-instance 'ruleset
 		       :name (name $ruleset)
@@ -2081,11 +2105,12 @@ with which the game begins."))
 					:root root)))
 	     (call 'strategy-editor
 		   :strategy strat
-		   :extra-rules $extra-rules
+		   :extra-rules $trimmed-extra-rules
 		   :heuristics $heuristics)))
 	  (play-as-both-proponent-and-opponent
 	   (call 'turn-editor
 		 :play-style 'play-as-both-proponent-and-opponent
+		 :extra-rules $trimmed-extra-rules
 		 :heuristics nil
 		 :game (make-dialogue (apply-translation selected-translation $formula)
 				      sig
@@ -2093,6 +2118,7 @@ with which the game begins."))
 	  (play-as-proponent-random-opponent
 	   (call 'turn-editor
 		 :play-style 'play-as-proponent-random-opponent
+		 :extra-rules $trimmed-extra-rules
 		 :heuristics $heurstics
 		 :game (let ((initial-dialogue
 			      (make-dialogue (apply-translation selected-translation $formula)
@@ -2105,6 +2131,7 @@ with which the game begins."))
 			   (if (null all-opponent-moves)
 			       (call 'turn-editor
 				     :play-style 'play-as-proponent-random-opponent
+				     :extra-rules $trimmed-extra-rules
 				     :heuristics nil
 				     :game initial-dialog)
 			       (let ((random-move (random-element all-opponent-moves)))
@@ -2114,12 +2141,14 @@ with which the game begins."))
 				       (call 'turn-editor
 				 
 					     :play-style 'play-as-proponent-random-opponent
+					     :extra-rules $trimmed-extra-rules
 					     :heuristics nil
 					     :game (add-move-to-dialogue-at-position initial-dialogue
 										     (make-move 'o statement 'a reference)
 										     1))
 				       (call 'turn-editor
 					     :play-style 'play-as-proponent-random-opponent
+					     :extra-rules $trimmed-extra-rules
 					     :heuristics nil
 					     :game (add-move-to-dialogue-at-position initial-dialogue
 										     (make-move 'o statement 'd reference)
@@ -2127,6 +2156,7 @@ with which the game begins."))
 	  (play-as-opponent-random-proponent
 	   (call 'turn-editor
 		 :play-style 'play-as-opponent-random-proponent
+		 :extra-rules $trimmed-extra-rules
 		 :heuristics nil
 		 :game (make-dialogue (apply-translation selected-translation $formula)
 				      sig
@@ -2195,32 +2225,34 @@ with which the game begins."))
 		       (<:th "Heuristic Rules")))
 		     (<:tbody
 		      (<:tr
-		       :valign "top"
+		       :valign "middle"
+		       (<:td
+			(<ucw:select
+			 :accessor selected-rules
+			 (ruleset-option d-dialogue-rules)
+			 (ruleset-option e-dialogue-rules)
+			 (ruleset-option classical-dialogue-rules)
+			 (ruleset-option nearly-classical-dialogue-rules)
+			 (ruleset-option skeletal-rules)))
 		       (<:td
 			(<:table
-			 (ruleset-row d-dialogue-rules d-dialogue-rules-selected)
-			 (ruleset-row e-dialogue-rules e-dialogue-rules-selected)
-			 (ruleset-row classical-dialogue-rules classical-dialogue-rules-selected)
-			 (ruleset-row nearly-classical-dialogue-rules nearly-classical-dialogue-rules-selected)))
+			 (rule-checkbox-row rule-d10 rule-d10-checked)
+			 (rule-checkbox-row rule-d11 rule-d11-checked)
+			 (rule-checkbox-row rule-d12 rule-d12-checked)
+			 (rule-checkbox-row rule-d13 rule-d13-checked)
+			 (rule-checkbox-row rule-e rule-e-checked)))
 		       (<:td
 			(<:table
-			 (rule-checkbox-row rule-d10)
-			 (rule-checkbox-row rule-d11)
-			 (rule-checkbox-row rule-d12)
-			 (rule-checkbox-row rule-d13)
-			 (rule-checkbox-row rule-e)))
+			 (rule-checkbox-row rule-d10-literal rule-d10-literal-checked)
+			 (rule-checkbox-row rule-d11-most-recent-attack rule-d11-most-recent-attack-checked)
+			 (rule-checkbox-row rule-d11-queue rule-d11-queue-checked)
+			 (rule-checkbox-row rule-d13-symmetric rule-d13-symmetric-checked)
+			 (rule-checkbox-row rule-d12-two-times rule-d12-two-times-checked)
+			 (rule-checkbox-row rule-d13-two-times rule-d13-two-times-checked)
+			 (rule-checkbox-row rule-d13-three-times rule-d13-three-times-checked)))
 		       (<:td
 			(<:table
-			 (rule-checkbox-row rule-d10-literal)
-			 (rule-checkbox-row rule-d11-most-recent-attack)
-			 (rule-checkbox-row rule-d11-queue)
-			 (rule-checkbox-row rule-d13-symmetric)
-			 (rule-checkbox-row rule-d12-two-times)
-			 (rule-checkbox-row rule-d13-two-times)
-			 (rule-checkbox-row rule-d13-three-times)))
-		       (<:td
-			(<:table
-			 (rule-checkbox-row proponent-no-repeats))))))
+			 (rule-checkbox-row proponent-no-repeats proponent-no-repeats-checked))))))
 		    (<:as-html (description (ruleset self))))))
 	 (<:tr
 	  :style "background-color:#A3D800;"
