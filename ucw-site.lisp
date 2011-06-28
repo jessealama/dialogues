@@ -530,7 +530,7 @@ Web" "UnCommon Web") " system.  The Common Lisp implementation is " (<:a :href "
 	      :initform nil)))
 
 (defmethod render ((self turn-evaluator))
-  (with-slots (player statement stance reference game play-style)
+  (with-slots (player statement stance reference game play-style heuristics extra-rules)
       self
     (let ((game-len (dialogue-length game)))
     (if (and player statement stance reference)
@@ -574,12 +574,14 @@ Web" "UnCommon Web") " system.  The Common Lisp implementation is " (<:a :href "
 			   (render-move-in-game 
 			    play game i
 			    :indicate-alternatives nil
+			    :heuristics heuristics
+			    :extra-rules extra-rules
 			    :play-style play-style
 			    :attack-is-closed (not (member i open-attacks 
 							   :test #'=))))
 		      (<:tr :style "background-color:#FF3333;"
 			    (<:td :align "left" (<:as-html game-len))
-			    (<:td :align "center" (<:as-html player))
+			    (<:td :align "center" (<:strong (<:as-html player)))
 			    (<:td :align "left" (render statement))
 			    (<:td :align "right"
 				  (<:as-html "[" stance "," reference "]"))
@@ -1554,6 +1556,8 @@ that all the rules in your edited ruleset are satisfied.")
 				      move-number)
 				     play
 				     move-number)
+			      :heuristics (heuristics self)
+			      :extra-rules (extra-rules self)
 			      :play-style play-style)
 			(<:as-html
 			 (if (eq player 'p)
@@ -1570,6 +1574,8 @@ that all the rules in your edited ruleset are satisfied.")
     (<:p "Follow a link to rewind the current game to move " (<:as-html move-number) " and play the selected alternative move rather than what was actually asserted.  Or, " (<ucw:a :action
   					  (call 'turn-editor
 						:play-style play-style
+						:heuristics (heuristics self)
+						:extra-rules (extra-rules self)
   						:game game)
   					  "continue playing the original game")
     ".")))
@@ -1581,6 +1587,8 @@ that all the rules in your edited ruleset are satisfied.")
 (defun render-move-in-game (play game move-number
 			      &key indicate-alternatives
 			           play-style
+			           heuristics
+			           extra-rules
 			           attack-is-closed
 			           move-is-alternative)
   (with-slots (player statement stance reference)
@@ -1619,6 +1627,8 @@ that all the rules in your edited ruleset are satisfied.")
 		(<:td :align "center"
 		 (<ucw:a :action
 			 (call 'alternative-move-chooser
+			       :heuristics heuristics
+			       :extra-rules extra-rules
 			       :play-style play-style
 			       :game game
 			       :actual-play play
@@ -1677,6 +1687,8 @@ that all the rules in your edited ruleset are satisfied.")
 		 (render-move-in-game 
 		  play game i
 		  :indicate-alternatives indicate-alternatives
+		  :heuristics heuristics
+		  :extra-rules extra-rules
 		  :play-style play-style
 		  :attack-is-closed (not (member i open-attacks :test #'=))
 		  :move-is-alternative (member i moves-to-highlight :test #'=)))))))
@@ -2108,7 +2120,7 @@ with which the game begins."))
 	   (call 'turn-editor
 		 :play-style 'play-as-both-proponent-and-opponent
 		 :extra-rules $trimmed-extra-rules
-		 :heuristics nil
+		 :heuristics $heuristics
 		 :game (make-dialogue (apply-translation selected-translation $formula)
 				      sig
 				      $actual-ruleset)))
@@ -2129,7 +2141,7 @@ with which the game begins."))
 			       (call 'turn-editor
 				     :play-style 'play-as-proponent-random-opponent
 				     :extra-rules $trimmed-extra-rules
-				     :heuristics nil
+				     :heuristics $heuristics
 				     :game initial-dialog)
 			       (let ((random-move (random-element all-opponent-moves)))
 				 (destructuring-bind (statement reference)
@@ -2139,14 +2151,14 @@ with which the game begins."))
 				 
 					     :play-style 'play-as-proponent-random-opponent
 					     :extra-rules $trimmed-extra-rules
-					     :heuristics nil
+					     :heuristics $heuristics
 					     :game (add-move-to-dialogue-at-position initial-dialogue
 										     (make-move 'o statement 'a reference)
 										     1))
 				       (call 'turn-editor
 					     :play-style 'play-as-proponent-random-opponent
 					     :extra-rules $trimmed-extra-rules
-					     :heuristics nil
+					     :heuristics $heuristics
 					     :game (add-move-to-dialogue-at-position initial-dialogue
 										     (make-move 'o statement 'd reference)
 										     1))))))))))
@@ -2154,7 +2166,7 @@ with which the game begins."))
 	   (call 'turn-editor
 		 :play-style 'play-as-opponent-random-proponent
 		 :extra-rules $trimmed-extra-rules
-		 :heuristics nil
+		 :heuristics $heuristics
 		 :game (make-dialogue (apply-translation selected-translation $formula)
 				      sig
 				      $actual-ruleset))))))
