@@ -1303,7 +1303,7 @@ current turn number is the selected one.")
       (<:td :align "left"
 	    (<:as-html depth))
       (<:td :align "center"
-	    (<:as-html player))
+	    (<:strong (<:as-html player)))
       (<:td :align "left"
 	    (render statement))
       (<:td :align "left"
