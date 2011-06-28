@@ -2265,13 +2265,13 @@ with which the game begins."))
 		 :accessor selected-play-style
 		 (<ucw:option
 		  :value 'play-as-both-proponent-and-opponent
-		  "Play a game as both proponent and opponent")
+		  "Play a game as both Proponent and Opponent")
 		 (<ucw:option
 		  :value 'play-as-proponent-random-opponent
 		  "Play a game as Proponent (Opponent will choose its moves randomly)")
 		 (<ucw:option
 		  :value 'play-as-opponent-random-proponent
-		  "Play a game as Opponent (Propnent will choose its moves randomly)")
+		  "Play a game as Opponent (Proponent will choose its moves randomly)")
 		 (<ucw:option
 		  :value 'interactive-strategy-search
 		  "Search for a winning strategy")))))))))))
