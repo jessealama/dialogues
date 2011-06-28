@@ -274,6 +274,20 @@
 	   'string
 	   strings))
 
+(defun lex< (str-1 str-2)
+  (cond ((string= str-1 "")
+	 (not (string= str-2 "")))
+	((string= str-2 "")
+	 t)
+	(t (let ((char-1 (char str-1 0))
+		(char-2 (char str-2 0)))
+	     (cond ((char< char-1 char-2)
+		    t)
+		   ((char= char-1 char-2)
+		    (lex< (subseq str-1 1)
+			  (subseq str-2 1)))
+		   (t nil))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Evaluation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
