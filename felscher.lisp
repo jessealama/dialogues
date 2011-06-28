@@ -274,7 +274,7 @@
 (defparameter rule-d10
   (make-structural-rule 
    :name "D10"
-   :description "Proponent cannot assert an atomic formula before opponent has asserted it."
+   :description "Proponent cannot assert an atomic formula before Opponent has asserted it."
   :predicate
   (loop
      with len = (dialogue-length dialogue)
