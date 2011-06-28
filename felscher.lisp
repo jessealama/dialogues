@@ -586,6 +586,17 @@
 				      rule-e))
 		 :description "E rules (D rules + Opponent must always respond to the immediately previous move), with queue-style D11"))
 
+(defparameter skeletal-rules
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack))
+		 :name "Skeletal"
+		 :description "Minimal structural rules"))
+
 (defparameter classical-dialogue-rules
   (make-instance 'ruleset
 		 :rules (append argumentation-forms 
