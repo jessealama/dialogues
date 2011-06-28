@@ -273,7 +273,7 @@
 
 (defparameter rule-d10
   (make-structural-rule 
-   :name "d10"
+   :name "D10"
    :description "Proponent cannot assert an atomic formula before opponent has asserted it."
   :predicate
   (loop
@@ -299,8 +299,8 @@
 
 (defparameter rule-d10-literal
   (make-structural-rule
-   :name "d10-literal"
-   :description "Proponent may assert an atomic formula only if Opponent has either asserted that formula, or its negation, earlier in the dialogue."
+   :name "D10-literal"
+   :description "Proponent may assert an atom only if Opponent has earlier asserted either that atom or its negation."
    :predicate
    (loop 
       with len = (dialogue-length dialogue)
@@ -330,7 +330,7 @@
 
 (defparameter rule-d11
   (make-structural-rule
-   :name "d11"
+   :name "D11"
    :description "You must defend against the most recent open attack."
    :predicate
    (loop
@@ -353,8 +353,8 @@
 
 (defparameter rule-d11-most-recent-attack
   (make-structural-rule
-   :name "d11-most-recent-attack"
-   :description "You must defend against the most recent attack."
+   :name "D11-most-recent"
+   :description "You must defend against the most recent attack (open or closed)."
    :predicate
    (loop
       with len = (dialogue-length dialogue)
@@ -380,7 +380,7 @@
 
 (defparameter rule-d11-queue
   (make-structural-rule
-   :name "d11-queue"
+   :name "D11-queue"
    :description "You must defend against the earliest open attack."
    :predicate
    (if final-move-only
@@ -412,7 +412,7 @@
 
 (defparameter rule-d12
   (make-structural-rule
-   :name "d12"
+   :name "D12"
    :description "Attacks may be answered at most once."
    :predicate
    (loop 
@@ -433,7 +433,7 @@
 
 (defparameter rule-d13
   (make-structural-rule
-   :name "d13"
+   :name "D13"
    :description "A P-assertion may be attacked at most once."
    :predicate
    (loop
@@ -458,7 +458,7 @@
 
 (defparameter rule-d13-symmetric
   (make-structural-rule
-   :name "d13-symmetric"
+   :name "Symmetric D13"
    :description "Assertions can be attacked at most once"
    :predicate
    (loop
@@ -482,7 +482,7 @@
 
 (defparameter rule-e
    (make-structural-rule 
-    :name "e"
+    :name "E"
     :description "Opponent must react to the most recent statement by Proponent."
     :predicate 
     (loop 
@@ -500,19 +500,17 @@
 	       (return nil))))
        finally (return t))))
 
-;; (defparameter rule-no-repetitions
-;;   (make-structuralrule
-;;    :name "no-repetitions"
-;;    :precondition t
-;;    :body (every-move #'(lambda (move)
-;; 			 (or (initial-move? move)
-;; 			     (not (eq (move-player move) current-player))
-;; 			     (/= (move-reference move) current-reference)
-;; 			     (not (eq (move-stance move) current-stance))
-;; 			     (not (equal-statements? (move-statement move)
-;; 						     current-statement))))
-;; 		     dialogue)
-;;    :description "You may not make the exact same move (same stance, same reference, same statement) twice."))
+(defparameter rule-no-repetitions
+  (make-structural-rule
+   :name "No repetitions"
+   :description "You may not make the exact same move (same stance, same reference, same statement) twice."
+   :predicate
+   (every-move #'(lambda (move)
+		   (every-move #'(lambda (other-move) (or (eq move other-move)
+							  (not (equal-moves? move
+									     other-move))))
+			       dialogue)) 
+	       dialogue)))
 
 (defparameter d-dialogue-rules 
   (make-instance 'ruleset
@@ -526,7 +524,8 @@
 				      rule-d11
 				      rule-d12
 				      rule-d13))
-		 :description "D rules (basic rules for intuitionistic logic)"))
+		 :name "D"
+		 :description "D10, D11, D12, and D13"))
 
 (defparameter jesse-kludge
   (make-instance 'ruleset
@@ -569,7 +568,8 @@
 				      rule-d12
 				      rule-d13
 				      rule-e))
-		 :description "E rules (D rules + Opponent must always respond to the immediately previous move)"))
+		 :name "E"
+		 :description "D rules plus rule E"))
 
 (defparameter e-dialogue-rules-queue
   (make-instance 'ruleset
@@ -599,7 +599,8 @@
 				      ; rule-d12
 				      rule-d13
 				      rule-e))
-		 :description "Classical logic rules (drop Felscher's D11 and D12, but add rule E)"))
+		 :name "CL"
+		 :description "E rules minus D11 and D12"))
 
 (defparameter conjectural-classical-dialogue-rules
   (make-instance 'ruleset
@@ -629,7 +630,8 @@
 				      ;; rule-d12
 				      rule-d13
 				      ))
-		 :description "N rules (D10 + D13)"))
+		 :name "N"
+		 :description "D10 and D13"))
 
 (defparameter sara-ad-hoc-rules
   (make-instance 'ruleset
@@ -672,8 +674,8 @@
 
 (defparameter proponent-no-repeats
   (make-structural-rule
-   :name "proponent-no-repeats"
-   :description "Proponent cannot repeat moves"
+   :name "P-no-repeat"
+   :description "P cannot repeat moves"
    :predicate
    (every-proponent-move #'(lambda (pro-move)
 			     (not (repetition-in-dialogue? pro-move dialogue)))
@@ -796,7 +798,7 @@
 
 (defparameter rule-d12-two-times
   (make-defensive-rule
-   :name "d12"
+   :name "D12 (2)"
    :body (every-move #'(lambda (move)
 			 (or (initial-move? move)
 			     (attacking-move? move)
@@ -807,17 +809,17 @@
 
 (defparameter rule-d13-two-times
   (make-offensive-rule
-   :name "d13-two-times"
+   :name "D13 (2)"
    :precondition (eq current-player 'o)
    :body (length-at-most (moves-referring-to dialogue current-reference) 2)
    :description "A P-assertion may be attacked at most twice."))
 
 (defparameter rule-d13-three-times
   (make-offensive-rule
-   :name "d13-three-times"
+   :name "D13 (3)"
    :precondition (eq current-player 'o)
    :body (length-at-most (moves-referring-to dialogue current-reference) 3)
-   :description "A P-assertion may be attacked at most twice."))
+   :description "A P-assertion may be attacked at most three times."))
 
 (defparameter d-dialogue-rules-literal-d10
   (make-instance 'ruleset
