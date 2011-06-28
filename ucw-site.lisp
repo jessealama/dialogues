@@ -5,32 +5,37 @@
 (defvar *maintainer-email* "jesse.alama@gmail.com")
 
 (defparameter available-rulesets
-  (list d-dialogue-rules 
-	d-dialogue-rules-queue
-	e-dialogue-rules
-	e-dialogue-rules-queue
-	nearly-classical-dialogue-rules
-	classical-dialogue-rules
-	conjectural-classical-dialogue-rules
-	d-dialogue-rules-minus-d10
-	d-dialogue-rules-minus-d11
-	e-dialogue-rules-minus-d11
-	d-dialogue-rules-minus-d12
-	e-dialogue-rules-minus-d12
-	d-dialogue-rules-symmetric-d13
-	d-dialogue-rules-literal-d10
-	e-dialogue-rules-literal-d10
-	d-dialogue-rules-inverted
-	e-dialogue-rules-inverted
-	classical-dialogue-rules-inverted
-	only-particle-rules
-	particle-rules+d10
-	particle-rules+d11
-	particle-rules+d12
-	particle-rules+d13
-	particle-rules+e
-	sara-ad-hoc-rules
-	sara-ad-hoc-rules-2))
+  (append
+   ;; main rulesets
+   (list d-dialogue-rules 
+	 e-dialogue-rules
+	 classical-dialogue-rules
+	 nearly-classical-dialogue-rules)
+   ;; experimental rulesets
+   (sort (list d-dialogue-rules-queue
+	       e-dialogue-rules-queue
+	       conjectural-classical-dialogue-rules
+	       d-dialogue-rules-minus-d10
+	       d-dialogue-rules-minus-d11
+	       e-dialogue-rules-minus-d11
+	       d-dialogue-rules-minus-d12
+	       e-dialogue-rules-minus-d12
+	       d-dialogue-rules-symmetric-d13
+	       d-dialogue-rules-literal-d10
+	       e-dialogue-rules-literal-d10
+	       d-dialogue-rules-inverted
+	       e-dialogue-rules-inverted
+	       classical-dialogue-rules-inverted
+	       only-particle-rules
+	       particle-rules+d10
+	       particle-rules+d11
+	       particle-rules+d12
+	       particle-rules+d13
+	       particle-rules+e
+	       sara-ad-hoc-rules
+	       sara-ad-hoc-rules-2)
+	 #'lex<
+	 :key #'description)))
 
 (defparameter available-heuristics
   (list proponent-no-repeats))
