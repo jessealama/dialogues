@@ -2034,7 +2034,8 @@ with which the game begins."))
 	rule-d12-two-times-checked
 	rule-d13-two-times-checked
 	rule-d13-three-times-checked
-	proponent-no-repeats-checked)
+	proponent-no-repeats-checked
+	rule-no-repetitions-checked)
   (symbol-macrolet
       (($formula
 	(let ((sig (signature self)))
@@ -2072,11 +2073,11 @@ with which the game begins."))
 	    (push rule-d13-two-times extras))
 	  (when rule-d13-three-times-checked
 	    (push rule-d13-three-times extras))
-	  (when proponent-no-repeats-checked
-	    (push proponent-no-repeats extras))
 	  (reverse extras)))
        ($heuristics
 	(let (heuristics)
+	  (when rule-no-repetitions-checked
+	    (push rule-no-repetitions heuristics))
 	  (when proponent-no-repeats-checked
 	    (push proponent-no-repeats heuristics))
 	  (reverse heuristics)))
@@ -2261,6 +2262,7 @@ with which the game begins."))
 			 (rule-checkbox-row rule-d13-three-times rule-d13-three-times-checked)))
 		       (<:td
 			(<:table
+			 (rule-checkbox-row rule-no-repetitions rule-no-repetitions-checked)
 			 (rule-checkbox-row proponent-no-repeats proponent-no-repeats-checked))))))
 		    (<:as-html (description (ruleset self))))))
 	 (<:tr
