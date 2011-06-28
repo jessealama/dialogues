@@ -4,6 +4,28 @@
 
 (defvar *maintainer-email* "jesse.alama@gmail.com")
 
+(defparameter standard-rulesets
+  (list d-dialogue-rules
+	e-dialogue-rules
+	classical-dialogue-rules
+	nearly-classical-dialogue-rules))
+
+(defparameter standard-structural-rules
+  (list rule-d10
+	rule-d11
+	rule-d12
+	rule-d13
+	rule-e))
+
+(defparameter exotic-structural-rules
+  (list rule-d10-literal
+	rule-d11-most-recent-attack
+	rule-d11-queue
+	rule-d13-symmetric
+	rule-d12-two-times
+	rule-d13-two-times
+	rule-d13-three-times))
+
 (defparameter available-rulesets
   (append
    ;; main rulesets
@@ -60,6 +82,11 @@
 	    :initform nil
 	    :accessor ruleset
 	    :type (or null ruleset))
+   (extra-rules
+    :initarg :extra-rules
+    :accessor extra-rules
+    :initform nil
+    :type list)
    (heuristics
     :initarg :heuristics
     :initform nil
@@ -136,9 +163,17 @@
 
 (defmethod render ((self strategy-editor))
   (let* ((strategy (strategy self))
+	 (heuristics (heuristics self))
+	 (extra-rules (extra-rules self))
 	 (opp-choice (first-proponent-choice strategy)))
-    (<:p (<:b "Ruleset:") " " (<:format (description (ruleset strategy))))
-    (<:p (<:b "Heuristic rules:") " " (render-heuristics (heuristics self)))
+    (<:p (<:b "Base ruleset:") " " (<:format (description (ruleset strategy))))
+    (<:p (<:b "Extra rules:")
+	 (if (null extra-rules)
+	     (progn (<:as-is " ") (<:em "(none"))
+	     (<:ul
+	      (dolist (extra-rule extra-rules)
+		(<:li (<:strong (<:as-html (name extra-rule))) ": " (<:as-html (description extra-rule)))))))
+    (<:p (<:b "Heuristic rules:") " " (render-heuristics heuristics))
     (if (eq opp-choice :too-deep)
 	(<:p "I couldn't find the first place where Proponent has a choice before I hit depth " (<:as-is +strategy-max-depth+) "; sorry, we can't play any more.  Please try some other formula or ruleset.")
 	(progn
@@ -1909,13 +1944,63 @@ with which the game begins."))
 (defmethod render ((self play-style-info))
   (<:p (<:em (<:b "About the play style:")) " The default mode of playing is to take on the role of both players: at each move, you'll see all possible moves that can be made, from the perspective of both players.  Two other play styles are supported: play as Proponent with a random Opponent, and play as Opponent with a random Proponent."))
 
+(defmacro ruleset-row (ruleset selector)
+  (let ((id (format nil "~a-radio" ruleset)))
+    `(<:tr
+      :valign "top"
+      (<:td
+       :nowrap "nowrap"
+       (<ucw:input :type "radio"
+		   :accessor ,selector
+		   :name "selected-rules"
+		   :value ,ruleset
+		   :id ,id)
+       (<:label
+	:for ,id
+	(<:strong (<:as-html (name ,ruleset)))))
+      (<:td
+       (<:as-html (description ,ruleset))))))
+
+(defmacro rule-checkbox-row (rule)
+  (let* ((selector (intern (format nil "~a-checked" rule) :dialogues))
+	 (id (format nil "~a-checkbox" rule)))
+    `(<:tr
+      :valign "top"
+      (<:td
+       :nowrap "nowrap"
+       (<ucw:input
+	:type "checkbox"
+	:accessor ,selector
+	:value ,rule
+	:id ,id)
+       (<:label
+	:for ,id
+	(<:strong (<:as-html (name ,rule)))))
+      (<:td (<:as-html (description ,rule))))))
+
 (defmethod render ((self start-game-component))
   (let (input-formula
 	selected-formula 
 	selected-rules
 	selected-translation
 	selected-play-style
-	pro-no-repeat-heuristic)
+	d-dialogue-rules-selected
+	e-dialogue-rules-selected
+	classical-dialogue-rules-selected
+	nearly-classical-dialogue-rules-selected
+	rule-d10-checked
+	rule-d11-checked
+	rule-d12-checked
+	rule-d13-checked
+	rule-e-checked
+	rule-d10-literal-checked
+	rule-d11-most-recent-attack-checked
+	rule-d11-queue-checked
+	rule-d13-symmetric-checked
+	rule-d12-two-times-checked
+	rule-d13-two-times-checked
+	rule-d13-three-times-checked
+	proponent-no-repeats-checked)
   (symbol-macrolet
       (($formula
 	(let ((sig (signature self)))
@@ -1927,16 +2012,62 @@ with which the game begins."))
 		  (call 'formula-corrector
 			:text selected-formula
 			:signature sig)))))
-       ($heuristics (when pro-no-repeat-heuristic
-		      (list proponent-no-repeats)))
+       ($extra-rules
+	(let (extras)
+	  (when rule-d10-checked
+	    (push rule-d10 extras))
+	  (when rule-d11-checked
+	    (push rule-d11 extras))
+	  (when rule-d12-checked
+	    (push rule-d12 extras))
+	  (when rule-d13-checked
+	    (push rule-d13 extras))
+	  (when rule-e-checked
+	    (push rule-e extras))
+	  (when rule-d10-literal-checked
+	    (push d10-literal extras))
+	  (when rule-d11-most-recent-attack-checked
+	    (push d11-most-recent-attack extras))
+	  (when rule-d11-queue-checked
+	    (push d11-queue extras))
+	  (when rule-d13-symmetric-checked
+	    (push rule-d13-symmetric extras))
+	  (when rule-d12-two-times-checked
+	    (push rule-d12-two-times extras))
+	  (when rule-d13-two-times-checked
+	    (push rule-d13-two-times extras))
+	  (when rule-d13-three-times-checked
+	    (push rule-d13-three-times extras))
+	  (when proponent-no-repeats-checked
+	    (push proponent-no-repeats extras))
+	  (reverse extras)))
+       ($heuristics
+	(let (heuristics)
+	  (when proponent-no-repeats-checked
+	    (push proponent-no-repeats heuristics))
+	  (reverse heuristics)))
        ($ruleset
-	(if (null (ruleset self))
-	    (if pro-no-repeat-heuristic
-		(add-rule-to-ruleset proponent-no-repeats (copy-ruleset selected-rules))
-		selected-rules)
-	    (if pro-no-repeat-heuristic
-		(add-rule-to-ruleset proponent-no-repeats (copy-ruleset (ruleset self)))
-		(ruleset-self))))
+	(or (ruleset self)
+	    (copy-ruleset
+	     (cond (d-dialogue-rules-selected
+		    d-dialogue-rules)
+		   (e-dialogue-rules-selected
+		    e-dialogue-rules)
+		   (classical-dialogue-rules-selected
+		    classical-dialogue-rules)
+		   (nearly-classical-dialogue-rules-selected
+		    nearly-classical-dialogue-rules)
+		   (t (make-instance 'ruleset
+				     :name "(No name)"
+				     :description "An ad hoc ruleset"))))))
+       ($actual-ruleset
+	(make-instance 'ruleset
+		       :name (name $ruleset)
+		       :description (description $ruleset)
+		       :rules (remove-duplicates
+			       (append (rules $ruleset)
+				       $extra-rules
+				       $heuristics))))
        ($take-action
 	(ecase selected-play-style
 	  (interactive-strategy-search
@@ -1946,18 +2077,19 @@ with which the game begins."))
 					   nil))
 		  (root (make-instance 'strategy-node :move initial-move))
 		  (strat (make-instance 'strategy
-					:ruleset $ruleset
+					:ruleset $actual-ruleset
 					:root root)))
 	     (call 'strategy-editor
 		   :strategy strat
+		   :extra-rules $extra-rules
 		   :heuristics $heuristics)))
 	  (play-as-both-proponent-and-opponent
 	   (call 'turn-editor
 		 :play-style 'play-as-both-proponent-and-opponent
-		 :heuristics $heuristics
+		 :heuristics nil
 		 :game (make-dialogue (apply-translation selected-translation $formula)
 				      sig
-				      $ruleset)))
+				      $actual-ruleset)))
 	  (play-as-proponent-random-opponent
 	   (call 'turn-editor
 		 :play-style 'play-as-proponent-random-opponent
@@ -1965,7 +2097,7 @@ with which the game begins."))
 		 :game (let ((initial-dialogue
 			      (make-dialogue (apply-translation selected-translation $formula)
 					     sig
-					     $ruleset)))
+					     $actual-ruleset)))
 			 (let* ((next-opponent-attacks (next-attacks initial-dialogue 'o))
 				(next-opponent-defenses (next-defenses initial-dialogue 'o))
 				(all-opponent-moves (append next-opponent-attacks
@@ -1973,7 +2105,7 @@ with which the game begins."))
 			   (if (null all-opponent-moves)
 			       (call 'turn-editor
 				     :play-style 'play-as-proponent-random-opponent
-				     :heuristics $heuristics
+				     :heuristics nil
 				     :game initial-dialog)
 			       (let ((random-move (random-element all-opponent-moves)))
 				 (destructuring-bind (statement reference)
@@ -1982,88 +2114,134 @@ with which the game begins."))
 				       (call 'turn-editor
 				 
 					     :play-style 'play-as-proponent-random-opponent
-					     :heuristics $heuristics
+					     :heuristics nil
 					     :game (add-move-to-dialogue-at-position initial-dialogue
 										     (make-move 'o statement 'a reference)
 										     1))
 				       (call 'turn-editor
 					     :play-style 'play-as-proponent-random-opponent
-					     :heuristics $heuristics
+					     :heuristics nil
 					     :game (add-move-to-dialogue-at-position initial-dialogue
 										     (make-move 'o statement 'd reference)
 										     1))))))))))
 	  (play-as-opponent-random-proponent
 	   (call 'turn-editor
 		 :play-style 'play-as-opponent-random-proponent
-		 :heuristics $heuristics
+		 :heuristics nil
 		 :game (make-dialogue (apply-translation selected-translation $formula)
 				      sig
-				      $ruleset))))))
+				      $actual-ruleset))))))
     (let ((sig (signature self)))
-      (<ucw:form :method "post"
-		 :action $take-action
-      (<:table :style "border:1px solid;"
-      (<:caption :style "caption-side:bottom;"
-		 (<:submit :value "Let's play"))
-       (<:tbody :style "border:1px solid;"
-       (<:tr :style "background-color:#F063CD;"
-	(<:td (<ucw:a :action (call 'formula-info)
-		      "Formula:"))
-	(<:td
-	 (<ucw:select :id "selected-formula" 
-		      :size 1 
-		      :accessor selected-formula
-	   (dolist (famous-formula (cons 't famous-formulas))
-	     (if (eq famous-formula t)
-		 (<ucw:option :value t
-			      (<:as-is "(enter a formula manually)"))
-		 (destructuring-bind (long-name short-name formula)
-		     famous-formula
-		   (declare (ignore short-name))
-		   (<ucw:option :value formula (<:as-is long-name))))))))
-       (<:tr :style "background-color:#A7007D;"
-	(<:td (<ucw:a :action (call 'translation-info)
-		      "Translation:"))
-	(<:td (<ucw:select :id "selected-translation"
-			   :size 1
-			   :accessor selected-translation
-	        (dolist (translation available-translations)
-		  (<ucw:option :value translation
-			       (<:as-is (description translation)))))))
-       (<:tr :style "background-color:#7B942E;"
-	(<:td (<ucw:a :action (call 'ruleset-info)
-		      "Ruleset:"))
-	(<:td (if (null (ruleset self))
-		  (<ucw:select :id "selected-rules"
-			       :size 1
-			       :accessor selected-rules
-			       (dolist (ruleset available-rulesets)
-				 (<ucw:option :value ruleset
-					      (<:as-html (description ruleset)))))
-		  (<:as-html (description (ruleset self))))))
-       (<:tr
-	(<:td "Heuristic rules:")
-	(<:td (dolist (heuristic available-heuristics)
-		(let ((desc (description heuristic)))
-		  (<ucw:input :type "checkbox"
-			      :id "pro-no-repeat-heuristic"
-			      :name "pro-no-repeat-heuristic"
-			      :value nil
-			      :accessor pro-no-repeat-heuristic)
-		  (<:as-is desc)))))
-       (<:tr :style "background-color:#A3D800;"
-         (<:td (<ucw:a :action (call 'play-style-info)
-		       "Play style:"))
-	 (<:td (<ucw:select :id "selected-play-style"
-			    :size 1
-			    :accessor selected-play-style
-	         (<ucw:option :value 'play-as-both-proponent-and-opponent
-			      "Play a game as both proponent and opponent")
-		 (<ucw:option :value 'play-as-proponent-random-opponent
-			      "Play a game as Proponent (Opponent will choose its moves randomly)")
-		 (<ucw:option :value 'play-as-opponent-random-proponent
-			      "Play a game as Opponent (Propnent will choose its moves randomly)")
-		 (<ucw:option :value 'interactive-strategy-search
-			      "Search for a winning strategy")))))))))))
+      (<ucw:form
+       :method "post"
+       :action $take-action
+       (<:table
+	:style "border:1px solid;"
+	(<:caption 
+	 :style "caption-side:bottom;"
+	 (<:submit :value "Let's play"))
+	(<:tbody
+	 :style "border:1px solid;"
+	 (<:tr 
+	  :style "background-color:#F063CD;"
+	  (<:td (<ucw:a 
+		 :action (call 'formula-info)
+		 "Formula:"))
+	  (<:td
+	   (<ucw:select
+	    :id "selected-formula" 
+	    :size 1 
+	    :accessor selected-formula
+	    (dolist (famous-formula (cons 't famous-formulas))
+	      (if (eq famous-formula t)
+		  (<ucw:option
+		   :value t
+		   (<:as-is "(enter a formula manually)"))
+		  (destructuring-bind (long-name short-name formula)
+		      famous-formula
+		    (declare (ignore short-name))
+		    (<ucw:option
+		     :value formula (<:as-is long-name))))))))
+	 (<:tr
+	  :style "background-color:#A7007D;"
+	  (<:td (<ucw:a 
+		 :action (call 'translation-info)
+		 "Translation:"))
+	  (<:td (<ucw:select
+		 :id "selected-translation"
+		 :size 1
+		 :accessor selected-translation
+		 (dolist (translation available-translations)
+		   (<ucw:option
+		    :value translation
+		    (<:as-is (description translation)))))))
+	 (<:tr
+	  :style "background-color:#7B942E;"
+	  (<:td (<ucw:a
+		 :action (call 'ruleset-info)
+		 "Ruleset:"))
+	  (<:td (if (null (ruleset self))
+		    (<:table
+		     :rules "cols"
+		     (<:thead
+		      (<:colgroup
+		       (<:col)
+		       (<:col)
+		       (<:col))
+		      (<:tr
+		       (<:th "Standard Rulesets")
+		       (<:th "Standard Structural Rules")
+		       (<:th "Experimental Rules")
+		       (<:th "Heuristic Rules")))
+		     (<:tbody
+		      (<:tr
+		       :valign "top"
+		       (<:td
+			(<:table
+			 (ruleset-row d-dialogue-rules d-dialogue-rules-selected)
+			 (ruleset-row e-dialogue-rules e-dialogue-rules-selected)
+			 (ruleset-row classical-dialogue-rules classical-dialogue-rules-selected)
+			 (ruleset-row nearly-classical-dialogue-rules nearly-classical-dialogue-rules-selected)))
+		       (<:td
+			(<:table
+			 (rule-checkbox-row rule-d10)
+			 (rule-checkbox-row rule-d11)
+			 (rule-checkbox-row rule-d12)
+			 (rule-checkbox-row rule-d13)
+			 (rule-checkbox-row rule-e)))
+		       (<:td
+			(<:table
+			 (rule-checkbox-row rule-d10-literal)
+			 (rule-checkbox-row rule-d11-most-recent-attack)
+			 (rule-checkbox-row rule-d11-queue)
+			 (rule-checkbox-row rule-d13-symmetric)
+			 (rule-checkbox-row rule-d12-two-times)
+			 (rule-checkbox-row rule-d13-two-times)
+			 (rule-checkbox-row rule-d13-three-times)))
+		       (<:td
+			(<:table
+			 (rule-checkbox-row proponent-no-repeats))))))
+		    (<:as-html (description (ruleset self))))))
+	 (<:tr
+	  :style "background-color:#A3D800;"
+	  (<:td (<ucw:a
+		 :action (call 'play-style-info)
+		 "Play style:"))
+	  (<:td (<ucw:select
+		 :id "selected-play-style"
+		 :size 1
+		 :accessor selected-play-style
+		 (<ucw:option
+		  :value 'play-as-both-proponent-and-opponent
+		  "Play a game as both proponent and opponent")
+		 (<ucw:option
+		  :value 'play-as-proponent-random-opponent
+		  "Play a game as Proponent (Opponent will choose its moves randomly)")
+		 (<ucw:option
+		  :value 'play-as-opponent-random-proponent
+		  "Play a game as Opponent (Propnent will choose its moves randomly)")
+		 (<ucw:option
+		  :value 'interactive-strategy-search
+		  "Search for a winning strategy")))))))))))
 
 ;;; ucw-site.lisp ends here
