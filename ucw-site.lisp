@@ -169,7 +169,7 @@
     (<:p (<:b "Base ruleset:") " " (<:format (description (ruleset strategy))))
     (<:p (<:b "Extra rules:")
 	 (if (null extra-rules)
-	     (progn (<:as-is " ") (<:em "(none"))
+	     (progn (<:as-is " ") (<:em "(none)"))
 	     (<:ul
 	      (dolist (extra-rule extra-rules)
 		(<:li (<:strong (<:as-html (name extra-rule))) ": " (<:as-html (description extra-rule)))))))
