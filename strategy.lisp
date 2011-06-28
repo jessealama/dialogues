@@ -439,7 +439,7 @@ the strategy.  If there no such node, return NIL."
 (defmethod render ((move move))
   (with-slots (player statement stance reference)
       move
-    (<:as-is player)
+    (<:strong (<:as-is player))
     (<:as-is " ")
     (render statement)
     (<:as-is " ")
@@ -451,7 +451,7 @@ the strategy.  If there no such node, return NIL."
   (with-slots (player statement stance reference)
       move
     (<:tr
-     (<:td (<:as-is player))
+     (<:td (<:strong (<:as-is player)))
      (<:td (render statement))) 
     (if (and stance reference)
 	(<:td (<:format "[~a,~d]" stance reference))
@@ -473,7 +473,7 @@ the strategy.  If there no such node, return NIL."
 	   (<:td :align "left"
 		 (<:as-html depth))
 	   (<:td :align "center"
-		 (<:as-html player))
+		 (<:strong (<:as-html player)))
 	   (<:td :align "left"
 		 :nowrap "nowrap"
 		 (render statement))
@@ -488,7 +488,7 @@ the strategy.  If there no such node, return NIL."
 	   (<:td :align "left"
 		 (<:as-html depth))
 	   (<:td :align "center"
-		 (<:as-html player))
+		 (<:strong (<:as-html player)))
 	   (<:td :align "left"
 		 :nowrap "nowrap"
 		 (render statement))
