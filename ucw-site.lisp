@@ -518,7 +518,7 @@ Web" "UnCommon Web") " system.  The Common Lisp implementation is " (<:a :href "
 (defcomponent turn-editor (game-component play-style-component ruleset-component)
   ())
 
-(defcomponent turn-evaluator (game-component play-style-component)
+(defcomponent turn-evaluator (game-component play-style-component ruleset-component)
   ((player :accessor player
 	   :initarg :player
 	   :initform nil)
