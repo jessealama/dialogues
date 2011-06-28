@@ -327,9 +327,9 @@ attacks which, being symbols, do qualify as terms."
 
 (defmethod print-object ((ruleset ruleset) stream)
   (print-unreadable-object (ruleset stream :type t)
-    (with-slots (description rules)
+    (with-slots (name description rules)
 	ruleset
-      (format stream "~A" description))))
+      (format stream "~a: ~a" name description))))
 
 (defun equal-rulesets? (ruleset-1 ruleset-2)
   (eq ruleset-1 ruleset-2)) ;; I don't have an interesting notion of equality
@@ -337,6 +337,7 @@ attacks which, being symbols, do qualify as terms."
 (defun copy-ruleset (ruleset)
   (make-instance 'ruleset
 		 :rules (copy-list (rules ruleset))
+		 :name (name ruleset)
 		 :description (description ruleset)))
 
 (defun add-rule-to-ruleset (rule ruleset)
