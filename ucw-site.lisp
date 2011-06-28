@@ -176,7 +176,11 @@
 		      (<:p "Congratulations!  You've found a winning strategy.  Here it is:")
 		      (render-strategy-with-alternative strategy nil))
 		    
-		    (<:p "I'm sorry to say that there is no winning strategy consistent with your choices so far."))
+		    (progn
+		      (<:p "I'm sorry to say that there is no winning strategy consistent with your choices so far.  (If you didn't make any choices at all, this means that the formula you started with,")
+		      (<:blockquote
+		       (render (move-statement (move (root strategy)))) ",")
+		      (<:p "is invalid with respect to the ruleset that you chose.)")))
 		(let ((alternatives (alternatives self)))
 		  (if alternatives
 		      (progn
