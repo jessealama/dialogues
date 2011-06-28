@@ -151,15 +151,12 @@
 (defun render-heuristics (heuristic-list)
   (if (null heuristic-list)
       (<:em "(none)")
-      (loop
-	 with num-heuristics = (length heuristic-list)
-	 for heuristic in heuristic-list
-	 for i from 1 upto num-heuristics
-	 for description = (description heuristic)
-	 do
-	   (<:as-is description)
-	   (unless (= i num-heuristics)
-	     (<:as-is ", ")))))
+      (<:ul
+       (dolist (heuristic heuristic-list)
+	 (<:li
+	  (<:strong (<:as-html (name heuristic)))
+	  ": "
+	  (<:as-html (description heuristic)))))))
 
 (defmethod render ((self strategy-editor))
   (let* ((strategy (strategy self))
