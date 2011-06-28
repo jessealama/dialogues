@@ -1479,7 +1479,7 @@ that all the rules in your edited ruleset are satisfied.")
       (<:h1 "...or quit.")
       (render-quit-form)))
 
-(defcomponent alternative-move-chooser (game-component play-style-component)
+(defcomponent alternative-move-chooser (game-component play-style-component ruleset-component)
   ((move-number :initarg :move-number
 		:accessor move-number)
    (actual-play :initarg :actual-play
