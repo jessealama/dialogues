@@ -196,7 +196,7 @@
 				   (<:li (<:format "Have ~a defend aginst the attack of move ~d by asserting " player reference)
 					 (render statement))))))))
 		      (progn
-			(<:p "There are no more alternatives."))))))))
+			(<:p "There are no more alternative moves to explore."))))))))
     
     (<ucw:form :method "get"
 	       :action (call 'start-game-component)
