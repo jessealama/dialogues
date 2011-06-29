@@ -172,18 +172,43 @@
 	 (player-choice (if (eql player 'p)
 			    (first-proponent-choice strategy)
 			    (first-opponent-choice strategy))))
-    (<:p (<:b "Base ruleset:") " " (<:strong (name (ruleset strategy))) ": " (<:as-html (description (ruleset strategy))))
-    (<:p (<:b "Extra rules:")
-	 (if (null extra-rules)
-	     (progn (<:as-is " ") (<:em "(none)"))
-	     (<:ul
-	      (dolist (extra-rule extra-rules)
-		(<:li (<:strong (<:as-html (name extra-rule))) ": " (<:as-html (description extra-rule)))))))
-    (<:p (<:b "Heuristic rules:") " " (render-heuristics heuristics))
-    (<:p (<:b "Player for whom we're building a strategy:") " "
-	 (if (eql player 'p)
-	     (<:em "Proponent")
-	     (<:em "Opponent")))
+    (<:table
+     :rules "cols"
+     :frame "box"
+     :cellpadding "5"
+     :bgcolor "IndianRed"
+     (<:colgroup
+      (<:col)
+      (<:col)
+      (<:col)
+      (<:col)
+      (<:col))
+     (<:thead
+      :style "border-bottom: solid 1px;"
+      (<:tr
+       (<:th "Ruleset")
+       (<:th "Player")
+       (<:th "Formula")
+       (<:th "Extra Rules")
+       (<:th "Heuristics")))
+     (<:tbody
+      (<:tr
+       (<:td :nowrap "nowrap"
+	     (<:strong (<:as-html (name (ruleset strategy))))
+	     ": "
+	     (<:as-html (description (ruleset strategy))))
+       (<:td
+	:align "center"
+	(if (eql player 'p)
+	    (<:strong "P")
+	    (<:strong "O")))
+       (<:td :nowrap "nowrap"
+	     (render (move-statement (move (root strategy)))))
+       (<:td
+	:align "center"
+	(render-heuristics extra-rules))
+       (<:td (render-heuristics heuristics)))))
+    (<:br) ;; no like
     (if (eq player-choice :too-deep)
 	(<:p "I couldn't find the first choice node before I hit depth " (<:as-is +strategy-max-depth+) "; sorry, we can't play any more.  Please try some other formula or ruleset.")
 	(progn
