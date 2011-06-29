@@ -1924,7 +1924,7 @@ that all the rules in your edited ruleset are satisfied.")
 (defmethod render ((formula atomic-formula))
   (let ((pred (predicate formula))
 	(args (arguments formula)))
-    (<:em (<:as-html pred))
+    (<:em (<:format "~(~a~)" pred))
     (unless (null args)
       (<:as-is "(")
       (let ((first (car args)))
@@ -1939,9 +1939,9 @@ that all the rules in your edited ruleset are satisfied.")
   (let ((pred (predicate formula))
 	(args (arguments formula)))
     (if (null args)
-	(format nil "~A" pred)
+	(format nil "~(~a~)" pred)
 	(if (null (cdr args))
-	    (format nil "~A(~A)"
+	    (format nil "~(~a~)(~a)"
 		    pred
 		    (render-plainly (car args)))
 	    (funcall #'concat-strings
