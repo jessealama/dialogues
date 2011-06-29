@@ -2221,7 +2221,9 @@ with which the game begins."))
 	:style "border:1px solid;"
 	(<:caption 
 	 :style "caption-side:bottom;"
-	 (<:submit :value "Let's play"))
+	 (<:submit
+	  :title "Start playing a game with the selected formula and ruleset."
+	  :value "Let's play"))
 	(<:tbody
 	 :style "border:1px solid;"
 	 (<:tr 
