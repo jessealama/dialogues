@@ -731,11 +731,11 @@ the strategy.  If there no such node, return NIL."
     (<:span
      :style "background-color:FireBrick;color:white;"
      "red")
-    " are attacks that are closed in every branch.  Nodes in "
+    " are attacks that are closed in every branch passing through the node.  Nodes in "
     (<:span
      :style "background-color:ForestGreen;color:white;"
      "green")
-    " are attacks that are open in every branch.  "
+    " are attacks that are open in every branch passing through the node.  "
     "Nodes in "
     (<:span
      :style "background-color:Indigo;color:white;"
