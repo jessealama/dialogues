@@ -172,8 +172,8 @@ Proponent."
 (defmethod leaves ((strategy strategy))
   (leaves (root strategy)))
 
-(defun winning-strategy-form? (strategy)
-  "Determine whether STRATEGY has the graph-theoretic structure that a winning strategy has: (1) every node of odd depth (start counting at 0) has exactly one child"
+(defun winning-strategy-for-proponent-form? (strategy)
+  "Determine whether STRATEGY has the graph-theoretic structure that a winning strategy for Player 1 has: (1) every node of odd depth (start counting at 0) has exactly one child"
   (labels ((even-node-ok? (node)
 	     (with-slots (children)
 		 node
@@ -186,13 +186,38 @@ Proponent."
 		    (even-node-ok? (first children))))))
     (even-node-ok? (root strategy))))
 
-(defun winning-strategy? (strategy)
-  "Determine whether STRATEGY is a winning stratgy (for Proponent).  There are three conditions to satisfy: (1) for every Proponent node of the strategy, the set of its children is equal (in the set of being the same set of moves) to the set of all possible moves for Opponent at that node, and (2) every Opponnent node has exactly one child, (3) every leaf of the tree, considered as a dialogue, is a win for Proponent."
+(defun winning-strategy-for-opponent-form? (strategy)
+  "Determine whether STRATEGY has the graph-theoretic structure that a winning strategy for Player 2 has: (1) every node of even depth (start counting at 0) has exactly one child"
+  (labels ((even-node-ok? (node)
+	     (with-slots (children)
+		 node
+	       (and (length= 1 children)
+		    (odd-node-ok? (first children)))))
+	   (odd-node-ok? (node)
+	     (with-slots (children)
+		 node
+	       (or (null children)
+		   (every #'even-node-ok? children)))))
+    (even-node-ok? (root strategy))))
+
+(defun winning-strategy-for-proponent? (strategy)
+  "Determine whether STRATEGY is a winning stratgy for Proponent.  There are three conditions to satisfy: (1) for every Proponent node of the strategy, the set of its children is equal (in the set of being the same set of moves) to the set of all possible moves for Opponent at that node, and (2) every Opponnent node has exactly one child, (3) every leaf of the tree, considered as a dialogue, is a win for Proponent."
   (with-slots (root ruleset)
       strategy
-    (and (winning-strategy-form? strategy)
+    (and (winning-strategy-for-proponent-form? strategy)
 	 (fully-expanded? strategy)
 	 (every #'proponent-wins?
+		(mapcar #'(lambda (leaf)
+			    (node->dialogue leaf ruleset))
+			(leaves root))))))
+
+(defun winning-strategy-for-opponent? (strategy)
+  "Determine whether STRATEGY is a winning stratgy for Opponent.  There are three conditions to satisfy: (1) for every Opponent node of the strategy, the set of its children is equal (in the set of being the same set of moves) to the set of all possible moves for Proponent at that node, and (2) every Proponent node has exactly one child, (3) every leaf of the tree, considered as a dialogue, is a win for Opponent."
+  (with-slots (root ruleset)
+      strategy
+    (and (winning-strategy-for-opponent-form? strategy)
+	 (fully-expanded? strategy)
+	 (every #'opponent-wins?
 		(mapcar #'(lambda (leaf)
 			    (node->dialogue leaf ruleset))
 			(leaves root))))))
@@ -205,8 +230,19 @@ the strategy.  If there no such node, return NIL."
   (first-proponent-choice-wrt-ruleset (root strategy)
 				      (ruleset strategy)))
 
+(defun first-opponent-choice (strategy)
+  "The shallowest, leftmost Proponent node of STRATEGY where Opponent
+has more than one possible move.  This function expands the nodes of
+STRATEGY to find such a node; the expansion will use the ruleset of
+the strategy.  If there no such node, return NIL."
+  (first-opponent-choice-wrt-ruleset (root strategy)
+				     (ruleset strategy)))
+
 (defmethod proponent-node? ((node strategy-node))
   (proponent-move? (move node)))
+
+(defmethod opponent-node? ((node strategy-node))
+  (opponent-move? (move node)))
 
 (defun strategy-node-depth (node)
   (let ((p (parent node))) 
@@ -233,6 +269,24 @@ the strategy.  If there no such node, return NIL."
 		(if (cdr children)
 		    node
 		    (first-proponent-choice-wrt-ruleset (first children) ruleset max-depth)))))
+	:too-deep)))
+
+(defun first-opponent-choice-wrt-ruleset (node ruleset &optional (max-depth +strategy-max-depth+))
+  (unless (expanded? node)
+    (expand-strategy-node node ruleset))
+  (let ((d (strategy-node-depth node)))
+    (if (< d max-depth)
+	(let ((children (children node)))
+	  (when children
+	    (if (opponent-node? node)
+		(some #'(lambda (node)
+			  (first-opponent-choice-wrt-ruleset node
+							     ruleset
+							     max-depth))
+		      children)
+		(if (cdr children)
+		    node
+		    (first-opponent-choice-wrt-ruleset (first children) ruleset max-depth)))))
 	:too-deep)))
 
 (defclass strategy-with-choices (strategy)
@@ -320,9 +374,9 @@ the strategy.  If there no such node, return NIL."
      no-more-choices
        (msg "No additional choices remain for Proponent.")
        (msg "Checking whether the selected strategy is actually a strategy...")
-       (if (winning-strategy? strategy)
+       (if (winning-strategy-for-proponent? strategy)
 	   (progn
-	     (msg "Congratulations! You found a winning strategy")
+	     (msg "Congratulations! You found a winning strategy for Proponent.")
 	     (push current-choice winning-pro-nodes))
 	   (progn
 	     (msg "I'm sorry to say that there is no winning strategy for Proponent~%that is consistent with the choices you've made so far.~%")
