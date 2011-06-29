@@ -2024,7 +2024,6 @@ with which the game begins."))
     `(<:tr
       :valign "top"
       (<:td
-       :nowrap "nowrap"
        (<ucw:input
 	:type "checkbox"
 	:accessor ,selector
@@ -2033,8 +2032,9 @@ with which the game begins."))
 	:id ,id)
        (<:label
 	:for ,id
-	(<:strong (<:as-html (name ,rule)))))
-      (<:td (<:as-html (description ,rule))))))
+	(<:strong (<:as-html (name ,rule))))
+       " "
+       (<:as-html (description ,rule))))))
 
 (defmethod render ((self start-game-component))
   (let (input-formula
@@ -2288,6 +2288,7 @@ with which the game begins."))
 			 (ruleset-option skeletal-rules)))
 		       (<:td
 			(<:table
+			 :rules "rows"
 			 (rule-checkbox-row rule-d10 rule-d10-checked)
 			 (rule-checkbox-row rule-d11 rule-d11-checked)
 			 (rule-checkbox-row rule-d12 rule-d12-checked)
@@ -2295,6 +2296,7 @@ with which the game begins."))
 			 (rule-checkbox-row rule-e rule-e-checked)))
 		       (<:td
 			(<:table
+			 :rules "rows"
 			 (rule-checkbox-row rule-d10-literal rule-d10-literal-checked)
 			 (rule-checkbox-row rule-d11-most-recent-attack rule-d11-most-recent-attack-checked)
 			 (rule-checkbox-row rule-d11-queue rule-d11-queue-checked)
@@ -2304,6 +2306,7 @@ with which the game begins."))
 			 (rule-checkbox-row rule-d13-three-times rule-d13-three-times-checked)))
 		       (<:td
 			(<:table
+			 :rules "rows"
 			 (rule-checkbox-row rule-no-repetitions rule-no-repetitions-checked)
 			 (rule-checkbox-row opponent-no-repeats opponent-no-repeats-checked)
 			 (rule-checkbox-row proponent-no-repeats proponent-no-repeats-checked))))))
