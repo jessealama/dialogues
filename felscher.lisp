@@ -692,6 +692,15 @@
 			     (not (repetition-in-dialogue? pro-move dialogue)))
 			 dialogue)))
 
+(defparameter opponent-no-repeats
+  (make-structural-rule
+   :name "O-no-repeat"
+   :description "O cannot repeat moves"
+   :predicate
+   (every-opponent-move #'(lambda (opp-move)
+			    (not (repetition-in-dialogue? opp-move dialogue)))
+			dialogue)))
+
 (defparameter e-dialogue-rules-no-pro-repetitions
   (make-instance 'ruleset
 		 :rules (append argumentation-forms 
