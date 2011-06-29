@@ -174,6 +174,7 @@
 			    (first-opponent-choice strategy))))
     (<:table
      :rules "cols"
+     :width "100%"
      :frame "box"
      :cellpadding "5"
      :bgcolor "IndianRed"
@@ -194,6 +195,7 @@
      (<:tbody
       (<:tr
        (<:td :nowrap "nowrap"
+	     :align "center"
 	     (<:strong (<:as-html (name (ruleset strategy))))
 	     ": "
 	     (<:as-html (description (ruleset strategy))))
@@ -203,11 +205,14 @@
 	    (<:strong "P")
 	    (<:strong "O")))
        (<:td :nowrap "nowrap"
+	     :align "center"
 	     (render (move-statement (move (root strategy)))))
        (<:td
 	:align "center"
 	(render-heuristics extra-rules))
-       (<:td (render-heuristics heuristics)))))
+       (<:td 
+	:align "center"
+	(render-heuristics heuristics)))))
     (<:br) ;; no like
     (if (eq player-choice :too-deep)
 	(<:p "I couldn't find the first choice node before I hit depth " (<:as-is +strategy-max-depth+) "; sorry, we can't play any more.  Please try some other formula or ruleset.")
@@ -243,7 +248,7 @@
 			      (dolist (child nodes-sorted)
 				(unless (eq child
 					    (current-choice self))
-				  (push child (alternatives self)))))				 
+				  (pushnew child (alternatives self)))))				 
 			    (if (eq stance 'a)
 				(<:format "Attack move #~d by asserting " reference)
 				(<:format "Defend against the attack of move #~d by asserting " reference))
@@ -280,8 +285,8 @@
 			     (with-slots (player statement stance reference)
 				 alternative-move
 			       (if (eq stance 'a)
-				   (<:li "Have " (<:strong (<:as-html player)) "attack move #" (<:as-html reference) " by asserting " (render statement))
-				   (<:li "Have " (<:strong (<:as-html player)) " defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))))))
+				   (<:li "Have " (<:strong (<:as-html player)) " attack move #" (<:as-html reference) " by asserting " (render statement))
+				   (<:li "Have " (<:strong (<:as-html player)) " defend against the attack of move #" (<:as-html reference) " by asserting " (render statement))))))))
 		      (progn
 			(<:p "There are no more alternative moves to explore."))))))))
     
@@ -1356,11 +1361,10 @@ current turn number is the selected one.")
       (<:td :align "left"
 	    (render statement))
       (<:td :align "left"
-	    (if (initial-move? move)
-		(<:em "(initial move)")
-		(if (attacking-move? move)
-		    (<:as-html "[A," reference "]")
-		    (<:as-html "[D," reference "]"))))))))
+	    (unless (initial-move? move)
+	      (if (attacking-move? move)
+		  (<:as-html "[A," reference "]")
+		  (<:as-html "[D," reference "]"))))))))
 
 (defun render-final-move-as-table-row (node)
   (let* ((game (node-state node))
@@ -1393,11 +1397,10 @@ current turn number is the selected one.")
        (<:td :align "left"
 	     (render statement))
        (<:td :align "left"
-	     (if (initial-move? move)
-		 (<:em "(initial move)")
-		 (if (attacking-move? move)
-		     (<:as-html "[A," reference "]")
-		     (<:as-html "[D," reference "]"))))))))
+	     (unless (initial-move? move)
+	       (if (attacking-move? move)
+		   (<:as-html "[A," reference "]")
+		   (<:as-html "[D," reference "]"))))))))
   
 (defun render-segment-from-to-with-padding-as-row (begin end padding)
   "Given search tree nodes BEGIN and END, render a single HTML table
@@ -1660,7 +1663,7 @@ that all the rules in your edited ruleset are satisfied.")
 		  (render statement)))
 	  (<:td :align "left" (render statement)))
       (if (zerop move-number)
-	  (<:td :align "right" (<:em "(initial move)"))
+	  (<:td)
 	  (<:td :align "right"
 		(<:as-html "[" (if (attacking-move? play)
 				   "A"

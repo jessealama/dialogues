@@ -496,10 +496,8 @@ the strategy.  If there no such node, return NIL."
     (<:strong (<:as-is player))
     (<:as-is " ")
     (render statement)
-    (<:as-is " ")
-    (if (and stance reference)
-	(<:as-is (format nil "[~a,~d]" stance reference)) 
-	(<:as-is (format nil "(initial move)")))))
+    (when (and stance reference)
+      (<:as-is " " (format nil "[~a,~d]" stance reference)))))
 
 (defun render-as-table-row (move)
   (with-slots (player statement stance reference)
@@ -509,10 +507,54 @@ the strategy.  If there no such node, return NIL."
      (<:td (render statement))) 
     (if (and stance reference)
 	(<:td (<:format "[~a,~d]" stance reference))
-	(<:td (<:em "(initial move)")))))
+	(<:td))))
 
 (defmethod first-splitter ((strategy strategy))
   (first-splitter (root strategy)))
+
+(defun every-branch (node predicate)
+  "Determine whether PREDICATE holds of every brach of tree that
+  passes through node NODE.  PREDICATE is applied the each leaf node reachable from NODE."
+  (every predicate (leaves node)))
+
+(defun segment (from to)
+  "A list of strategy nodes starting from FROM and ending at TO.
+  It is assumed that FROM and TO are coming from the same tree, and
+  that there is in fact a path between them."
+  (loop
+     with path = (list from)
+     for node = to then (parent node)
+     do
+       (if (eq node from)
+	   (return (reverse path))
+	   (push node path))))
+
+(defun closed-in-every-branch? (node attack-index)
+  "Determine whether ATTACK-INDEX, which is assumed to be the
+  index (starting from 0) of an attack in the dialogue tree implicitly
+  represented by NODE, is closed in every branch of the tree passing
+  through NODE."
+  (flet ((branch-closed? (leaf)
+	   (find-if #'(lambda (move)
+			(and (defensive-move? move)
+			     (= (move-reference move) attack-index)))
+		    (segment node leaf)
+		    :key #'move)))
+    (every-branch node #'branch-closed?)))
+
+(defun open-in-every-branch? (node attack-index)
+  "Determine whether ATTACK-INDEX, which is assumed to be the
+  index (starting from 0) of an attack in the dialogue tree implicitly
+  represented by NODE, is open in every branch of the tree passing
+  through NODE."
+  (flet ((branch-open? (leaf)
+	   (not
+	    (find-if #'(lambda (move)
+			 (and (defensive-move? move)
+			      (= (move-reference move) attack-index)))
+		     (segment node leaf)
+		     :key #'move))))
+    (every-branch node #'branch-open?)))
 
 (defun render-strategy-node-as-table-row (node &optional alternatives)
   (let ((move (move node))
@@ -532,26 +574,73 @@ the strategy.  If there no such node, return NIL."
 		 :nowrap "nowrap"
 		 (render statement))
 	   (<:td :align "left"
-		 (if (initial-move? move)
-		     (<:em "(initial move)")
-		     (if (attacking-move? move)
-			 (<:as-html "[A," reference "]")
-			 (<:as-html "[D," reference "]")))))
-	  (<:tr :nowrap "nowrap"
-		:valign "top"
-	   (<:td :align "left"
-		 (<:as-html depth))
-	   (<:td :align "center"
-		 (<:strong (<:as-html player)))
-	   (<:td :align "left"
-		 :nowrap "nowrap"
-		 (render statement))
-	   (<:td :align "left"
-		 (if (initial-move? move)
-		     (<:em "(initial move)")
-		     (if (attacking-move? move)
-			 (<:as-html "[A," reference "]")
-			 (<:as-html "[D," reference "]")))))))))
+		 (unless (initial-move? move)
+		   (if (attacking-move? move)
+		       (<:as-html "[A," reference "]")
+		       (<:as-html "[D," reference "]")))))
+	  (if (attacking-move? move)
+	      (if (closed-in-every-branch? node depth)
+		  (<:tr :nowrap "nowrap"
+			:valign "top"
+			:bgcolor "FireBrick"
+			:style "color:white;"
+			(<:td :align "left"
+			      (<:as-html depth))
+			(<:td :align "center"
+			      (<:strong (<:as-html player)))
+			(<:td :align "left"
+			      :nowrap "nowrap"
+			      (render statement))
+			(<:td :align "left"
+			      (unless (initial-move? move)
+				(if (attacking-move? move)
+				    (<:as-html "[A," reference "]")
+				    (<:as-html "[D," reference "]")))))
+		  (if (open-in-every-branch? node depth)
+		      (<:tr :nowrap "nowrap"
+			    :valign "top"
+			    :bgcolor "ForestGreen"
+			    :style "color:white;"
+			    (<:td :align "left"
+				  (<:as-html depth))
+			    (<:td :align "center"
+				  (<:strong (<:as-html player)))
+			    (<:td :align "left"
+				  :nowrap "nowrap"
+				  (render statement))
+			    (<:td :align "left"
+				  (unless (initial-move? move)
+				    (if (attacking-move? move)
+					(<:as-html "[A," reference "]")
+					(<:as-html "[D," reference "]")))))
+		      (<:tr :nowrap "nowrap"
+			    :valign "top"
+			    (<:td :align "left"
+				  (<:as-html depth))
+			    (<:td :align "center"
+				  (<:strong (<:as-html player)))
+			    (<:td :align "left"
+				  :nowrap "nowrap"
+				  (render statement))
+			    (<:td :align "left"
+				  (unless (initial-move? move)
+				    (if (attacking-move? move)
+					(<:as-html "[A," reference "]")
+					(<:as-html "[D," reference "]")))))))
+	      (<:tr :nowrap "nowrap"
+		    :valign "top"
+		    (<:td :align "left"
+			  (<:as-html depth))
+		    (<:td :align "center"
+			  (<:strong (<:as-html player)))
+		    (<:td :align "left"
+			  :nowrap "nowrap"
+			  (render statement))
+		    (<:td :align "left"
+			  (unless (initial-move? move)
+			    (if (attacking-move? move)
+				(<:as-html "[A," reference "]")
+				(<:as-html "[D," reference "]"))))))))))
 
 (defun render-segment-with-padding-as-row (begin end padding &optional alternatives)
   "Given strategy nodes BEGIN and END, emit an HTML table
@@ -569,6 +658,7 @@ the strategy.  If there no such node, return NIL."
      (<:td :align "center"
        (<:table
 	:bgcolor "silver"
+	:cellspacing "0"
 	:style "align: center;"
 	(loop
 	   for current-node = begin then (first (children current-node))
@@ -630,11 +720,30 @@ the strategy.  If there no such node, return NIL."
   "Render STRATEGY, with the children of strategy node ALTERNATIVE in
   a distinctive color."
   (<:table
-   :style "align: center;"
+   :width "100%"
+   :style "align: center;background-color:silver;"
    :frame "box"
-   :title "The strategy so far.  Purple nodes (if any) indicate choices to be made."
+   :summary "The strategy so far."
+   (<:caption
+    :style "background-color:silver;"
+    :align "bottom"
+    "The strategy so far.  Nodes in "
+    (<:span
+     :style "background-color:FireBrick;color:white;"
+     "red")
+    " are attacks that are closed in every branch.  Nodes in "
+    (<:span
+     :style "background-color:ForestGreen;color:white;"
+     "green")
+    " are attacks that are open in every branch.  "
+    "Nodes in "
+    (<:span
+     :style "background-color:Indigo;color:white;"
+     "purple")
+    "indicate choices to be made.")
    (<:tr
     (<:td
+     :align "center"
      (render-node-with-alternative (root strategy) alternative)))))
 
 ;;; strategy.lisp ends here
