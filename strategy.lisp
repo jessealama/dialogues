@@ -568,6 +568,8 @@ the strategy.  If there no such node, return NIL."
      $padding
      (<:td :align "center"
        (<:table
+	:bgcolor "silver"
+	:style "align: center;"
 	(loop
 	   for current-node = begin then (first (children current-node))
 	   do
@@ -581,12 +583,16 @@ the strategy.  If there no such node, return NIL."
     (if (null first-splitter)
 	(let ((leaf (first (leaves node))))
 	  (<:table
+	   :style "align: center;"
+	   :bgcolor "silver"
 	   (render-segment-with-padding-as-row node leaf 0 (when alternative
 							     (children alternative)))))
 	(let* ((succs (children first-splitter))
 	       (num-succs (length succs)))
 	  (<:table :rules "groups"
 		   :frame "void"
+		   :bgcolor "silver"
+		   :style "align: center;"
 	    (<:thead
 	     (render-segment-with-padding-as-row node first-splitter
 						 (floor (/ num-succs 2))
@@ -623,6 +629,12 @@ the strategy.  If there no such node, return NIL."
 (defun render-strategy-with-alternative (strategy alternative)
   "Render STRATEGY, with the children of strategy node ALTERNATIVE in
   a distinctive color."
-  (render-node-with-alternative (root strategy) alternative))
+  (<:table
+   :style "align: center;"
+   :frame "box"
+   :title "The strategy so far.  Purple nodes (if any) indicate choices to be made."
+   (<:tr
+    (<:td
+     (render-node-with-alternative (root strategy) alternative)))))
 
 ;;; strategy.lisp ends here
