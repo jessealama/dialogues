@@ -312,11 +312,12 @@ DEPTH TREE).")
     (car (last nodes))))
 
 (defgeneric proponent-node? (node))
+(defgeneric opponent-node? (node))
 
 (defmethod proponent-node? ((node node))
   (proponent-move? (last-move (node-state node))))
 
-(defun opponent-node? (node)
+(defmethod opponent-node? ((node node))
   (opponent-move? (last-move (node-state node))))
 
 (defun proponent-ws-from-opponent-node (opponent-node &optional ruleset)
