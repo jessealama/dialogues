@@ -692,6 +692,22 @@
 			     (not (repetition-in-dialogue? pro-move dialogue)))
 			 dialogue)))
 
+(defparameter rule-d14
+  (make-structural-rule
+   :name "D14"
+   :description "Proponent's attacks may be defended at most once."
+   :predicate
+   (every-opponent-move #'(lambda (move)
+			    (or (attacking-move? move)
+				(let ((ref (move-reference move)))
+				  (every-opponent-move #'(lambda (other-move)
+							   (let ((other-ref (move-reference other-move)))
+							     (or (eq move other-move)
+								 (attacking-move? move)
+								 (/= ref other-ref))))
+						       dialogue))))
+			dialogue)))
+
 (defparameter opponent-no-repeats
   (make-structural-rule
    :name "O-no-repeat"
