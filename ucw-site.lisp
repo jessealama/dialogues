@@ -2259,23 +2259,44 @@ with which the game begins."))
 		    (<:as-is (description translation)))))))
 	 (<:tr
 	  :style "background-color:#7B942E;"
-	  (<:td (<ucw:a
-		 :action (call 'ruleset-info)
-		 "Ruleset:"))
+	  (<:td :title "To construct a ruleset for playing a dialogue game, first, choose a base ruleset.  The list of base rulesets is taken from the literature on dialogue games (see, for instance, W. Felscher's 'Dialogues, strategies, and intuitionistic provability', Annals of Pure and Applied Logic 28(3), pp. 217-254).  (The names 'D' and 'E' and the names of the standard structural rules come from this paper.)
+
+After choosing a base ruleset, you may optionally select other rules. The extra rules come in three kinds: standard structural rules, experimental, non-standard structural rules, and heuristics.  Strictly speaking, there is no difference between these different kinds of rules; they are all structural rules on a par with one another.
+
+The standard structural rules are commonly used in the literature on dialogue games (Felscher, Krabbe, etc.).
+
+The experimental rules are just that: experiments.  They are definitely non-standard, and sometimes even whimsical.
+
+The list of heuristic rules can be used to help cut down the set of possibilities.  For example, one might be interested in games where neither player can repeat and earlier move.  (But note that these heuristic rules, since they are on a par with all the other rules, can have significant logical impact.  You have been warned.)
+
+The ruleset that will be used during the game will be the union of the rules in the chosen base rule set, together with whatever optional, extra rules were chosen.  We have a adopted a 'the-user-is-always-right' approach: there is no check for whether the constructed ruleset is 'consistent' or has any logical significance."
+		"Ruleset")
 	  (<:td (if (null (ruleset self))
 		    (<:table
 		     :rules "cols"
-		     :summary "Build the ruleset according to which you want to play a game.  First, choose a base ruleset.  Then, optionally select other rules. The ruleset that will be used during the game will be the union of the rules in the chosen base rule set, together with whatever optional, extra rules were chosen."
+		     :summary "The purpose of this table is to build the ruleset according to which you want to play a game."
 		     (<:thead
 		      (<:colgroup
 		       (<:col)
 		       (<:col)
 		       (<:col))
 		      (<:tr
-		       (<:th "Standard Rulesets")
-		       (<:th "Standard Structural Rules")
-		       (<:th "Experimental Rules")
-		       (<:th "Heuristic Rules")))
+		       (<:th
+			:title "First, choose from one of the predefined well-established rulesets.  Its rules will be included in the ruleset according to which your game will be played."
+			:abbr "Ruleset"
+			"Standard Rulesets")
+		       (<:th
+			:title "Now choose whether to include some of the standard rules taken from the literature on dialogue games.  Some of the standard rulesets already include these rules; if you choose a rule here that is already included in the ruleset you've chosen, you choice will be ignored."
+			:abbr "Structural Rules"
+			"Standard Structural Rules")
+		       (<:th
+			:title "Now choose whether to include some non-standard experimental structural rules."
+			:abbr "Experimental"
+			"Experimental Rules")
+		       (<:th
+			:title "Finally, choose whether you with to include some 'heuristic' rules that will help to eliminate some 'redundant' possibilities (e.g., repeating a move)."
+			:abbr "Heuristics"
+			"Heuristic Rules")))
 		     (<:tbody
 		      (<:tr
 		       :valign "middle"
