@@ -111,6 +111,12 @@
 	     :initarg :strategy
 	     :initform nil
 	     :type (or null strategy))
+   (player
+    :accessor player
+    :initarg :player
+    :initform 'p
+    :type symbol
+    :documentation "The player for whom we are interactively looking for a strategy.  It should be other the symbol P or the symbol O.")
    (choice-node
     :accessor choice-node
     :initarg :choice-node
@@ -160,10 +166,13 @@
 
 (defmethod render ((self strategy-editor))
   (let* ((strategy (strategy self))
+	 (player (player self))
 	 (heuristics (heuristics self))
 	 (extra-rules (extra-rules self))
-	 (opp-choice (first-proponent-choice strategy)))
-    (<:p (<:b "Base ruleset:") " " (<:format (description (ruleset strategy))))
+	 (player-choice (if (eql player 'p)
+			    (first-proponent-choice strategy)
+			    (first-opponent-choice strategy))))
+    (<:p (<:b "Base ruleset:") " " (<:strong (name (ruleset strategy))) ": " (<:as-html (description (ruleset strategy))))
     (<:p (<:b "Extra rules:")
 	 (if (null extra-rules)
 	     (progn (<:as-is " ") (<:em "(none)"))
@@ -171,54 +180,71 @@
 	      (dolist (extra-rule extra-rules)
 		(<:li (<:strong (<:as-html (name extra-rule))) ": " (<:as-html (description extra-rule)))))))
     (<:p (<:b "Heuristic rules:") " " (render-heuristics heuristics))
-    (if (eq opp-choice :too-deep)
-	(<:p "I couldn't find the first place where Proponent has a choice before I hit depth " (<:as-is +strategy-max-depth+) "; sorry, we can't play any more.  Please try some other formula or ruleset.")
+    (<:p (<:b "Player for whom we're building a strategy:") " "
+	 (if (eql player 'p)
+	     (<:em "Proponent")
+	     (<:em "Opponent")))
+    (if (eq player-choice :too-deep)
+	(<:p "I couldn't find the first choice node before I hit depth " (<:as-is +strategy-max-depth+) "; sorry, we can't play any more.  Please try some other formula or ruleset.")
 	(progn
-	  (if opp-choice
+	  (if player-choice
 	      (progn
 		(render-strategy-with-alternative
-		 (node->strategy opp-choice (ruleset (strategy self)))
-		 opp-choice)
-		(setf (choice-node self) opp-choice)
-		(<:p "Multiple moves are available to Proponent.  Choose one:")
+		 (node->strategy player-choice (ruleset (strategy self)))
+		 player-choice)
+		(setf (choice-node self) player-choice)
+		(<:p "Multiple moves are available.  Choose one:")
 		(<:ul
 		 (loop
-		    with prop-nodes = (children opp-choice)
-		    with prop-nodes-sorted = (sort (copy-list prop-nodes)
-						   #'node-reference->)
-		    with num-children = (length prop-nodes-sorted)
-		    for prop-node in prop-nodes-sorted
-		    for prop-move = (move prop-node)
+		    with nodes = (children player-choice)
+		    with nodes-sorted = (sort (copy-list nodes)
+					      #'node-reference->)
+		    with num-children = (length nodes-sorted)
+		    for node in nodes-sorted
+		    for move = (move node)
 		    for i from 1
 		    do
 		      (let ((i i))
 			(with-slots (statement stance reference)
-			    prop-move
+			    move
 			  (<:li
-			   (<ucw:a :action (progn
-					     (setf (children opp-choice)
-						   (list (nth (1- i) prop-nodes-sorted))
-						   (current-choice self)
-						   (nth (1- i) prop-nodes-sorted))
-					     (dolist (child prop-nodes-sorted)
-					       (unless (eq child
-							   (current-choice self))
-						 (push child (alternatives self)))))				 
-				   (if (eq stance 'a)
-				       (<:format "Attack move #~d by asserting " reference)
-				       (<:format "Defend against the attack of move #~d by asserting " reference))
-				   (render statement))))))))
+			   (<ucw:a
+			    :action
+			    (progn
+			      (setf (children player-choice)
+				    (list (nth (1- i) nodes-sorted))
+				    (current-choice self)
+				    (nth (1- i) nodes-sorted))
+			      (dolist (child nodes-sorted)
+				(unless (eq child
+					    (current-choice self))
+				  (push child (alternatives self)))))				 
+			    (if (eq stance 'a)
+				(<:format "Attack move #~d by asserting " reference)
+				(<:format "Defend against the attack of move #~d by asserting " reference))
+			    (render statement))))))))
 	      (progn
-		(if (winning-strategy? strategy)
-		    (progn
-		      (<:p "Congratulations!  You've found a winning strategy.  Here it is:")
-		      (render-strategy-with-alternative strategy nil))
-		    
-		    (progn
-		      (<:p "I'm sorry to say that there is no winning strategy consistent with your choices so far.  (If you didn't make any choices at all, this means that the formula you started with,")
-		      (<:blockquote
-		       (render (move-statement (move (root strategy)))) ",")
-		      (<:p "is invalid with respect to the ruleset that you chose.)")))
+		(if (eql player 'p)
+		    (if (winning-strategy-for-proponent? strategy)
+			(progn
+			  (<:p "Congratulations!  You've found a winning strategy for Proponent.  Here it is:")
+			  (render-strategy-with-alternative strategy nil))
+			
+			(progn
+			  (<:p "I'm sorry to say that there is no winning strategy consistent with your choices so far.  (If you didn't make any choices at all, this means that the formula you started with,")
+			  (<:blockquote
+			   (render (move-statement (move (root strategy)))) ",")
+			  (<:p "is invalid with respect to the ruleset that you chose.)")))
+		    (if (winning-strategy-for-opponent? strategy)
+			(progn
+			  (<:p "Congratulations!  You've found a winning strategy for Opponent.  Here it is:")
+			  (render-strategy-with-alternative strategy nil))
+			
+			(progn
+			  (<:p "I'm sorry to say that there is no winning strategy for Opponent consistent with your choices so far.  (If you didn't make any choices at all, this means that the formula you started with,")
+			  (<:blockquote
+			   (render (move-statement (move (root strategy)))) ",")
+			  (<:p "is valid with respect to the ruleset that you chose.)"))))
 		(let ((alternatives (alternatives self)))
 		  (if alternatives
 		      (progn
@@ -229,10 +255,8 @@
 			     (with-slots (player statement stance reference)
 				 alternative-move
 			       (if (eq stance 'a)
-				   (<:li (<:format "Have ~a attack move #~d by asserting " player reference)
-					 (render statement))
-				   (<:li (<:format "Have ~a defend aginst the attack of move ~d by asserting " player reference)
-					 (render statement))))))))
+				   (<:li "Have " (<:strong player) "attack move #" (<:as-html reference) " by asserting " (render statement))
+				   (<:li "Have " (<:strong player) " defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))))))
 		      (progn
 			(<:p "There are no more alternative moves to explore."))))))))
     
@@ -2104,7 +2128,7 @@ with which the game begins."))
 				       $heuristics))))
        ($take-action
 	(ecase selected-play-style
-	  (interactive-strategy-search
+	  (interactive-strategy-search-for-proponent
 	   (let* ((initial-move (make-move 'p
 					   (apply-translation selected-translation $formula)
 					   nil
@@ -2115,6 +2139,21 @@ with which the game begins."))
 					:root root)))
 	     (call 'strategy-editor
 		   :strategy strat
+		   :player 'p
+		   :extra-rules $trimmed-extra-rules
+		   :heuristics $heuristics)))
+	  (interactive-strategy-search-for-opponent
+	   (let* ((initial-move (make-move 'p
+					   (apply-translation selected-translation $formula)
+					   nil
+					   nil))
+		  (root (make-instance 'strategy-node :move initial-move))
+		  (strat (make-instance 'strategy
+					:ruleset $actual-ruleset
+					:root root)))
+	     (call 'strategy-editor
+		   :strategy strat
+		   :player 'o
 		   :extra-rules $trimmed-extra-rules
 		   :heuristics $heuristics)))
 	  (play-as-both-proponent-and-opponent
@@ -2284,7 +2323,10 @@ with which the game begins."))
 		  :value 'play-as-opponent-random-proponent
 		  "Play a game as Opponent (Proponent will choose its moves randomly)")
 		 (<ucw:option
-		  :value 'interactive-strategy-search
-		  "Search for a winning strategy")))))))))))
+		  :value 'interactive-strategy-search-for-proponent
+		  "Search for a winning strategy for Proponent")
+		 (<ucw:option
+		  :value 'interactive-strategy-search-for-opponent
+		  "Search for a winning strategy for Opponent")))))))))))
 
 ;;; ucw-site.lisp ends here
