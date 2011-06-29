@@ -2094,6 +2094,7 @@ with which the game begins."))
 	rule-d12-two-times-checked
 	rule-d13-two-times-checked
 	rule-d13-three-times-checked
+	rule-d14-checked
 	proponent-no-repeats-checked
 	opponent-no-repeats-checked
 	rule-no-repetitions-checked)
@@ -2134,6 +2135,8 @@ with which the game begins."))
 	    (push rule-d13-two-times extras))
 	  (when rule-d13-three-times-checked
 	    (push rule-d13-three-times extras))
+	  (when rule-d14-checked
+	    (push rule-d14 extras))
 	  (reverse extras)))
        ($heuristics
 	(let (heuristics)
@@ -2352,7 +2355,7 @@ The ruleset that will be used during the game will be the union of the rules in 
 			 (rule-checkbox-row rule-d10 rule-d10-checked)
 			 (rule-checkbox-row rule-d11 rule-d11-checked)
 			 (rule-checkbox-row rule-d12 rule-d12-checked)
-			 (rule-checkbox-row rule-d13 rule-d13-checked)
+			 (rule-checkbox-row rule-d13 rule-d13-checked)	 
 			 (rule-checkbox-row rule-e rule-e-checked)))
 		       (<:td
 			(<:table
@@ -2363,7 +2366,8 @@ The ruleset that will be used during the game will be the union of the rules in 
 			 (rule-checkbox-row rule-d13-symmetric rule-d13-symmetric-checked)
 			 (rule-checkbox-row rule-d12-two-times rule-d12-two-times-checked)
 			 (rule-checkbox-row rule-d13-two-times rule-d13-two-times-checked)
-			 (rule-checkbox-row rule-d13-three-times rule-d13-three-times-checked)))
+			 (rule-checkbox-row rule-d13-three-times rule-d13-three-times-checked)
+			 (rule-checkbox-row rule-d14 rule-d14-checked)))
 		       (<:td
 			(<:table
 			 :rules "rows"
