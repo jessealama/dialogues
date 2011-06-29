@@ -11,7 +11,7 @@
    :name "d01-alternating"
    :body (not (eq current-player
 		  (move-player (nth-move dialogue current-reference))))
-   :description "You cannot respond to your own statements."))
+   :description "A player cannot respond to his own statements."))
 
 (defparameter rule-d01-conjunction
   (make-offensive-rule
@@ -129,7 +129,7 @@
 			   (when attacked-player
 			     (and (not (eq current-player attacking-player))
 				  (eq current-player attacked-player))))))))))))
-   :description "You can defend only against the other player's attacks, which themselves are supposed to be against your statements."))
+   :description "A player X can defend only against the other player's attacks, which themselves are supposed to be against X's statements."))
 
 (defparameter rule-d02-formula
   (make-defensive-rule
@@ -331,7 +331,7 @@
 (defparameter rule-d11
   (make-structural-rule
    :name "D11"
-   :description "You must defend against the most recent open attack."
+   :description "A player must defend against the most recent open attack."
    :predicate
    (loop
       with len = (dialogue-length dialogue)
@@ -354,7 +354,7 @@
 (defparameter rule-d11-most-recent-attack
   (make-structural-rule
    :name "D11-most-recent"
-   :description "You must defend against the most recent attack (open or closed)."
+   :description "Defenses  must be against the most recent attack (open or closed)."
    :predicate
    (loop
       with len = (dialogue-length dialogue)
@@ -381,7 +381,7 @@
 (defparameter rule-d11-queue
   (make-structural-rule
    :name "D11-queue"
-   :description "You must defend against the earliest open attack."
+   :description "Defenses must be against the earliest open attack."
    :predicate
    (if final-move-only
        (let ((final-move (last-move dialogue)))
@@ -503,7 +503,7 @@
 (defparameter rule-no-repetitions
   (make-structural-rule
    :name "No repetitions"
-   :description "You may not make the exact same move (same stance, same reference, same statement) twice."
+   :description "Neither player may repeat moves (same stance, same reference, same statement)."
    :predicate
    (every-move #'(lambda (move)
 		   (every-move #'(lambda (other-move) (or (eq move other-move)
@@ -887,7 +887,7 @@
 				      ;; rule-d11
 				      rule-d12
 				      rule-d13))
-		 :description "D rules, but you may defend against any open attack (D11 absent)"))
+		 :description "D rules, but players may defend against any open attack (D11 absent)"))
 
 (defparameter e-dialogue-rules-minus-d11
   (make-instance 'ruleset
@@ -902,7 +902,7 @@
 				      rule-d12
 				      rule-d13
 				      rule-e))
-		 :description "E rules, but you may defend against any open attack (D11 absent)"))
+		 :description "E rules, but players may defend against any open attack (D11 absent)"))
 
 (defparameter d-dialogue-rules-minus-d12
   (make-instance 'ruleset
