@@ -255,8 +255,8 @@
 			     (with-slots (player statement stance reference)
 				 alternative-move
 			       (if (eq stance 'a)
-				   (<:li "Have " (<:strong player) "attack move #" (<:as-html reference) " by asserting " (render statement))
-				   (<:li "Have " (<:strong player) " defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))))))
+				   (<:li "Have " (<:strong (<:as-html player)) "attack move #" (<:as-html reference) " by asserting " (render statement))
+				   (<:li "Have " (<:strong (<:as-html player)) " defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))))))
 		      (progn
 			(<:p "There are no more alternative moves to explore."))))))))
     
