@@ -725,7 +725,7 @@ the strategy.  If there no such node, return NIL."
    :frame "box"
    :summary "The strategy so far."
    (<:caption
-    :style "background-color:silver;"
+    :style "background-color:silver;font-style:oblique;"
     :align "bottom"
     "The strategy so far.  Nodes in "
     (<:span
@@ -740,7 +740,7 @@ the strategy.  If there no such node, return NIL."
     (<:span
      :style "background-color:Indigo;color:white;"
      "purple")
-    "indicate choices to be made.")
+    " indicate choices to be made.")
    (<:tr
     (<:td
      :align "center"
