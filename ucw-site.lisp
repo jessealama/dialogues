@@ -207,12 +207,20 @@
        (<:td :nowrap "nowrap"
 	     :align "center"
 	     (render (move-statement (move (root strategy)))))
-       (<:td
-	:align "center"
-	(render-heuristics extra-rules))
-       (<:td 
-	:align "center"
-	(render-heuristics heuristics)))))
+       (if extra-rules
+	   (<:td
+	    :align "left"
+	    (render-heuristics extra-rules))
+	   (<:td
+	    :align "center"
+	    (render-heuristics extra-rules)))
+       (if heuristics
+	   (<:td 
+	    :align "left"
+	    (render-heuristics heuristics))
+	   (<:td 
+	    :align "center"
+	    (render-heuristics heuristics))))))
     (<:br) ;; no like
     (if (eq player-choice :too-deep)
 	(<:p "I couldn't find the first choice node before I hit depth " (<:as-is +strategy-max-depth+) "; sorry, we can't play any more.  Please try some other formula or ruleset.")
