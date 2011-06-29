@@ -2265,6 +2265,7 @@ with which the game begins."))
 	  (<:td (if (null (ruleset self))
 		    (<:table
 		     :rules "cols"
+		     :summary "Build the ruleset according to which you want to play a game.  First, choose a base ruleset.  Then, optionally select other rules. The ruleset that will be used during the game will be the union of the rules in the chosen base rule set, together with whatever optional, extra rules were chosen."
 		     (<:thead
 		      (<:colgroup
 		       (<:col)
