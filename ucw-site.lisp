@@ -2053,6 +2053,7 @@ with which the game begins."))
 (defmacro ruleset-option (ruleset)
   `(<ucw:option
     :value ',ruleset
+    :title (description ,ruleset)
     (<:as-html (name ,ruleset) ": " (description ,ruleset))))
 
 (defmacro rule-checkbox-row (rule selector)
