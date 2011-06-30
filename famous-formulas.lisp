@@ -120,7 +120,7 @@
 	    (-> p r)))
 
     (define-famous-formula disjunctive-syllogism
-	(-> (& (v p q) (neg p)) (neg q)))
+	(-> (& (v p q) (neg p)) q))
 
     (define-famous-formula constructive-dilemma
 	(-> (& (-> p q)
