@@ -2323,7 +2323,7 @@ The ruleset that will be used during the game will be the union of the rules in 
 		       (<:col))
 		      (<:tr
 		       (<:th
-			:title "First, choose from one of the predefined well-established rulesets.  Its rules will be included in the ruleset according to which your game will be played."
+			:title "First, choose from one of the predefined well-established rulesets.  Its rules will be included in the ruleset according to which your game will be played.  By default, only a skeletal ruleset (no structural rules) will be used."
 			:abbr "Ruleset"
 			"Standard Rulesets")
 		       (<:th
@@ -2344,11 +2344,12 @@ The ruleset that will be used during the game will be the union of the rules in 
 		       (<:td
 			(<ucw:select
 			 :accessor selected-rules
+			 :title "Choose from one of the predefined well-established rulesets.  Its rules will be included in the ruleset according to which your game will be played.  By default, only a skeletal ruleset (no structural rules) will be used."
+			 (ruleset-option skeletal-rules)
 			 (ruleset-option d-dialogue-rules)
 			 (ruleset-option e-dialogue-rules)
 			 (ruleset-option classical-dialogue-rules)
-			 (ruleset-option nearly-classical-dialogue-rules)
-			 (ruleset-option skeletal-rules)))
+			 (ruleset-option nearly-classical-dialogue-rules)))
 		       (<:td
 			(<:table
 			 :rules "rows"
