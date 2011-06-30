@@ -131,8 +131,8 @@
     (define-famous-formula destructive-dilemma
 	(-> (& (-> p q)
 	       (-> r s))
-	    (-> (v (neg r) (neg s))
-		(v (neg p) (neg q)))))
+	    (-> (v (neg q) (neg s))
+		(v (neg p) (neg r)))))
 
     (define-famous-formula conjunction-elimination
 	(-> (& p q) p))
