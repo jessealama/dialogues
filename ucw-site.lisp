@@ -2075,6 +2075,196 @@ with which the game begins."))
        " "
        (<:as-html (description ,rule))))))
 
+(defun render-strategy-node-as-table-row (node &optional alternatives)
+  (let ((move (move node))
+	(depth (strategy-node-depth node)))
+    (with-slots (player statement stance reference)
+	move
+      (if (member node alternatives)
+	  (<:tr :bgcolor "indigo"
+		:nowrap "nowrap"
+		:valign "top"
+		:style "font-style:bold;color:white;"
+	   (<:td :align "left"
+		 (<:as-html depth))
+	   (<:td :align "center"
+		 (<:strong (<:as-html player)))
+	   (<:td :align "left"
+		 :nowrap "nowrap"
+		 (render statement))
+	   (<:td :align "left"
+		 (unless (initial-move? move)
+		   (if (attacking-move? move)
+		       (<:as-html "[A," reference "]")
+		       (<:as-html "[D," reference "]")))))
+	  (if (attacking-move? move)
+	      (if (closed-in-every-branch? node depth)
+		  (<:tr :nowrap "nowrap"
+			:valign "top"
+			:bgcolor "FireBrick"
+			:style "color:white;"
+			(<:td :align "left"
+			      (<:as-html depth))
+			(<:td :align "center"
+			      (<:strong (<:as-html player)))
+			(<:td :align "left"
+			      :nowrap "nowrap"
+			      (render statement))
+			(<:td :align "left"
+			      (unless (initial-move? move)
+				(if (attacking-move? move)
+				    (<:as-html "[A," reference "]")
+				    (<:as-html "[D," reference "]")))))
+		  (if (open-in-every-branch? node depth)
+		      (<:tr :nowrap "nowrap"
+			    :valign "top"
+			    :bgcolor "ForestGreen"
+			    :style "color:white;"
+			    (<:td :align "left"
+				  (<:as-html depth))
+			    (<:td :align "center"
+				  (<:strong (<:as-html player)))
+			    (<:td :align "left"
+				  :nowrap "nowrap"
+				  (render statement))
+			    (<:td :align "left"
+				  (unless (initial-move? move)
+				    (if (attacking-move? move)
+					(<:as-html "[A," reference "]")
+					(<:as-html "[D," reference "]")))))
+		      (<:tr :nowrap "nowrap"
+			    :valign "top"
+			    (<:td :align "left"
+				  (<:as-html depth))
+			    (<:td :align "center"
+				  (<:strong (<:as-html player)))
+			    (<:td :align "left"
+				  :nowrap "nowrap"
+				  (render statement))
+			    (<:td :align "left"
+				  (unless (initial-move? move)
+				    (if (attacking-move? move)
+					(<:as-html "[A," reference "]")
+					(<:as-html "[D," reference "]")))))))
+	      (<:tr :nowrap "nowrap"
+		    :valign "top"
+		    (<:td :align "left"
+			  (<:as-html depth))
+		    (<:td :align "center"
+			  (<:strong (<:as-html player)))
+		    (<:td :align "left"
+			  :nowrap "nowrap"
+			  (render statement))
+		    (<:td :align "left"
+			  (unless (initial-move? move)
+			    (if (attacking-move? move)
+				(<:as-html "[A," reference "]")
+				(<:as-html "[D," reference "]"))))))))))
+
+(defun render-segment-with-padding-as-row (begin end padding &optional alternatives)
+  "Given strategy nodes BEGIN and END, emit an HTML table
+  row representing the dialogue from BEGIN to END.  The row will
+  contain 2*PADDING + 1 columns; PADDING empty columns will be put on
+  the left and the right of the sequence.  It is assumed that there is
+  a path from BEGIN to END; the path is constrcted simply taking
+  unique successors, starting at BEGIN, until we reach END.  The moves
+  of the game between BEGIN and END will be put into a single HTML
+  table element."
+  (symbol-macrolet
+      (($padding (dotimes (i padding) (<:td))))
+    (<:tr :valign "top"
+     $padding
+     (<:td :align "center"
+       (<:table
+	:bgcolor "silver"
+	:cellspacing "0"
+	:style "align: center;"
+	(loop
+	   for current-node = begin then (first (children current-node))
+	   do
+	     (render-strategy-node-as-table-row current-node alternatives)
+	     (when (eq current-node end)
+	       (return)))))
+     $padding)))
+
+(defun render-node-with-alternative (node alternative)
+  (let ((first-splitter (first-splitter node)))
+    (if (null first-splitter)
+	(let ((leaf (first (leaves node))))
+	  (<:table
+	   :style "align: center;"
+	   :bgcolor "silver"
+	   (render-segment-with-padding-as-row node leaf 0 (when alternative
+							     (children alternative)))))
+	(let* ((succs (children first-splitter))
+	       (num-succs (length succs)))
+	  (<:table :rules "groups"
+		   :frame "void"
+		   :bgcolor "silver"
+		   :style "align: center;"
+	    (<:thead
+	     (render-segment-with-padding-as-row node first-splitter
+						 (floor (/ num-succs 2))
+						 (when alternative
+						   (children alternative))))
+	    (<:tbody
+	     (<:tr :valign "top"
+	      (if (evenp num-succs)
+		  (progn
+		    (loop
+		       with cleft-point = (/ num-succs 2)
+		       for i from 0 upto (1- cleft-point)
+		       for succ = (nth i succs)
+		       do
+			 (<:td :align "center"
+			   (render-node-with-alternative succ
+							 (when alternative
+							   alternative))))
+		    (<:td)
+		    (loop
+		       with cleft-point = (/ num-succs 2)
+		       for i from cleft-point upto (1- num-succs)
+		       for succ = (nth i succs)
+		       do
+			 (<:td :align "center"
+			   (render-node-with-alternative succ (when alternative
+								alternative)))))
+		  (loop
+		     for succ in succs
+		     do
+		       (<:td :align "center"
+		         (render-node-with-alternative succ alternative)))))))))))
+
+(defun render-strategy-with-alternative (strategy alternative)
+  "Render STRATEGY, with the children of strategy node ALTERNATIVE in
+  a distinctive color."
+  (<:table
+   :width "100%"
+   :style "align: center;background-color:silver;"
+   :frame "box"
+   :summary "The strategy so far."
+   (<:caption
+    :style "background-color:silver;font-style:oblique;"
+    :align "bottom"
+    "The strategy so far.  Nodes in "
+    (<:span
+     :style "background-color:FireBrick;color:white;"
+     "red")
+    " are attacks that are closed in every branch passing through the node.  Nodes in "
+    (<:span
+     :style "background-color:ForestGreen;color:white;"
+     "green")
+    " are attacks that are open in every branch passing through the node.  "
+    "Nodes in "
+    (<:span
+     :style "background-color:Indigo;color:white;"
+     "purple")
+    " indicate choices to be made.")
+   (<:tr
+    (<:td
+     :align "center"
+     (render-node-with-alternative (root strategy) alternative)))))
+
 (defmethod render ((self start-game-component))
   (let (input-formula
 	selected-formula 
