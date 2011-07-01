@@ -2163,15 +2163,37 @@ with which the game begins."))
 	       (return)))))
      $padding)))
 
-(defun render-node-with-alternative-hiding-closed-branches (node alternative)
+(defun render-node-with-alternative-hiding-closed-branches (node alternative ruleset)
   (if (branch-closed? node)
       (<:table
        :style "align: center;"
        :bgcolor "silver"
        (<:tr
 	(<:td
+	 :align "center"
 	 :title "Wouldn't it be great if this were a link which, when followed, showed the subtree rooted at this node?"
-	 (<:b (<:as-is "&hellip;")))))
+	 (<:b (<:as-is "&hellip;"))))
+       (<:tr
+	(if (proponent-wins-every-branch? node ruleset)
+	    (<:td
+	     :align "center"
+	     :title "Proponent wins every dialogue passing through here"
+	     (<:span
+	      :style "font-size:xx-large;"
+	      (<:as-is "&#9786")))
+	    (if (opponent-wins-every-branch? node ruleset)
+		(<:td
+		 :align "center"
+		 :title "Opponent wins every dialogue passing through here"
+		 (<:span
+		  :style "font-size:xx-large;"
+		  (<:as-is "&#9785;")))
+		(<:td
+		 :align "center"
+		 :title "Proponent wins at least one dialogue passing through here, and Opponents wins at least one dialogue passing through here"
+		 (<:span
+		  :style "font-size:xx-large;"
+		  (<:as-is "&#9786; &#9785;")))))))
       (let ((first-splitter (first-splitter node)))
 	(if (null first-splitter)
 	    (let ((leaf (first (leaves node))))
@@ -2206,7 +2228,8 @@ with which the game begins."))
 		       do
 			 (<:td :align "center"
 			   (render-node-with-alternative-hiding-closed-branches succ
-										alternative)))
+										alternative
+										ruleset)))
 		    (<:td)
 		    (loop
 		       with cleft-point = (/ num-succs 2)
@@ -2215,13 +2238,15 @@ with which the game begins."))
 		       do
 			 (<:td :align "center"
 			   (render-node-with-alternative-hiding-closed-branches succ
-										alternative))))
+										alternative
+										ruleset))))
 		  (loop
 		     for succ in succs
 		     do
 		       (<:td :align "center"
 		         (render-node-with-alternative-hiding-closed-branches succ
-									      alternative))))))))))))
+									      alternative
+									      ruleset))))))))))))
 
 (defun render-node-with-alternative (node alternative)
   (let ((first-splitter (first-splitter node)))
@@ -2303,7 +2328,7 @@ with which the game begins."))
    (<:tr
     (<:td
      :align "center"
-     (render-node-with-alternative-hiding-closed-branches (root strategy) alternative)))))
+     (render-node-with-alternative-hiding-closed-branches (root strategy) alternative (ruleset strategy))))))
 
 (defun render-strategy-with-alternative (strategy alternative)
   "Render STRATEGY, with the children of strategy node ALTERNATIVE in
