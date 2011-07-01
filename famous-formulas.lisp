@@ -115,6 +115,12 @@
 	    (v (-> (neg p) (neg q))
 	       (-> (neg p) (neg r)))))
 
+
+    (define-famous-formula distributivity-of-implication-over-disjunction
+	(-> (-> p (v q r))
+	    (v (-> p q)
+	       (-> p r))))`
+
     (define-famous-formula modus-ponens
 	(-> (& (-> p q) p) q))
     

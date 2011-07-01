@@ -444,6 +444,7 @@ Web" "UnCommon Web") " system.  The Common Lisp implementation is " (<:a :href "
     ("Implicational ex falso quodlibet" "implicational-ex-falso" ,implicational-ex-falso)
     ("KP" "kp" ,kp)
     ("WKP" "wkp" ,wkp)
+    ("Distributivity of implication over disjunction" "distributivity-of-implication-over-disjunction" ,distributivity-of-implication-over-disjunction)
     ("Aristotle's thesis (positive antecedent)" "aristotles-thesis-positive-antecedent" ,aristotles-thesis-positive-antecedent)
     ("Aristotle's thesis (negative antecedent)" "aristotles-thesis-negative-antecedent" ,aristotles-thesis-negative-antecedent)
     ("Modus ponens" "modus-ponens" ,modus-ponens)
