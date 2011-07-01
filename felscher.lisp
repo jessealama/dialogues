@@ -751,7 +751,7 @@
 				  (every-opponent-move #'(lambda (other-move)
 							   (let ((other-ref (move-reference other-move)))
 							     (or (eq move other-move)
-								 (attacking-move? move)
+								 (attacking-move? other-move)
 								 (/= ref other-ref))))
 						       dialogue))))
 			dialogue)))
