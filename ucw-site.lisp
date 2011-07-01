@@ -227,7 +227,7 @@
 	(progn
 	  (if player-choice
 	      (progn
-		(render-strategy-with-alternative
+		(render-strategy-with-alternative-hiding-closed-branches
 		 (node->strategy player-choice (ruleset (strategy self)))
 		 player-choice)
 		(setf (choice-node self) player-choice))
@@ -2163,6 +2163,66 @@ with which the game begins."))
 	       (return)))))
      $padding)))
 
+(defun render-node-with-alternative-hiding-closed-branches (node alternative)
+  (if (branch-closed? node)
+      (<:table
+       :style "align: center;"
+       :bgcolor "silver"
+       (<:tr
+	(<:td
+	 :title "Wouldn't it be great if this were a link which, when followed, showed the subtree rooted at this node?"
+	 (<:b (<:as-is "&hellip;")))))
+      (let ((first-splitter (first-splitter node)))
+	(if (null first-splitter)
+	    (let ((leaf (first (leaves node))))
+	      (<:table
+	       :style "align: center;"
+	       :bgcolor "silver"
+	       (render-segment-with-padding-as-row node
+						   leaf
+						   0
+						   (when alternative
+						     (children alternative)))))
+	    (let* ((succs (children first-splitter))
+	       (num-succs (length succs)))
+	      (<:table :rules "groups"
+		       :frame "void"
+		       :bgcolor "silver"
+		       :style "align: center;"
+		       (<:thead
+			(render-segment-with-padding-as-row node
+							    first-splitter
+							    (floor (/ num-succs 2))
+						 (when alternative
+						   (children alternative))))
+	    (<:tbody
+	     (<:tr :valign "top"
+	      (if (evenp num-succs)
+		  (progn
+		    (loop
+		       with cleft-point = (/ num-succs 2)
+		       for i from 0 upto (1- cleft-point)
+		       for succ = (nth i succs)
+		       do
+			 (<:td :align "center"
+			   (render-node-with-alternative-hiding-closed-branches succ
+										alternative)))
+		    (<:td)
+		    (loop
+		       with cleft-point = (/ num-succs 2)
+		       for i from cleft-point upto (1- num-succs)
+		       for succ = (nth i succs)
+		       do
+			 (<:td :align "center"
+			   (render-node-with-alternative-hiding-closed-branches succ
+										alternative))))
+		  (loop
+		     for succ in succs
+		     do
+		       (<:td :align "center"
+		         (render-node-with-alternative-hiding-closed-branches succ
+									      alternative))))))))))))
+
 (defun render-node-with-alternative (node alternative)
   (let ((first-splitter (first-splitter node)))
     (if (null first-splitter)
@@ -2214,6 +2274,36 @@ with which the game begins."))
 		       (<:td :align "center"
 		         (render-node-with-alternative succ
 						       alternative)))))))))))
+
+(defun render-strategy-with-alternative-hiding-closed-branches (strategy alternative)
+  "Render STRATEGY, with the children of strategy node ALTERNATIVE in
+  a distinctive color, and link the the action of extending STRATEGY by setting the unique child of ALTERNATIVE to the indicated child.  Omit showing closed branches"
+  (<:table
+   :width "100%"
+   :style "align: center;background-color:silver;"
+   :frame "box"
+   :summary "The strategy so far."
+   (<:caption
+    :style "background-color:silver;font-style:oblique;"
+    :align "bottom"
+    "The strategy so far.  Nodes in "
+    (<:span
+     :style "background-color:FireBrick;color:white;"
+     "red")
+    " are attacks that are closed in every branch passing through the node.  Nodes in "
+    (<:span
+     :style "background-color:ForestGreen;color:white;"
+     "green")
+    " are attacks that are open in every branch passing through the node.  "
+    "Nodes in "
+    (<:span
+     :style "background-color:Indigo;color:white;"
+     "purple")
+    " indicate choices to be made.")
+   (<:tr
+    (<:td
+     :align "center"
+     (render-node-with-alternative-hiding-closed-branches (root strategy) alternative)))))
 
 (defun render-strategy-with-alternative (strategy alternative)
   "Render STRATEGY, with the children of strategy node ALTERNATIVE in
