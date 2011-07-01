@@ -538,6 +538,20 @@ the strategy.  If there no such node, return NIL."
       (or (null children)
 	  (every #'branch-closed? children)))))
 
+(defun proponent-wins-every-branch? (node ruleset)
+  "Determine whether Proponent wins every dialogue that passes through NODE."
+  (every #'proponent-wins?
+	 (mapcar #'(lambda (leaf)
+		     (node->dialogue leaf ruleset))
+		 (leaves node))))
+
+(defun opponent-wins-every-branch? (node ruleset)
+  "Determine whether Proponent wins every dialogue that passes through NODE."
+  (every #'opponent-wins?
+	 (mapcar #'(lambda (leaf)
+		     (node->dialogue leaf ruleset))
+		 (leaves node))))
+
 (defun closed-in-every-branch? (node attack-index)
   "Determine whether ATTACK-INDEX, which is assumed to be the
   index (starting from 0) of an attack in the dialogue tree implicitly
