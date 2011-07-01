@@ -230,37 +230,7 @@
 		(render-strategy-with-alternative
 		 (node->strategy player-choice (ruleset (strategy self)))
 		 player-choice)
-		(setf (choice-node self) player-choice)
-		(<:p "Multiple moves are available.  Choose one:")
-		(<:ul
-		 (loop
-		    with nodes = (children player-choice)
-		    with nodes-sorted = (sort (copy-list nodes)
-					      #'node-reference->)
-		    with num-children = (length nodes-sorted)
-		    for node in nodes-sorted
-		    for move = (move node)
-		    for i from 1
-		    do
-		      (let ((i i))
-			(with-slots (statement stance reference)
-			    move
-			  (<:li
-			   (<ucw:a
-			    :action
-			    (progn
-			      (setf (children player-choice)
-				    (list (nth (1- i) nodes-sorted))
-				    (current-choice self)
-				    (nth (1- i) nodes-sorted))
-			      (dolist (child nodes-sorted)
-				(unless (eq child
-					    (current-choice self))
-				  (pushnew child (alternatives self)))))				 
-			    (if (eq stance 'a)
-				(<:format "Attack move #~d by asserting " reference)
-				(<:format "Defend against the attack of move #~d by asserting " reference))
-			    (render statement))))))))
+		(setf (choice-node self) player-choice))
 	      (progn
 		(if (eql player 'p)
 		    (if (winning-strategy-for-proponent? strategy)
@@ -2085,18 +2055,24 @@ with which the game begins."))
 		:nowrap "nowrap"
 		:valign "top"
 		:style "font-style:bold;color:white;"
-	   (<:td :align "left"
-		 (<:as-html depth))
-	   (<:td :align "center"
-		 (<:strong (<:as-html player)))
-	   (<:td :align "left"
-		 :nowrap "nowrap"
-		 (render statement))
-	   (<:td :align "left"
-		 (unless (initial-move? move)
-		   (if (attacking-move? move)
-		       (<:as-html "[A," reference "]")
-		       (<:as-html "[D," reference "]")))))
+	   (<:td
+	    (<ucw:a
+	     :action (setf (children (parent node))
+			   (list node))
+	     :style "text-decoration:none;color:white;"
+	     :title (if (eq stance 'a)
+			(format nil "Attack move #~d by asserting ~a" reference (render-plainly statement))
+			(format nil "Defend against the attack of move #~d by asserting ~a" reference (render-plainly statement)))
+	     (<:as-html depth)
+	     " "
+	     (<:strong (<:as-html player))
+	     " "
+	     (render statement)
+	     " "
+	     (unless (initial-move? move)
+	       (if (attacking-move? move)
+		   (<:as-html "[A," reference "]")
+		   (<:as-html "[D," reference "]"))))))
 	  (if (attacking-move? move)
 	      (if (closed-in-every-branch? node depth)
 		  (<:tr :nowrap "nowrap"
@@ -2194,8 +2170,11 @@ with which the game begins."))
 	  (<:table
 	   :style "align: center;"
 	   :bgcolor "silver"
-	   (render-segment-with-padding-as-row node leaf 0 (when alternative
-							     (children alternative)))))
+	   (render-segment-with-padding-as-row node
+					       leaf
+					       0
+					       (when alternative
+						 (children alternative)))))
 	(let* ((succs (children first-splitter))
 	       (num-succs (length succs)))
 	  (<:table :rules "groups"
@@ -2203,7 +2182,8 @@ with which the game begins."))
 		   :bgcolor "silver"
 		   :style "align: center;"
 	    (<:thead
-	     (render-segment-with-padding-as-row node first-splitter
+	     (render-segment-with-padding-as-row node
+						 first-splitter
 						 (floor (/ num-succs 2))
 						 (when alternative
 						   (children alternative))))
@@ -2218,8 +2198,7 @@ with which the game begins."))
 		       do
 			 (<:td :align "center"
 			   (render-node-with-alternative succ
-							 (when alternative
-							   alternative))))
+							 alternative)))
 		    (<:td)
 		    (loop
 		       with cleft-point = (/ num-succs 2)
@@ -2227,17 +2206,18 @@ with which the game begins."))
 		       for succ = (nth i succs)
 		       do
 			 (<:td :align "center"
-			   (render-node-with-alternative succ (when alternative
-								alternative)))))
+			   (render-node-with-alternative succ
+							 alternative))))
 		  (loop
 		     for succ in succs
 		     do
 		       (<:td :align "center"
-		         (render-node-with-alternative succ alternative)))))))))))
+		         (render-node-with-alternative succ
+						       alternative)))))))))))
 
 (defun render-strategy-with-alternative (strategy alternative)
   "Render STRATEGY, with the children of strategy node ALTERNATIVE in
-  a distinctive color."
+  a distinctive color, and link the the action of extending STRATEGY by setting the unique child of ALTERNATIVE to the indicated child."
   (<:table
    :width "100%"
    :style "align: center;background-color:silver;"
