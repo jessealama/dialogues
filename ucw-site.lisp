@@ -2091,6 +2091,8 @@ with which the game begins."))
 	rule-d10-literal-checked
 	rule-d11-most-recent-attack-checked
 	rule-d11-queue-checked
+	rule-d11-proponent-checked
+	rule-d11-opponent-checked
 	rule-d13-symmetric-checked
 	rule-d12-two-times-checked
 	rule-d13-two-times-checked
@@ -2128,6 +2130,10 @@ with which the game begins."))
 	    (push d11-most-recent-attack extras))
 	  (when rule-d11-queue-checked
 	    (push d11-queue extras))
+	  (when rule-d11-proponent-checked
+	    (push rule-d11-proponent extras))
+	  (when rule-d11-opponent-checked
+	    (push rule-d11-opponent extras))
 	  (when rule-d13-symmetric-checked
 	    (push rule-d13-symmetric extras))
 	  (when rule-d12-two-times-checked
@@ -2365,6 +2371,8 @@ The ruleset that will be used during the game will be the union of the rules in 
 			 (rule-checkbox-row rule-d10-literal rule-d10-literal-checked)
 			 (rule-checkbox-row rule-d11-most-recent-attack rule-d11-most-recent-attack-checked)
 			 (rule-checkbox-row rule-d11-queue rule-d11-queue-checked)
+			 (rule-checkbox-row rule-d11-proponent rule-d11-proponent-checked)
+			 (rule-checkbox-row rule-d11-opponent rule-d11-opponent-checked)
 			 (rule-checkbox-row rule-d13-symmetric rule-d13-symmetric-checked)
 			 (rule-checkbox-row rule-d12-two-times rule-d12-two-times-checked)
 			 (rule-checkbox-row rule-d13-two-times rule-d13-two-times-checked)
