@@ -266,7 +266,7 @@
 				   (<:li "Have " (<:strong (<:as-html player)) " attack move #" (<:as-html reference) " by asserting " (render statement))
 				   (<:li "Have " (<:strong (<:as-html player)) " defend against the attack of move #" (<:as-html reference) " by asserting " (render statement))))))))
 		      (progn
-			(<:p "There are no more alternative moves to explore."))))))))
+			(<:p "There might be options to explore (which would give rise to other strategies), but I stopped keeping track of them long ago.  Sorry.  Please complain loudly."))))))))
     
     (<ucw:form :method "get"
 	       :action (call 'start-game-component)
