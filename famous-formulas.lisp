@@ -119,7 +119,7 @@
     (define-famous-formula distributivity-of-implication-over-disjunction
 	(-> (-> p (v q r))
 	    (v (-> p q)
-	       (-> p r))))`
+	       (-> p r))))
 
     (define-famous-formula modus-ponens
 	(-> (& (-> p q) p) q))
