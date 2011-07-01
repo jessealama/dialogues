@@ -442,6 +442,7 @@ Web" "UnCommon Web") " system.  The Common Lisp implementation is " (<:a :href "
     ("(P &rarr; &not;P) &or; (&not;P &rarr; P)" "anti-connexive-formula" ,anti-connexive-formula)
     ("Ex contradictione quodlibet" "ex-contradictione-quodlibet" ,ex-contradictione-quodlibet)
     ("Implicational ex falso quodlibet" "implicational-ex-falso" ,implicational-ex-falso)
+    ("KP" "kp" ,kp)
     ("WKP" "wkp" ,wkp)
     ("Aristotle's thesis (positive antecedent)" "aristotles-thesis-positive-antecedent" ,aristotles-thesis-positive-antecedent)
     ("Aristotle's thesis (negative antecedent)" "aristotles-thesis-negative-antecedent" ,aristotles-thesis-negative-antecedent)

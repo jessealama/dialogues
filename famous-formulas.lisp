@@ -103,6 +103,12 @@
     (define-famous-formula implicational-ex-falso
 	(-> (neg p) (-> p q)))
 
+    (define-famous-formula kp
+	(-> (-> (neg p)
+		(v q r))
+	    (v (-> (neg p) q)
+	       (-> (neg p) r))))
+
     (define-famous-formula wkp
 	(-> (-> (neg p)
 		(v (neg q) (neg r)))
