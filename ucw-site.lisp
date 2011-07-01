@@ -1946,37 +1946,36 @@ with which the game begins."))
     (with-slots (player statement stance reference)
 	move
       (symbol-macrolet
-	  (($stance-and-reference
+	  (($depth
+	    `(<:td :align "left" (<:as-html depth)))
+	   ($player
+	    `(<:td :align "center" (<:strong (<:as-html player))))
+	   ($statement
+	    `(<:td :align "left" :nowrap "nowrap" (render statement)))
+	   ($stance-and-reference-raw
 	    `(unless (initial-move? move)
 	       (if (attacking-move? move)
 		   (<:as-html "[A," reference "]")
 		   (<:as-html "[D," reference "]"))))
+	   ($stance-and-reference
+	    `(<:td :align "left" $stance-and-reference-raw))
 	   ($plain-row
 	    `(<:tr :nowrap "nowrap"
 		   :valign "top"
-		   (<:td :align "left"
-			 (<:as-html depth))
-		   (<:td :align "center"
-			 (<:strong (<:as-html player)))
-		   (<:td :align "left"
-			 :nowrap "nowrap"
-			 (render statement))
-		   (<:td :align "left"
-			 $stance-and-reference))))
+		   $depth
+		   $player
+		   $statement
+		   $stance-and-reference
+		   )))
 	(macrolet ((colored-row (color)
 		     (<:tr :nowrap "nowrap"
 			   :valign "top"
 			   :bgcolor ,color
 			   :style "color:white;"
-			   (<:td :align "left"
-				 (<:as-html depth))
-			   (<:td :align "center"
-				 (<:strong (<:as-html player)))
-			   (<:td :align "left"
-				 :nowrap "nowrap"
-				 (render statement))
-			   (<:td :align "left"
-				 $stance-and-reference))))))
+			   $depth
+			   $player
+			   $statement
+			   $stance-and-reference)))))
       (if (member node alternatives)
 	  (<:tr :bgcolor "indigo"
 		:nowrap "nowrap"
@@ -1998,7 +1997,7 @@ with which the game begins."))
 		  " "
 		  (render statement)
 		  " "
-		  $stance-and-reference)))
+		  $stance-and-reference-raw)))
 	  (if (attacking-move? move)
 	      (if (closed-in-every-branch? node depth)
 		  (colored-row "FireBrick")
