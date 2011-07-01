@@ -2056,6 +2056,8 @@ with which the game begins."))
 		:valign "top"
 		:style "font-style:bold;color:white;"
 	   (<:td
+	    :nowrap "nowrap"
+	    :align "center"
 	    (<ucw:a
 	     :action (setf (children (parent node))
 			   (list node))
@@ -2168,15 +2170,19 @@ with which the game begins."))
       (<:table
        :style "align: center;"
        :bgcolor "silver"
+       :cellspacing "0"
+       (render-strategy-node-as-table-row node nil)
        (<:tr
 	(<:td
 	 :align "center"
+	 :colspan "4"
 	 :title "Wouldn't it be great if this were a link which, when followed, showed the subtree rooted at this node?"
 	 (<:b (<:as-is "&hellip;"))))
        (<:tr
 	(if (proponent-wins-every-branch? node ruleset)
 	    (<:td
 	     :align "center"
+	     :colspan "4"
 	     :title "Proponent wins every dialogue passing through here"
 	     (<:span
 	      :style "font-size:xx-large;"
@@ -2184,12 +2190,14 @@ with which the game begins."))
 	    (if (opponent-wins-every-branch? node ruleset)
 		(<:td
 		 :align "center"
+		 :colspan "4"
 		 :title "Opponent wins every dialogue passing through here"
 		 (<:span
 		  :style "font-size:xx-large;"
 		  (<:as-is "&#9785;")))
 		(<:td
 		 :align "center"
+		 :colspan "4"
 		 :title "Proponent wins at least one dialogue passing through here, and Opponents wins at least one dialogue passing through here"
 		 (<:span
 		  :style "font-size:xx-large;"
