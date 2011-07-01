@@ -529,6 +529,15 @@ the strategy.  If there no such node, return NIL."
 	   (return (reverse path))
 	   (push node path))))
 
+(defun branch-closed? (node)
+  "Determine whether NODE represents a closed branch: every leaf
+  reachable from NODE is expanded."
+  (with-slots (children expanded)
+      node
+    (when expanded
+      (or (null children)
+	  (every #'branch-closed? children)))))
+
 (defun closed-in-every-branch? (node attack-index)
   "Determine whether ATTACK-INDEX, which is assumed to be the
   index (starting from 0) of an attack in the dialogue tree implicitly
