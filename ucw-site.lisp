@@ -227,7 +227,7 @@
 	(progn
 	  (if player-choice
 	      (progn
-		(render-strategy-with-alternative
+		(render-strategy-with-alternative-hiding-closed-branches
 		 (node->strategy player-choice (ruleset (strategy self)))
 		 player-choice)
 		(setf (choice-node self) player-choice))
