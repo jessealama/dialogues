@@ -1735,8 +1735,6 @@ that all the rules in your edited ruleset are satisfied.")
 			 "blue")
 		 " are open attacks.  (Defensive moves are not colored, nor is the initial move, since it is neither an attack nor a defense.) A dagger " (<:as-is "(&#8224;)") " in the Notes column indicates that alternative moves were available; follow the link to see them and rewind the game to explore an alternative course."))))))
 
-(defgeneric render-plainly (statement))
-
 (defmethod render ((statement term))
   (let ((func-sym (function-symbol statement))
 	(args (arguments statement)))
@@ -1752,25 +1750,6 @@ that all the rules in your edited ruleset are satisfied.")
 	      (render arg)))
 	  (<:as-is ")")))))
 
-(defmethod render-plainly ((statement term))
-  (let ((func-sym (function-symbol statement))
-	(args (arguments statement)))
-    (if (null args)
-	(format nil "~A" func-sym)
-	(if (null (cdr args))
-	    (format nil "~A(~A)"
-		    func-sym
-		    (render-plainly (car args)))
-	    (funcall #'concat-strings
-		     (format nil "~A" func-sym)
-		     "("
-		     (render-plainly (car args))
-		     (apply #'concat-strings
-			    (mapcar #'(lambda (arg)
-					(format nil ",~A" (render-plainly arg)))
-				    (cdr args)))
-		     ")")))))
-
 (defmethod render ((sa (eql attack-left-conjunct)))
   (<:as-is "&and;")
   (<:sub "L"))
@@ -1778,12 +1757,6 @@ that all the rules in your edited ruleset are satisfied.")
 (defmethod render ((sa (eql attack-left-disjunct)))
   (<:as-is "&or;")
   (<:sub "L"))
-
-(defmethod render-plainly ((sa (eql attack-left-conjunct)))
-  "&and;(L)")
-
-(defmethod render-plainly ((sa (eql attack-left-disjunct)))
-  "&or;(L)")
 
 (defmethod render ((sa (eql attack-right-conjunct)))
   (<:as-is "&and;")
@@ -1793,17 +1766,8 @@ that all the rules in your edited ruleset are satisfied.")
   (<:as-is "&or;")
   (<:sub "R"))
 
-(defmethod render-plainly ((sa (eql attack-right-conjunct)))
-  "&and;(R)")
-
-(defmethod render-plainly ((sa (eql attack-right-disjunct)))
-  "&or;(R)")
-
 (defmethod render ((sa (eql which-instance?)))
   (<:as-is "?"))
-
-(defmethod render-plainly ((sa (eql which-instance?)))
-  "?")
 
 (defmethod render ((sa (eql which-disjunct?)))
   (<:as-is "?"))
@@ -1811,25 +1775,12 @@ that all the rules in your edited ruleset are satisfied.")
 (defmethod render ((sa (eql which-conjunct?)))
   (<:as-is "?"))
 
-(defmethod render-plainly ((sa (eql which-disjunct?)))
-  "?")	   
-
-(defmethod render-plainly ((sa (eql which-conjunct?)))
-  "?")
-
 (defmethod render :around ((formula unary-connective-formula))
   (call-next-method)
   (render (argument formula)))
 
-(defmethod render-plainly :around ((formula unary-connective-formula))
-  (let ((body (call-next-method)))
-    (concatenate 'string body (render-plainly (argument formula)))))
-
 (defmethod render ((neg negation))
   (<:as-is "&not;"))
-
-(defmethod render-plainly ((neg negation))
-  "&not;")
 
 (defmethod render :around ((formula binary-connective-formula))
   (<:as-html "(")
@@ -1840,16 +1791,6 @@ that all the rules in your edited ruleset are satisfied.")
   (render (rhs formula))
   (<:as-html ")"))
 
-(defmethod render-plainly :around ((formula binary-connective-formula))
-  (concatenate 'string
-	       "("
-	       (render-plainly (lhs formula))
-	       " "
-	       (call-next-method)
-	       " "
-	       (render-plainly (rhs formula))
-	       ")"))
-
 (defmethod render :around ((gen generalization))
   (call-next-method)
   (<:em (<:as-html (bound-variable gen)))
@@ -1857,49 +1798,23 @@ that all the rules in your edited ruleset are satisfied.")
   (render (matrix gen))
   (<:as-html "]"))
 
-(defmethod render-plainly :around ((gen generalization))
-  (concatenate 'string
-	       (call-next-method)
-	       (render-plainly (bound-variable gen))
-	       "["
-	       (render-plainly (matrix gen))
-	       "]"))
-
 (defmethod render ((formula binary-conjunction))
   (<:as-is "&and;"))
-
-(defmethod render-plainly ((formula binary-conjunction))
-  "&")
 
 (defmethod render ((formula binary-disjunction))
   (<:as-is "&or;"))
 
-(defmethod render-plainly ((formula binary-disjunction))
-  "v")
-
 (defmethod render ((formula implication))
   (<:as-is "&rarr;"))
-
-(defmethod render-plainly ((formula implication))
-  "-->")
 
 (defmethod render ((formula equivalence))
    (<:as-is "&harr;"))
 
-(defmethod render-plainly ((formula equivalence))
-  "<-->")
-
 (defmethod render ((formula universal-generalization))
   (<:as-is "&forall;"))
 
-(defmethod render-plainly ((formula universal-generalization))
-  "forall")
-
 (defmethod render ((formula existential-generalization))
   (<:as-is "&exist;"))
-
-(defmethod render-plainly ((formula existential-generalization))
-  "exists")
 
 (defmethod render ((formula atomic-formula))
   (let ((pred (predicate formula))
@@ -1914,26 +1829,6 @@ that all the rules in your edited ruleset are satisfied.")
 	    (<:as-is ",")
 	    (render arg)))
 	(<:as-is ")")))))
-
-(defmethod render-plainly ((formula atomic-formula))
-  (let ((pred (predicate formula))
-	(args (arguments formula)))
-    (if (null args)
-	(format nil "~(~a~)" pred)
-	(if (null (cdr args))
-	    (format nil "~(~a~)(~a)"
-		    pred
-		    (render-plainly (car args)))
-	    (funcall #'concat-strings
-		     (format nil "~A" pred)
-		     "("
-		     (render-plainly (car args))
-		     (apply #'concatenate
-			    'string
-			    (mapcar #'(lambda (arg)
-					(format nil ",~A" (render-plainly arg)))
-				    (cdr args)))
-		     ")")))))
 
 (defcomponent start-game-component (signature-component ruleset-component)
   ())

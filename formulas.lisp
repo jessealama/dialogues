@@ -38,6 +38,111 @@
 	       (format stream ",~A" arg))
 	  (format stream ")")))))
 
+(defgeneric render-plainly (statement))
+
+(defmethod render-plainly ((statement term))
+  (let ((func-sym (function-symbol statement))
+	(args (arguments statement)))
+    (if (null args)
+	(format nil "~A" func-sym)
+	(if (null (cdr args))
+	    (format nil "~A(~A)"
+		    func-sym
+		    (render-plainly (car args)))
+	    (funcall #'concat-strings
+		     (format nil "~A" func-sym)
+		     "("
+		     (render-plainly (car args))
+		     (apply #'concat-strings
+			    (mapcar #'(lambda (arg)
+					(format nil ",~A" (render-plainly arg)))
+				    (cdr args)))
+		     ")")))))
+
+(defmethod render-plainly ((sa (eql attack-left-conjunct)))
+  "&and;(L)")
+
+(defmethod render-plainly ((sa (eql attack-left-disjunct)))
+  "&or;(L)")
+
+(defmethod render-plainly ((sa (eql attack-right-conjunct)))
+  "&and;(R)")
+
+(defmethod render-plainly ((sa (eql attack-right-disjunct)))
+  "&or;(R)")
+
+(defmethod render-plainly ((sa (eql which-instance?)))
+  "?")
+
+(defmethod render-plainly ((sa (eql which-disjunct?)))
+  "?")	   
+
+(defmethod render-plainly ((sa (eql which-conjunct?)))
+  "?")
+
+(defmethod render-plainly :around ((formula unary-connective-formula))
+  (let ((body (call-next-method)))
+    (concatenate 'string body (render-plainly (argument formula)))))
+
+(defmethod render-plainly ((neg negation))
+  "&not;")
+
+(defmethod render-plainly :around ((formula binary-connective-formula))
+  (concatenate 'string
+	       "("
+	       (render-plainly (lhs formula))
+	       " "
+	       (call-next-method)
+	       " "
+	       (render-plainly (rhs formula))
+	       ")"))
+
+(defmethod render-plainly :around ((gen generalization))
+  (concatenate 'string
+	       (call-next-method)
+	       (render-plainly (bound-variable gen))
+	       "["
+	       (render-plainly (matrix gen))
+	       "]"))
+
+(defmethod render-plainly ((formula binary-conjunction))
+  "&")
+
+(defmethod render-plainly ((formula binary-disjunction))
+  "v")
+
+(defmethod render-plainly ((formula implication))
+  "-->")
+
+(defmethod render-plainly ((formula equivalence))
+  "<-->")
+
+(defmethod render-plainly ((formula universal-generalization))
+  "forall")
+
+(defmethod render-plainly ((formula existential-generalization))
+  "exists")
+
+(defmethod render-plainly ((formula atomic-formula))
+  (let ((pred (predicate formula))
+	(args (arguments formula)))
+    (if (null args)
+	(format nil "~(~a~)" pred)
+	(if (null (cdr args))
+	    (format nil "~(~a~)(~a)"
+		    pred
+		    (render-plainly (car args)))
+	    (funcall #'concat-strings
+		     (format nil "~A" pred)
+		     "("
+		     (render-plainly (car args))
+		     (apply #'concatenate
+			    'string
+			    (mapcar #'(lambda (arg)
+					(format nil ",~A" (render-plainly arg)))
+				    (cdr args)))
+		     ")")))))
+
 (defgeneric make-atomic-formula (predicate &rest arguments))
 
 (let ((atomic-formula-store (make-hash-table)))
