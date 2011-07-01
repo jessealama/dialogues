@@ -1869,37 +1869,37 @@ that all the rules in your edited ruleset are satisfied.")
   (<:as-is "&and;"))
 
 (defmethod render-plainly ((formula binary-conjunction))
-  "&and;")
+  "&")
 
 (defmethod render ((formula binary-disjunction))
   (<:as-is "&or;"))
 
 (defmethod render-plainly ((formula binary-disjunction))
-  "&or;")
+  "v")
 
 (defmethod render ((formula implication))
   (<:as-is "&rarr;"))
 
 (defmethod render-plainly ((formula implication))
-  "&rarr;")
+  "-->")
 
 (defmethod render ((formula equivalence))
    (<:as-is "&harr;"))
 
 (defmethod render-plainly ((formula equivalence))
-  "&harr;")
+  "<-->")
 
 (defmethod render ((formula universal-generalization))
   (<:as-is "&forall;"))
 
 (defmethod render-plainly ((formula universal-generalization))
-  "&forall;")
+  "forall")
 
 (defmethod render ((formula existential-generalization))
   (<:as-is "&exist;"))
 
 (defmethod render-plainly ((formula existential-generalization))
-  "&exist;")
+  "exists")
 
 (defmethod render ((formula atomic-formula))
   (let ((pred (predicate formula))
