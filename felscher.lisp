@@ -394,6 +394,54 @@
 	     t))
        (queue-ok dialogue))))
 
+(defparameter rule-d11-proponent
+  (make-structural-rule
+   :name "D11-Proponent"
+   :description "Proponent must defend against the most recent open attack."
+   :predicate
+   (loop
+      with len = (dialogue-length dialogue)
+      for move in (if final-move-only
+		      (subseq (dialogue-plays dialogue) (1- len))
+		      (dialogue-plays dialogue))
+      for i from (if final-move-only
+		     (1- len)
+		     0)
+      do
+	(when (defensive-move? move)
+	  (when (proponent-move? move)
+	    (let ((most-recent (most-recent-open-attack dialogue :end i))
+		  (reference (move-reference move)))
+	      (if (null most-recent)
+		  (return nil)
+		  (unless (= most-recent reference)
+		    (return nil))))))
+      finally (return t))))
+
+(defparameter rule-d11-opponent
+  (make-structural-rule
+   :name "D11-Opponent"
+   :description "Opponent must defend against the most recent open attack."
+   :predicate
+   (loop
+      with len = (dialogue-length dialogue)
+      for move in (if final-move-only
+		      (subseq (dialogue-plays dialogue) (1- len))
+		      (dialogue-plays dialogue))
+      for i from (if final-move-only
+		     (1- len)
+		     0)
+      do
+	(when (defensive-move? move)
+	  (when (opponent-move? move)
+	    (let ((most-recent (most-recent-open-attack dialogue :end i))
+		  (reference (move-reference move)))
+	      (if (null most-recent)
+		  (return nil)
+		  (unless (= most-recent reference)
+		    (return nil))))))
+      finally (return t))))
+
 (defun earliest-open-attack-by-player-excluding-move (dialogue player move)
   (earliest-open-attack-for-player
    (truncate-dialogue dialogue
