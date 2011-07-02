@@ -1,9 +1,4 @@
 .DS_Store
-/felscher.fasl
-/ucw-site.fasl
-/dialogues.fasl
-/strategy.lisp~
-/strategy.fasl
-/dialogue-search.fasl
+*.fasl
+*~
 /table.html
-/table.html~
