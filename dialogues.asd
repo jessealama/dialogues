@@ -56,4 +56,5 @@ UCW."
 	       (:file "ucw-server")
 	       (:file "ucw-applications")
 	       (:file "about")
+	       (:file "contact")
 	       (:file "ucw-site")))
