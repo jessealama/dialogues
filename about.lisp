@@ -1,5 +1,7 @@
 ;;; about.lisp
 
+(in-package :dialogues)
+
 (defcomponent about-component ()
   ())
 
