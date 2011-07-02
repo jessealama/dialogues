@@ -2,6 +2,8 @@
 
 (in-package :dialogues)
 
+(defparameter *maintainer-email* "j.alama@fct.unl.pt")
+
 (defcomponent about-component ()
   ())
 
@@ -58,5 +60,11 @@ saying.)")
   (<:p "This site was written in Common Lisp using
 the " (<:a :href "http://common-lisp.net/project/ucw/" :title "UnCommon
 Web" "UnCommon Web") " system.  The Common Lisp implementation is " (<:a :href "http://www.sbcl.org" :title "Steel Bank Common Lisp" "SBCL") ".  You can follow the development on " (<:a :href "http://github.com/jessealama/dialogues" :title "dialogues on github" "github") "."))
+
+(defcomponent play-style-info ()
+  ())
+
+(defmethod render ((self play-style-info))
+  (<:p (<:em (<:b "About the play style:")) " The default mode of playing is to take on the role of both players: at each move, you'll see all possible moves that can be made, from the perspective of both players.  Two other play styles are supported: play as Proponent with a random Opponent, and play as Opponent with a random Proponent."))
 
 ;;; about.lisp ends here

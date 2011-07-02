@@ -112,34 +112,6 @@
 ;;; Statements
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(always
-  (defclass symbolic-attack ()
-    nil)
-  (defconstant-if-unbound attack-left-conjunct (make-instance 'symbolic-attack))
-  (defconstant-if-unbound attack-right-conjunct (make-instance 'symbolic-attack))
-  (defconstant-if-unbound which-instance? (make-instance 'symbolic-attack))
-  (defconstant-if-unbound which-disjunct? (make-instance 'symbolic-attack)))
-
-(defmethod print-object ((attack (eql attack-left-conjunct)) stream)
-  (format stream "ATTACK-LEFT-CONJUNCT"))
-
-(defmethod print-object ((attack (eql attack-right-conjunct)) stream)
-  (format stream "ATTACK-RIGHT-CONJUNCT"))
-
-(defmethod print-object ((attack (eql which-instance?)) stream)
-  (format stream "WHICH-INSTANCE?"))
-
-(defmethod print-object ((attack (eql which-disjunct?)) stream)
-  (format stream "WHICH-DISJUNCT?"))
-
-(defvar symbolic-attacks (list attack-left-conjunct
-			       attack-right-conjunct
-			       which-instance?
-			       which-disjunct?))
-
-(defun symbolic-attack? (obj)
-  (eql (class-of obj) 'symbolic-attack))
-
 (defclass statement (formula symbolic-attack term)
   nil)
 
@@ -709,7 +681,8 @@ fail, only whether all of them are satisfied."
     (if (> position game-len)
 	nil
 	(dotimes (index position result)
-	  (dolist (statement (append subformulas symbolic-attacks))
+	  (dolist (statement (append subformulas
+				     *propositional-symbolic-attacks*))
 	    (let* ((provisional-move (make-move player statement stance index))
 		   (provisional-extension (provisionally-extend-dialogue dialogue provisional-move)))
 	      (when (fast-eval-entire-dialogue provisional-extension)
@@ -1052,10 +1025,10 @@ fail, only whether all of them are satisfied."
 	 (p (go print-then-statement-input))
 	 (f (go formula-input))
 	 (t (go term-input))
-	 (l (setf statement attack-left-conjunct))
-	 (r (setf statement attack-right-conjunct))
-	 (d (setf statement which-disjunct?))
-	 (i (setf statement which-instance?)))
+	 (l (setf statement *attack-left-conjunct*))
+	 (r (setf statement *attack-right-conjunct*))
+	 (d (setf statement *which-disjunct?*))
+	 (i (setf statement *which-instance?*)))
        (go evaluate-rules)
      statement
        (msg "You are responding to move #~A.  Enter:" index)

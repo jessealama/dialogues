@@ -2,8 +2,6 @@
 
 (in-package :dialogues)
 
-(defvar *maintainer-email* "jesse.alama@gmail.com")
-
 (defparameter standard-rulesets
   (list d-dialogue-rules
 	e-dialogue-rules
@@ -45,9 +43,6 @@
 	       d-dialogue-rules-symmetric-d13
 	       d-dialogue-rules-literal-d10
 	       e-dialogue-rules-literal-d10
-	       d-dialogue-rules-inverted
-	       e-dialogue-rules-inverted
-	       classical-dialogue-rules-inverted
 	       only-particle-rules
 	       particle-rules+d10
 	       particle-rules+d11
@@ -61,21 +56,6 @@
 
 (defparameter available-heuristics
   (list proponent-no-repeats))
-
-(defparameter available-translations
-  (list identity-translation
-	goedel-gentzen-translation 
-	double-negate-translation
-	double-negate-all-subformulas-translation
-	kuroda-translation
-	negate-atomic-subformulas-translation
-	double-negate-atomic-subformulas-translation
-	self-conjoin-atomic-subformulas-translation
-	self-disjoin-atomic-subformulas-translation
-	contrapositivify-translation
-	contrapositive-translation
-	atomic->excluded-middle-translation
-	converse-translation))
 
 (defclass ruleset-component ()
   ((ruleset :initarg :ruleset
@@ -94,59 +74,11 @@
     :accessor heuristics
     :documentation "Heuristic rules that, in addition to RULESET, are also in effect.")))
 
-(defclass signature-component ()
-  ((signature :initarg :signature
-	      :initform alphabetic-propositional-signature
-	      :type finite-variable-propositional-signature
-	      :accessor signature)))
-
 (defclass game-component ()
   ((game :accessor game
 	 :initarg :game
 	 :initform nil
 	 :type (or (eql nil) dialogue))))
-
-(defcomponent strategy-editor (ruleset-component)
-  ((strategy :accessor strategy
-	     :initarg :strategy
-	     :initform nil
-	     :type (or null strategy))
-   (player
-    :accessor player
-    :initarg :player
-    :initform 'p
-    :type symbol
-    :documentation "The player for whom we are interactively looking for a strategy.  It should be other the symbol P or the symbol O.")
-   (choice-node
-    :accessor choice-node
-    :initarg :choice-node
-    :initform nil
-    :type (or null strategy-node)
-    :documentation "The Opponent node that has multiple Proponent responses that we are exploring")
-   (current-choice
-    :accessor current-choice
-    :initarg :current-choice
-    :initform nil
-    :type (or null strategy-node)
-    :documentation "The Proponent node that was most recently selected for exploration.")
-   (winning-nodes
-    :accessor winning-nodes
-    :initarg :winning-nodes
-    :initform nil
-    :type list
-    :documentation "The list of Proponent nodes that have led to a winning strategy.")
-   (losing-nodes
-    :accessor losing-nodes
-    :initarg :losing-nodes
-    :initform nil
-    :type list
-    :documentation "The list of Proponent nodes that have led to a loss (i.e., a failure to find a winning strategy).")
-   (alternatives
-    :accessor alternatives
-    :initarg :alternatives
-    :initform nil
-    :type list
-    :documentation "The list of alternatives (which are Proponent nodes) that are yet to be explored.")))
 
 (defun render-available-heuristics ()
   (dolist (heuristic available-heuristics)
@@ -164,146 +96,10 @@
 	  ": "
 	  (<:as-html (description heuristic)))))))
 
-(defmethod render ((self strategy-editor))
-  (let* ((strategy (strategy self))
-	 (player (player self))
-	 (heuristics (heuristics self))
-	 (extra-rules (extra-rules self))
-	 (player-choice (if (eql player 'p)
-			    (first-proponent-choice strategy)
-			    (first-opponent-choice strategy))))
-    (<:table
-     :rules "cols"
-     :width "100%"
-     :frame "box"
-     :cellpadding "5"
-     :bgcolor "IndianRed"
-     (<:colgroup
-      (<:col)
-      (<:col)
-      (<:col)
-      (<:col)
-      (<:col))
-     (<:thead
-      :style "border-bottom: solid 1px;"
-      (<:tr
-       (<:th "Ruleset")
-       (<:th "Player")
-       (<:th "Formula")
-       (<:th "Extra Rules")
-       (<:th "Heuristics")))
-     (<:tbody
-      (<:tr
-       (<:td :nowrap "nowrap"
-	     :align "center"
-	     (<:strong (<:as-html (name (ruleset strategy))))
-	     ": "
-	     (<:as-html (description (ruleset strategy))))
-       (<:td
-	:align "center"
-	(if (eql player 'p)
-	    (<:strong "P")
-	    (<:strong "O")))
-       (<:td :nowrap "nowrap"
-	     :align "center"
-	     (render (move-statement (move (root strategy)))))
-       (if extra-rules
-	   (<:td
-	    :align "left"
-	    (render-heuristics extra-rules))
-	   (<:td
-	    :align "center"
-	    (render-heuristics extra-rules)))
-       (if heuristics
-	   (<:td 
-	    :align "left"
-	    (render-heuristics heuristics))
-	   (<:td 
-	    :align "center"
-	    (render-heuristics heuristics))))))
-    (<:br) ;; no like
-    (if (eq player-choice :too-deep)
-	(<:p "I couldn't find the first choice node before I hit depth " (<:as-is +strategy-max-depth+) "; sorry, we can't play any more.  Please try some other formula or ruleset.")
-	(progn
-	  (if player-choice
-	      (progn
-		(render-strategy-with-alternative-hiding-closed-branches
-		 (node->strategy player-choice (ruleset (strategy self)))
-		 player-choice)
-		(setf (choice-node self) player-choice))
-	      (progn
-		(if (eql player 'p)
-		    (if (winning-strategy-for-proponent? strategy)
-			(progn
-			  (<:p "Congratulations!  You've found a winning strategy for Proponent.  Here it is:")
-			  (render-strategy-with-alternative strategy nil))
-			
-			(progn
-			  (<:p "I'm sorry to say that there is no winning strategy consistent with your choices so far.  (If you didn't make any choices at all, this means that the formula you started with,")
-			  (<:blockquote
-			   (render (move-statement (move (root strategy)))) ",")
-			  (<:p "is invalid with respect to the ruleset that you chose.)")))
-		    (if (winning-strategy-for-opponent? strategy)
-			(progn
-			  (<:p "Congratulations!  You've found a winning strategy for Opponent.  Here it is:")
-			  (render-strategy-with-alternative strategy nil))
-			
-			(progn
-			  (<:p "I'm sorry to say that there is no winning strategy for Opponent consistent with your choices so far.  (If you didn't make any choices at all, this means that the formula you started with,")
-			  (<:blockquote
-			   (render (move-statement (move (root strategy)))) ",")
-			  (<:p "is valid with respect to the ruleset that you chose.)"))))
-		(let ((alternatives (alternatives self)))
-		  (if alternatives
-		      (progn
-			(<:p "There are unexplored alternatives (functionality not yet implemented, please complain loudly):")
-			(<:ul
-			 (dolist (alternative alternatives)
-			   (let ((alternative-move (move alternative)))
-			     (with-slots (player statement stance reference)
-				 alternative-move
-			       (if (eq stance 'a)
-				   (<:li "Have " (<:strong (<:as-html player)) " attack move #" (<:as-html reference) " by asserting " (render statement))
-				   (<:li "Have " (<:strong (<:as-html player)) " defend against the attack of move #" (<:as-html reference) " by asserting " (render statement))))))))
-		      (progn
-			(<:p "There might be options to explore (which would give rise to other strategies), but I stopped keeping track of them long ago.  Sorry.  Please complain loudly."))))))))
-    
-    (<ucw:form :method "get"
-	       :action (call 'start-game-component)
-	       (<:submit :value "Quit"))))
-
 (defclass play-style-component ()
   ((play-style :accessor play-style
 	       :initarg :play-style
 	       :initform nil)))
-
-(defmethod handle-toplevel-condition ((app (eql *dialogue-application*))
-				      condition
-				      action)
-  (<:h1 "Oops, something went wrong")
-  (<:p "Something went wrong, I'm afraid.  Here is the precise error that was generated:")
-  (<:blockquote
-   (<:as-html condition))
-  (<:p "You're welcome to " (<:a :href (concatenate 'string
-						    "mailto:"
-						    *maintainer-email*)
-				 "notify the site maintainer") " about this.")
-  (<:p "What next?  You can either go back with your browser or simply " 
-       (<ucw:a :action (call 'start-game-component)
-	       "quit and start over") "."))
-
-;; (defgeneric render-signature (signature))
-
-;; (defmethod render-signature ((sig finite-variable-propositional-signature))
-;;   (<:em "Predicates: ")
-;;   (with-slots (predicates) sig
-;;     (if (null predicates)
-;; 	(<:em "(none)")
-;; 	(let ((first (car predicates)))
-;; 	  (<:em (<:as-html first))
-;; 	  (dolist (pred (cdr predicates))
-;; 	    (<:as-is ", ")
-;; 	    (<:em (<:as-html pred)))))))
 
 (defentry-point "" (:application *dialogue-application*)
     ()
@@ -322,161 +118,6 @@
 				 ("about dialogical logic" . ,(make-instance 'about-component))
 				 ("about this site" . ,(make-instance 'about-this-site-component))
 				 ("contact" . ,(make-instance 'contact-page))))))
-
-(defparameter famous-formulas
-  `(("Peirce's formula" "peirce-formula" ,peirce-formula)
-    ("Excluded middle" "excluded-middle" ,excluded-middle)
-    ("Weak excuded middle" "weak-excluded-middle" ,weak-excluded-middle)
-    ("Conditional excluded middle" "conditional-excluded-middle" ,conditional-excluded-middle)
-    ("Dummett's formula" "dummett-formula" ,dummett-formula)
-    ("Double negation introduction" "double-negation-introduction" ,double-negation-introduction)
-    ("Double negation elimination" "double-negation-elimination" ,double-negation-elimination)
-    ("K formula" "k-formula" ,k-formula)
-    ("B formula" "b-formula" ,b-formula)
-    ("C formula" "c-formula" ,c-formula)
-    ("W formula" "w-formula" ,w-formula)
-    ("Scott's formula" "scott-formula" ,scott-formula)
-    ("Smetanich's formula" "smetanich-formula" ,smetanich-formula)
-    ("De Morgan &not;(P &and; Q) &rarr; (&not;P &or; &not;Q)" "de-morgan-not-and-implies-or-not" ,de-morgan-not-and-implies-or-not)
-    ("De Morgan &not;(P &or; Q) &rarr; (&not;P &and; &not;Q)" "de-morgan-not-or-implies-and-not" ,de-morgan-not-or-implies-and-not)
-    ("De Morgan (&not;P &and; &not;Q) &rarr; &not;(P &or; Q)" "de-morgan-and-not-implies-not-or" ,de-morgan-and-not-implies-not-or)
-    ("De Morgan (&not;P &or; &not;Q) &rarr; &not;(P &and; Q)" "de-morgan-or-not-implies-not-and" ,de-morgan-or-not-implies-not-and)
-    ("(P &rarr; &not;P) &or; (&not;P &rarr; P)" "anti-connexive-formula" ,anti-connexive-formula)
-    ("Ex contradictione quodlibet" "ex-contradictione-quodlibet" ,ex-contradictione-quodlibet)
-    ("Implicational ex falso quodlibet" "implicational-ex-falso" ,implicational-ex-falso)
-    ("KP" "kp" ,kp)
-    ("WKP" "wkp" ,wkp)
-    ("Distributivity of implication over disjunction" "distributivity-of-implication-over-disjunction" ,distributivity-of-implication-over-disjunction)
-    ("Aristotle's thesis (positive antecedent)" "aristotles-thesis-positive-antecedent" ,aristotles-thesis-positive-antecedent)
-    ("Aristotle's thesis (negative antecedent)" "aristotles-thesis-negative-antecedent" ,aristotles-thesis-negative-antecedent)
-    ("Modus ponens" "modus-ponens" ,modus-ponens)
-    ("Modus tollens" "modus-tollens" ,modus-tollens)
-    ("Hypothetical syllogism" "hypothetical-syllogism" ,hypothetical-syllogism)
-    ("Disjunctive syllogism" "disjunctive-syllogism" ,disjunctive-syllogism)
-    ("Constructive dilemma" "constructive-dilemma" ,constructive-dilemma)
-    ("Destructive dilemma" "destructive-dilemma" ,destructive-dilemma)
-    ("Conjunction elimination" "conjunction-elimination" ,conjunction-elimination)
-    ("Conjunction introduction" "conjunction-introduction" ,conjunction-introduction)
-    ("Disjunction introduction" "disjunction-introduction" ,disjunction-introduction)
-    ("Composition" "composition" ,composition)
-    ("Commutativity of conjunction" "commutivity-of-conjunction" ,commutivity-of-conjunction)
-    ("Commutativity of disjunction" "commutativity-of-disjunction" ,commutativity-of-disjunction)
-    ("Commutativity of implication" "commutativity-of-implication" ,commutativity-of-implication)
-    ("Associativity of conjunction" "associativity-of-conjunction" ,associativity-of-conjunction)
-    ("Associativity of disjunction" "associativity-of-disjunction" ,associativity-of-disjunction)
-    ("Associativity of implication" "associativity-of-implication" ,associativity-of-implication)
-    ("Distributivity of conjunction over disjunction (conjunctive antecdent)" "distributivity-of-conjunction-over-disjunction-conjunctive-antecedent" ,distributivity-of-conjunction-over-disjunction-conjunctive-antecedent)
-    ("Distributivity of conjunction over disjunction (disjunctive antecdent)" "distributivity-of-conjunction-over-disjunction-disjunctive-antecedent" ,distributivity-of-conjunction-over-disjunction-disjunctive-antecedent)
-    ("Distributivity of disjunction over conjunction (disjunctive antecedent)" "distributivity-of-disjunction-over-conjunction-disjunctive-antecedent" ,distributivity-of-disjunction-over-conjunction-disjunctive-antecedent)
-    ("Distributivity of disjunction over conjunction (conjunctive antecedent)" "distributivity-of-disjunction-over-conjunction-conjunctive-antecedent" ,distributivity-of-disjunction-over-conjunction-conjunctive-antecedent)
-    ("Transposition" "transposition" ,transposition)
-    ("Material implication (implicational antecdent)" "material-implication-implicational-antecedent" ,material-implication-implicational-antecedent)
-    ("Material implication (disjunctive antecdent)" "material-implication-disjunctive-antecedent" ,material-implication-disjunctive-antecedent)
-    ("False material implication (negative antecedent)" "material-implication-negative-antecedent" ,material-implication-negative-antecedent)
-    ("False material implication (negative consequent)" "material-implication-negative-consequent" ,material-implication-negative-consequent)
-    ("Material equivalence (conjunctive antecedent)" "material-equivalence-conjunctive-antecedent" ,material-equivalence-conjunctive-antecedent)
-    ("Material equivalence (disjunctive antecedent)" "material-equivalence-disjunctive-antecedent" ,material-equivalence-disjunctive-antecedent)
-    ("Exportation (conjunctive antecedent)" "exportation-conjunctive-antecedent" ,exportation-conjunctive-antecedent)
-    ("Exportation (implicational antecedent)" "exportation-implicational-antecedent" ,exportation-implicational-antecedent)
-
-    ("Idempotency of conjunction (conjunctive antecedent)" "conjunctive-idempotency-conjunctive-antecedent" ,conjunctive-idempotency-conjunctive-antecedent)
-    ("Idempotency of conjunction (conjunctive consequent)" "conjunctive-idempotency-conjunctive-consequent" ,conjunctive-idempotency-conjunctive-consequent)
-    ("Idempotency of disjunction (disjunctive antecedent)" "disjunctive-idempotenency-disjunctive-antecedent" ,disjunctive-idempotenency-disjunctive-antecedent)
-    ("Idempotenc of disjunction (disjunctive consequent)" "disjunctive-idempotenency-disjunctive-consequent" ,disjunctive-idempotenency-disjunctive-consequent)
-    ("Disjunctive absorption (disjunctive antecedent)" "disjunctive-absorption-disjunctive-antecedent" ,disjunctive-absorption-disjunctive-antecedent)
-    ("Disjunctive absorption (disjunctive consequent)" "disjunctive-absorption-disjunctive-consequent" ,disjunctive-absorption-disjunctive-consequent)
-    ("Conjunctive absorption (conjunctive antecdent)" "conjunctive-absorption-conjunctive-antecedent" ,conjunctive-absorption-conjunctive-antecedent)
-    ("Conjunctive absorption (conjunctive consequent)" "conjunctive-absorption-conjunctive-consequent" ,conjunctive-absorption-conjunctive-consequent)
-    ("Frege formula" "frege-formula" ,frege-formula)
-    ("Contrapositive (positive antecedent)" "contraposition-positive-antecedent" ,contraposition-positive-antecedent)
-    ("Contrapositive (negative antecedent)" "contraposition-negative-antecedent" ,contraposition-negative-antecedent)
-    ("McColl's Connexive Axiom 1" "connexive-ax-1" ,connexive-ax-1)
-    ("McColl's Connexive Axiom 2" "connexive-ax-2" ,connexive-ax-2)
-    ("McColl's Connexive Axiom 3" "connexive-ax-3" ,connexive-ax-3)
-    ("McColl's Connexive Axiom 4" "connexive-ax-4" ,connexive-ax-4)
-    ("McColl's Connexive Axiom 5" "connexive-ax-5" ,connexive-ax-5)
-    ("McColl's Connexive Axiom 6" "connexive-ax-6" ,connexive-ax-6)
-    ("McColl's Connexive Axiom 7" "connexive-ax-7" ,connexive-ax-7)
-    ("McColl's Connexive Axiom 8" "connexive-ax-8" ,connexive-ax-8)
-    ("McColl's Connexive Axiom 9" "connexive-ax-9" ,connexive-ax-9)
-    ("McColl's Connexive Axiom 10" "connexive-ax-10" ,connexive-ax-10)
-    ("McColl's Connexive Axiom 11" "connexive-ax-11" ,connexive-ax-11)
-    ("McColl's Connexive Axiom 12" "connexive-ax-12" ,connexive-ax-12)))
-
-(defcomponent formula-corrector (signature-component)
-  ((text :initarg :text :accessor formula-corrector-text)))
-
-(defun formula-guide ()
-  (<:p "Non-atomic formulas are written in prefix notation, with parentheses
-      around the outside.  Thus, an implication whose antecdent is " (<:as-is "&phi;") " and whose consequent is " (<:as-is "&psi;") " would be entered as")
-  (<:blockquote
-   (<:pre "(implies " (<:as-is "&phi;") " " (<:as-is "&psi;") ")"))
-  (<:p "The available connectives are")
-  (<:ul
-   (<:li (<:tt "implies") ",")
-   (<:li (<:tt "iff") ",")
-   (<:li (<:tt "and") ",")
-   (<:li (<:tt "or") ", and")
-   (<:li (<:tt "not") "."))
-  (<:p "Atomic formulas are simply the letters of the alphabet A, B, " (<:as-is "&hellip;") ", Z.  The case you use to write connectives and atomic formulas doesn't matter (anything you enter will be upcased).")
-  (<:p "Here are some " (html-quote "famous formulas") " that can be referred to by name:")
-  (<:table :rules "all"
-   (<:thead
-    (<:tr
-     (<:th "Name")
-     (<:th "Identifier")
-     (<:th "Value")))
-   (<:tbody :style "border:1px solid;"
-   (dolist (famous-formula famous-formulas)
-     (destructuring-bind (long-name identifier-name value)
-	 famous-formula
-       (<:tr
-	(<:td (<:as-is long-name))
-	(<:td (<:tt (<:as-is identifier-name)))
-	(<:td (render value)))))))
-  (<:p "When constructing formulas manually, you can refer to these famous formulas by simply using their identifier name.  Example:")
-  (<:blockquote
-   (<:tt "(implies excluded-middle ex-contradictione-quodlibet)"))
-  (<:p "will be interpreted as")
-  (<:blockquote
-   (render (-> excluded-middle ex-contradictione-quodlibet)))
-  (<:p "The famous formulas are rigidly defined: " (<:tt "peirce-formula") ", for example, refers to a specific formula composed of specific atomic subformulas in a fixed order.  If you want to express things such as " (<:tt "(or q (not q))") ", an instance of the excluded middle with the variable " (<:em "q") " instead of the variable " (<:em "p") ", then you have to type it manually; at present there is no way to influence the name of the atomic subformulas nor their order."))
-
-(defaction parse-formula-action (formula-str signature)
-  (answer
-   (ucw-handler-case
-       (parse-formula formula-str)
-     (end-of-file ()
-		  (call 'formula-corrector
-			:text formula-str
-			:signature signature))
-     (malformed-formula-error ()
-       (call 'formula-corrector
-	     :text formula-str
-	     :signature signature)))))
-
-(defmethod render ((self formula-corrector))
-  (let ((input-formula)
-	(sig (signature self))
-	(text (formula-corrector-text self)))
-    (<:h1 "Invalid formula supplied")
-    (<:p "We are unable to make sense of the formula, \""
-	 (if (stringp text)
-	     (<:as-html text)
-	     (if (null text)
-		 (<:as-is "(weird -- NIL supplied)")
-		 (render text))) "\" that you supplied.")
-    ;; (render-signature sig)
-    (formula-guide)
-    (<:p "Please try again.")
-    (<ucw:form :method "post"
-	       :action (parse-formula-action input-formula sig)
-      (<:p "Enter a formula in the above signature.")
-	(<ucw:input :type "text"
-		    :id "formula-input"
-		    :size "160"
-		    :accessor input-formula)
-	(<:submit :value "Use this formula"))))
 
 (defcomponent turn-editor (game-component play-style-component ruleset-component)
   ())
@@ -794,18 +435,12 @@ meaning of the dialogue rules.")
 				  :accessor input-statement)
 		      (<ucw:select :accessor selected-symbolic-attack
 				   :size 1
-			  (<ucw:option :value attack-left-conjunct 
+			  (<ucw:option :value *attack-left-conjunct*
 				       "Attack the left conjunct")
-			  (<ucw:option :value attack-right-conjunct
+			  (<ucw:option :value *attack-right-conjunct*
 				       "Attack the right conjunct")
-			  (<ucw:option :value which-disjunct?
-				       "Request that a disjunct be chosen")
-		          (<ucw:option :value attack-left-disjunct 
-				       "Attack the left disjunct")
-			  (<ucw:option :value attack-right-disjunct
-				       "Attack the right disjunct")
-			  (<ucw:option :value which-conjunct?
-				       "Request that a conjunct be chosen"))))
+			  (<ucw:option :value *which-disjunct?*
+				       "Request that a disjunct be chosen"))))
 	       (<:caption :style "caption-side:bottom;"
 	         (<ucw:submit :value "Make a move"
 			      :action $take-action))))))))
@@ -1193,16 +828,6 @@ current turn number is the selected one.")
 	    :accessor success
 	    :initform nil)))
 
-(defcomponent winning-strategy-searcher (game-component play-style-component)
-  ((depth :initarg :depth
-	  :accessor depth)
-   (queue :initarg :queue
-	  :accessor queue
-	  :initform nil)
-   (success :initarg :success
-	    :accessor success
-	    :initform nil)))
-
 (defmethod render ((self winning-play-searcher))
   (with-slots (game depth play-style queue success)
       self
@@ -1335,74 +960,6 @@ current turn number is the selected one.")
 	(render-node-as-table-row end))))
    (dotimes (i padding)
      (<:td))))
-
-(defun render-strategy (strategy)
-  (let ((first-splitter (first-splitting-descendent strategy)))
-    (if (null first-splitter)
-	(let ((leaf (first (leaf-nodes strategy))))
-	  (<:table
-	   (render-segment-from-to-with-padding-as-row strategy leaf 0)))
-	(let* ((succs (node-successors first-splitter))
-	       (num-succs (length succs)))
-	  (<:table :rules "groups"
-		   :frame "void"
-	   (<:thead
-	    (render-segment-from-to-with-padding-as-row strategy first-splitter (floor (/ num-succs 2))))
-	   (<:tbody
-	    (<:tr
-	     (if (evenp num-succs)
-		 (progn
-		   (loop
-		      with cleft-point = (/ num-succs 2)
-		      for i from 0 upto (1- cleft-point)
-		      with succ = (nth i succs)
-		      do
-			(<:td :align "center"
-			      (render-strategy succ)))
-		   (<:td)
-		   (loop
-		      with cleft-point = (/ num-succs 2)
-		      for i from cleft-point upto (1- num-succs)
-		      with succ = (nth i succs)
-		      do
-			(<:td :align "center"
-			      (render-strategy succ))))
-		 (loop
-		    for succ in succs
-		    do
-		      (<:td :align "center"
-			    (render-strategy succ)))))))))))
-		 
-(defmethod render ((self winning-strategy-searcher))
-  (with-slots (game depth play-style queue success)
-      self
-    (let ((result (winning-strategy (initial-statement game)
-				    (dialogue-rules game)
-				    depth
-				    game)))
-      (cond ((null result)
-	     (<:h1 "Ouch!")
-	     (<:p "Not only is there is no winning strategy that continues from the game above no more than " (<:as-html depth) " " (if (= depth 1) "move" "moves") ", there is actually " (<:em "no") " winning strategy at all that extends the initial game."))
-	    ((eq result :dialogue-tree-too-shallow)
-	     (<:h1 "Cutoff!")
-	     (<:p "I couldn't find a winning strategy that extends the initial game at most " (<:as-html depth) " " (if (= depth 1) (<:as-is "move") (<:as-is "moves")) " beyond the end of the initial game.  The search was terminated because we reached the depth cutoff."))
-	    (t ; something interesting
-	     (let ((strat result))
-	       (<:h1 "Success")
-	       (<:p "Here is a continuation of the initial game for which Proponent has a winning strategy in no more than " (<:as-html depth) " " (if (= depth 1) (<:as-is "move") (<:as-is "moves")) " beyond the end of the initial game:")
-	       (<:div :style "border:1px solid;"
-	         (render-strategy strat))))))
-    (<ucw:form :method "post"
-	       :action (call 'turn-editor
-			     :game game
-			     :play-style play-style)
-      (<:submit :value "Go back to the original game"))
-    (<ucw:form :method "post"
-	       :action (call 'start-game-component)
-    (<:submit :value "Quit"))))
-
-(defconstant max-search-depth 15
-  "The maximum depth to which we permit searching for winning plays and winning strategies.")
 
 (defun render-win-searcher (game play-style)
   (let (search-depth)
@@ -1682,31 +1239,6 @@ that all the rules in your edited ruleset are satisfied.")
 	      (render arg)))
 	  (<:as-is ")")))))
 
-(defmethod render ((sa (eql attack-left-conjunct)))
-  (<:as-is "&and;")
-  (<:sub "L"))
-
-(defmethod render ((sa (eql attack-left-disjunct)))
-  (<:as-is "&or;")
-  (<:sub "L"))
-
-(defmethod render ((sa (eql attack-right-conjunct)))
-  (<:as-is "&and;")
-  (<:sub "R"))
-
-(defmethod render ((sa (eql attack-right-disjunct)))
-  (<:as-is "&or;")
-  (<:sub "R"))
-
-(defmethod render ((sa (eql which-instance?)))
-  (<:as-is "?"))
-
-(defmethod render ((sa (eql which-disjunct?)))
-  (<:as-is "?"))
-
-(defmethod render ((sa (eql which-conjunct?)))
-  (<:as-is "?"))
-
 (defmethod render :around ((formula unary-connective-formula))
   (call-next-method)
   (render (argument formula)))
@@ -1765,407 +1297,12 @@ that all the rules in your edited ruleset are satisfied.")
 (defcomponent start-game-component (signature-component ruleset-component)
   ())
 
-(defcomponent manual-formula-editor-component (signature-component)
-  ())
-
-(defmethod render ((self manual-formula-editor-component))
-  (let ((input-formula nil)
-	(sig (signature self)))
-    (symbol-macrolet 
-	(($formula
-	  (let ((parsed-formula 
-		 (ucw-handler-case (parse-formula input-formula)
-		   (end-of-file () (call 'formula-corrector
-					 :text input-formula
-					 :signature sig))
-		   (malformed-formula-error () (call 'formula-corrector
-						     :text input-formula
-						     :signature sig)))))
-	    (if (belongs-to-signature? sig parsed-formula)
-		(answer parsed-formula)
-		(call 'formula-corrector
-		      :text parsed-formula
-		      :signature sig)))))
-      (<:h1 "Enter a formula")
-      ;; (<:p "The signature that you should use is:")
-      ;; (<:blockquote
-      ;; (render-signature (signature self)))
-      (<ucw:form :method "POST"
-		 :action $formula
-		 (<ucw:input :type "text"
-			     :size "160"
-			     :accessor input-formula)
-		 (<:submit :value "Use this formula"))
-      (formula-guide))))
-
 (defcomponent ruleset-info ()
   ())
 
 (defmethod render ((self ruleset-info))
   (<:p (<:em (<:b "About the rules:")) " The rulesets in the
 above menu are some notable cases that have some logical content.  You will be able to change your choice of ruleset once the game has started.  The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985; it was arguably the first papers to rigorously establish the equivalence between intuitionistic validity and existence of winning strategies for certain dialogue games.  You will be able to alter your choice of rules after the game has begun."))
-
-(defcomponent signature-info ()
-  ())
-
-(defmethod render ((self signature-info))
-  (<:p (<:em (<:b "About the signature:")) "The signature is propositional, whose atoms are simply the letters of the alphabet: A, B, C, ... Z."))
-
-(defcomponent translation-info ()
-  ())
-
-(defmethod render ((self translation-info))
-  (<:p (<:em (<:b "About the translation:")) " The default is the
-identity translation, so that whatever formula is chosen (or whatever
-formula is entered into the text box) will be, verbatim, the formula
-with which the game begins."))
-
-(defcomponent formula-info ()
-  ())
-
-(defmethod render ((self formula-info))
-  (formula-guide))
-
-(defcomponent play-style-info ()
-  ())
-
-(defmethod render ((self play-style-info))
-  (<:p (<:em (<:b "About the play style:")) " The default mode of playing is to take on the role of both players: at each move, you'll see all possible moves that can be made, from the perspective of both players.  Two other play styles are supported: play as Proponent with a random Opponent, and play as Opponent with a random Proponent."))
-
-(defmacro ruleset-row (ruleset)
-  (let ((id (format nil "~a-radio" ruleset)))
-    `(<:tr
-      :valign "top"
-      (<:td
-       :nowrap "nowrap"
-       (<ucw:input :type "radio"
-		   :name "selected-rules"
-		   :accessor (name ,ruleset)
-		   :value (name ,ruleset)
-		   :id ,id)
-       (<:label
-	:for ,id
-	(<:strong (<:as-html (name ,ruleset)))))
-      (<:td
-       (<:as-html (description ,ruleset))))))
-
-(defmacro ruleset-option (ruleset)
-  `(<ucw:option
-    :value ',ruleset
-    :title (description ,ruleset)
-    (<:as-html (name ,ruleset) ": " (description ,ruleset))))
-
-(defmacro rule-checkbox-row (rule selector)
-  (let ((id (format nil "~a-checkbox" rule)))
-    `(<:tr
-      :valign "top"
-      (<:td
-       (<ucw:input
-	:type "checkbox"
-	:accessor ,selector
-	:name (name ,rule)
-	:value ',rule
-	:id ,id)
-       (<:label
-	:for ,id
-	(<:strong (<:as-html (name ,rule))))
-       " "
-       (<:as-html (description ,rule))))))
-
-(defun render-strategy-node-as-table-row (node &optional alternatives)
-  (let ((move (move node))
-	(depth (strategy-node-depth node)))
-    (with-slots (player statement stance reference)
-	move
-      (symbol-macrolet
-	  (($depth
-	    `(<:td :align "left" (<:as-html depth)))
-	   ($player
-	    `(<:td :align "center" (<:strong (<:as-html player))))
-	   ($statement
-	    `(<:td :align "left" :nowrap "nowrap" (render statement)))
-	   ($stance-and-reference-raw
-	    `(unless (initial-move? move)
-	       (if (attacking-move? move)
-		   (<:as-html "[A," reference "]")
-		   (<:as-html "[D," reference "]"))))
-	   ($stance-and-reference
-	    `(<:td :align "left" $stance-and-reference-raw))
-	   ($plain-row
-	    `(<:tr :nowrap "nowrap"
-		   :valign "top"
-		   $depth
-		   $player
-		   $statement
-		   $stance-and-reference
-		   )))
-	(macrolet ((colored-row (color)
-		     (<:tr :nowrap "nowrap"
-			   :valign "top"
-			   :bgcolor ,color
-			   :style "color:white;"
-			   $depth
-			   $player
-			   $statement
-			   $stance-and-reference)))))
-      (if (member node alternatives)
-	  (<:tr :bgcolor "indigo"
-		:nowrap "nowrap"
-		:valign "top"
-		:style "font-style:bold;color:white;"
-		(<:td
-		 :nowrap "nowrap"
-		 :align "center"
-		 (<ucw:a
-		  :action (setf (children (parent node))
-				(list node))
-		  :style "text-decoration:none;color:white;"
-		  :title (if (eq stance 'a)
-			     (format nil "Attack move #~d by asserting ~a" reference (render-plainly statement))
-			     (format nil "Defend against the attack of move #~d by asserting ~a" reference (render-plainly statement)))
-		  (<:as-html depth)
-		  " "
-		  (<:strong (<:as-html player))
-		  " "
-		  (render statement)
-		  " "
-		  $stance-and-reference-raw)))
-	  (if (attacking-move? move)
-	      (if (closed-in-every-branch? node depth)
-		  (colored-row "FireBrick")
-		  (if (open-in-every-branch? node depth)
-		      (colored-row "ForestGreen")
-		      $plain-row))
-	      $plain-row)))))
-
-(defun render-segment-with-padding-as-row (begin end padding &optional alternatives)
-  "Given strategy nodes BEGIN and END, emit an HTML table
-  row representing the dialogue from BEGIN to END.  The row will
-  contain 2*PADDING + 1 columns; PADDING empty columns will be put on
-  the left and the right of the sequence.  It is assumed that there is
-  a path from BEGIN to END; the path is constrcted simply taking
-  unique successors, starting at BEGIN, until we reach END.  The moves
-  of the game between BEGIN and END will be put into a single HTML
-  table element."
-  (symbol-macrolet
-      (($padding (dotimes (i padding) (<:td))))
-    (<:tr :valign "top"
-     $padding
-     (<:td :align "center"
-       (<:table
-	:bgcolor "silver"
-	:cellspacing "0"
-	:style "align: center;"
-	(loop
-	   for current-node = begin then (first (children current-node))
-	   do
-	     (render-strategy-node-as-table-row current-node alternatives)
-	     (when (eq current-node end)
-	       (return)))))
-     $padding)))
-
-(defun render-node-with-alternative-hiding-closed-branches (node alternative ruleset)
-  (if (branch-closed? node)
-      (<:table
-       :style "align: center;"
-       :bgcolor "silver"
-       :cellspacing "0"
-       (render-strategy-node-as-table-row node nil)
-       (<:tr
-	(<:td
-	 :align "center"
-	 :colspan "4"
-	 :title "Wouldn't it be great if this were a link which, when followed, showed the subtree rooted at this node?"
-	 (<:b (<:as-is "&hellip;"))))
-       (<:tr
-	(if (proponent-wins-every-branch? node ruleset)
-	    (<:td
-	     :align "center"
-	     :colspan "4"
-	     :title "Proponent wins every dialogue passing through here"
-	     (<:span
-	      :style "font-size:xx-large;"
-	      (<:as-is "&#9786")))
-	    (if (opponent-wins-every-branch? node ruleset)
-		(<:td
-		 :align "center"
-		 :colspan "4"
-		 :title "Opponent wins every dialogue passing through here"
-		 (<:span
-		  :style "font-size:xx-large;"
-		  (<:as-is "&#9785;")))
-		(<:td
-		 :align "center"
-		 :colspan "4"
-		 :title "Proponent wins at least one dialogue passing through here, and Opponents wins at least one dialogue passing through here"
-		 (<:span
-		  :style "font-size:xx-large;"
-		  (<:as-is "&#9786; &#9785;")))))))
-      (let ((first-splitter (first-splitter node)))
-	(if (null first-splitter)
-	    (let ((leaf (first (leaves node))))
-	      (<:table
-	       :style "align: center;"
-	       :bgcolor "silver"
-	       (render-segment-with-padding-as-row node
-						   leaf
-						   0
-						   (when alternative
-						     (children alternative)))))
-	    (let* ((succs (children first-splitter))
-	       (num-succs (length succs)))
-	      (<:table :rules "groups"
-		       :frame "void"
-		       :bgcolor "silver"
-		       :style "align: center;"
-		       (<:thead
-			(render-segment-with-padding-as-row node
-							    first-splitter
-							    (floor (/ num-succs 2))
-						 (when alternative
-						   (children alternative))))
-	    (<:tbody
-	     (<:tr :valign "top"
-	      (if (evenp num-succs)
-		  (progn
-		    (loop
-		       with cleft-point = (/ num-succs 2)
-		       for i from 0 upto (1- cleft-point)
-		       for succ = (nth i succs)
-		       do
-			 (<:td :align "center"
-			   (render-node-with-alternative-hiding-closed-branches succ
-										alternative
-										ruleset)))
-		    (<:td)
-		    (loop
-		       with cleft-point = (/ num-succs 2)
-		       for i from cleft-point upto (1- num-succs)
-		       for succ = (nth i succs)
-		       do
-			 (<:td :align "center"
-			   (render-node-with-alternative-hiding-closed-branches succ
-										alternative
-										ruleset))))
-		  (loop
-		     for succ in succs
-		     do
-		       (<:td :align "center"
-		         (render-node-with-alternative-hiding-closed-branches succ
-									      alternative
-									      ruleset))))))))))))
-
-(defun render-node-with-alternative (node alternative)
-  (let ((first-splitter (first-splitter node)))
-    (if (null first-splitter)
-	(let ((leaf (first (leaves node))))
-	  (<:table
-	   :style "align: center;"
-	   :bgcolor "silver"
-	   (render-segment-with-padding-as-row node
-					       leaf
-					       0
-					       (when alternative
-						 (children alternative)))))
-	(let* ((succs (children first-splitter))
-	       (num-succs (length succs)))
-	  (<:table :rules "groups"
-		   :frame "void"
-		   :bgcolor "silver"
-		   :style "align: center;"
-	    (<:thead
-	     (render-segment-with-padding-as-row node
-						 first-splitter
-						 (floor (/ num-succs 2))
-						 (when alternative
-						   (children alternative))))
-	    (<:tbody
-	     (<:tr :valign "top"
-	      (if (evenp num-succs)
-		  (progn
-		    (loop
-		       with cleft-point = (/ num-succs 2)
-		       for i from 0 upto (1- cleft-point)
-		       for succ = (nth i succs)
-		       do
-			 (<:td :align "center"
-			   (render-node-with-alternative succ
-							 alternative)))
-		    (<:td)
-		    (loop
-		       with cleft-point = (/ num-succs 2)
-		       for i from cleft-point upto (1- num-succs)
-		       for succ = (nth i succs)
-		       do
-			 (<:td :align "center"
-			   (render-node-with-alternative succ
-							 alternative))))
-		  (loop
-		     for succ in succs
-		     do
-		       (<:td :align "center"
-		         (render-node-with-alternative succ
-						       alternative)))))))))))
-
-(defun render-strategy-with-alternative-hiding-closed-branches (strategy alternative)
-  "Render STRATEGY, with the children of strategy node ALTERNATIVE in
-  a distinctive color, and link the the action of extending STRATEGY by setting the unique child of ALTERNATIVE to the indicated child.  Omit showing closed branches"
-  (<:table
-   :width "100%"
-   :style "align: center;background-color:silver;"
-   :frame "box"
-   :summary "The strategy so far."
-   (<:caption
-    :style "background-color:silver;font-style:oblique;"
-    :align "bottom"
-    "The strategy so far.  Nodes in "
-    (<:span
-     :style "background-color:FireBrick;color:white;"
-     "red")
-    " are attacks that are closed in every branch passing through the node.  Nodes in "
-    (<:span
-     :style "background-color:ForestGreen;color:white;"
-     "green")
-    " are attacks that are open in every branch passing through the node.  "
-    "Nodes in "
-    (<:span
-     :style "background-color:Indigo;color:white;"
-     "purple")
-    " indicate choices to be made.")
-   (<:tr
-    (<:td
-     :align "center"
-     (render-node-with-alternative-hiding-closed-branches (root strategy) alternative (ruleset strategy))))))
-
-(defun render-strategy-with-alternative (strategy alternative)
-  "Render STRATEGY, with the children of strategy node ALTERNATIVE in
-  a distinctive color, and link the the action of extending STRATEGY by setting the unique child of ALTERNATIVE to the indicated child."
-  (<:table
-   :width "100%"
-   :style "align: center;background-color:silver;"
-   :frame "box"
-   :summary "The strategy so far."
-   (<:caption
-    :style "background-color:silver;font-style:oblique;"
-    :align "bottom"
-    "The strategy so far.  Nodes in "
-    (<:span
-     :style "background-color:FireBrick;color:white;"
-     "red")
-    " are attacks that are closed in every branch passing through the node.  Nodes in "
-    (<:span
-     :style "background-color:ForestGreen;color:white;"
-     "green")
-    " are attacks that are open in every branch passing through the node.  "
-    "Nodes in "
-    (<:span
-     :style "background-color:Indigo;color:white;"
-     "purple")
-    " indicate choices to be made.")
-   (<:tr
-    (<:td
-     :align "center"
-     (render-node-with-alternative (root strategy) alternative)))))
 
 (defmethod render ((self start-game-component))
   (let (input-formula

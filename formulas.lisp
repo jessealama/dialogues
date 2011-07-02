@@ -6,8 +6,6 @@
 ;;; Formulas
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;; Keywords
-
 (defclass formula ()
   nil)
 
@@ -23,6 +21,49 @@
 
 (defun atomic-formula? (thing)
   (typep thing 'atomic-formula))
+
+(defclass unary-connective-formula (composite-formula)
+  ((argument :initarg :argument
+	     :accessor argument)))
+
+(defclass negation (unary-connective-formula)
+  nil)
+
+(defclass binary-connective-formula (composite-formula)
+  ((lhs :initarg :lhs
+	:accessor lhs
+	:type formula)
+   (rhs :initarg :rhs
+	:accessor rhs
+	:type formula)))
+
+(defclass binary-conjunction (binary-connective-formula)
+  nil)
+
+(defclass binary-disjunction (binary-connective-formula)
+  nil)
+
+(defclass implication (binary-connective-formula)
+  nil)
+
+(defclass equivalence (binary-connective-formula)
+  nil)
+
+;; quantifiers
+
+(defclass generalization (composite-formula)
+  ((bound-variable :initarg :bound-variable
+		   :accessor bound-variable
+		   :type variable-term)
+   (matrix :initarg :matrix
+	   :accessor matrix
+	   :type formula)))
+
+(defclass universal-generalization (generalization)
+  nil)
+
+(defclass existential-generalization (generalization)
+  nil)
 
 (defmethod print-object ((atom atomic-formula) stream)
   (let ((pred (predicate atom))
@@ -58,27 +99,6 @@
 					(format nil ",~A" (render-plainly arg)))
 				    (cdr args)))
 		     ")")))))
-
-(defmethod render-plainly ((sa (eql attack-left-conjunct)))
-  "&and;(L)")
-
-(defmethod render-plainly ((sa (eql attack-left-disjunct)))
-  "&or;(L)")
-
-(defmethod render-plainly ((sa (eql attack-right-conjunct)))
-  "&and;(R)")
-
-(defmethod render-plainly ((sa (eql attack-right-disjunct)))
-  "&or;(R)")
-
-(defmethod render-plainly ((sa (eql which-instance?)))
-  "?")
-
-(defmethod render-plainly ((sa (eql which-disjunct?)))
-  "?")	   
-
-(defmethod render-plainly ((sa (eql which-conjunct?)))
-  "?")
 
 (defmethod render-plainly :around ((formula unary-connective-formula))
   (let ((body (call-next-method)))
@@ -184,14 +204,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (and (formula? formula)
        (not (atomic-formula? formula))))
 
-(defclass binary-connective-formula (composite-formula)
-  ((lhs :initarg :lhs
-	:accessor lhs
-	:type formula)
-   (rhs :initarg :rhs
-	:accessor rhs
-	:type formula)))
-
 (defun binary-connective-formula? (thing)
   (typep thing 'binary-connective-formula))
 
@@ -200,10 +212,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (call-next-method)
   (format stream " ~A)" (rhs formula)))
 
-(defclass unary-connective-formula (composite-formula)
-  ((argument :initarg :argument
-	     :accessor argument)))
-
 (defmethod belongs-to-signature? ((sig signature)
 				  (formula unary-connective-formula))
   (belongs-to-signature? sig (argument formula)))
@@ -211,9 +219,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defmethod print-object :around ((formula unary-connective-formula) stream)
   (call-next-method)
   (format stream "~A" (argument formula)))
-
-(defclass negation (unary-connective-formula)
-  nil)
 
 (defgeneric unnegate (formula))
 
@@ -266,9 +271,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 	     (belongs-to-signature? sig item))
 	 (items formula)))
 
-(defclass implication (binary-connective-formula)
-  nil)
-
 (defun implication? (thing)
   (typep thing 'implication))
 
@@ -291,9 +293,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defmethod consequent ((implication implication))
   (rhs implication))
 
-(defclass equivalence (binary-connective-formula)
-  nil)
-
 (defun equivalence? (thing)
   (typep thing 'equivalence))
 
@@ -306,9 +305,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 		 :rhs rhs))
 
 ;;; disjunctions
-
-(defclass binary-disjunction (binary-connective-formula)
-  nil)
 
 (defun binary-disjunction? (thing)
   (typep thing 'binary-disjunction))
@@ -372,9 +368,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 
 ;; conjunctions
 
-(defclass binary-conjunction (binary-connective-formula)
-  nil)
-
 (defun binary-conjunction? (thing)
   (typep thing 'binary-conjunction))
 
@@ -429,16 +422,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 						    (make-conjunction (cdr ds))))))
 	      (make-conjunction conjuncts))))))
 
-;; quantifiers
-
-(defclass generalization (composite-formula)
-  ((bound-variable :initarg :bound-variable
-		   :accessor bound-variable
-		   :type variable-term)
-   (matrix :initarg :matrix
-	   :accessor matrix
-	   :type formula)))
-
 (defmethod print-object :after ((gen generalization) stream)
   (call-next-method)
   (format stream 
@@ -446,17 +429,11 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 	  (bound-variable gen)
 	  (matrix gen)))
 
-(defclass universal-generalization (generalization)
-  nil)
-
 (defun universal-generalization? (thing)
   (eql (class-of thing) 'universal-generalization))
 
 (defmethod print-object ((uni-gen universal-generalization) stream)
   (format stream "all"))
-
-(defclass existential-generalization (generalization)
-  nil)
 
 (defun existential-generalization? (thing)
   (eql (class-of thing) 'existential-generalization))

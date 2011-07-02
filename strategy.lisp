@@ -62,7 +62,7 @@
     (if parent
 	(add-move-to-dialogue (node->dialogue parent ruleset) move)
 	(make-dialogue (move-statement move)
-		       alphabetic-propositional-signature ;; ugh
+		       *alphabetic-propositional-signature* ;; ugh
 		       ruleset))))
 
 (defun node-reference-< (node-1 node-2)
@@ -238,6 +238,9 @@ the strategy.  If there no such node, return NIL."
   (first-opponent-choice-wrt-ruleset (root strategy)
 				     (ruleset strategy)))
 
+(defgeneric proponent-node? (node))
+(defgeneric opponent-node? (node))
+
 (defmethod proponent-node? ((node strategy-node))
   (proponent-move? (move node)))
 
@@ -298,7 +301,7 @@ the strategy.  If there no such node, return NIL."
     :documentation "The list of choices that are available for this strategy.  It is intended to be a list of STRATEGY-NODE objects."))
   (:documentation "A STRATEGY-WITH-CHOICES is a strategy that keeps tracks of possible choices that were made as the strategy was expanded."))
 
-(defun play-strategy-search-game (rules &optional (signature alphabetic-propositional-signature) initial-formula)
+(defun play-strategy-search-game (rules &optional (signature *alphabetic-propositional-signature*) initial-formula)
   (let ((strategy nil)
 	(opp-choice-node nil)
 	(current-choice nil)
@@ -484,9 +487,11 @@ the strategy.  If there no such node, return NIL."
        (go make-choice)
      quit
        (msg "Thanks for playing, I hope you had fun."))
-    (mapcar #'(lambda (winner)
-		(node->strategy winner rules))
-	    winning-pro-nodes)))
+    (if (member nil winning-pro-nodes) ;; no choice were ever made
+	(list strategy)
+	(mapcar #'(lambda (winner)
+		    (node->strategy winner rules))
+		winning-pro-nodes))))
 
 ;; HTML representation of strategies and strategy nodes
 

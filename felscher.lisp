@@ -17,14 +17,14 @@
   (make-offensive-rule
    :name "d01-conjunction"
    :precondition (binary-conjunction? (nth-statement dialogue current-reference))
-   :body (or (eq current-statement attack-left-conjunct)
-	     (eq current-statement attack-right-conjunct))
+   :body (or (eq current-statement *attack-left-conjunct*)
+	     (eq current-statement *attack-right-conjunct*))
    :description "Only two attacks against conjunctions are permitted: ATTACK-LEFT-CONJUNCT and ATTACK-RIGHT-CONJUNCT."))
 
 (defparameter rule-d01-left-conjunct
   (make-offensive-rule
    :name "d01-left-conjunct"
-   :precondition (eq current-statement attack-left-conjunct)
+   :precondition (eq current-statement *attack-left-conjunct*)
    :body (and (non-symbolic-attack-formula?
 	       (nth-statement dialogue current-reference))
 	      (binary-conjunction? (nth-statement dialogue current-reference)))
@@ -33,7 +33,7 @@
 (defparameter rule-d01-right-conjunct
   (make-offensive-rule
    :name "d01-right-conjunct"
-   :precondition (eq current-statement attack-right-conjunct)
+   :precondition (eq current-statement *attack-right-conjunct*)
    :body (and (non-symbolic-attack-formula?
 	       (nth-statement dialogue current-reference))
 	      (binary-conjunction? (nth-statement dialogue current-reference)))
@@ -43,13 +43,13 @@
   (make-offensive-rule
    :name "d01-disjunction"
    :precondition (binary-disjunction? (nth-statement dialogue current-reference))
-   :body (eq current-statement which-disjunct?)
+   :body (eq current-statement *which-disjunct?*)
    :description "WHICH-DISJUNCT? is the only permissible attack against a disjunction."))
 
 (defparameter rule-d01-which-disjunct
   (make-offensive-rule
    :name "d01-which-disjunct"
-   :precondition (eq current-statement which-disjunct?)
+   :precondition (eq current-statement *which-disjunct?*)
    :body (binary-disjunction? (nth-statement dialogue current-reference))
    :description "The WHICH-DISJUNCT? attack applies only to disjunctions."))
 
@@ -92,7 +92,7 @@
 (defparameter rule-d01-which-instance
   (make-offensive-rule 
    :name "d01-which-instance"
-   :precondition (eq current-statement which-instance?)
+   :precondition (eq current-statement *which-instance?*)
    :body (let ((s (nth-statement dialogue current-reference)))
 	   (and (non-symbolic-attack-formula? s)
 		(existential-generalization? s)))
@@ -102,7 +102,7 @@
   (make-offensive-rule
    :name "d01-existential"
    :precondition (existential-generalization? (nth-statement dialogue current-reference))
-   :body (eq current-statement which-instance?)
+   :body (eq current-statement *which-instance?*)
    :description "WHICH-INSTANCE? is the only permissible attack on existential generalizations."))
 
 (defparameter rule-d01-formula
@@ -141,7 +141,7 @@
   (make-defensive-rule
    :name "d02-left-conjunct"
    :precondition (eq (nth-statement dialogue current-reference)
-		  attack-left-conjunct)
+		     *attack-left-conjunct*)
   :body (with-original-statement (original-statement)
 	  (equal-statements? current-statement
 			     (lhs original-statement)))
@@ -151,7 +151,7 @@
   (make-defensive-rule 
    :name "d02-right-conjunct"
    :precondition (eq (nth-statement dialogue current-reference)
-		  attack-right-conjunct)
+		     *attack-right-conjunct*)
    :body (with-original-statement (original-statement)
 	   (equal-statements? current-statement
 			      (rhs original-statement)))
@@ -160,7 +160,8 @@
 (defparameter rule-d02-which-disjunct
   (make-defensive-rule
    :name "d02-which-disjunct"
-   :precondition (eq (nth-statement dialogue current-reference) which-disjunct?)
+   :precondition (eq (nth-statement dialogue current-reference)
+		     *which-disjunct?*)
    :body (with-original-statement (original-statement)
 	   (or (equal-statements? current-statement
 				  (lhs original-statement))
@@ -1020,164 +1021,6 @@
 				      ;; rule-d13
 				      rule-d13-symmetric))
 		 :description "D rules, but attacks may be answered at most once"))
-
-;;; Inversion of disjunction and conjunction
-
-(defconstant-if-unbound attack-left-disjunct (make-instance 'symbolic-attack))
-(defconstant-if-unbound attack-right-disjunct (make-instance 'symbolic-attack))
-(defconstant-if-unbound which-conjunct? (make-instance 'symbolic-attack))
-
-(setf symbolic-attacks (append symbolic-attacks (list attack-left-disjunct
-						      attack-right-disjunct
-						      which-conjunct?)))
-
-;; inverted from rule-d01-conjunction
-(defparameter rule-d01-disjunction-inverted
-  (make-offensive-rule
-   :name "d01-disjunction"
-   :precondition (binary-disjunction? (nth-statement dialogue current-reference))
-   :body (or (eq current-statement attack-left-disjunct)
-	     (eq current-statement attack-right-disjunct))
-   :description "Only two attacks against disjuncts are permitted: ATTACK-LEFT-DISJUNCT and ATTACK-RIGHT-DISJUNCT."))
-
-;; inverted from rule-d01-right-conjunct
-(defparameter rule-d01-left-disjunct
-  (make-offensive-rule
-   :name "d01-left-disjunct"
-   :precondition (eq current-statement attack-left-disjunct)
-   :body (and (non-symbolic-attack-formula?
-	       (nth-statement dialogue current-reference))
-	      (binary-disjunction? (nth-statement dialogue current-reference)))
-   :description "One cannot attack the left disjunct of a formula that isn't a disjunction."))
-
-;; inverted from rule-d01-right-conjunct
-(defparameter rule-d01-right-disjunct
-  (make-offensive-rule
-   :name "d01-right-disjunct"
-   :precondition (eq current-statement attack-right-disjunct)
-   :body (and (non-symbolic-attack-formula?
-	       (nth-statement dialogue current-reference))
-	      (binary-disjunction? (nth-statement dialogue current-reference)))
-   :description "One cannot attack the right disjunct of a formula that isn't a disjunction."))
-
-;; inverted from rule-d01-disjunction
-(defparameter rule-d01-conjunction-inverted
-  (make-offensive-rule
-   :name "d01-disjunction"
-   :precondition (binary-conjunction? (nth-statement dialogue current-reference))
-   :body (eq current-statement which-conjunct?)
-   :description "WHICH-CONJUNCT? is the only permissible attack against a conjunction."))
-
-;; inverted from rule-d01-which-disjunct
-(defparameter rule-d01-which-conjunct
-  (make-offensive-rule
-   :name "d01-which-conjunct"
-   :precondition (eq current-statement which-conjunct?)
-   :body (binary-conjunction? (nth-statement dialogue current-reference))
-   :description "The WHICH-CONJUNCT? attack applies only to conjunctions."))
-
-;; inverted from rule-d02-left-conjunct
-(defparameter rule-d02-left-disjunct
-  (make-defensive-rule
-   :name "d02-left-disjunct"
-   :precondition (eq (nth-statement dialogue current-reference)
-		  attack-left-disjunct)
-  :body (with-original-statement (original-statement)
-	  (equal-statements? current-statement
-			     (lhs original-statement)))
-  :description "To defend against the ATTACK-LEFT-DISJUNCT attack, assert the left conjunct of the original disjunction."))
-
-;; inverted from rule-d02-right-conjunct
-(defparameter rule-d02-right-disjunct
-  (make-defensive-rule 
-   :name "d02-right-disjunct"
-   :precondition (eq (nth-statement dialogue current-reference)
-		  attack-right-disjunct)
-   :body (with-original-statement (original-statement)
-	   (equal-statements? current-statement
-			      (rhs original-statement)))
-   :description "To defend against the ATTACK-RIGHT-DISJUNCT attack, assert the right conjunct of the original conjunction."))
-
-;; inverted from rule-d02-which-disjunct
-(defparameter rule-d02-which-conjunct
-  (make-defensive-rule
-   :name "d02-which-conjunct"
-   :precondition (eq (nth-statement dialogue current-reference) which-conjunct?)
-   :body (with-original-statement (original-statement)
-	   (or (equal-statements? current-statement
-				  (lhs original-statement))
-	       (equal-statements? current-statement
-				  (rhs original-statement))))
-   :description "To defend against the WHICH-CONJUNCT? attack, assert either the left or the right disjunct of the original disjunction."))
-
-(defparameter inverted-argumentation-forms (list rule-d01-alternating
-						 rule-d01-conjunction-inverted
-						 rule-d01-left-disjunct
-						 rule-d01-right-disjunct
-						 rule-d01-disjunction-inverted
-						 rule-d01-which-disjunct
-						 rule-d01-implication
-						 rule-d01-negation
-						 ;; rule-d01-universal
-						 ;; rule-d01-term
-						 ;; rule-d01-which-instance
-						 ;; rule-d01-existential
-						 rule-d01-formula
-						 rule-d02-alternating
-						 rule-d02-formula
-						 rule-d02-left-disjunct
-						 rule-d02-right-disjunct
-						 rule-d02-which-conjunct
-						 rule-d02-implication
-						 rule-d02-negation
-						 ;; rule-d02-universal
-						 ;; rule-d02-existential
-						 ))
-
-(defparameter d-dialogue-rules-inverted
-  (make-instance 'ruleset
-		 :rules (append inverted-argumentation-forms 
-				(list rule-d00-atomic
-				      rule-d00-proponent
-				      rule-d00-opponent
-				      rule-d01-composite
-				      rule-d02-attack
-				      rule-d10
-				      rule-d11
-				      rule-d12
-				      rule-d13))
-		 :description "D rules (basic rules for intuitionistic logic), with disjunction and conjunction inverted"))
-
-(defparameter e-dialogue-rules-inverted
-  (make-instance 'ruleset
-		 :rules (append inverted-argumentation-forms 
-				(list rule-d00-atomic
-				      rule-d00-proponent
-				      rule-d00-opponent
-				      rule-d01-composite
-				      rule-d02-attack
-				      rule-d10
-				      rule-d11
-				      rule-d12
-				      rule-d13
-				      rule-e))
-		 :description "E rules (D rules + Opponment must always respond to the immediately previous move), with disjunction and conjunction inverted"))
-
-(defparameter classical-dialogue-rules-inverted
-  (make-instance 'ruleset
-		 :rules (append inverted-argumentation-forms 
-				(list rule-d00-atomic
-				      rule-d00-proponent
-				      rule-d00-opponent
-				      rule-d01-composite
-				      rule-d02-attack
-				      rule-d10
-				      ; rule-d11
-				      ; rule-d12
-				      rule-d13
-				      rule-e))
-		 :description "Classical logic rules (drop Felscher's D11 and D12, but add rule E), with disjunction and conjunction inverted"))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Playing games with Felscher's rules
