@@ -62,7 +62,7 @@
 (defparameter *propositional-symbolic-attacks*
   (list *attack-left-conjunct*
 	*attack-right-conjunct*
-	*which-instance?*)
+	*which-disjunct?*)
   "The three symbolic attacks that are permitted in propositional
   dialogue games, comprising the moves:
 
