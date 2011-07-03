@@ -32,31 +32,7 @@
 		     :current-component-key "play a game"
 		     :key-test #'string=
 		     :contents `(("play a game" . ,(make-instance 'start-game-component))
-				 ("about dialogical logic" . ,(make-instance 'about-component))
-				 ("about this site" . ,(make-instance 'about-this-site-component))
-				 ("contact" . ,(make-instance 'contact-page))))))
-
-(defun render-move-at-depth-as-table (move depth)
-  (with-slots (player statement stance reference)
-      move
-    (<:table
-     (<:tr
-      (<:td :align "left"
-	    (<:as-html depth))
-      (<:td :align "center"
-	    (<:strong (<:as-html player)))
-      (<:td :align "left"
-	    (render statement))
-      (<:td :align "left"
-	    (unless (initial-move? move)
-	      (if (attacking-move? move)
-		  (<:as-html "[A," reference "]")
-		  (<:as-html "[D," reference "]"))))))))
-
-(defun render-final-move-as-table-row (node)
-  (let* ((game (node-state node))
-	 (move (last-move game)))
-    (render-move-at-depth-as-table move (node-depth node))))
+				 ("about" . ,(make-instance 'about-component))))))
 
 (defun render-node-as-table-row (node)
   (let* ((game (node-state node))
