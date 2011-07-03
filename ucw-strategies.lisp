@@ -540,7 +540,7 @@
   a distinctive color, and link the the action of extending STRATEGY by setting the unique child of ALTERNATIVE to the indicated child."
   (<:table
    :width "100%"
-   :style "align: center;background-color:silver;"
+   :style "align:center;background-color:silver;"
    :frame "box"
    :summary "The strategy so far."
    (<:caption
