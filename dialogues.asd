@@ -57,6 +57,7 @@ UCW."
 	       (:file "ucw-utils")
 	       (:file "ucw-server")
 	       (:file "ucw-applications")
+	       (:file "ucw-ruleset")
 	       (:file "ucw-strategies")
 	       (:file "about")
 	       (:file "contact")

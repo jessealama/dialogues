@@ -40,19 +40,6 @@
       (format stream "~a (with ~d children; ~:[unexpanded~;expanded~])"
 	      move (length children) expanded))))
 
-(defgeneric visit-depth-first (thing function)
-  (:documentation "Enumerate the nodes of THING in depth-first order,
-  calling FUNCTION on each along the way."))
-
-(defmethod visit-depth-first ((node strategy-node) func)
-  (loop 
-     with visit-value = (funcall func node)
-     for child in (children node)
-     do
-       (visit-depth-first child func)
-     finally
-       (return visit-value)))
-
 (defun node->dialogue (strategy-node ruleset)
   "By following the edges from a strategy node to its parent until we
   reach a root, strategy nodes can be considered the end of a unique
@@ -129,9 +116,6 @@ Proponent."
 		 (format stream ")")))))
     (print-unreadable-object (strategy stream :type t)
       (print-node (root strategy)))))
-
-(defmethod visit-depth-first ((strategy strategy) function)
-  (visit-depth-first (root strategy) function))
 
 (defun nodes (strategy)
   "A list of all nodes of STRATEGY reachable from its root."

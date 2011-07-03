@@ -115,8 +115,8 @@
 		(if (eql player 'p)
 		    (if (winning-strategy-for-proponent? strategy)
 			(progn
-			  (<:p "Congratulations!  You've found a winning strategy for Proponent.  Here it is:")
-			  (render-strategy-with-alternative strategy nil))
+			  (render-strategy-with-alternative strategy nil)
+			  (<:p "Congratulations!  You've found a winning strategy for Proponent."))
 			
 			(progn
 			  (<:p "I'm sorry to say that there is no winning strategy consistent with your choices so far.  (If you didn't make any choices at all, this means that the formula you started with,")
@@ -148,9 +148,7 @@
 		      (progn
 			(<:p "There might be options to explore (which would give rise to other strategies), but I stopped keeping track of them long ago.  Sorry.  Please complain loudly."))))))))
     
-    (<ucw:form :method "get"
-	       :action (call 'start-game-component)
-	       (<:submit :value "Quit"))))
+    (<:a :href "/" "[Quit]")))
 
 (defcomponent winning-strategy-searcher (game-component play-style-component)
   ((depth :initarg :depth
@@ -161,6 +159,25 @@
    (success :initarg :success
 	    :accessor success
 	    :initform nil)))
+
+(defun render-node-as-table-row (node)
+  (let* ((game (node-state node))
+	 (move (last-move game))
+	 (depth (node-depth node)))
+    (with-slots (player statement stance reference)
+	move
+      (<:tr
+       (<:td :align "left"
+	     (<:as-html depth))
+       (<:td :align "center"
+	     (<:as-html player))
+       (<:td :align "left"
+	     (render statement))
+       (<:td :align "left"
+	     (unless (initial-move? move)
+	       (if (attacking-move? move)
+		   (<:as-html "[A," reference "]")
+		   (<:as-html "[D," reference "]"))))))))
 
 (defun render-segment-from-to-with-padding-as-row (begin end padding)
   "Given search tree nodes BEGIN and END, render a single HTML table

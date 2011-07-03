@@ -110,6 +110,33 @@
 		  (<:p "You must edit your move; please try again.")
 		  (<:submit :value "Go back and edit the move")))))))))
 
+(defun render-win-searcher (game play-style)
+  (let (search-depth)
+  (<:p "From the current state of the game, you can search for a " (<:em "winning play") " or a " (<:em "winning strategy") ".  A winning play is a sequence of moves that leads to a win for Proponent, whereas a winning strategy is a way of playing the game in such a way that Proponent can win the game no matter what Opponent does. (Winning strategies are generally not sequences; they are more complicated objects than winning plays.)")
+  (<:p "Select the number of moves beyond the end of the current game that should be searched, and choose the kind of object for which to search. " (<:b "Note:") " generally, the greater the depth, the more time it will take to compute an answer; be patient.")
+  (<ucw:form :action (call 'winning-play-searcher
+			   :depth search-depth
+			   :game game
+			   :play-style play-style)
+   (<:p "Number of moves: "
+	(<ucw:select :size 1
+		     :accessor search-depth
+	  (dotimes (i max-search-depth)
+	    (<ucw:option :value (1+ i) (<:as-html (1+ i)))))
+	" "
+	(<:submit :value "Search for a winning play")))
+  (<ucw:form :action (call 'winning-strategy-searcher
+			   :depth search-depth
+			   :game game
+			   :play-style play-style)
+   (<:p "Number of moves: "
+	(<ucw:select :size 1
+		     :accessor search-depth
+	  (dotimes (i max-search-depth)
+	    (<ucw:option :value (1+ i) (<:as-html (1+ i)))))
+	" "
+	(<:submit :value "Search for a winning strategy")))))
+
 (defmethod render ((self turn-editor))
     (let* ((game (game self))
 	   (game-len (dialogue-length game))
@@ -139,7 +166,10 @@
       (<:h1 "...or edit the dialogue rules...")
       (render-rule-editor game)
       (<:h1 "...or quit.")
-      (render-quit-form)))
+      (<ucw:form
+       :method "post"
+       :action (call 'start-game-component)
+       (<:submit :value "Quit"))))
 
 (defcomponent alternative-move-chooser (game-component play-style-component ruleset-component)
   ((move-number :initarg :move-number
@@ -265,6 +295,10 @@
 			 "blue")
 		 " are open attacks.  (Defensive moves are not colored, nor is the initial move, since it is neither an attack nor a defense.) A dagger " (<:as-is "(&#8224;)") " in the Notes column indicates that alternative moves were available; follow the link to see them and rewind the game to explore an alternative course."))))))
 
+(defparameter *closed-attack-color* "CCCCCC")
+(defparameter *open-attack-color* "CCCCFF")
+(defparameter *alternative-attack-color* "CC3300")
+
 (defun render-move-in-game (play game move-number
 			      &key indicate-alternatives
 			           play-style
@@ -277,16 +311,16 @@
     (let ((background-style (if (attacking-move? play)
 				(format nil "background-color:#~A;"
 					(if attack-is-closed
-					    closed-attack-color
-					    open-attack-color))
+					    *closed-attack-color*
+					    *open-attack-color*))
 				"")))
     (<:tr :style background-style
       (<:td :align "left" (<:as-html move-number))
       (<:td :align "center" (<:as-html player))
       (if move-is-alternative
-	  (let ((cell-style (concatenate 'string background-style
-					 (format nil "border:3px solid #~A;"
-						 alternative-attack-color))))
+	  (let ((cell-style (format nil "~a;border:3px solid #~A;"
+				    background-style
+				    *alternative-attack-color*)))
 	    (<:td :style cell-style
 		  :align "left"
 		  (render statement)))
