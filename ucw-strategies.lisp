@@ -270,71 +270,75 @@
        " "
        (<:as-html (description ,rule))))))
 
+(defun move-as-colored-row (index move &key color)
+  (with-slots (player statement stance reference)
+      move
+    (if color
+	(<:tr
+	 :nowrap "nowrap"
+	 :valign "top"
+	 :bgcolor color
+	 :style "color:white;"
+	 (<:td (<:as-html index))
+	 (<:td (<:as-html player))
+	 (<:td
+	  :nowrap "nowrap"
+	  (render statement))
+	 (unless (initial-move? move)
+	   (if (attacking-move? move)
+	       (<:td (<:as-html "[A," reference "]"))
+	       (<:td (<:as-html "[D," reference "]")))))
+	(<:tr
+	 :nowrap "nowrap"
+	 :valign "top"
+	 (<:td (<:as-html index))
+	 (<:td (<:as-html player))
+	 (<:td
+	  :nowrap "nowrap"
+	  (render statement))
+	 (unless (initial-move? move)
+	   (if (attacking-move? move)
+	       (<:td (<:as-html "[A," reference "]"))
+	       (<:td (<:as-html "[D," reference "]"))))))))
+
 (defun render-strategy-node-as-table-row (node &optional alternatives)
   (let ((move (move node))
 	(depth (strategy-node-depth node)))
     (with-slots (player statement stance reference)
 	move
-      (symbol-macrolet
-	  (($depth
-	    `(<:td :align "left" (<:as-html depth)))
-	   ($player
-	    `(<:td :align "center" (<:strong (<:as-html player))))
-	   ($statement
-	    `(<:td :align "left" :nowrap "nowrap" (render statement)))
-	   ($stance-and-reference-raw
-	    `(unless (initial-move? move)
+      (if (member node alternatives)
+	  (<:tr
+	   :bgcolor "indigo"
+	   :nowrap "nowrap"
+	   :valign "top"
+	   :style "font-style:bold;color:white;"
+	   (<:td
+	    :nowrap "nowrap"
+	    :align "center"
+	    (<ucw:a
+	     :action (setf (children (parent node))
+			   (list node))
+	     :style "text-decoration:none;color:white;"
+	     :title (if (eq stance 'a)
+			(format nil "Attack move #~d by asserting ~a" reference (render-plainly statement))
+			(format nil "Defend against the attack of move #~d by asserting ~a" reference (render-plainly statement)))
+	     (<:as-html depth)
+	     " "
+	     (<:strong (<:as-html player))
+	     " "
+	     (render statement)
+	     " "
+	     (unless (initial-move? move)
 	       (if (attacking-move? move)
 		   (<:as-html "[A," reference "]")
-		   (<:as-html "[D," reference "]"))))
-	   ($stance-and-reference
-	    `(<:td :align "left" $stance-and-reference-raw))
-	   ($plain-row
-	    `(<:tr :nowrap "nowrap"
-		   :valign "top"
-		   $depth
-		   $player
-		   $statement
-		   $stance-and-reference
-		   )))
-	(macrolet ((colored-row (color)
-		     `(<:tr :nowrap "nowrap"
-			    :valign "top"
-			    :bgcolor ,color
-			    :style "color:white;"
-			    $depth
-			    $player
-			    $statement
-			    $stance-and-reference)))
-	  (if (member node alternatives)
-	      (<:tr :bgcolor "indigo"
-		    :nowrap "nowrap"
-		    :valign "top"
-		    :style "font-style:bold;color:white;"
-		    (<:td
-		     :nowrap "nowrap"
-		     :align "center"
-		     (<ucw:a
-		      :action (setf (children (parent node))
-				    (list node))
-		      :style "text-decoration:none;color:white;"
-		      :title (if (eq stance 'a)
-				 (format nil "Attack move #~d by asserting ~a" reference (render-plainly statement))
-				 (format nil "Defend against the attack of move #~d by asserting ~a" reference (render-plainly statement)))
-		      (<:as-html depth)
-		      " "
-		      (<:strong (<:as-html player))
-		      " "
-		      (render statement)
-		      " "
-		      $stance-and-reference-raw)))
-	      (if (attacking-move? move)
-		  (if (closed-in-every-branch? node depth)
-		      (colored-row "FireBrick")
-		      (if (open-in-every-branch? node depth)
-			  (colored-row "ForestGreen")
-			  $plain-row))
-		  $plain-row)))))))
+		   (<:as-html "[D," reference "]"))))))
+	  (if (attacking-move? move)
+	      (if (closed-in-every-branch? node depth)
+		  (move-as-colored-row depth move :color "FireBrick")
+		  (if (open-in-every-branch? node depth)
+		      (move-as-colored-row depth move :color "ForestGreen")
+		      (move-as-colored-row depth move)))
+	      (move-as-colored-row depth move))))))
 
 (defun render-segment-with-padding-as-row (begin end padding &optional alternatives)
   "Given strategy nodes BEGIN and END, emit an HTML table
