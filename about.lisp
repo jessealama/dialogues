@@ -22,15 +22,6 @@ Philosophy") ".")
 "Dialogues, strategies, and intuitionistic provability" ) (<:as-is "&rdquo;") ", " (<:i "Annals of Pure and Applied Logic") " " (<:b "28") ", pp. 217" (<:as-is "&ndash;") "254.")
   (<:p "There's also " (<:a :href "http://dialogue-games.blogspot.com/" :title "TONIGHT: Proponent v. Opponent" "a blog") " about dialogue games and dialogical logic, to which the maintainer of this web site contributes.")
   (<:p "The " (<:a :href "http://www-ls.informatik.uni-tuebingen.de/difos/" :title "Dialogical Foundations of Semantics" "homepage for the research project for which this site was designed") " also contains some valuable information.")
-  (<:hr)
-  (<:address
-   (<:a :href "mailto:jesse.alama@gmail.com"
-	"Contact the site maintainer")))
-
-(defcomponent about-this-site-component ()
-  ())
-
-(defmethod render ((self about-this-site-component))
   (<:h1 "About this site")
   (<:h2 "History and motivation")
   (<:p "This site was created as an attempt to understand dialogue
@@ -59,12 +50,27 @@ saying.)")
   (<:h2 "Implementation")
   (<:p "This site was written in Common Lisp using
 the " (<:a :href "http://common-lisp.net/project/ucw/" :title "UnCommon
-Web" "UnCommon Web") " system.  The Common Lisp implementation is " (<:a :href "http://www.sbcl.org" :title "Steel Bank Common Lisp" "SBCL") ".  You can follow the development on " (<:a :href "http://github.com/jessealama/dialogues" :title "dialogues on github" "github") "."))
+Web" "UnCommon Web") " system.  The Common Lisp implementation is " (<:a :href "http://www.sbcl.org" :title "Steel Bank Common Lisp" "SBCL") ".  You can follow the development on " (<:a :href "http://github.com/jessealama/dialogues" :title "dialogues on github" "github") ".")
+  (<:hr)
+  (<:address
+   (<:a :href "mailto:jesse.alama@gmail.com"
+	"Contact the site maintainer")))
+
+(defcomponent about-this-site-component ()
+  ())
+
+(defmethod render ((self about-this-site-component)))
 
 (defcomponent play-style-info ()
   ())
 
 (defmethod render ((self play-style-info))
   (<:p (<:em (<:b "About the play style:")) " The default mode of playing is to take on the role of both players: at each move, you'll see all possible moves that can be made, from the perspective of both players.  Two other play styles are supported: play as Proponent with a random Opponent, and play as Opponent with a random Proponent."))
+
+(defcomponent ruleset-info ()
+  ()
+  (:render ()
+    (<:p (<:em (<:b "About the rules:")) " The rulesets in the
+above menu are some notable cases that have some logical content.  You will be able to change your choice of ruleset once the game has started.  The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985; it was arguably the first papers to rigorously establish the equivalence between intuitionistic validity and existence of winning strategies for certain dialogue games.  You will be able to alter your choice of rules after the game has begun.")))
 
 ;;; about.lisp ends here

@@ -60,4 +60,5 @@ UCW."
 	       (:file "ucw-strategies")
 	       (:file "about")
 	       (:file "contact")
+	       (:file "ucw-turns")
 	       (:file "ucw-site")))

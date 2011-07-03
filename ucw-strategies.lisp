@@ -162,6 +162,28 @@
 	    :accessor success
 	    :initform nil)))
 
+(defun render-segment-from-to-with-padding-as-row (begin end padding)
+  "Given search tree nodes BEGIN and END, render a single HTML table
+  row representing the dialogue from BEGIN to END.  The row will
+  contain 2*PADDING + 1 columns; PADDING empty columns will be put on
+  the left and the right of the sequence.  It is assumed that there is
+  a path from BEGIN to END; the path is constrcted simply taking
+  unique successors, starting at BEGIN, until we reach END.  The moves
+  of the game between BEGIN and END will be put into a single HTML
+  table element."
+  (<:tr
+   (dotimes (i padding)
+     (<:td))
+   (<:td :align "center"
+     (<:table
+      (let ((current-node begin))
+	(until (eq current-node end)
+	  (render-node-as-table-row current-node)
+	  (setf current-node (first (node-successors current-node))))
+	(render-node-as-table-row end))))
+   (dotimes (i padding)
+     (<:td))))
+
 (defun render-strategy (strategy)
   (let ((first-splitter (first-splitting-descendent strategy)))
     (if (null first-splitter)
