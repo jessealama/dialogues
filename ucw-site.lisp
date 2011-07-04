@@ -128,7 +128,8 @@
 	  (ecase selected-play-style
 	    (interactive-strategy-search-for-proponent
 	     (let* ((initial-move (make-move 'p
-					     (apply-translation selected-translation $formula)
+					     (uniquify-atoms
+					      (apply-translation selected-translation $formula))
 					     nil
 					     nil))
 		    (root (make-instance 'strategy-node :move initial-move))
@@ -142,7 +143,8 @@
 		     :heuristics $heuristics)))
 	    (interactive-strategy-search-for-opponent
 	     (let* ((initial-move (make-move 'p
-					     (apply-translation selected-translation $formula)
+					     (uniqify-atoms
+					      (apply-translation selected-translation $formula))
 					     nil
 					     nil))
 		    (root (make-instance 'strategy-node :move initial-move))
@@ -159,7 +161,8 @@
 		   :play-style 'play-as-both-proponent-and-opponent
 		   :extra-rules $trimmed-extra-rules
 		   :heuristics $heuristics
-		   :game (make-dialogue (apply-translation selected-translation $formula)
+		   :game (make-dialogue (uniqify-atoms
+					 (apply-translation selected-translation $formula))
 					sig
 					$actual-ruleset)))
 	    (play-as-proponent-random-opponent
@@ -168,7 +171,8 @@
 		   :extra-rules $trimmed-extra-rules
 		   :heuristics $heurstics
 		   :game (let ((initial-dialogue
-				(make-dialogue (apply-translation selected-translation $formula)
+				(make-dialogue (uniqify-atoms
+						(apply-translation selected-translation $formula))
 					       sig
 					       $actual-ruleset)))
 			   (let* ((next-opponent-attacks (next-attacks initial-dialogue 'o))
@@ -205,7 +209,8 @@
 		   :play-style 'play-as-opponent-random-proponent
 		   :extra-rules $trimmed-extra-rules
 		   :heuristics $heuristics
-		   :game (make-dialogue (apply-translation selected-translation $formula)
+		   :game (make-dialogue (uniqify-atoms
+					 (apply-translation selected-translation $formula))
 					sig
 					$actual-ruleset))))))
       (<ucw:form
