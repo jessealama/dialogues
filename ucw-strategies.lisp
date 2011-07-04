@@ -376,22 +376,27 @@
   unique successors, starting at BEGIN, until we reach END.  The moves
   of the game between BEGIN and END will be put into a single HTML
   table element."
-  (symbol-macrolet
-      (($padding (dotimes (i padding) (<:td))))
-    (<:tr :valign "top"
-     $padding
-     (<:td :align "center"
-       (<:table
-	:bgcolor "silver"
-	:cellspacing "0"
-	:style "align: center;"
-	(loop
-	   for current-node = begin then (first (children current-node))
-	   do
-	     (render-strategy-node-as-table-row current-node alternatives)
-	     (when (eq current-node end)
-	       (return)))))
-     $padding)))
+  (let ((sorted-alternatives (sort (copy-list alternatives)
+				   #'move-< :key #'move)))
+    (symbol-macrolet
+	(($padding (dotimes (i padding) (<:td))))
+      (<:tr 
+       :valign "top"
+       $padding
+       (<:td
+	:align "center"
+	(<:table
+	 :bgcolor "silver"
+	 :cellspacing "0"
+	 :style "align: center;"
+	 (loop
+	    for current-node = begin then (first (children current-node))
+	    do
+	      (render-strategy-node-as-table-row current-node
+						 sorted-alternatives)
+	      (when (eq current-node end)
+		(return)))))
+       $padding))))
 
 (defun render-node-with-alternative-hiding-closed-branches (node alternative ruleset)
   (if (branch-closed? node)
@@ -442,7 +447,10 @@
 						   (when alternative
 						     (children alternative)))))
 	    (let* ((succs (children first-splitter))
-	       (num-succs (length succs)))
+		   (succs-sorted (sort (copy-list succs)
+				       #'move-<
+				       :key #'move))
+		   (num-succs (length succs)))
 	      (<:table :rules "groups"
 		       :frame "void"
 		       :bgcolor "silver"
@@ -460,7 +468,7 @@
 		    (loop
 		       with cleft-point = (/ num-succs 2)
 		       for i from 0 upto (1- cleft-point)
-		       for succ = (nth i succs)
+		       for succ = (nth i succs-sorted)
 		       do
 			 (<:td :align "center"
 			   (render-node-with-alternative-hiding-closed-branches succ
@@ -470,14 +478,14 @@
 		    (loop
 		       with cleft-point = (/ num-succs 2)
 		       for i from cleft-point upto (1- num-succs)
-		       for succ = (nth i succs)
+		       for succ = (nth i succs-sorted)
 		       do
 			 (<:td :align "center"
 			   (render-node-with-alternative-hiding-closed-branches succ
 										alternative
 										ruleset))))
 		  (loop
-		     for succ in succs
+		     for succ in succs-sorted
 		     do
 		       (<:td :align "center"
 		         (render-node-with-alternative-hiding-closed-branches succ
@@ -497,6 +505,9 @@
 					       (when alternative
 						 (children alternative)))))
 	(let* ((succs (children first-splitter))
+	       (succs-sorted (sort (copy-list succs)
+				   #'move-<
+				   :key #'move))
 	       (num-succs (length succs)))
 	  (<:table :rules "groups"
 		   :frame "void"
@@ -515,7 +526,7 @@
 		    (loop
 		       with cleft-point = (/ num-succs 2)
 		       for i from 0 upto (1- cleft-point)
-		       for succ = (nth i succs)
+		       for succ = (nth i succs-sorted)
 		       do
 			 (<:td :align "center"
 			   (render-node-with-alternative succ
@@ -524,13 +535,13 @@
 		    (loop
 		       with cleft-point = (/ num-succs 2)
 		       for i from cleft-point upto (1- num-succs)
-		       for succ = (nth i succs)
+		       for succ = (nth i succs-sorted)
 		       do
 			 (<:td :align "center"
 			   (render-node-with-alternative succ
 							 alternative))))
 		  (loop
-		     for succ in succs
+		     for succ in succs-sorted
 		     do
 		       (<:td :align "center"
 		         (render-node-with-alternative succ
