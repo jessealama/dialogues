@@ -99,15 +99,6 @@
 (defmethod render ((self signature-info))
   (<:p (<:em (<:b "About the signature:")) "The signature is propositional, whose atoms are simply the letters of the alphabet: A, B, C, ... Z."))
 
-(defcomponent translation-info ()
-  ())
-
-(defmethod render ((self translation-info))
-  (<:p (<:em (<:b "About the translation:")) " The default is the
-identity translation, so that whatever formula is chosen (or whatever
-formula is entered into the text box) will be, verbatim, the formula
-with which the game begins."))
-
 (defcomponent formula-info ()
   ())
 
