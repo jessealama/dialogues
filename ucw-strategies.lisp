@@ -342,7 +342,7 @@
 
 (defun render-strategy-node-as-table-row (node &optional alternatives)
   (let ((move (move node))
-	(depth (strategy-node-depth node)))
+	(depth (depth node)))
     (with-slots (player statement stance reference)
 	move
       (if (member node alternatives)
