@@ -133,20 +133,21 @@
 			  (<:blockquote
 			   (render (move-statement (move (root strategy)))) ",")
 			  (<:p "is valid with respect to the ruleset that you chose.)"))))
-		(let ((alternatives (alternatives self)))
-		  (if alternatives
-		      (progn
-			(<:p "There are unexplored alternatives (functionality not yet implemented, please complain loudly):")
-			(<:ul
-			 (dolist (alternative alternatives)
-			   (let ((alternative-move (move alternative)))
-			     (with-slots (player statement stance reference)
-				 alternative-move
-			       (if (eq stance 'a)
-				   (<:li "Have " (<:strong (<:as-html player)) " attack move #" (<:as-html reference) " by asserting " (render statement))
-				   (<:li "Have " (<:strong (<:as-html player)) " defend against the attack of move #" (<:as-html reference) " by asserting " (render statement))))))))
-		      (progn
-			(<:p "There might be options to explore (which would give rise to other strategies), but I stopped keeping track of them long ago.  Sorry.  Please complain loudly."))))))))
+		;; (let ((alternatives (alternatives self)))
+		;;   (if alternatives
+		;;       (progn
+		;; 	(<:p "There are unexplored alternatives (functionality not yet implemented, please complain loudly):")
+		;; 	(<:ul
+		;; 	 (dolist (alternative alternatives)
+		;; 	   (let ((alternative-move (move alternative)))
+		;; 	     (with-slots (player statement stance reference)
+		;; 		 alternative-move
+		;; 	       (if (eq stance 'a)
+		;; 		   (<:li "Have " (<:strong (<:as-html player)) " attack move #" (<:as-html reference) " by asserting " (render statement))
+		;; 		   (<:li "Have " (<:strong (<:as-html player)) " defend against the attack of move #" (<:as-html reference) " by asserting " (render statement))))))))
+		;;       (progn
+		;; 	(<:p "There might be options to explore (which would give rise to other strategies), but I stopped keeping track of them long ago.  Sorry.  Please complain loudly."))))
+		))))
     
     (<:a :href "/" "[Quit]")))
 
