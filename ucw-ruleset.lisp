@@ -19,12 +19,6 @@
     :accessor heuristics
     :documentation "Heuristic rules that, in addition to RULESET, are also in effect.")))
 
-(defun render-available-heuristics ()
-  (dolist (heuristic available-heuristics)
-    (let ((desc (description heuristic)))
-      (<:input :type "checkbox"
-	       :value desc))))
-
 (defun render-heuristics (heuristic-list)
   (if (null heuristic-list)
       (<:em "(none)")
