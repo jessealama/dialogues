@@ -58,9 +58,9 @@
    :name "d01-implication"
    :precondition (implication? (nth-statement dialogue current-reference))
    :body (and (non-symbolic-attack-formula? current-statement)
-	      (equal-statements? current-statement
-				 (antecedent
-				  (nth-statement dialogue current-reference))))
+	      (eq current-statement
+		  (antecedent
+		   (nth-statement dialogue current-reference))))
    :description "To attack an implication, one must assert the antecdent."))
 
 (defparameter rule-d01-negation
@@ -68,9 +68,9 @@
    :name "d01-negation"
    :precondition (negation? (nth-statement dialogue current-reference))
    :body (and (non-symbolic-attack-formula? current-statement)
-	      (equal-statements? current-statement
-				 (unnegate
-				  (nth-statement dialogue current-reference))))
+	      (eq current-statement
+		  (unnegate
+		   (nth-statement dialogue current-reference))))
    :description "To attack a negation, one must assert the \"unnegation\" of the negation."))
 
 (defparameter rule-d01-universal
@@ -143,8 +143,8 @@
    :precondition (eq (nth-statement dialogue current-reference)
 		     *attack-left-conjunct*)
   :body (with-original-statement (original-statement)
-	  (equal-statements? current-statement
-			     (lhs original-statement)))
+	  (eq current-statement
+	      (lhs original-statement)))
   :description "To defend against the ATTACK-LEFT-CONJUNCT attack, assert the left conjunct of the original conjunction."))
 
 (defparameter rule-d02-right-conjunct
@@ -153,8 +153,8 @@
    :precondition (eq (nth-statement dialogue current-reference)
 		     *attack-right-conjunct*)
    :body (with-original-statement (original-statement)
-	   (equal-statements? current-statement
-			      (rhs original-statement)))
+	   (eq current-statement
+	       (rhs original-statement)))
    :description "To defend against the ATTACK-RIGHT-CONJUNCT attack, assert the right conjunct of the original conjunction."))
 
 (defparameter rule-d02-which-disjunct
@@ -163,10 +163,10 @@
    :precondition (eq (nth-statement dialogue current-reference)
 		     *which-disjunct?*)
    :body (with-original-statement (original-statement)
-	   (or (equal-statements? current-statement
-				  (lhs original-statement))
-	       (equal-statements? current-statement
-				  (rhs original-statement))))
+	   (or (eq current-statement
+		   (lhs original-statement))
+	       (eq current-statement
+		    (rhs original-statement))))
    :description "To defend against the WHICH-DISJUNCT? attack, assert either the left or the right disjunct of the original disjunction."))
 
 (defparameter rule-d02-implication
@@ -175,8 +175,8 @@
    :precondition (with-original-statement (original-statement)
 		(implication? original-statement))
    :body (with-original-statement (original-statement)
-	   (equal-statements? current-statement
-			      (consequent original-statement)))
+	   (eq current-statement
+	       (consequent original-statement)))
    :description "To defend against an attack on an implication, assert its consequent."))
 
 (defparameter rule-d02-negation
@@ -199,8 +199,8 @@
 		(original-statement (move-statement original-move))
 		(var (bound-variable original-statement))
 		(matrix (matrix original-statement)))
-	   (equal-statements? current-statement
-			      (instantiate instance var matrix)))
+	   (eq current-statement
+	       (instantiate instance var matrix)))
    :description "The asserted statement is not the required instance of the original universal generalization."))
 
 (defparameter rule-d02-existential
@@ -292,8 +292,8 @@
 	       (some-move
 		#'(lambda (other-move)
 		    (when (opponent-move? other-move)
-		      (equal-statements? (move-statement other-move)
-					 (move-statement move))))
+		      (eq (move-statement other-move)
+			  (move-statement move))))
 		dialogue :end i)
 	     (return nil)))
        finally (return t))))
@@ -320,10 +320,10 @@
 		 #'(lambda (other-move)
 		     (let ((other-statement (move-statement other-move)))
 		       (when (opponent-move? other-move)
-			 (or (equal-statements? other-statement statement)
+			 (or (eq other-statement statement)
 			     (and (negation? other-statement)
-				  (equal-statements? (unnegate other-statement)
-						     statement))))))
+				  (eq (unnegate other-statement)
+				      statement))))))
 		 dialogue
 		 :end i)
 	      (return nil))))

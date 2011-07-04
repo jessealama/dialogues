@@ -676,7 +676,7 @@ fail, only whether all of them are satisfied."
 
 (defun next-moves-at-position (dialogue player stance position)
   (let ((result nil)
-	(subformulas (proper-subformulas (initial-statement dialogue)))
+	(subformulas (proper-subformula-occurrences (initial-statement dialogue)))
 	(game-len (dialogue-length dialogue)))
     (if (> position game-len)
 	nil
