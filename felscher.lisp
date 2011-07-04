@@ -735,7 +735,7 @@
 (defparameter proponent-no-repeats
   (make-structural-rule
    :name "P-no-repeat"
-   :description "P cannot repeat moves"
+   :description "Proponent cannot repeat moves"
    :predicate
    (every-proponent-move #'(lambda (pro-move)
 			     (not (repetition-in-dialogue? pro-move dialogue)))
@@ -760,7 +760,7 @@
 (defparameter opponent-no-repeats
   (make-structural-rule
    :name "O-no-repeat"
-   :description "O cannot repeat moves"
+   :description "Opponent cannot repeat moves"
    :predicate
    (every-opponent-move #'(lambda (opp-move)
 			    (not (repetition-in-dialogue? opp-move dialogue)))
