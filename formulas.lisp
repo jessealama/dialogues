@@ -1828,4 +1828,41 @@ value."
 		 :lhs (uniquify-atoms (lhs formula))
 		 :rhs (uniquify-atoms (rhs formula))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Sorting formulas
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defgeneric formula-< (formula-1 formula-2))
+
+(defmethod formula-< ((formula-1 atomic-formula) (formula-2 atomic-formula))
+  (let ((pred-1 (predicate formula-1))
+	(pred-2 (predicate formula-2)))
+    (lex< pred-1 pred-2)))
+
+(defmethod formula-< ((formula-1 atomic-formula) formula-2)
+  t)
+
+(defmethod formula-< ((formula-1 unary-connective-formula) (formula-2 atomic-formula))
+  nil)
+
+(defmethod formula-< ((formula-1 unary-connective-formula) (formula-2 unary-connective-formula))
+  (formula-< (argument formula-1)
+	     (argument formula-2)))
+
+(defmethod formula-< ((formula-1 unary-connective-formula) (formula-2 binary-connective-formula))
+  t)
+
+(defmethod formula-< ((formula-1 binary-connective-formula) (formula-2 atomic-formula))
+  nil)
+
+(defmethod formula-< ((formula-1 binary-connective-formula) (formula-2 unary-connective-formula))
+  nil)
+
+(defmethod formula-< ((formula-1 binary-connective-formula) (formula-2 binary-connective-formula))
+  (or (formula-< (lhs formula-1)
+		 (lhs formula-2))
+      (formula-< (rhs formula-1)
+		 (rhs formula-2))))
+
+
 ;;; formulas.lisp ends here
