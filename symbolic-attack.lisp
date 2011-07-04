@@ -71,10 +71,10 @@
 - attack a disjunction by requesting one of the disjuncts.")
 
 (defmethod render-plainly ((sa (eql *attack-left-conjunct*)))
-  "&(L)")
+  "&-left")
 
 (defmethod render-plainly ((sa (eql *attack-right-conjunct*)))
-  "&(R)")
+  "&-right")
 
 (defmethod render-plainly ((sa (eql *which-instance?*)))
   "?")
