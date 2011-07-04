@@ -143,7 +143,7 @@
 		     :heuristics $heuristics)))
 	    (interactive-strategy-search-for-opponent
 	     (let* ((initial-move (make-move 'p
-					     (uniqify-atoms
+					     (uniquify-atoms
 					      (apply-translation selected-translation $formula))
 					     nil
 					     nil))
@@ -161,7 +161,7 @@
 		   :play-style 'play-as-both-proponent-and-opponent
 		   :extra-rules $trimmed-extra-rules
 		   :heuristics $heuristics
-		   :game (make-dialogue (uniqify-atoms
+		   :game (make-dialogue (uniquify-atoms
 					 (apply-translation selected-translation $formula))
 					sig
 					$actual-ruleset)))
@@ -171,7 +171,7 @@
 		   :extra-rules $trimmed-extra-rules
 		   :heuristics $heurstics
 		   :game (let ((initial-dialogue
-				(make-dialogue (uniqify-atoms
+				(make-dialogue (uniquify-atoms
 						(apply-translation selected-translation $formula))
 					       sig
 					       $actual-ruleset)))
@@ -209,7 +209,7 @@
 		   :play-style 'play-as-opponent-random-proponent
 		   :extra-rules $trimmed-extra-rules
 		   :heuristics $heuristics
-		   :game (make-dialogue (uniqify-atoms
+		   :game (make-dialogue (uniquify-atoms
 					 (apply-translation selected-translation $formula))
 					sig
 					$actual-ruleset))))))
