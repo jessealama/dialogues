@@ -445,7 +445,12 @@ The ruleset that will be used during the game will be the union of the rules in 
 		  "Search for a winning strategy for Proponent")
 		 (<ucw:option
 		  :value 'interactive-strategy-search-for-opponent
-		  "Search for a winning strategy for Opponent")))))))))))
+		  "Search for a winning strategy for Opponent")))))))
+      (<:hr)
+      (<:p
+       (<:a :href "/about" "[About]")
+       " | "
+       (<:a :href "mailto:j.alama@fct.unl.pt" "[Contact]"))))))
 
 (defcomponent initial-formula-window (standard-window-component)
   ()
