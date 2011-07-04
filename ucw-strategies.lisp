@@ -362,8 +362,12 @@
 		  (move-as-colored-row depth move :color "FireBrick")
 		  (if (open-in-every-branch? node depth)
 		      (move-as-colored-row depth move :color "ForestGreen")
-		      (move-as-colored-row depth move)))
-	      (move-as-colored-row depth move))))))
+		      (if (expanded? node)
+			  (move-as-colored-row depth move)
+			  (move-as-colored-row depth move :color "Gold"))))
+	      (if (expanded? node)
+		  (move-as-colored-row depth move)
+		  (move-as-colored-row depth move :color "Goldenrod")))))))
 
 (defun render-segment-with-padding-as-row (begin end padding &optional alternatives)
   "Given strategy nodes BEGIN and END, emit an HTML table
@@ -558,7 +562,11 @@
     (<:span
      :style "background-color:Indigo;color:white;"
      "purple")
-    " indicate choices to be made.")
+    " indicate choices to be made.  Nodes in "
+    (<:span
+     :style "background-color:Goldenrod;color:white;"
+     "gold")
+    " are yet to be explored.")
    (<:tr
     (<:td
      :align "center"
