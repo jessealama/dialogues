@@ -54,10 +54,4 @@ Web" "UnCommon Web") " system.  The Common Lisp implementation is " (<:a :href "
    (<:a :href "mailto:jesse.alama@gmail.com"
 	"Contact the site maintainer")))
 
-(defcomponent ruleset-info ()
-  ()
-  (:render ()
-    (<:p (<:em (<:b "About the rules:")) " The rulesets in the
-above menu are some notable cases that have some logical content.  You will be able to change your choice of ruleset once the game has started.  The names " (html-quote "D") " and " (html-quote "E") " come from W. Felscher's paper " (<:em "Dialogues, strategies, and intuitionistic provability") ", Annals of Pure and Applied Logic " (<:b "28") "(3), pp. 217" (<:as-is "&ndash;") "254, May 1985; it was arguably the first papers to rigorously establish the equivalence between intuitionistic validity and existence of winning strategies for certain dialogue games.  You will be able to alter your choice of rules after the game has begun.")))
-
 ;;; about.lisp ends here
