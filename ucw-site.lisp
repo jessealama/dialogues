@@ -6,12 +6,12 @@
     ()
   (call 'initial-formula-window))
 
-(defentry-point "/game"
+(defentry-point "game"
     (:application *dialogue-application*)
     ((signature)
      (initial-formula)))
 
-(defentry-point "/strategy"
+(defentry-point "strategy"
     (:application *dialogue-application*)
     ((initial-formula)
      (base-ruleset)
