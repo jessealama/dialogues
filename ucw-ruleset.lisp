@@ -47,4 +47,34 @@ ruleset.  Before continuing playing the game, you will need to ensure
 that all the rules in your edited ruleset are satisfied.")
     (<:submit :value "Edit the ruleset")))
 
+(defparameter *available-rulesets*
+  (append
+   ;; main rulesets
+   (list d-dialogue-rules 
+	 e-dialogue-rules
+	 classical-dialogue-rules
+	 nearly-classical-dialogue-rules)
+   ;; experimental rulesets
+   (sort (list d-dialogue-rules-queue
+	       e-dialogue-rules-queue
+	       conjectural-classical-dialogue-rules
+	       d-dialogue-rules-minus-d10
+	       d-dialogue-rules-minus-d11
+	       e-dialogue-rules-minus-d11
+	       d-dialogue-rules-minus-d12
+	       e-dialogue-rules-minus-d12
+	       d-dialogue-rules-symmetric-d13
+	       d-dialogue-rules-literal-d10
+	       e-dialogue-rules-literal-d10
+	       only-particle-rules
+	       particle-rules+d10
+	       particle-rules+d11
+	       particle-rules+d12
+	       particle-rules+d13
+	       particle-rules+e
+	       sara-ad-hoc-rules
+	       sara-ad-hoc-rules-2)
+	 #'lex<
+	 :key #'description)))
+
 ;;; ucw-ruleset.lisp ends here
