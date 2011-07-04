@@ -54,17 +54,6 @@ Web" "UnCommon Web") " system.  The Common Lisp implementation is " (<:a :href "
    (<:a :href "mailto:jesse.alama@gmail.com"
 	"Contact the site maintainer")))
 
-(defcomponent about-this-site-component ()
-  ())
-
-(defmethod render ((self about-this-site-component)))
-
-(defcomponent play-style-info ()
-  ())
-
-(defmethod render ((self play-style-info))
-  (<:p (<:em (<:b "About the play style:")) " The default mode of playing is to take on the role of both players: at each move, you'll see all possible moves that can be made, from the perspective of both players.  Two other play styles are supported: play as Proponent with a random Opponent, and play as Opponent with a random Proponent."))
-
 (defcomponent ruleset-info ()
   ()
   (:render ()
