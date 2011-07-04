@@ -177,7 +177,7 @@ attacks which, being symbols, do qualify as terms."
 
 (defmacro make-structural-rule (&key name description predicate)
   (let ((pred-as-fun `(lambda (dialogue &key final-move-only)
-			(declare (ignorable dialogue))
+			(declare (ignorable dialogue final-move-only))
 			,predicate)))
     `(make-instance 'structural-rule
 		    :name ,name
