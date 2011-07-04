@@ -14,6 +14,12 @@
     :initarg :parent
     :initform nil
     :documentation "The parent of this node")
+   (depth
+    :type (or null fixnum)
+    :accessor depth
+    :initarg :depth
+    :initform nil
+    :documentation "The depth of this node from the root (we start counting at 0).")
    (children
     :type list
     :accessor children
@@ -231,11 +237,14 @@ the strategy.  If there no such node, return NIL."
 (defmethod opponent-node? ((node strategy-node))
   (opponent-move? (move node)))
 
-(defun strategy-node-depth (node)
+(defmethod depth ((node strategy-node))
   (let ((p (parent node))) 
     (if (null p)
 	0
-	(1+ (strategy-node-depth p)))))
+	(1+ (depth p)))))
+
+(defun strategy-node-depth (node)
+  )
 
 (define-constant +strategy-max-depth+
     75
@@ -245,7 +254,7 @@ the strategy.  If there no such node, return NIL."
 (defun first-proponent-choice-wrt-ruleset (node ruleset &optional (max-depth +strategy-max-depth+))
   (unless (expanded? node)
     (expand-strategy-node node ruleset))
-  (let ((d (strategy-node-depth node)))
+  (let ((d (depth node)))
     (if (< d max-depth)
 	(let ((children (children node)))
 	  (when children
@@ -261,7 +270,7 @@ the strategy.  If there no such node, return NIL."
 (defun first-opponent-choice-wrt-ruleset (node ruleset &optional (max-depth +strategy-max-depth+))
   (unless (expanded? node)
     (expand-strategy-node node ruleset))
-  (let ((d (strategy-node-depth node)))
+  (let ((d (depth node)))
     (if (< d max-depth)
 	(let ((children (children node)))
 	  (when children
