@@ -157,6 +157,22 @@ attacks which, being symbols, do qualify as terms."
   (and (not (symbolic-attack? obj))
        (formula? obj)))
 
+(defgeneric statement-< (statement-1 statement-2))
+
+(defmethod statement-< ((statement-1 symbolic-attack) (statement-2 symbolic-attack))
+  (or (eq statement-1 *attack-left-conjunct*)
+      (and (eq statement-1 *attack-right-conjunct*)
+	   (not (eq statement-2 *attack-left-conjunct*)))))
+
+(defmethod statement-< ((statement-1 symbolic-attack) statement-2)
+  nil)
+
+(defmethod statement-< ((statement-1 formula) (statement-2 symbolic-attack))
+  nil)
+
+(defmethod statement-< ((statement-1 formula) (statement-2 formula))
+  (formula-< statement-1 statement-2))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Dialogue rules
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1062,5 +1078,22 @@ fail, only whether all of them are satisfied."
      quit
        (msg "Thanks for playing, I hope you had fun."))
     dialogue))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Sorting moves
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun move-< (move-1 move-2)
+  (with-slots ((statement-1 statement) (stance-1 stance) (reference-1 reference))
+      move-1
+    (with-slots ((statement-2 statement) (stance-2 stance) (reference-2 reference))
+	move-2
+      (or (< reference-1 reference-2)
+	  (and (= reference-1 reference-2)
+	       (if (eq stance-1 'a)
+		   (and (eq stance-2 'a)
+			(statement-< statement-1 statement-2))
+		   (and (eq stance-2 'd)
+			(statement-< statement-1 statement-2))))))))
 
 ;;; dialogues.lisp ends hered
