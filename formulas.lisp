@@ -105,7 +105,7 @@
     (concatenate 'string body (render-plainly (argument formula)))))
 
 (defmethod render-plainly ((neg negation))
-  "&not;")
+  "~")
 
 (defmethod render-plainly :around ((formula binary-connective-formula))
   (concatenate 'string
