@@ -1809,4 +1809,23 @@ value."
 	    (and (tautology? formula-with-atom-true)
 		 (tautology? formula-with-atom-false)))))))
 
+(defgeneric uniquify-atoms (formula)
+  (:documentation "Ensure that all the atoms of FORMULA are distinct objects, even if they have the same print name.  (We treat only the propositional case.)"))
+
+(defgeneric uniquify-atoms (formula))
+
+(defmethod uniquify-atoms ((atom atomic-formula))
+  (make-instance 'atomic-formula
+		 :predicate (predicate atom)
+		 :args nil))
+
+(defmethod uniquify-atoms ((formula unary-connective-formula))
+  (make-instance (class-of formula)
+		 :argument (uniquify-atoms (argument formula))))
+
+(defmethod uniquify-atoms ((formula binary-connective-formula))
+  (make-instance (class-of formula)
+		 :lhs (uniquify-atoms (lhs formula))
+		 :rhs (uniquify-atoms (rhs formula))))
+
 ;;; formulas.lisp ends here
