@@ -16,6 +16,9 @@
 (defcomponent turn-editor (game-component play-style-component ruleset-component)
   ())
 
+(defcomponent rule-editor (game-component ruleset-component play-style-component)
+  ())
+
 (defcomponent turn-evaluator (game-component play-style-component ruleset-component)
   ((player :accessor player
 	   :initarg :player
@@ -425,9 +428,6 @@ current turn number is the selected one.")
 	      do (<ucw:option :value i (<:as-html i)))))
 	(<:td
 	 (<:submit :value "Rewind the game to this turn"))))))))
-
-(defcomponent rule-editor (game-component ruleset-component play-style-component)
-  ())
 
 (defmethod render ((self rule-editor))
   (let* ((game (game self))
