@@ -292,8 +292,8 @@
 	       (some-move
 		#'(lambda (other-move)
 		    (when (opponent-move? other-move)
-		      (eq (move-statement other-move)
-			  (move-statement move))))
+		      (equal-statements? (move-statement other-move)
+					 (move-statement move))))
 		dialogue :end i)
 	     (return nil)))
        finally (return t))))
