@@ -500,6 +500,9 @@ should return the formula
 (defun proper-subformulas (formula)
   (remove-duplicates (proper-subformulas-1 formula) :test #'equal-formulas?))
 
+(defun proper-subformula-occurrences (formula)
+  (proper-subformulas-1 formula))
+
 (define-condition expression-not-in-signature-error (error)
   ((expression :initarg :expression
 	       :reader expression)
