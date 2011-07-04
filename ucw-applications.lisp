@@ -1,6 +1,8 @@
 
 (in-package :dialogues)
 
+(defparameter *maintainer-email* "j.alama@fct.unl.pt")
+
 (defclass dialogue-application (standard-application cookie-session-application-mixin)
   ()
   (:default-initargs

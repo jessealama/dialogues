@@ -2,8 +2,6 @@
 
 (in-package :dialogues)
 
-(defparameter *maintainer-email* "j.alama@fct.unl.pt")
-
 (defcomponent about-component ()
   ())
 
