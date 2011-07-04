@@ -253,6 +253,18 @@
 		    :title title
 		    (<:as-is long-name))))))
 	    (<:optgroup
+	     :label "Type theory"
+	     :title "Principal types of some standard combinators"
+	     (dolist (famous-formula *type-theory-formulas*)
+	       (destructuring-bind (long-name short-name formula)
+		   famous-formula
+		 (declare (ignore short-name))
+		 (let ((title (format nil "~a: ~a" long-name (render-plainly formula))))
+		   (<ucw:option
+		    :value formula
+		    :title title
+		    (<:as-is long-name))))))
+	    (<:optgroup
 	     :label "Intermediate logic"
 	     :title "Formulas bearing on logics between intuitionistic and classical logic"
 	     (dolist (famous-formula *intermediate-logic*)
