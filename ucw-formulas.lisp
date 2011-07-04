@@ -85,12 +85,13 @@
       ;; (<:p "The signature that you should use is:")
       ;; (<:blockquote
       ;; (render-signature (signature self)))
-      (<ucw:form :method "POST"
-		 :action $formula
-		 (<ucw:input :type "text"
-			     :size "160"
-			     :accessor input-formula)
-		 (<:submit :value "Use this formula"))
+      (<ucw:form
+       :method "post"
+       :action $formula
+       (<ucw:input :type "text"
+		   :size "160"
+		   :accessor input-formula)
+       (<:submit :value "Use this formula"))
       (formula-guide))))
 
 (defcomponent formula-info ()
