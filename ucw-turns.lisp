@@ -169,9 +169,9 @@
       (<:h1 "...or edit the dialogue rules...")
       (render-rule-editor game)
       (<:h1 "...or quit.")
-      (<ucw:form
-       :method "post"
-       :action (call 'start-game-component)
+      (<:form
+       :method "get"
+       :action "/"
        (<:submit :value "Quit"))))
 
 (defcomponent alternative-move-chooser (game-component play-style-component ruleset-component)
@@ -1018,8 +1018,9 @@ meaning of the dialogue rules.")
 				:game game
 				:play-style play-style)
          (<:submit :value "Go back to the original game"))
-       (<ucw:form :method "post"
-		  :action (call 'start-game-component)
-         (<:submit :value "Quit"))))))
+       (<:form
+	:method "get"
+	:action "/"
+	(<:submit :value "Quit"))))))
 
 ;;; ucw-turns.lisp ends here
