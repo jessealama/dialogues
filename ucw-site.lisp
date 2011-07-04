@@ -221,9 +221,11 @@
 	 :style "border:1px solid;"
 	 (<:tr 
 	  :style "background-color:#F063CD;"
-	  (<:td (<ucw:a 
-		 :action (call 'formula-info)
-		 "Formula:"))
+	  (<:td
+	   :align "center"
+	   :style "font-weight:bold;"
+	   :title "Select an initial formula, or choose to enter your own formula manually."
+	   "Formula")
 	  (<:td
 	   (<ucw:select
 	    :id "selected-formula" 
@@ -241,9 +243,12 @@
 		     :value formula (<:as-is long-name))))))))
 	 (<:tr
 	  :style "background-color:#A7007D;"
-	  (<:td (<ucw:a 
-		 :action (call 'translation-info)
-		 "Translation:"))
+	  (<:td
+	   :align "center"
+	   :style "font-weight:bold;"
+	   :title "Choose a way of modifying the formula that you've
+selected. The default is the identity translation, which does nothing."
+	   "Translation")
 	  (<:td (<ucw:select
 		 :id "selected-translation"
 		 :size 1
@@ -253,10 +258,28 @@
 		    :value translation
 		    (<:as-is (description translation)))))))
 	 (<:tr
+	  :style "background-color:lightcoral;"
+	  (<:td
+	   :align "center"
+	   :style "font-weight:bold;"
+	   :title "Choose from one of the predefined well-established rulesets.  Its rules will be included in the ruleset according to which your game will be played.  By default, only a skeletal ruleset (no structural rules) will be used."
+	   "Ruleset")
+	  (<:td
+	   :title "Choose from one of the predefined well-established rulesets.  Its rules will be included in the ruleset according to which your game will be played.  By default, only a skeletal ruleset (no structural rules) will be used."
+	   (<ucw:select
+	    :accessor selected-rules
+	    :title "The list of base rulesets is taken from the literature on dialogue games (see, for instance, W. Felscher's 'Dialogues, strategies, and intuitionistic provability', Annals of Pure and Applied Logic 28(3), pp. 217-254).  (The names 'D' and 'E' and the names of the standard structural rules come from this paper.)"
+	    (ruleset-option skeletal-rules)
+	    (ruleset-option d-dialogue-rules)
+	    (ruleset-option e-dialogue-rules)
+	    (ruleset-option classical-dialogue-rules)
+	    (ruleset-option nearly-classical-dialogue-rules))))
+	 (<:tr
 	  :style "background-color:#7B942E;"
-	  (<:td :title "To construct a ruleset for playing a dialogue game, first, choose a base ruleset.  The list of base rulesets is taken from the literature on dialogue games (see, for instance, W. Felscher's 'Dialogues, strategies, and intuitionistic provability', Annals of Pure and Applied Logic 28(3), pp. 217-254).  (The names 'D' and 'E' and the names of the standard structural rules come from this paper.)
-
-After choosing a base ruleset, you may optionally select other rules. The extra rules come in three kinds: standard structural rules, experimental, non-standard structural rules, and heuristics.  Strictly speaking, there is no difference between these different kinds of rules; they are all structural rules on a par with one another.
+	  (<:td
+	   :align "center"
+	   :style "font-weight:bold;"
+	   :title "After choosing a base ruleset, you may optionally select other rules. The extra rules come in three kinds: standard structural rules, experimental, non-standard structural rules, and heuristics.  Strictly speaking, there is no difference between these different kinds of rules; they are all structural rules on a par with one another.
 
 The standard structural rules are commonly used in the literature on dialogue games (Felscher, Krabbe, etc.).
 
@@ -265,11 +288,11 @@ The experimental rules are just that: experiments.  They are definitely non-stan
 The list of heuristic rules can be used to help cut down the set of possibilities.  For example, one might be interested in games where neither player can repeat and earlier move.  (But note that these heuristic rules, since they are on a par with all the other rules, can have significant logical impact.  You have been warned.)
 
 The ruleset that will be used during the game will be the union of the rules in the chosen base rule set, together with whatever optional, extra rules were chosen.  We have a adopted a 'the-user-is-always-right' approach: there is no check for whether the constructed ruleset is 'consistent' or has any logical significance."
-		"Ruleset")
+		"Extras")
 	  (<:td (if (null (ruleset self))
 		    (<:table
 		     :rules "cols"
-		     :summary "The purpose of this table is to build the ruleset according to which you want to play a game."
+		     :summary "The purpose of this table is to augment the ruleset that was chosen in the previous file."
 		     (<:thead
 		      (<:colgroup
 		       (<:col)
@@ -277,11 +300,7 @@ The ruleset that will be used during the game will be the union of the rules in 
 		       (<:col))
 		      (<:tr
 		       (<:th
-			:title "First, choose from one of the predefined well-established rulesets.  Its rules will be included in the ruleset according to which your game will be played.  By default, only a skeletal ruleset (no structural rules) will be used."
-			:abbr "Ruleset"
-			"Standard Rulesets")
-		       (<:th
-			:title "Now choose whether to include some of the standard rules taken from the literature on dialogue games.  Some of the standard rulesets already include these rules; if you choose a rule here that is already included in the ruleset you've chosen, you choice will be ignored."
+			:title "Choose whether to include some of the standard rules taken from the literature on dialogue games.  Some of the standard rulesets already include these rules; if you choose a rule here that is already included in the ruleset you've chosen, you choice will be ignored."
 			:abbr "Structural Rules"
 			"Standard Structural Rules")
 		       (<:th
@@ -294,16 +313,7 @@ The ruleset that will be used during the game will be the union of the rules in 
 			"Heuristic Rules")))
 		     (<:tbody
 		      (<:tr
-		       :valign "middle"
-		       (<:td
-			(<ucw:select
-			 :accessor selected-rules
-			 :title "Choose from one of the predefined well-established rulesets.  Its rules will be included in the ruleset according to which your game will be played.  By default, only a skeletal ruleset (no structural rules) will be used."
-			 (ruleset-option skeletal-rules)
-			 (ruleset-option d-dialogue-rules)
-			 (ruleset-option e-dialogue-rules)
-			 (ruleset-option classical-dialogue-rules)
-			 (ruleset-option nearly-classical-dialogue-rules)))
+		       :valign "center"
 		       (<:td
 			(<:table
 			 :rules "rows"
@@ -334,9 +344,11 @@ The ruleset that will be used during the game will be the union of the rules in 
 		    (<:as-html (description (ruleset self))))))
 	 (<:tr
 	  :style "background-color:#A3D800;"
-	  (<:td (<ucw:a
-		 :action (call 'play-style-info)
-		 "Play style:"))
+	  (<:td
+	   :align "center"
+	   :style "font-weight:bold;"
+	   :title "Choose how you want to play a game.  You can choose to play a concrete dialogue as either the Proponent or Opponent, or as both.  At each stage of the game, you will see all possible ch move, you'll see all possible moves that can be made.  You can also choose to interactively find a winning strategy (and you can choose for which player you want to find a strategy)."
+	   "Play Style")
 	  (<:td (<ucw:select
 		 :id "selected-play-style"
 		 :size 1
