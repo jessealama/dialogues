@@ -170,7 +170,7 @@
        (<:td :align "left"
 	     (<:as-html depth))
        (<:td :align "center"
-	     (<:as-html player))
+	     (<:strong (<:as-html player)))
        (<:td :align "left"
 	     (render statement))
        (<:td :align "left"
@@ -319,7 +319,7 @@
 	 :bgcolor color
 	 :style "color:white;"
 	 (<:td (<:as-html index))
-	 (<:td (<:as-html player))
+	 (<:td (<:strong (<:as-html player)))
 	 (<:td
 	  :nowrap "nowrap"
 	  (render statement))
@@ -331,7 +331,7 @@
 	 :nowrap "nowrap"
 	 :valign "top"
 	 (<:td (<:as-html index))
-	 (<:td (<:as-html player))
+	 (<:td (<:strong (<:as-html player)))
 	 (<:td
 	  :nowrap "nowrap"
 	  (render statement))
