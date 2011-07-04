@@ -93,12 +93,6 @@
 		 (<:submit :value "Use this formula"))
       (formula-guide))))
 
-(defcomponent signature-info ()
-  ())
-
-(defmethod render ((self signature-info))
-  (<:p (<:em (<:b "About the signature:")) "The signature is propositional, whose atoms are simply the letters of the alphabet: A, B, C, ... Z."))
-
 (defcomponent formula-info ()
   ())
 
