@@ -87,7 +87,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod render ((sa (eql *attack-left-conjunct*)))
-  (<:as-is "&or;")
+  (<:as-is "&and;")
   (<:sub "L"))
 
 (defmethod render ((sa (eql *attack-right-conjunct*)))
