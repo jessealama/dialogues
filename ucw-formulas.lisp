@@ -28,14 +28,14 @@
   (answer
    (ucw-handler-case
        (parse-formula formula-str)
-     (end-of-file ()
-		  (call 'formula-corrector
-			:text formula-str
-			:signature signature))
      (malformed-formula-error ()
        (call 'formula-corrector
 	     :text formula-str
-	     :signature signature)))))
+	     :signature signature))
+     (error ()
+	    (call 'formula-corrector
+		  :text formula-str
+		  :signature signature)))))
 
 (defmethod render ((self formula-corrector))
   (let ((input-formula)
