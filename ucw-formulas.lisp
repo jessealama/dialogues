@@ -126,12 +126,14 @@
     ("B formula" "b-formula" ,b-formula)
     ("C formula" "c-formula" ,c-formula)
     ("W formula" "w-formula" ,w-formula)
+    ("I formula" "i-formula" ,i-formula)
+    ("S formula" "s-formula" ,s-formula)
     ("Scott's formula" "scott-formula" ,scott-formula)
     ("Smetanich's formula" "smetanich-formula" ,smetanich-formula)
-    ("De Morgan &not;(P &and; Q) &rarr; (&not;P &or; &not;Q)" "de-morgan-not-and-implies-or-not" ,de-morgan-not-and-implies-or-not)
-    ("De Morgan &not;(P &or; Q) &rarr; (&not;P &and; &not;Q)" "de-morgan-not-or-implies-and-not" ,de-morgan-not-or-implies-and-not)
-    ("De Morgan (&not;P &and; &not;Q) &rarr; &not;(P &or; Q)" "de-morgan-and-not-implies-not-or" ,de-morgan-and-not-implies-not-or)
-    ("De Morgan (&not;P &or; &not;Q) &rarr; &not;(P &and; Q)" "de-morgan-or-not-implies-not-and" ,de-morgan-or-not-implies-not-and)
+    ("&not;(P &and; Q) &rarr; (&not;P &or; &not;Q)" "de-morgan-not-and-implies-or-not" ,de-morgan-not-and-implies-or-not)
+    ("&not;(P &or; Q) &rarr; (&not;P &and; &not;Q)" "de-morgan-not-or-implies-and-not" ,de-morgan-not-or-implies-and-not)
+    ("(&not;P &and; &not;Q) &rarr; &not;(P &or; Q)" "de-morgan-and-not-implies-not-or" ,de-morgan-and-not-implies-not-or)
+    ("(&not;P &or; &not;Q) &rarr; &not;(P &and; Q)" "de-morgan-or-not-implies-not-and" ,de-morgan-or-not-implies-not-and)
     ("(P &rarr; &not;P) &or; (&not;P &rarr; P)" "anti-connexive-formula" ,anti-connexive-formula)
     ("Ex contradictione quodlibet" "ex-contradictione-quodlibet" ,ex-contradictione-quodlibet)
     ("Implicational ex falso quodlibet" "implicational-ex-falso" ,implicational-ex-falso)
@@ -146,9 +148,12 @@
     ("Disjunctive syllogism" "disjunctive-syllogism" ,disjunctive-syllogism)
     ("Constructive dilemma" "constructive-dilemma" ,constructive-dilemma)
     ("Destructive dilemma" "destructive-dilemma" ,destructive-dilemma)
-    ("Conjunction elimination" "conjunction-elimination" ,conjunction-elimination)
+    ("Conjunction elimination (left)" "conjunction-elimination-left" ,conjunction-elimination-left)
+    ("Conjunction elimination (right)" "conjunction-elimination-right" ,conjunction-elimination-right)
     ("Conjunction introduction" "conjunction-introduction" ,conjunction-introduction)
-    ("Disjunction introduction" "disjunction-introduction" ,disjunction-introduction)
+    ("Conjunction introduction" "conjunction-introduction" ,conjunction-introduction)
+    ("Disjunction introduction (left)" "disjunction-introduction-left" ,disjunction-introduction-left)
+    ("Disjunction introduction (right)" "disjunction-introduction-right" ,disjunction-introduction-right)
     ("Composition" "composition" ,composition)
     ("Commutativity of conjunction" "commutivity-of-conjunction" ,commutivity-of-conjunction)
     ("Commutativity of disjunction" "commutativity-of-disjunction" ,commutativity-of-disjunction)
@@ -173,7 +178,7 @@
     ("Idempotency of conjunction (conjunctive antecedent)" "conjunctive-idempotency-conjunctive-antecedent" ,conjunctive-idempotency-conjunctive-antecedent)
     ("Idempotency of conjunction (conjunctive consequent)" "conjunctive-idempotency-conjunctive-consequent" ,conjunctive-idempotency-conjunctive-consequent)
     ("Idempotency of disjunction (disjunctive antecedent)" "disjunctive-idempotenency-disjunctive-antecedent" ,disjunctive-idempotenency-disjunctive-antecedent)
-    ("Idempotenc of disjunction (disjunctive consequent)" "disjunctive-idempotenency-disjunctive-consequent" ,disjunctive-idempotenency-disjunctive-consequent)
+    ("Idempotency of disjunction (disjunctive consequent)" "disjunctive-idempotenency-disjunctive-consequent" ,disjunctive-idempotenency-disjunctive-consequent)
     ("Disjunctive absorption (disjunctive antecedent)" "disjunctive-absorption-disjunctive-antecedent" ,disjunctive-absorption-disjunctive-antecedent)
     ("Disjunctive absorption (disjunctive consequent)" "disjunctive-absorption-disjunctive-consequent" ,disjunctive-absorption-disjunctive-consequent)
     ("Conjunctive absorption (conjunctive antecdent)" "conjunctive-absorption-conjunctive-antecedent" ,conjunctive-absorption-conjunctive-antecedent)
@@ -192,7 +197,79 @@
     ("McColl's Connexive Axiom 9" "connexive-ax-9" ,connexive-ax-9)
     ("McColl's Connexive Axiom 10" "connexive-ax-10" ,connexive-ax-10)
     ("McColl's Connexive Axiom 11" "connexive-ax-11" ,connexive-ax-11)
-    ("McColl's Connexive Axiom 12" "connexive-ax-12" ,connexive-ax-12)))
+    ("McColl's Connexive Axiom 12" "connexive-ax-12" ,connexive-ax-12)
+
+    ("Implicational disjunction introduction" "il-disjunction-formula" ,il-disjunction-formula)
+    ("Implicational contraposition" "il-negation-formula" ,il-negation-formula)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Groups of formulas
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defparameter *intuitionistic-logic-formulas*
+  (list (find k-formula famous-formulas :key #'third)
+	(find s-formula famous-formulas :key #'third)
+	(find conjunction-introduction famous-formulas :key #'third)
+	(find conjunction-elimination-left famous-formulas :key #'third)
+	(find conjunction-elimination-right famous-formulas :key #'third)
+	(find disjunction-introduction-left famous-formulas :key #'third)
+	(find disjunction-introduction-right famous-formulas :key #'third)
+	(find il-disjunction-formula famous-formulas :key #'third)
+	(find il-negation-formula famous-formulas :key #'third)
+	(find implicational-ex-falso famous-formulas :key #'third)))
+
+(defparameter *type-theory-formulas*
+  (list (find k-formula famous-formulas :key #'third)
+	(find b-formula famous-formulas :key #'third)
+	(find w-formula famous-formulas :key #'third)
+	(find c-formula famous-formulas :key #'third)
+	(find s-formula famous-formulas :key #'third)
+	(find i-formula famous-formulas :key #'third)))
+
+(defparameter *intermediate-logic*
+  (list (find weak-excluded-middle famous-formulas :key #'third)
+	(find dummett-formula famous-formulas :key #'third)
+	(find conditional-excluded-middle famous-formulas :key #'third)
+	(find scott-formula famous-formulas :key #'third)
+	(find smetanich-formula famous-formulas :key #'third)))
+
+(defparameter *connexive-logic*
+  (list (find connexive-ax-1 famous-formulas :key #'third)
+	(find connexive-ax-2 famous-formulas :key #'third)
+	(find connexive-ax-3 famous-formulas :key #'third)
+	(find connexive-ax-4 famous-formulas :key #'third)
+	(find connexive-ax-5 famous-formulas :key #'third)
+	(find connexive-ax-6 famous-formulas :key #'third)
+	(find connexive-ax-7 famous-formulas :key #'third)
+	(find connexive-ax-8 famous-formulas :key #'third)
+	(find connexive-ax-9 famous-formulas :key #'third)
+	(find connexive-ax-10 famous-formulas :key #'third)
+	(find connexive-ax-11 famous-formulas :key #'third)
+	(find connexive-ax-12 famous-formulas :key #'third)
+	(find anti-connexive-formula famous-formulas :key #'third)))
+
+(defparameter *de-morgan-rules*
+  (list   (find de-morgan-not-and-implies-or-not famous-formulas :key #'third)
+	  (find de-morgan-not-or-implies-and-not famous-formulas :key #'third)
+	  (find de-morgan-and-not-implies-not-or famous-formulas :key #'third)
+	  (find de-morgan-or-not-implies-not-and famous-formulas :key #'third)))
+
+(defparameter *modal-logic*
+  (list (find kp famous-formulas :key #'third)
+	(find wkp famous-formulas :key #'third)))
+
+(defparameter *syllogism-formulas*
+  (list (find modus-ponens famous-formulas :key #'third)
+	(find modus-tollens famous-formulas :key #'third)
+	(find hypothetical-syllogism famous-formulas :key #'third)
+	(find disjunctive-syllogism famous-formulas :key #'third)
+	(find constructive-dilemma famous-formulas :key #'third)
+	(find destructive-dilemma famous-formulas :key #'third)))
+
+(defparameter *classical-logic-formulas*
+  (list (find peirce-formula famous-formulas :key #'third)
+	(find excluded-middle famous-formulas :key #'third)
+	(find double-negation-elimination famous-formulas :key #'third)))
 
 (defun formula-guide ()
   (<:p "Non-atomic formulas are written in prefix notation, with parentheses

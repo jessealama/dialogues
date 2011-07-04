@@ -51,6 +51,14 @@
 	   (-> p q))
        (-> p q)))
 
+  (define-famous-formula s-formula
+      (-> (-> p (-> q r))
+	  (-> (-> p q)
+	      (-> p r))))
+
+  (define-famous-formula i-formula
+      (-> p p))
+
   (define-famous-formula weak-excluded-middle
       (v
        (neg p)
@@ -143,14 +151,20 @@
 	  (-> (v (neg q) (neg s))
 	      (v (neg p) (neg r)))))
 
-  (define-famous-formula conjunction-elimination
+  (define-famous-formula conjunction-elimination-left
       (-> (& p q) p))
+
+  (define-famous-formula conjunction-elimination-right
+      (-> (& p q) q))
 
   (define-famous-formula conjunction-introduction
       (-> p (-> q (& p q))))
 
-  (define-famous-formula disjunction-introduction
+  (define-famous-formula disjunction-introduction-left
       (-> p (v p q)))
+
+  (define-famous-formula disjunction-introduction-right
+      (-> q (v p q)))
 
   (define-famous-formula composition
       (-> (& (-> p q)
@@ -298,6 +312,12 @@
   (define-famous-formula connexive-ax-12
       (-> (-> p p) (neg (-> p (neg p)))))
 
+  (define-famous-formula il-disjunction-formula
+      (-> (-> p r) (-> (-> q r) (-> (v p q) r))))
+
+  (define-famous-formula il-negation-formula
+      (-> (-> p q) (-> (-> p (neg q)) (neg p))))
+
   )
 
 (defparameter il-axioms
@@ -314,5 +334,6 @@
 	  (-> (-> p r) (-> (-> q r) (-> (v p q) r)))
 	  (-> (-> p q) (-> (-> p (neg q)) (neg p)))
 	  (-> (neg p) (-> p q)))))
+
 
 ;;; famous-formulas.lisp ends here

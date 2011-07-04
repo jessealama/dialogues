@@ -232,16 +232,93 @@
 	    :id "selected-formula" 
 	    :size 1 
 	    :accessor selected-formula
-	    (dolist (famous-formula (cons 't famous-formulas))
-	      (if (eq famous-formula t)
+	    (<ucw:option
+	     :value t
+	     (<:as-is "(enter a formula manually)"))
+	    (<:optgroup
+	     :label "Intuitionistic logic"
+	     :title "Formulas related to intuitionistic logic"
+	     (dolist (famous-formula *intuitionistic-logic-formulas*)
+	       (destructuring-bind (long-name short-name formula)
+		   famous-formula
+		 (declare (ignore short-name))
+		 (let ((title (format nil "~a: ~a" long-name (render-plainly formula))))
+		   (<ucw:option
+		    :value formula
+		    :title title
+		    (<:as-is long-name))))))
+	    (<:optgroup
+	     :label "Intermediate logic"
+	     :title "Formulas bearing on logics between intuitionistic and classical logic"
+	     (dolist (famous-formula *intermediate-logic*)
+	      (destructuring-bind (long-name short-name formula)
+		  famous-formula
+		(declare (ignore short-name))
+		(let ((title (format nil "~a: ~a" long-name (render-plainly formula))))
 		  (<ucw:option
-		   :value t
-		   (<:as-is "(enter a formula manually)"))
-		  (destructuring-bind (long-name short-name formula)
-		      famous-formula
-		    (declare (ignore short-name))
-		    (<ucw:option
-		     :value formula (<:as-is long-name))))))))
+		   :value formula
+		   :title title
+		   (<:as-is long-name))))))
+	    (<:optgroup
+	     :label "De Morgan Formulas"
+	     :title "The four forms of De Morgan's princple"
+	     (dolist (famous-formula *de-morgan-rules*)
+	       (destructuring-bind (long-name short-name formula)
+		   famous-formula
+		 (declare (ignore short-name))
+		 (let ((title (format nil "~a: ~a" long-name (render-plainly formula))))
+		   (<ucw:option
+		    :value formula
+		    :title title
+		    (<:as-is long-name))))))
+	    (<:optgroup
+	     :label "Classical logic"
+	     :title "Formulas bearing on classical logic"
+	     (dolist (famous-formula *classical-logic-formulas*)
+	       (destructuring-bind (long-name short-name formula)
+		   famous-formula
+		 (declare (ignore short-name))
+		 (let ((title (format nil "~a: ~a" long-name (render-plainly formula))))
+		   (<ucw:option
+		    :value formula
+		    :title title
+		    (<:as-is long-name))))))
+	    (<:optgroup
+	     :label "'Syllogistic' formulas"
+	     :title "Formulas related to syllogisms"
+	     (dolist (famous-formula *syllogism-formulas*)
+	       (destructuring-bind (long-name short-name formula)
+		   famous-formula
+		 (declare (ignore short-name))
+		 (let ((title (format nil "~a: ~a" long-name (render-plainly formula))))
+		   (<ucw:option
+		    :value formula
+		    :title title
+		    (<:as-is long-name))))))
+	    (<:optgroup
+	     :label "Modal Logic"
+	     :title "Formulas related to modal logic"
+	     (dolist (famous-formula *modal-logic*)
+	       (destructuring-bind (long-name short-name formula)
+		   famous-formula
+		 (declare (ignore short-name))
+		 (let ((title (format nil "~a: ~a" long-name (render-plainly formula))))
+		   (<ucw:option
+		    :value formula
+		    :title title
+		    (<:as-is long-name))))))
+	    (<:optgroup
+	     :label "Connexive logic"
+	     :title "Formulas related to connexive logic"
+	     (dolist (famous-formula *connexive-logic*)
+	       (destructuring-bind (long-name short-name formula)
+		   famous-formula
+		 (declare (ignore short-name))
+		 (let ((title (format nil "~a: ~a" long-name (render-plainly formula))))
+		   (<ucw:option
+		    :value formula
+		    :title title
+		    (<:as-is long-name)))))))))
 	 (<:tr
 	  :style "background-color:#A7007D;"
 	  (<:td
