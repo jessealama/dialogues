@@ -104,7 +104,7 @@
 	goedel-gentzen-translation 
 	double-negate-translation
 	double-negate-all-subformulas-translation
-	kuroda-translation
+	;; kuroda-translation
 	negate-atomic-subformulas-translation
 	double-negate-atomic-subformulas-translation
 	self-conjoin-atomic-subformulas-translation
