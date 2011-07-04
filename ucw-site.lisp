@@ -18,9 +18,9 @@
      (extra-rules)
      (heuristic-rules)))
 
-(defentry-point "/about"
+(defentry-point "about"
     (:application *dialogue-application*)
-    (call 'about-this-site-component))
+    (call 'about-component))
 
 (defcomponent start-game-component (signature-component ruleset-component)
   ())
