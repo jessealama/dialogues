@@ -508,7 +508,7 @@ current turn number is the selected one.")
 	   (<:br)
 	   " or change the ruleset to: "
 	   (<ucw:select :accessor selected-ruleset
-	      (dolist (ruleset available-rulesets)
+	      (dolist (ruleset *available-rulesets*)
 		(<ucw:option :value ruleset
 			     (<:as-html (description ruleset)))))
 	   (<:submit :value "Use this ruleset instead of the current one"))))))
