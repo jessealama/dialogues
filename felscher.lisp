@@ -897,14 +897,14 @@
    :name "D13 (2)"
    :precondition (eq current-player 'o)
    :body (length-at-most (moves-referring-to dialogue current-reference) 2)
-   :description "A P-assertion may be attacked at most twice."))
+   :description "Proponent's assertions may be attacked at most two times."))
 
 (defparameter rule-d13-three-times
   (make-offensive-rule
    :name "D13 (3)"
    :precondition (eq current-player 'o)
    :body (length-at-most (moves-referring-to dialogue current-reference) 3)
-   :description "A P-assertion may be attacked at most three times."))
+   :description "Proponent's assertions may be attacked at most three times."))
 
 (defparameter d-dialogue-rules-literal-d10
   (make-instance 'ruleset
