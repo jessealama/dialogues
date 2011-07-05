@@ -1837,7 +1837,8 @@ value."
 (defmethod formula-< ((formula-1 atomic-formula) (formula-2 atomic-formula))
   (let ((pred-1 (predicate formula-1))
 	(pred-2 (predicate formula-2)))
-    (lex< pred-1 pred-2)))
+    (lex< (format nil "~a" pred-1)
+	  (format nil "~a" pred-2))))
 
 (defmethod formula-< ((formula-1 atomic-formula) formula-2)
   t)
