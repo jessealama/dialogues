@@ -110,7 +110,7 @@
     (concatenate 'string body (render-plainly (argument formula)))))
 
 (defmethod render-fancily :around ((formula unary-connective-formula))
-  (format "~a~a" (call-next-method) (render-fancily (argument formula))))
+  (format nil "~a~a" (call-next-method) (render-fancily (argument formula))))
 
 (defmethod render-plainly ((neg negation))
   "~")
