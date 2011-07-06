@@ -158,6 +158,7 @@
        (<:td :align "center"
 	     (<:strong (<:as-html player)))
        (<:td :align "left"
+	     :nowrap "nowrap"
 	     (render statement))
        (<:td :align "left"
 	     (unless (initial-move? move)
