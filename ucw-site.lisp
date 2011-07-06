@@ -247,11 +247,12 @@
 	       (destructuring-bind (long-name short-name formula)
 		   famous-formula
 		 (declare (ignore short-name))
-		 (let ((title (format nil "~a: ~a" long-name (render-plainly formula))))
+		 (let ((title (format nil "~a: ~a" long-name (render-plainly formula)))
+		       (name-and-formula (format nil "~a: ~a" long-name (render-fancily formula))))
 		   (<ucw:option
 		    :value formula
 		    :title title
-		    (<:as-is long-name))))))
+		    (<:as-is name-and-formula))))))
 	    (<:optgroup
 	     :label "Type theory"
 	     :title "Principal types of some standard combinators"
