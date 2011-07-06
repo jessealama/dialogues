@@ -131,10 +131,10 @@
     ("S formula" "s-formula" ,s-formula)
     ("Scott's formula" "scott-formula" ,scott-formula)
     ("Smetanich's formula" "smetanich-formula" ,smetanich-formula)
-    ("¬(P &and; Q) &rarr; (¬P &or; ¬Q)" "de-morgan-not-and-implies-or-not" ,de-morgan-not-and-implies-or-not)
-    ("¬(P &or; Q) &rarr; (¬P &and; ¬Q)" "de-morgan-not-or-implies-and-not" ,de-morgan-not-or-implies-and-not)
-    ("(¬P &and; ¬Q) &rarr; ¬(P &or; Q)" "de-morgan-and-not-implies-not-or" ,de-morgan-and-not-implies-not-or)
-    ("(¬P &or; ¬Q) &rarr; ¬(P &and; Q)" "de-morgan-or-not-implies-not-and" ,de-morgan-or-not-implies-not-and)
+    ("¬(P &amp; Q) &rarr; (¬P &or; ¬Q)" "de-morgan-not-and-implies-or-not" ,de-morgan-not-and-implies-or-not)
+    ("¬(P &or; Q) &rarr; (¬P &amp; ¬Q)" "de-morgan-not-or-implies-and-not" ,de-morgan-not-or-implies-and-not)
+    ("(¬P &amp; ¬Q) &rarr; ¬(P &or; Q)" "de-morgan-and-not-implies-not-or" ,de-morgan-and-not-implies-not-or)
+    ("(¬P &or; ¬Q) &rarr; ¬(P &amp; Q)" "de-morgan-or-not-implies-not-and" ,de-morgan-or-not-implies-not-and)
     ("(P &rarr; ¬P) &or; (¬P &rarr; P)" "anti-connexive-formula" ,anti-connexive-formula)
     ("Ex contradictione quodlibet" "ex-contradictione-quodlibet" ,ex-contradictione-quodlibet)
     ("Implicational ex falso quodlibet" "implicational-ex-falso" ,implicational-ex-falso)
@@ -347,7 +347,7 @@
   (<:as-html "]"))
 
 (defmethod render ((formula binary-conjunction))
-  (<:as-is "&and;"))
+  (<:as-is "&amp;"))
 
 (defmethod render ((formula binary-disjunction))
   (<:as-is "&or;"))
