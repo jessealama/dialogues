@@ -159,7 +159,7 @@
 	     (<:strong (<:as-html player)))
        (<:td :align "left"
 	     :nowrap "nowrap"
-	     (render statement))
+	     (<:as-is (render-fancily statement)))
        (<:td :align "left"
 	     (unless (initial-move? move)
 	       (if (attacking-move? move)
@@ -309,7 +309,7 @@
 	 (<:td (<:strong (<:as-html player)))
 	 (<:td
 	  :nowrap "nowrap"
-	  (render statement))
+	  (<:as-is (render-fancily statement)))
 	 (unless (initial-move? move)
 	   (if (attacking-move? move)
 	       (<:td (<:as-html "[A," reference "]"))
@@ -321,7 +321,7 @@
 	 (<:td (<:strong (<:as-html player)))
 	 (<:td
 	  :nowrap "nowrap"
-	  (render statement))
+	  (<:as-is (render-fancily statement)))
 	 (unless (initial-move? move)
 	   (if (attacking-move? move)
 	       (<:td (<:as-html "[A," reference "]"))
@@ -352,7 +352,7 @@
 	     " "
 	     (<:strong (<:as-html player))
 	     " "
-	     (render statement)
+	     (<:as-is (render-fancily statement))
 	     " "
 	     (unless (initial-move? move)
 	       (if (attacking-move? move)
