@@ -86,7 +86,7 @@
 		      (<:tr :style "background-color:#FF3333;"
 			    (<:td :align "left" (<:as-html game-len))
 			    (<:td :align "center" (<:strong (<:as-html player)))
-			    (<:td :align "left" (render statement))
+			    (<:td :align "left" (<:as-is (render-fancily statement)))
 			    (<:td :align "right"
 				  (<:as-html "[" stance "," reference "]"))
 			    (<:td)))
@@ -222,7 +222,7 @@
 			     "defended against the attack of move "))
   			(<:as-html reference)
   			" by asserting "
-  			(render statement)))))))
+  			(<:as-is (render-fancily statement))))))))
     (<:p "Follow a link to rewind the current game to move " (<:as-html move-number) " and play the selected alternative move rather than what was actually asserted.  Or, " (<ucw:a :action
   					  (call 'turn-editor
 						:play-style play-style
@@ -326,8 +326,8 @@
 				    *alternative-attack-color*)))
 	    (<:td :style cell-style
 		  :align "left"
-		  (render statement)))
-	  (<:td :align "left" (render statement)))
+		  (<:as-is (render-fancily statement))))
+	  (<:td :align "left" (<:as-is (render-fancily statement))))
       (if (zerop move-number)
 	  (<:td)
 	  (<:td :align "right"
@@ -527,7 +527,7 @@ current turn number is the selected one.")
 						   reference
 						   position)
        :title title
-       "Attack move " (<:as-html reference) " by asserting " (render statement)))))
+       "Attack move " (<:as-html reference) " by asserting " (<:as-is (render-fancily statement))))))
 
 (defun render-proponent-attack (attack game position)
   (render-attack attack 'p game position))
@@ -549,7 +549,7 @@ current turn number is the selected one.")
 						    reference
 						    position)
        :title title
-       "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement)))))
+       "Defend against the attack of move " (<:as-html reference) " by asserting " (<:as-is (render-fancily statement))))))
 
 (defun render-proponent-defense (defense game position)
   (render-defense defense 'p game position))
@@ -746,7 +746,7 @@ meaning of the dialogue rules.")
 				  :play-style 'play-as-proponent-random-opponent
 				  :game game-after-attack)
 		    :title title
-		    "Attack move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
+		    "Attack move " (<:as-html reference) " by asserting " (<:as-is (render-fancily statement)) " (you would win the game)")
 	    (<ucw:a :action 
 		    (let ((random-move (random-element all-opponent-moves)))
 		      (destructuring-bind (statement reference)
@@ -765,7 +765,7 @@ meaning of the dialogue rules.")
 								    (make-move 'o statement 'd reference)
 								    (1+ position))))))
 		    :title title
-		    "Attack move " (<:as-html reference) " by asserting " (render statement))))))
+		    "Attack move " (<:as-html reference) " by asserting " (<:as-is (render-fancily statement)))))))
 
 (defun render-opponent-attack-against-random-proponent (attack game position)
   (destructuring-bind (statement reference)
@@ -789,7 +789,7 @@ meaning of the dialogue rules.")
 				  :play-style 'play-as-opponent-random-proponent
 				  :game game-after-attack)
 		    :title title
-		    "Attack move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
+		    "Attack move " (<:as-html reference) " by asserting " (<:as-is (render-fancily statement)) " (you would win the game)")
 	    (<ucw:a :action 
 		    (let ((random-move (random-element all-proponent-moves)))
 		      (destructuring-bind (statement reference)
@@ -808,7 +808,7 @@ meaning of the dialogue rules.")
 								    (make-move 'p statement 'd reference)
 								    (1+ position))))))
 		    :title title
-		    "Attack move " (<:as-html reference) " by asserting " (render statement))))))
+		    "Attack move " (<:as-html reference) " by asserting " (<:as-is (render-fancily statement)))))))
 
 (defun render-opponent-defense-against-random-proponent (defense game position)
   (destructuring-bind (statement reference)
@@ -832,7 +832,7 @@ meaning of the dialogue rules.")
 				  :play-style 'play-as-opponent-random-proponent
 				  :game game-after-defense)
 		    :title title
-		    "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
+		    "Defend against the attack of move " (<:as-html reference) " by asserting " (<:as-is (render-fancily statement)) " (you would win the game)")
 	    (<ucw:a :action 
 		    (let ((random-move (random-element all-proponent-moves)))
 		      (destructuring-bind (statement reference)
@@ -851,7 +851,7 @@ meaning of the dialogue rules.")
 								    (make-move 'p statement 'd reference)
 								    (1+ position))))))
 		    :title title
-		    "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))))
+		    "Defend against the attack of move " (<:as-html reference) " by asserting " (<:as-is (render-fancily statement)))))))
 
 (defun render-proponent-defense-against-random-opponent (defense game position)
   (destructuring-bind (statement reference)
@@ -875,7 +875,7 @@ meaning of the dialogue rules.")
 				  :play-style 'play-as-proponent-random-opponent
 				  :game game-after-defense)
 		    :title title
-		    "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement) " (you would win the game)")
+		    "Defend against the attack of move " (<:as-html reference) " by asserting " (<:as-is (render-fancily statement)) " (you would win the game)")
 	    (<ucw:a :action 
 		    (let ((random-move (random-element all-opponent-moves)))
 		      (destructuring-bind (statement reference)
@@ -892,7 +892,7 @@ meaning of the dialogue rules.")
 									  (make-move 'o statement 'd reference)
 									  (1+ position))))))
 		    :title title
-		    "Defend against the attack of move " (<:as-html reference) " by asserting " (render statement))))))
+		    "Defend against the attack of move " (<:as-html reference) " by asserting " (<:as-is (render-fancily statement)))))))
 
 (defun render-proponent-attacks-with-random-opponent (game)
   (let* ((game-len (dialogue-length game))
