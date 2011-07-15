@@ -86,7 +86,7 @@
 	    (<:strong "O")))
        (<:td :nowrap "nowrap"
 	     :align "center"
-	     (render (move-statement (move (root strategy)))))
+	     (<:as-is (render-fancily (move-statement (move (root strategy))))))
        (if extra-rules
 	   (<:td
 	    :align "left"
