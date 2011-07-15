@@ -205,7 +205,7 @@
 		     ")")))))
 
 (defmethod render-fancily ((formula atomic-formula))
-  (render-plainly formula))
+  (format nil "<i>~a</i>" (render-plainly formula)))
 
 (defgeneric make-atomic-formula (predicate &rest arguments))
 
