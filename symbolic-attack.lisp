@@ -100,4 +100,17 @@
 (defmethod render ((sa (eql *which-disjunct?*)))
   (<:as-is "?"))
 
+(defmethod render-fancily ((sa (eql *attack-left-conjunct*)))
+  "∧<sub>L</sub>")
+
+(defmethod render-fancily ((sa (eql *attack-right-conjunct*)))
+  "∧<sub>R</sub>")
+
+(defmethod render-fancily ((sa (eql *which-instance?*)))
+  "?")
+
+(defmethod render-fancily ((sa (eql *which-disjunct?*)))
+  "?")
+
+
 ;;; symbolic-attack ends here
