@@ -134,7 +134,7 @@
 			   (render (move-statement (move (root strategy)))) ",")
 			  (<:p "is valid with respect to the ruleset that you chose.)"))))))))
     
-    (<:a :href "/" "[Quit]")))
+    (<:a :href "/dialogues/" "[Quit]")))
 
 (defcomponent winning-strategy-searcher (game-component play-style-component)
   ((depth :initarg :depth
