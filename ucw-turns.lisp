@@ -171,7 +171,7 @@
       (<:h1 "...or quit.")
       (<:form
        :method "get"
-       :action "/"
+       :action "/dialogues/"
        (<:submit :value "Quit"))))
 
 (defcomponent alternative-move-chooser (game-component play-style-component ruleset-component)
@@ -1020,7 +1020,7 @@ meaning of the dialogue rules.")
          (<:submit :value "Go back to the original game"))
        (<:form
 	:method "get"
-	:action "/"
+	:action "/dialogues/"
 	(<:submit :value "Quit"))))))
 
 ;;; ucw-turns.lisp ends here
