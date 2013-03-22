@@ -41,7 +41,7 @@
 		 (push pred-letter final-preds)
 		 (error 'non-symbol-treated-as-predicate-symbol-error
 			:item pred-letter))
-	   finally 
+	   finally
 	     (return (make-instance 'finite-variable-propositional-signature
 				    :predicates (reverse final-preds)))))))
 
@@ -108,14 +108,14 @@
 (define-condition symbol-already-present-error (error)
   ((symbol :initarg :symbol
 	   :reader symbol-already-present-error-symbol)
-   (signature :initarg :signature 
+   (signature :initarg :signature
 	      :reader symbol-already-present-error-signature))
   (:report (lambda (condition stream)
 	     (let ((symbol (symbol-already-present-error-symbol condition))
 		   (sig (symbol-already-present-error-signature condition)))
 	       (if sig
 		   (if symbol
-		       (format stream 
+		       (format stream
 			       "The given symbol,~%~%  ~A,~%~%already belongs to the signature~%~%  ~A~%"
 			       symbol sig)
 		       (format stream
@@ -177,7 +177,7 @@
 (defmethod print-object ((sig infinite-variable-first-order-signature) stream)
   (print-unreadable-object (sig stream :type t)
     (with-slots (constants predicates functions) sig
-      (format stream "constants: ~A, functions: ~A, predicates: ~A" 
+      (format stream "constants: ~A, functions: ~A, predicates: ~A"
 	      (if constants
 		  (comma-separated-list constants)
 		  "(none)")
@@ -198,7 +198,7 @@
 		    :test #'eq)
        (equal-sets? (signature-predicates signature-1)
 		    (signature-predicates signature-2)
-		    :test #'equal) 
+		    :test #'equal)
        (equal-sets? (signature-functions signature-1)
 		    (signature-functions signature-2)
 		    :test #'equal)))
@@ -229,7 +229,7 @@
 		   (1st-value (first-value condition))
 		   (2nd-value (second-value condition))
 		   (items (item-list condition)))
-	       (format stream 
+	       (format stream
 		       "The item~%~%  ~A~%~%occurs twice in the list~%~%  ~A~%~%with different values: the first is~%~%  ~A,~%~%and the second is ~%~%~A"
 		       item
 		       items
@@ -242,8 +242,8 @@
        with already-seen-items = nil
        for item in list
        do
-	 (let ((seen (member (car item) already-seen-items 
-			     :test #'eql 
+	 (let ((seen (member (car item) already-seen-items
+			     :test #'eql
 			     :key #'car)))
 	   (if (null seen)
 	       (push item already-seen-items)
@@ -256,7 +256,7 @@
        finally
 	 (return t))))
 
-(defun make-infinite-variable-signature-with-equality 
+(defun make-infinite-variable-signature-with-equality
     (&key constants predicates functions)
   "Make an infinite-variable first-order signature whose constants are
 CONSTANTS, whose predicates are PREDICATEs, and whose functions are
@@ -331,9 +331,9 @@ sense of EQL) but with different corresponding arities."
 
 (defmethod predicate? ((sig finite-variable-propositional-signature)
 		       (pred-sym symbol))
-  (member pred-sym (signature-predicates sig) 
+  (member pred-sym (signature-predicates sig)
 	  :test #'string=
-	  :key #'symbol-name))	  
+	  :key #'symbol-name))
 
 (defmethod predicate? ((s first-order-signature) pred-sym)
   (some #'(lambda (sym) (eq sym pred-sym))
@@ -354,9 +354,9 @@ sense of EQL) but with different corresponding arities."
       (predicate? sig sym)
       (function? sig sym)))
 
-(defmethod belongs-to-signature? ((sig infinite-variable-first-order-signature) 
+(defmethod belongs-to-signature? ((sig infinite-variable-first-order-signature)
 				  (sym symbol))
-  (or (constant? sig sym) 
+  (or (constant? sig sym)
       (predicate? sig sym)
       (function? sig sym)))
 
@@ -518,5 +518,14 @@ sense of EQL) but with different corresponding arities."
 		   :predicates predicates
 		   :functions functions
 		   :constants constants)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Some concrete signatures
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defparameter *alphabetic-propositional-signature*
+  (make-finite-variable-propositional-signature
+   'a 'b 'c 'd 'e 'f 'g 'h 'i 'j 'k 'm
+   'n 'o 'p 'q 'r 's 't 'u 'v 'w 'x 'y 'z))
 
 ;;; signature.lisp ends here
