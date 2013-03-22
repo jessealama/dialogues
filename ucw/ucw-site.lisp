@@ -333,9 +333,8 @@ The list of heuristic rules can be used to help cut down the set of possibilitie
 The ruleset that will be used during the game will be the union of the rules in the chosen base rule set, together with whatever optional, extra rules were chosen.  We have a adopted a 'the-user-is-always-right' approach: there is no check for whether the constructed ruleset is 'consistent' or has any logical significance."
 		"Extras")
 	  (<:td (if (null (ruleset self))
-		    (<:table
-		     :rules "cols"
-		     :summary "The purpose of this table is to augment the ruleset that was chosen in the previous file."
+		    ((<:table :rules "cols"
+			      :summary "The purpose of this table is to augment the ruleset that was chosen in the previous file.")
 		     (<:thead
 		      (<:colgroup
 		       (<:col)

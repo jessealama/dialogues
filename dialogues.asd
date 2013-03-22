@@ -26,7 +26,7 @@ UCW."
   :author "Jesse Alama <jesse.alama@gmail.com>"
   :maintainer "Jesse Alama <jesse.alama@gmail.com>"
   :serial t
-  :depends-on (:ucw :cl-ppcre :alexandria)
+  :depends-on (:alexandria)
   :components ((:file "packages")
 	       (:file "utils")
 	       (:file "signature")
@@ -43,14 +43,5 @@ UCW."
 	       (:file "search")
 	       (:file "figure")
 	       (:file "felscher")
-	       (:file "ucw-formulas")
 	       (:file "strategy")
-	       (:file "dialogue-search")
-	       (:file "ucw-utils")
-	       (:file "ucw-server")
-	       (:file "ucw-applications")
-	       (:file "ucw-ruleset")
-	       (:file "ucw-strategies")
-	       (:file "about")
-	       (:file "ucw-turns")
-	       (:file "ucw-site")))
+	       (:file "dialogue-search")))
