@@ -549,6 +549,54 @@
 	       (return nil))))
        finally (return t))))
 
+(defparameter rule-e-implication-opponent
+   (make-structural-rule
+    :name "E-for-implications (Opponent)"
+    :description "Opponent must react to the most recent statement by Proponent if that statement is an implication."
+    :predicate
+    (loop
+       with len = (dialogue-length dialogue)
+       for move in (if final-move-only
+		       (subseq (dialogue-plays dialogue) (1- len))
+		       (dialogue-plays dialogue))
+       for i from (if final-move-only
+		      (1- len)
+		      0)
+       do
+	 (when (and (opponent-move? move)
+		    (> i 0))
+	   (let ((previous-move (nth-move dialogue (1- i))))
+	     (let ((other-formula (move-statement previous-move)))
+	       (when (implication? other-formula)
+		 (let ((reference (move-reference move)))
+		   (unless (= (1+ reference) i)
+		     (return nil)))))))
+       finally (return t))))
+
+(defparameter rule-e-implication-proponent
+   (make-structural-rule
+    :name "E-for-implications (Proponent)"
+    :description "Proponent must react to the most recent statement by Opponent if that statement is an implication."
+    :predicate
+    (loop
+       with len = (dialogue-length dialogue)
+       for move in (if final-move-only
+		       (subseq (dialogue-plays dialogue) (1- len))
+		       (dialogue-plays dialogue))
+       for i from (if final-move-only
+		      (1- len)
+		      0)
+       do
+	 (when (and (proponent-move? move)
+		    (> i 0))
+	   (let ((previous-move (nth-move dialogue (1- i))))
+	     (let ((other-formula (move-statement previous-move)))
+	       (when (implication? other-formula)
+		 (let ((reference (move-reference move)))
+		   (unless (= (1+ reference) i)
+		     (return nil)))))))
+       finally (return t))))
+
 (defparameter rule-no-repetitions
   (make-structural-rule
    :name "No repetitions"
@@ -661,6 +709,25 @@
 				      rule-e))
 		 :name "CL"
 		 :description "E rules minus D11 and D12"))
+
+(defparameter classical-dialogue-rules-keiff
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      ; rule-d11
+				      ; rule-d12
+				      rule-d13
+				      ; rule-e
+				      rule-e-implication-proponent
+				      rule-e-implication-opponent
+				      ))
+		 :name "CL á la Keiff"
+		 :description "D rules minus D11 and D12, plus Keiff's variant of E"))
 
 (defparameter conjectural-classical-dialogue-rules
   (make-instance 'ruleset
