@@ -64,7 +64,7 @@
    :description "To attack an implication, one must assert the antecdent."))
 
 (defparameter rule-d01-negation
-  (make-offensive-rule 
+  (make-offensive-rule
    :name "d01-negation"
    :precondition (negation? (nth-statement dialogue current-reference))
    :body (and (non-symbolic-attack-formula? current-statement)
@@ -90,7 +90,7 @@
    :description "If one asserts a term as an attack, then the assertion being attacked must be a universal generalization."))
 
 (defparameter rule-d01-which-instance
-  (make-offensive-rule 
+  (make-offensive-rule
    :name "d01-which-instance"
    :precondition (eq current-statement *which-instance?*)
    :body (let ((s (nth-statement dialogue current-reference)))
@@ -106,7 +106,7 @@
    :description "WHICH-INSTANCE? is the only permissible attack on existential generalizations."))
 
 (defparameter rule-d01-formula
-  (make-offensive-rule 
+  (make-offensive-rule
    :name "d01-formula"
    :precondition (non-symbolic-attack-formula? current-statement)
    :body (or (implication? (nth-statement dialogue current-reference))
@@ -148,7 +148,7 @@
   :description "To defend against the ATTACK-LEFT-CONJUNCT attack, assert the left conjunct of the original conjunction."))
 
 (defparameter rule-d02-right-conjunct
-  (make-defensive-rule 
+  (make-defensive-rule
    :name "d02-right-conjunct"
    :precondition (eq (nth-statement dialogue current-reference)
 		     *attack-right-conjunct*)
@@ -170,7 +170,7 @@
    :description "To defend against the WHICH-DISJUNCT? attack, assert either the left or the right disjunct of the original disjunction."))
 
 (defparameter rule-d02-implication
-  (make-defensive-rule 
+  (make-defensive-rule
    :name "d02-implication"
    :precondition (with-original-statement (original-statement)
 		(implication? original-statement))
@@ -180,7 +180,7 @@
    :description "To defend against an attack on an implication, assert its consequent."))
 
 (defparameter rule-d02-negation
-  (make-defensive-rule 
+  (make-defensive-rule
    :name "d02-negation"
    :precondition (with-original-statement (original-statement)
 		(negation? original-statement))
@@ -262,18 +262,18 @@
 (defparameter rule-d01-composite
   (make-offensive-rule
    :name "d01-composite"
-   :body (composite-formula? (nth-statement dialogue 
+   :body (composite-formula? (nth-statement dialogue
 					    current-reference))
    :description "Atomic formulas cannot be attacked."))
 
 (defparameter rule-d02-attack
-  (make-defensive-rule 
+  (make-defensive-rule
    :name "d02-attack"
    :body (attacking-move? (nth-move dialogue current-reference))
    :description "The move being defended against is not an attack."))
 
 (defparameter rule-d10
-  (make-structural-rule 
+  (make-structural-rule
    :name "D10"
    :description "Proponent cannot assert an atomic formula before Opponent has asserted it."
   :predicate
@@ -303,7 +303,7 @@
    :name "D10-literal"
    :description "Proponent may assert an atom only if Opponent has earlier asserted either that atom or its negation."
    :predicate
-   (loop 
+   (loop
       with len = (dialogue-length dialogue)
       for move in (if final-move-only
 		      (subseq (dialogue-plays dialogue) (1- len))
@@ -446,7 +446,7 @@
 (defun earliest-open-attack-by-player-excluding-move (dialogue player move)
   (earliest-open-attack-for-player
    (truncate-dialogue dialogue
-		      (position move (dialogue-plays dialogue))) 
+		      (position move (dialogue-plays dialogue)))
    player))
 
 (defun queue-ok (dialogue)
@@ -464,7 +464,7 @@
    :name "D12"
    :description "Attacks may be answered at most once."
    :predicate
-   (loop 
+   (loop
       named outer-loop
       for move-1 in (dialogue-plays dialogue)
       do
@@ -495,7 +495,7 @@
 		     0)
       do
 	(when (proponent-move? move)
-	  (unless (length-at-most (select-moves 
+	  (unless (length-at-most (select-moves
 				   #'(lambda (other-move)
 				       (and (attacking-move? other-move)
 					    (= (move-reference other-move)
@@ -519,7 +519,7 @@
 		     (1- len)
 		     0)
       do
-	(unless (length-at-most (select-moves 
+	(unless (length-at-most (select-moves
 				 #'(lambda (other-move)
 				     (and (attacking-move? other-move)
 					  (= (move-reference other-move)
@@ -530,11 +530,11 @@
       finally (return t))))
 
 (defparameter rule-e
-   (make-structural-rule 
+   (make-structural-rule
     :name "E"
     :description "Opponent must react to the most recent statement by Proponent."
-    :predicate 
-    (loop 
+    :predicate
+    (loop
        with len = (dialogue-length dialogue)
        for move in (if final-move-only
 		       (subseq (dialogue-plays dialogue) (1- len))
@@ -558,12 +558,12 @@
 		   (every-move #'(lambda (other-move) (or (eq move other-move)
 							  (not (equal-moves? move
 									     other-move))))
-			       dialogue)) 
+			       dialogue))
 	       dialogue)))
 
-(defparameter d-dialogue-rules 
+(defparameter d-dialogue-rules
   (make-instance 'ruleset
-		 :rules (append argumentation-forms 
+		 :rules (append argumentation-forms
 				(list rule-d00-atomic
 				      rule-d00-proponent
 				      rule-d00-opponent
@@ -578,7 +578,7 @@
 
 (defparameter jesse-kludge
   (make-instance 'ruleset
-		 :rules (append argumentation-forms 
+		 :rules (append argumentation-forms
 				(list ;; rule-d00-atomic
 				      rule-d00-proponent
 				      rule-d00-opponent
@@ -592,7 +592,7 @@
 
 (defparameter d-dialogue-rules-queue
 (make-instance 'ruleset
-		 :rules (append argumentation-forms 
+		 :rules (append argumentation-forms
 				(list rule-d00-atomic
 				      rule-d00-proponent
 				      rule-d00-opponent
@@ -606,7 +606,7 @@
 
 (defparameter e-dialogue-rules
   (make-instance 'ruleset
-		 :rules (append argumentation-forms 
+		 :rules (append argumentation-forms
 				(list rule-d00-atomic
 				      rule-d00-proponent
 				      rule-d00-opponent
@@ -622,7 +622,7 @@
 
 (defparameter e-dialogue-rules-queue
   (make-instance 'ruleset
-		 :rules (append argumentation-forms 
+		 :rules (append argumentation-forms
 				(list rule-d00-atomic
 				      rule-d00-proponent
 				      rule-d00-opponent
@@ -648,7 +648,7 @@
 
 (defparameter classical-dialogue-rules
   (make-instance 'ruleset
-		 :rules (append argumentation-forms 
+		 :rules (append argumentation-forms
 				(list rule-d00-atomic
 				      rule-d00-proponent
 				      rule-d00-opponent
@@ -664,7 +664,7 @@
 
 (defparameter conjectural-classical-dialogue-rules
   (make-instance 'ruleset
-		 :rules (append argumentation-forms 
+		 :rules (append argumentation-forms
 				(list rule-d00-atomic
 				      rule-d00-proponent
 				      rule-d00-opponent
@@ -768,7 +768,7 @@
 
 (defparameter e-dialogue-rules-no-pro-repetitions
   (make-instance 'ruleset
-		 :rules (append argumentation-forms 
+		 :rules (append argumentation-forms
 				(list rule-d00-atomic
 				      rule-d00-proponent
 				      rule-d00-opponent
@@ -1046,7 +1046,7 @@
 	(and rhs (contains-formula? lhs (first rhs))))))
 
 (defun figure-axiom? (figure)
-  (eq (figure-label figure) 'axiom)) 
+  (eq (figure-label figure) 'axiom))
 
 (defun lj-deduction (figure)
   "Determine whether FIGURE is an intuitionistic deduction."
@@ -1056,7 +1056,7 @@
 ;; Transformations
 
 (defun lj->lj-prime (figure)
-  "Transform FIGURE, assumed to be an LJ deduction, into an LJ' deduction." 
+  "Transform FIGURE, assumed to be an LJ deduction, into an LJ' deduction."
   (if (figure-axiom? figure)
       figure
       (let ((rule (figure-label figure))
