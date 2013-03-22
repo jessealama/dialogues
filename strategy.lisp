@@ -486,27 +486,6 @@ the strategy.  If there no such node, return NIL."
 		    (node->strategy winner rules))
 		winning-pro-nodes))))
 
-;; HTML representation of strategies and strategy nodes
-
-(defmethod render ((move move))
-  (with-slots (player statement stance reference)
-      move
-    (<:strong (<:as-is player))
-    (<:as-is " ")
-    (render statement)
-    (when (and stance reference)
-      (<:as-is " " (format nil "[~a,~d]" stance reference)))))
-
-(defun render-as-table-row (move)
-  (with-slots (player statement stance reference)
-      move
-    (<:tr
-     (<:td (<:strong (<:as-is player)))
-     (<:td (render statement))) 
-    (if (and stance reference)
-	(<:td (<:format "[~a,~d]" stance reference))
-	(<:td))))
-
 (defmethod first-splitter ((strategy strategy))
   (first-splitter (root strategy)))
 

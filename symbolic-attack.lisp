@@ -82,35 +82,4 @@
 (defmethod render-plainly ((sa (eql *which-disjunct?*)))
   "?")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; UCW functionality
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmethod render ((sa (eql *attack-left-conjunct*)))
-  (<:as-is "&and;")
-  (<:sub "L"))
-
-(defmethod render ((sa (eql *attack-right-conjunct*)))
-  (<:as-is "&and;")
-  (<:sub "R"))
-
-(defmethod render ((sa (eql *which-instance?*)))
-  (<:as-is "?"))
-
-(defmethod render ((sa (eql *which-disjunct?*)))
-  (<:as-is "?"))
-
-(defmethod render-fancily ((sa (eql *attack-left-conjunct*)))
-  "∧<sub>L</sub>")
-
-(defmethod render-fancily ((sa (eql *attack-right-conjunct*)))
-  "∧<sub>R</sub>")
-
-(defmethod render-fancily ((sa (eql *which-instance?*)))
-  "?")
-
-(defmethod render-fancily ((sa (eql *which-disjunct?*)))
-  "?")
-
-
 ;;; symbolic-attack ends here

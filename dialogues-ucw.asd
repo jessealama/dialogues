@@ -12,6 +12,7 @@ of several aspects. It is based on the UnCommon Web system."
   :components ((:module "ucw"
 			:serial t
 			:components ((:file "packages")
+				     (:file "render")
 				     (:file "ucw-formulas")
 				     (:file "ucw-utils")
 				     (:file "ucw-server")
