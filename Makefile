@@ -1,8 +1,5 @@
 .PHONY: clean test
 
-asd-files = $(wildcard *.asd)
-lisp-files = $(wildcard *.lisp)
-editable-files = $(asd-files) $(lisp-files) Makefile README.mkd .gitignore
 emacs-backups = $(wildcard *~)
 ccl-fasls = $(wildcard *.dx64fsl)
 plain-fasls = $(wildcard *.fasl)
