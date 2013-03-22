@@ -185,7 +185,7 @@
 				       :extra-rules $trimmed-extra-rules
 				       :heuristics $heuristics
 				       :game initial-dialog)
-				 (let ((random-move (random-element all-opponent-moves)))
+				 (let ((random-move (random-elt all-opponent-moves)))
 				   (destructuring-bind (statement reference)
 				       random-move
 				     (if (member random-move next-opponent-attacks)

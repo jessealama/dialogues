@@ -44,7 +44,7 @@
 	      (progn
 		(<:h1 "Success!")
 		(<:p "Your move was accepted. "
-		     (<ucw:a :action 
+		     (<ucw:a :action
 			     (call 'turn-editor
 				   :play-style (play-style self)
 				   :game (add-move-to-dialogue-at-position
@@ -60,7 +60,7 @@
 		(<:p "The game at this point:")
 		(unless (zerop (dialogue-length game))
 		  (let ((open-attacks (open-attack-indices game)))
-		    (<:table 
+		    (<:table
 		     (<:colgroup :span "2" :align "center")
 		     (<:colgroup :span "2" :align "left")
 		     (<:thead
@@ -75,13 +75,13 @@
 			 for play in plays
 			 for i from 0 upto len
 			 do
-			   (render-move-in-game 
+			   (render-move-in-game
 			    play game i
 			    :indicate-alternatives nil
 			    :heuristics heuristics
 			    :extra-rules extra-rules
 			    :play-style play-style
-			    :attack-is-closed (not (member i open-attacks 
+			    :attack-is-closed (not (member i open-attacks
 							   :test #'=))))
 		      (<:tr :style "background-color:#FF3333;"
 			    (<:td :align "left" (<:as-html game-len))
@@ -107,7 +107,7 @@
 			 (<:br)
 			 "Description: " (<:as-html (description violated-rule)))))
 		(<ucw:form :method "post"
-			   :action (call 'turn-editor 
+			   :action (call 'turn-editor
 					 :game game
 					 :play-style (play-style self))
 		  (<:p "You must edit your move; please try again.")
@@ -146,7 +146,7 @@
 	   (play-style (play-style self)))
       (<:h1 "The game so far")
       (<:div :style "border:1px solid"
-        (render-game game 
+        (render-game game
 		     :play-style play-style
 		     :extra-rules (extra-rules self)
 		     :heuristics (heuristics self)
@@ -258,7 +258,7 @@
     (<:p (<:em "Heuristic rules: ")
 	 (render-heuristics heuristics)))
   (<:hr)
-  (<:table 
+  (<:table
    (<:colgroup :span "2" :align "center")
    (<:colgroup :span "3" :align "left")
    (<:thead
@@ -279,7 +279,7 @@
 	       for play in plays
 	       for i from 0 upto len
 	       do
-		 (render-move-in-game 
+		 (render-move-in-game
 		  play game i
 		  :indicate-alternatives indicate-alternatives
 		  :heuristics heuristics
@@ -288,7 +288,7 @@
 		  :attack-is-closed (not (member i open-attacks :test #'=))
 		  :move-is-alternative (member i moves-to-highlight :test #'=)))))))
    (<:tfoot
-    (<:tr 
+    (<:tr
      (<:td :align "center"
 	   :colspan "5"
 	   (<:em "Rows in " (<:span :style "background-color:#CCCCCC"
@@ -435,7 +435,7 @@ current turn number is the selected one.")
 	 (rules (rules ruleset))
 	 (selected-ruleset))
     (let (indices-and-violated-rules)
-      (loop 
+      (loop
 	 for turn-number from 1 upto (dialogue-length game)
 	 do
 	   (let ((truncated (copy-and-truncate-dialogue game turn-number)))
@@ -457,7 +457,7 @@ current turn number is the selected one.")
 		     :heuristics (heuristics self)
 		     :extra-rules (extra-rules self)))
       (<:p "At least one move of the game is violated with these rules:")
-      (<:ul 
+      (<:ul
        (dolist (index-and-violators indices-and-violated-rules)
 	 (destructuring-bind (index . violated-rules)
 	     index-and-violators
@@ -488,7 +488,7 @@ current turn number is the selected one.")
 	   (<:th "Description")))
 	 (<:tbody
 	  (dolist (rule rules)
-	    (with-slots (name description) 
+	    (with-slots (name description)
 		rule
 	      (<:tr
 	       (<:td :align "right" (<:as-html name))
@@ -539,7 +539,7 @@ current turn number is the selected one.")
   (destructuring-bind (statement reference)
       defense
     (let* ((statement-str (render-plainly statement))
-	   (title (format nil "Defend against the attack of move ~d by asserting ~A" 
+	   (title (format nil "Defend against the attack of move ~d by asserting ~A"
 			  reference
 			  statement-str)))
       (<ucw:a
@@ -656,15 +656,15 @@ current turn number is the selected one.")
 
 (defun render-manual-move-entry-form (game play-style)
   (let (input-statement player-option reference-option selected-symbolic-attack stance-option)
-  (symbol-macrolet 
-      (($take-action 
+  (symbol-macrolet
+      (($take-action
 	(let (new-statement)
 	  (if (empty-string? input-statement)
 	      (setf new-statement selected-symbolic-attack)
 	      (setf new-statement
 		    (ucw-handler-case (parse-formula input-statement)
 		      (malformed-formula-error
-		       () 
+		       ()
 		       (call 'formula-corrector
 			     :text input-statement
 			     :signature (dialogue-signature game))))))
@@ -688,7 +688,7 @@ meaning of the dialogue rules.")
       (<ucw:form :method "post"
 		 :action $take-action
       (<:table :style "border:1px solid;"
-	       (<:tr 
+	       (<:tr
 		(<:td "Which player will move?")
 		(<:td (<ucw:select :accessor player-option
 				   :size 1
@@ -736,7 +736,7 @@ meaning of the dialogue rules.")
 	   (statement-str (render-plainly statement))
 	   (title (format nil "Attack move ~d by asserting ~A"
 			  reference
-			  statement-str))			  
+			  statement-str))
 	   (next-opponent-attacks (next-attacks game-after-attack 'o))
 	   (next-opponent-defenses (next-defenses game-after-attack 'o))
 	   (all-opponent-moves (append next-opponent-attacks
@@ -747,8 +747,8 @@ meaning of the dialogue rules.")
 				  :game game-after-attack)
 		    :title title
 		    "Attack move " (<:as-html reference) " by asserting " (<:as-is (render-fancily statement)) " (you would win the game)")
-	    (<ucw:a :action 
-		    (let ((random-move (random-element all-opponent-moves)))
+	    (<ucw:a :action
+		    (let ((random-move (random-elt all-opponent-moves)))
 		      (destructuring-bind (statement reference)
 			  random-move
 			(if (member random-move next-opponent-attacks)
@@ -777,7 +777,7 @@ meaning of the dialogue rules.")
 						reference
 						position))
 	   (statement-str (render-plainly statement))
-	   (title (format nil "Attack move ~d by asserting ~A" 
+	   (title (format nil "Attack move ~d by asserting ~A"
 			  reference
 			  statement-str))
 	   (next-proponent-attacks (next-attacks game-after-attack 'p))
@@ -790,8 +790,8 @@ meaning of the dialogue rules.")
 				  :game game-after-attack)
 		    :title title
 		    "Attack move " (<:as-html reference) " by asserting " (<:as-is (render-fancily statement)) " (you would win the game)")
-	    (<ucw:a :action 
-		    (let ((random-move (random-element all-proponent-moves)))
+	    (<ucw:a :action
+		    (let ((random-move (random-elt all-proponent-moves)))
 		      (destructuring-bind (statement reference)
 			  random-move
 			(if (member random-move next-proponent-attacks)
@@ -833,8 +833,8 @@ meaning of the dialogue rules.")
 				  :game game-after-defense)
 		    :title title
 		    "Defend against the attack of move " (<:as-html reference) " by asserting " (<:as-is (render-fancily statement)) " (you would win the game)")
-	    (<ucw:a :action 
-		    (let ((random-move (random-element all-proponent-moves)))
+	    (<ucw:a :action
+		    (let ((random-move (random-elt all-proponent-moves)))
 		      (destructuring-bind (statement reference)
 			  random-move
 			(if (member random-move next-proponent-attacks)
@@ -876,8 +876,8 @@ meaning of the dialogue rules.")
 				  :game game-after-defense)
 		    :title title
 		    "Defend against the attack of move " (<:as-html reference) " by asserting " (<:as-is (render-fancily statement)) " (you would win the game)")
-	    (<ucw:a :action 
-		    (let ((random-move (random-element all-opponent-moves)))
+	    (<ucw:a :action
+		    (let ((random-move (random-elt all-opponent-moves)))
 		      (destructuring-bind (statement reference)
 			  random-move
 			(if (member random-move next-opponent-attacks)
@@ -994,7 +994,7 @@ meaning of the dialogue rules.")
 		   (<:h1 "Cut off!")
 		   (<:p "No winning play "
 			(<:as-is "&le; ")
-			(<:as-html depth) " " 
+			(<:as-html depth) " "
 			(if (= depth 1)
 			    (<:as-is "move")
 			    (<:as-is "moves"))
