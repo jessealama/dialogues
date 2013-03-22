@@ -272,17 +272,4 @@
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      ,@body))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Variables
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmacro defconstant-if-unbound (var value &optional documentation)
-  (if (null documentation)
-      `(unless (boundp ',var)
-	 (defconstant ,var ,value))
-      (if (stringp documentation)
-	  `(unless (boundp ',var)
-	     (defconstant ,var ,value ,documentation))
-	  (error "The third argument, if non-NIL, must be a string."))))
-
 ;;; utils.lisp ends here
