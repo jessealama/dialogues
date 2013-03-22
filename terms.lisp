@@ -108,9 +108,9 @@
 
 (defmethod equal-terms? ((func-term-1 function-term) (func-term-2 function-term))
   (and (string= (function-symbol func-term-1) (function-symbol func-term-2))
-       (every-pair #'equal-terms? (arguments func-term-1) 
+       (every-pair #'equal-terms? (arguments func-term-1)
 		                  (arguments func-term-2))))
-		   
+
 (defun make-variable (symbol-or-string)
   (let ((name (if (symbolp symbol-or-string)
 			   (symbol-name symbol-or-string)
@@ -125,7 +125,7 @@
 				   (sym symbol))
   (let ((var (make-variable sym))
 	(variable-tester (variable-test-pred sig)))
-    (funcall variable-tester var)))    
+    (funcall variable-tester var)))
 
 (defmethod variable-in-signature? ((sig finite-variable-first-order-signature)
 				   (sym symbol))
@@ -181,7 +181,7 @@
 	nil
 	(let ((num-preds (length unary-preds)))
 	  (let (new-var proposed-sort proposed-name)
-	    (tagbody 
+	    (tagbody
 	       (go start)
 	     start
 	       (format prompt-stream "Select the unary predicate from the signature that will be the sort of the new variable:~%")
@@ -248,7 +248,7 @@
 			 (go the-end))))))
 	   the-end)
 	  new-term))))
-  
+
 
 (defun read-term-in-signature (signature &optional (prompt-stream *standard-output*)
 			                           (prompt ">")
