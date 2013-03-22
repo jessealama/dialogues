@@ -1028,8 +1028,6 @@ sending the output to SUBST-1."
 
 (defgeneric match-formulas (formula-1 formula-2))
 
-(defgeneric match-formulas (formula-1 formula-2))
-
 (defmethod match-formulas ((formula-1 atomic-formula)
 						(formula-2 atomic-formula))
   (if (equal-formulas? formula-1 formula-2)
