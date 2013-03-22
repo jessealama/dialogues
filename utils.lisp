@@ -71,11 +71,7 @@
       (null lst-2)))
 
 (defun first-n (n lst)
-  (loop
-     for i from 1 upto n
-     for elt in lst
-     collect elt into result
-     finally (return result)))
+  (loop :for i :from 1 :upto n :for elt :in lst :collect elt))
 
 (defun map-initial-pairs (lst-1 lst-2 fn)
   (cond ((null lst-1)
