@@ -93,10 +93,12 @@
 	(push (funcall fun elt-1 elt-2) results)))))
 
 (defun length-at-most (lst n)
-  (or (minusp n)
-      (if (zerop n)
-	  (null lst)
-	  (length-at-most (cdr lst) (1- n)))))
+  (cond ((minusp n)
+	 t)
+	((zerop n)
+	 (null lst))
+	(t
+	 (length-at-most (cdr lst) (1- n)))))
 
 (defun same-length (lst-1 lst-2)
   (if (null lst-1)
