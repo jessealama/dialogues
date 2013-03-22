@@ -25,17 +25,6 @@
 ;;; Lists
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun list-to-array (lst)
-  (if lst
-      (let ((len (length lst)))
-	(let ((a (make-array (list len))))
-	  (do ((i 0 (1+ i))
-	       (x (car lst) (car tail))
-	       (tail (cdr lst) (cdr tail)))
-	      ((null tail) a)
-	    (setf (aref a i) x))))
-      (make-array (list 0))))
-
 (defun every-pair (pred lst-1 lst-2)
   "With LST-1 = (a-1 a-2 ...) and LST-2 = (b-1 b-2 ...), and PRED a
   binary predicate, determine whether PRED applies
