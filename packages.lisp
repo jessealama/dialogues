@@ -26,7 +26,7 @@
 
 	   ; rule sets
 	   #:D-DIALOGUE-RULES
-	   
+
 	   ;; slots
 
 	   ; move class
@@ -39,7 +39,7 @@
 	   #:SIGNATURE
 	   #:PLAYS
 	   #:DIALOGUE-SIGNATURE
-	   
+
 	   ; named formulas
 	   #:PEIRCE-FORMULA
 	   #:EXCLUDED-MIDDLE
