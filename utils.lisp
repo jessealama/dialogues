@@ -63,12 +63,6 @@
 	 (dolist (,obj ,objs ,lst)
 	   (push ,obj ,lst)))))
 
-(defun equal-length? (lst-1 lst-2)
-  (if lst-1
-      (and lst-2
-	   (equal-length? (cdr lst-1) (cdr lst-2)))
-      (null lst-2)))
-
 (defun every-pair? (pred lst-1 lst-2)
   (if lst-1
       (and lst-2

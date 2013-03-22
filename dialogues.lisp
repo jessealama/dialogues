@@ -217,7 +217,7 @@ attacks which, being symbols, do qualify as terms."
   `(make-instance 'particle-rule
 		  :name ,name
 		  :description ,description
-		  :precondition (lambda (dialogue 
+		  :precondition (lambda (dialogue
 					 current-player
 					 current-position
 					 current-statement
@@ -230,7 +230,7 @@ attacks which, being symbols, do qualify as terms."
 						      current-stance
 						      current-reference))
 				  ,precondition)
-		  :body (lambda (dialogue 
+		  :body (lambda (dialogue
 				 current-player
 				 current-position
 				 current-statement
@@ -247,7 +247,7 @@ attacks which, being symbols, do qualify as terms."
 (defclass structural-rule (dialogue-rule)
   ((predicate :initarg :predicate
 	      :type function
-	      :accessor predicate)))	      
+	      :accessor predicate)))
 
 (defun structural-rule? (thing)
   (typep thing 'structural-rule))
@@ -336,7 +336,7 @@ attacks which, being symbols, do qualify as terms."
   "Evaluate all rules, but return only whether every rule passes.
 This function is used in cases where it doesn't matter what rules
 fail, only whether all of them are satisfied."
-  (loop 
+  (loop
      with ruleset = (dialogue-rules dialogue)
      for rule in (rules ruleset)
      do
@@ -349,7 +349,7 @@ fail, only whether all of them are satisfied."
      finally (return t)))
 
 (defun eval-entire-dialogue (dialogue &key structural-rules-from-end)
-  (loop 
+  (loop
      with failures = nil
      with all-pass = t
      with ruleset = (dialogue-rules dialogue)
@@ -372,12 +372,12 @@ fail, only whether all of them are satisfied."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Dialogues
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	
+
 (defclass dialogue ()
   ((signature :accessor dialogue-signature
 	      :initform nil
 	      :initarg :signature)
-   (plays :accessor dialogue-plays 
+   (plays :accessor dialogue-plays
 	  :initform nil
 	  :initarg :plays)
    (rules :accessor dialogue-rules
@@ -432,7 +432,7 @@ fail, only whether all of them are satisfied."
 		                         stance
 					 ref-index
 					 statement)
-	(format stream "~A O [~A,~A] ~A" position 
+	(format stream "~A O [~A,~A] ~A" position
 	                                 stance
 					 ref-index
 					 statement))))
@@ -440,7 +440,7 @@ fail, only whether all of them are satisfied."
 (defun pretty-print-dialogue (dialogue stream)
   (let ((plays (dialogue-plays dialogue)))
     (cond ((null plays) (format stream ""))
-	  (t 
+	  (t
 	   (print-initial-move dialogue stream)
 	   (when (cdr plays)
 	     (do ((i 1 (1+ i))
@@ -455,7 +455,7 @@ fail, only whether all of them are satisfied."
 
 (defun add-move-to-dialogue (dialogue move)
   (setf (dialogue-plays dialogue)
-	(append (dialogue-plays dialogue) 
+	(append (dialogue-plays dialogue)
 		(list move)))
   dialogue)
 
@@ -524,14 +524,14 @@ fail, only whether all of them are satisfied."
   (make-instance 'dialogue
 		 :signature (dialogue-signature dialogue)
 		 :plays (copy-list (dialogue-plays dialogue))
-		 :rules (dialogue-rules dialogue)))						   
+		 :rules (dialogue-rules dialogue)))
 
 (defun equal-dialogues? (dialogue-1 dialogue-2)
   (let ((signature-1 (dialogue-signature dialogue-1))
 	(signature-2 (dialogue-signature dialogue-2)))
     (and (equal-signatures? signature-1 signature-2)
-	 (equal-length? (dialogue-plays dialogue-1)
-			(dialogue-plays dialogue-2))
+	 (length= (dialogue-plays dialogue-1)
+		  (dialogue-plays dialogue-2))
 	 (every-pair #'(lambda (move-1 move-2)
 			 (equal-moves? move-1 move-2))
 		     (dialogue-plays dialogue-1)
@@ -556,7 +556,7 @@ fail, only whether all of them are satisfied."
 				  (subseq (dialogue-plays dialogue) 0 end))))
 
 ;; (defun select-moves (predicate dialogue &key start end)
-;;   (remove-if-not predicate (dialogue-plays dialogue) 
+;;   (remove-if-not predicate (dialogue-plays dialogue)
 ;; 		 :start (if (null start)
 ;; 			    0
 ;; 			    start)
@@ -667,7 +667,7 @@ fail, only whether all of them are satisfied."
 (defun evaluate-particle-rule (rule dialogue)
   (let ((precondition (precondition rule))
 	(body (body rule)))
-    (loop 
+    (loop
        for move in (dialogue-plays dialogue)
        for turn-number from 0
        do
@@ -736,7 +736,7 @@ fail, only whether all of them are satisfied."
 (defun all-next-opponent-moves-at-position (dialogue position)
   (remove-if-not #'opponent-move?
 		 (all-next-moves-at-position dialogue position)))
-  
+
 (defun next-moves (dialogue player stance)
   (next-moves-at-position dialogue player stance (dialogue-length dialogue)))
 
@@ -782,7 +782,7 @@ fail, only whether all of them are satisfied."
 
 (defun freshly-extend-dialogue (dialogue player stance statement reference)
   (let ((new-move (make-move player statement stance reference)))
-    (add-move-to-dialogue (copy-dialogue dialogue) new-move)))			  
+    (add-move-to-dialogue (copy-dialogue dialogue) new-move)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Playing games
@@ -802,7 +802,7 @@ fail, only whether all of them are satisfied."
        (go check-arguments)
      check-arguments
        (cond ((and signature
-		   initial-formula 
+		   initial-formula
 		   (formula? initial-formula))
 	      (setf dialogue (make-dialogue initial-formula
 					    signature
@@ -837,7 +837,7 @@ fail, only whether all of them are satisfied."
        (setf statement nil)
        (until (composite-formula? statement)
 	 (restart-case (setf statement (read-composite-formula))
-	   (try-another-formula (new-formula) 
+	   (try-another-formula (new-formula)
 	     :report "Enter another formula"
 	     :interactive read-new-formula
 	     (setf statement new-formula))))
@@ -924,7 +924,7 @@ fail, only whether all of them are satisfied."
 	 (if open
 	     (msg "Open attacks at this point: ~A" (comma-separated-list open))
 	     (msg "All attacks are closed at this point."))
-	 (go defend))       
+	 (go defend))
      print-then-restart
        (msg-dialogue-so-far dialogue)
        (go start-move)
@@ -961,8 +961,8 @@ fail, only whether all of them are satisfied."
        (msg "- Q to quit,")
        (msg "- R to restart the move.")
        (format t "~A" prompt)
-       (setf index (read-number-in-interval-or-symbol 
-		    0 (1- turn-number) 
+       (setf index (read-number-in-interval-or-symbol
+		    0 (1- turn-number)
 		    'n 'p 'q 'r))
        (when (integerp index)
 	 (setf stance 'a)
@@ -994,8 +994,8 @@ fail, only whether all of them are satisfied."
        (msg "- Q to quit,")
        (msg "- R to restart the move.")
        (format t "~A" prompt)
-       (setf index (read-number-in-interval-or-symbol 
-		    0 (1- turn-number) 
+       (setf index (read-number-in-interval-or-symbol
+		    0 (1- turn-number)
 		    'n 'o 'p 'q 'r))
        (when (integerp index)
 	 (setf stance 'd)
@@ -1012,7 +1012,7 @@ fail, only whether all of them are satisfied."
        (setf statement nil)
        (until (formula? statement)
 	 (restart-case (setf statement (read-formula))
-	   (try-another-formula (new-formula) 
+	   (try-another-formula (new-formula)
 	     :report "Enter a different formula."
 	     :interactive read-new-formula
 	     (setf statement new-formula))))
