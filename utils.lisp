@@ -1,4 +1,4 @@
-;;; utils.lisp For stuff that doesn't fit any where else
+;;; utils.lisp For stuff that doesn't fit anywhere else
 
 (in-package :dialogues)
 
