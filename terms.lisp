@@ -215,7 +215,7 @@
   (let ((funcs (signature-functions signature)))
     (if (null funcs)
 	nil
-	(let (new-term proposed-function)
+	(let (new-term)
 	  (tagbody
 	     (go start)
 	   start
@@ -232,7 +232,6 @@
 	       (let ((selected-func-and-arity (nth (1- index) funcs)))
 		 (destructuring-bind (name . arity)
 		     selected-func-and-arity
-		   (setf proposed-function name)
 		   (if (zerop arity)
 		       (progn
 			 (setf new-term (make-function-term name))
