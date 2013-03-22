@@ -128,10 +128,7 @@
 
 (defun pairs-summing-to (n)
  "All pairs (A . B) of natural numbers summing to N."
- (loop
-    for a from 0 upto n
-    collect (cons a (- n a)) into pairs
-    finally (return pairs)))
+ (loop :for a :from 0 :upto n :collect (cons a (- n a))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Input and output
