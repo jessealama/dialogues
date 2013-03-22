@@ -40,7 +40,6 @@ UCW."
 	       (:file "dialogues")
 	       (:file "queue")
 	       (:file "search")
-	       (:file "figure")
 	       (:file "felscher")
 	       (:file "strategy")
 	       (:file "dialogue-search")))
