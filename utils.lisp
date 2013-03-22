@@ -69,10 +69,6 @@
 	   (equal-length? (cdr lst-1) (cdr lst-2)))
       (null lst-2)))
 
-(defun equal-sets? (set-1 set-2 &key test)
-  (and (subsetp set-1 set-2 :test test)
-       (subsetp set-2 set-1 :test test)))
-
 (defun every-pair? (pred lst-1 lst-2)
   (if lst-1
       (and lst-2

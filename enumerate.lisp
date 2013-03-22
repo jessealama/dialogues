@@ -60,9 +60,9 @@
 	 (let ((mgu (match-formulas formula-1 formula-2)))
 	   (and (not (eq mgu :fail))
 		(let ((full-mgu (complete-substitution mgu vars-1)))
-		  (equal-sets? (substitution-range full-mgu)
-			       vars-2
-			       :test #'equal-atomic-formulas?)))))))
+		  (set-equal (substitution-range full-mgu)
+			     vars-2
+			     :test #'equal-atomic-formulas?)))))))
 
 (defgeneric isomorphic-propositional-formulas? (formula-1 formula-2 &optional bindings))
 
