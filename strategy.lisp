@@ -152,7 +152,7 @@ Proponent."
 (defgeneric leaves (thing)
   (:documentation "Leaf nodes reachable from ROOT"))
 
-(defmethod leaves ((node strategy-node))  
+(defmethod leaves ((node strategy-node))
   (with-slots (children)
       node
     (if (null children)
@@ -238,7 +238,7 @@ the strategy.  If there no such node, return NIL."
   (opponent-move? (move node)))
 
 (defmethod depth ((node strategy-node))
-  (let ((p (parent node))) 
+  (let ((p (parent node)))
     (if (null p)
 	0
 	(1+ (depth p)))))
@@ -309,7 +309,7 @@ the strategy.  If there no such node, return NIL."
        (go check-arguments)
      check-arguments
        (cond ((and signature
-		   initial-formula 
+		   initial-formula
 		   (formula? initial-formula))
 	      (let* ((initial-move (make-move 'p
 					      initial-formula
@@ -350,7 +350,7 @@ the strategy.  If there no such node, return NIL."
        (setf statement nil)
        (until (composite-formula? statement)
 	 (restart-case (setf statement (read-composite-formula))
-	   (try-another-formula (new-formula) 
+	   (try-another-formula (new-formula)
 	     :report "Enter another formula"
 	     :interactive read-new-formula
 	     (setf statement new-formula))))
