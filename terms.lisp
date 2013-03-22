@@ -215,7 +215,7 @@
   (let ((funcs (signature-functions signature)))
     (if (null funcs)
 	nil
-	(let (new-term proposed-function proposed-terms)
+	(let (new-term proposed-function)
 	  (tagbody
 	     (go start)
 	   start
@@ -242,9 +242,7 @@
 			 (loop for i from 1 upto arity
 			    collect (read-term-in-signature signature prompt-stream prompt input-stream) into terms
 			    do
-			      (setf new-term (apply #'make-function-term name terms))
-			    finally
-			      (setf proposed-terms terms))
+			      (setf new-term (apply #'make-function-term name terms)))
 			 (go the-end))))))
 	   the-end)
 	  new-term))))
