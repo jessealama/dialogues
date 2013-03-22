@@ -147,13 +147,6 @@
 		 :predicates (copy-list (signature-predicates sig))
 		 :functions (copy-list (signature-functions sig))))
 
-(defmethod copy-signature ((sig finite-variable-first-order-signature))
-  (make-instance 'finite-variable-first-order-signature
-		 :constants (copy-list (signature-constants sig))
-		 :predicates (copy-list (signature-predicates sig))
-		 :functions (copy-list (signature-functions sig))
-		 :variables (copy-list (signature-variables sig))))
-
 (defmethod print-object ((sig finite-variable-propositional-signature) stream)
   (print-unreadable-object (sig stream :type t)
     (with-slots (predicates) sig
