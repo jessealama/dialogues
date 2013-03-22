@@ -11,7 +11,7 @@
 ;; Singleton pattern: given a name, there should be one and only one
 ;; instance of SYMBOLIC-ATTACK with that name
 (let ((symbolic-attack-table (make-hash-table :test #'equal)))
-  (defmethod make-instance :around ((class (eql 'symbolic-attack)) 
+  (defmethod make-instance :around ((class (eql 'symbolic-attack))
 				    &rest initargs)
     (let ((name-tail (member :name initargs)))
       (if name-tail
