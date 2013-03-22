@@ -244,9 +244,6 @@
 (defun symbolify-here (str)
   (symbolify str (find-package :dialogues)))
 
-;; (defun intern-in-dialogue-package (name)
-;;   (intern name *dialogue-package*))
-
 (defun concat-strings (&rest strings)
   (funcall #'concatenate
 	   'string
