@@ -86,12 +86,6 @@
 	 (funcall fn (car lst-1) (car lst-2))
 	 (map-initial-pairs (cdr lst-1) (cdr lst-2) fn))))
 
-(defun apply-to-product (fun lst-1 lst-2)
-  (let (results)
-    (dolist (elt-1 lst-1 results)
-      (dolist (elt-2 lst-2)
-	(push (funcall fun elt-1 elt-2) results)))))
-
 (defun length-at-most (lst n)
   (cond ((minusp n)
 	 t)

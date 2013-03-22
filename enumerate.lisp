@@ -24,12 +24,12 @@
 			 for (a . b) in sum-pairs
 			 append (let ((ce-a (ce a))
 				      (ce-b (ce b)))
-				  (append (apply-to-product #'make-binary-disjunction
-							    ce-a ce-b)
-					  (apply-to-product #'make-binary-conjunction
-							    ce-a ce-b)
-					  (apply-to-product #'make-implication
-							    ce-a ce-b)))
+				  (append (map-product #'make-binary-disjunction
+						       ce-a ce-b)
+					  (map-product #'make-binary-conjunction
+						       ce-a ce-b)
+					  (map-product #'make-implication
+						       ce-a ce-b)))
 			   into results
 			 finally
 			   (return
@@ -183,12 +183,12 @@ SIGNATURE, modulo some notion of equivalence that depends on SIGNATURE."))
 			 for (a . b) in sum-pairs
 			 append (let ((ce-a (ce a))
 				      (ce-b (ce b)))
-				  (append (apply-to-product #'make-binary-disjunction
-							    ce-a ce-b)
-					  (apply-to-product #'make-binary-conjunction
-							    ce-a ce-b)
-					  (apply-to-product #'make-implication
-							    ce-a ce-b)))
+				  (append (map-product #'make-binary-disjunction
+						       ce-a ce-b)
+					  (map-product #'make-binary-conjunction
+						       ce-a ce-b)
+					  (map-product #'make-implication
+						       ce-a ce-b)))
 			 into results
 			 finally
 			   (return
@@ -211,14 +211,14 @@ SIGNATURE, modulo some notion of equivalence that depends on SIGNATURE."))
 		   append (let ((ce-a (ce a))
 				(ce-b (ce b)))
 			    (append (reduce-formula-list
-				     (apply-to-product #'make-binary-disjunction
-						       ce-a ce-b))
+				     (map-product #'make-binary-disjunction
+						  ce-a ce-b))
 				    (reduce-formula-list
-				     (apply-to-product #'make-binary-conjunction
-						       ce-a ce-b))
+				     (map-product #'make-binary-conjunction
+						  ce-a ce-b))
 				    (reduce-formula-list
-				     (apply-to-product #'make-implication
-						       ce-a ce-b))))
+				     (map-product #'make-implication
+						  ce-a ce-b))))
 		   into results
 		   finally
 		     (return
