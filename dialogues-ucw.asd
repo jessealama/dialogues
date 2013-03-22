@@ -18,6 +18,5 @@ of several aspects. It is based on the UnCommon Web system."
 				     (:file "ucw-applications")
 				     (:file "ucw-ruleset")
 				     (:file "ucw-strategies")
-				     (:file "about")
 				     (:file "ucw-turns")
 				     (:file "ucw-site")))))
