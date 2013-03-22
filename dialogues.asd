@@ -36,7 +36,6 @@ UCW."
 	       (:file "enumerate")
 	       (:file "translations")
 	       (:file "famous-formulas")
-	       (:file "sequent")
 	       (:file "dialogues")
 	       (:file "queue")
 	       (:file "search")
