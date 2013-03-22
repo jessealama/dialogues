@@ -190,7 +190,7 @@
 				       random-move
 				     (if (member random-move next-opponent-attacks)
 					 (call 'turn-editor
-					       
+
 					       :play-style 'play-as-proponent-random-opponent
 					       :extra-rules $trimmed-extra-rules
 					       :heuristics $heuristics
@@ -212,7 +212,7 @@
 		   :game (make-dialogue (uniquify-atoms
 					 (apply-translation selected-translation $formula))
 					sig
-					$actual-ruleset))))))      
+					$actual-ruleset))))))
       (macrolet ((write-formulas (formulas)
 		   `(dolist (famous-formula ,formulas)
 		      (destructuring-bind (long-name short-name formula)
@@ -229,14 +229,14 @@
        :action $take-action
        (<:table
 	:style "border:1px solid;"
-	(<:caption 
+	(<:caption
 	 :style "caption-side:bottom;"
 	 (<:submit
 	  :title "Start playing a game with the selected formula and ruleset."
 	  :value "Let's play"))
 	(<:tbody
 	 :style "border:1px solid;"
-	 (<:tr 
+	 (<:tr
 	  :style "background-color:#F063CD;"
 	  (<:td
 	   :align "center"
@@ -245,8 +245,8 @@
 	   "Formula")
 	  (<:td
 	   (<ucw:select
-	    :id "selected-formula" 
-	    :size 1 
+	    :id "selected-formula"
+	    :size 1
 	    :accessor selected-formula
 	    (<ucw:option
 	     :value t
@@ -315,6 +315,7 @@ selected. The default is the identity translation, which does nothing."
 	    (ruleset-option d-dialogue-rules)
 	    (ruleset-option e-dialogue-rules)
 	    (ruleset-option classical-dialogue-rules)
+	    (ruleset-option classical-dialogue-rules-keiff)
 	    (ruleset-option nearly-classical-dialogue-rules))))
 	 (<:tr
 	  :style "background-color:#7B942E;"
@@ -362,7 +363,7 @@ The ruleset that will be used during the game will be the union of the rules in 
 			 (rule-checkbox-row rule-d10 rule-d10-checked)
 			 (rule-checkbox-row rule-d11 rule-d11-checked)
 			 (rule-checkbox-row rule-d12 rule-d12-checked)
-			 (rule-checkbox-row rule-d13 rule-d13-checked)	 
+			 (rule-checkbox-row rule-d13 rule-d13-checked)
 			 (rule-checkbox-row rule-e rule-e-checked)))
 		       (<:td
 			(<:table
