@@ -100,13 +100,6 @@
 	(t
 	 (length-at-most (cdr lst) (1- n)))))
 
-(defun same-length (lst-1 lst-2)
-  (if (null lst-1)
-      (null lst-2)
-      (if (null lst-2)
-	  nil
-	  (same-length (cdr lst-1) (cdr lst-2)))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Numbers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

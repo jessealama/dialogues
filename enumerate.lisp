@@ -56,7 +56,7 @@
 (defun isomorphic-propositional-formulas (formula-1 formula-2)
   (let ((vars-1 (propositional-formula-variables formula-1))
 	(vars-2 (propositional-formula-variables formula-2)))
-    (and (same-length vars-1 vars-2)
+    (and (length= vars-1 vars-2)
 	 (let ((mgu (match-formulas formula-1 formula-2)))
 	   (and (not (eq mgu :fail))
 		(let ((full-mgu (complete-substitution mgu vars-1)))
@@ -72,7 +72,7 @@
   (declare (ignorable bindings))
   (let ((vars-1 (propositional-formula-variables formula-1))
 	(vars-2 (propositional-formula-variables formula-2)))
-    (if (same-length vars-1 vars-2)
+    (if (length= vars-1 vars-2)
 	(call-next-method)
 	:fail)))
 
