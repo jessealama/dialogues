@@ -232,7 +232,11 @@
     (string= str "")))
 
 (defun contains-whitespace? (str)
-  (cl-ppcre:scan "\\s" str))
+  (find-if #'(lambda (x)
+	       (or (char= x #\Newline)
+		   (char= x #\Tab)
+		   (char= x #\Space)))
+	   str))
 
 (defun symbolify (str &optional (package *package*))
   (intern (string-upcase str) package))
