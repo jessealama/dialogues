@@ -1035,44 +1035,44 @@ sending the output to SUBST-1."
       (acons formula-1 formula-2 nil)))
 
 (defmethod match-formulas ((formula-1 atomic-formula)
-						(formula-2 negation))
+			   (formula-2 negation))
   :fail)
 
 (defmethod match-formulas ((formula-1 atomic-formula)
-						(formula-2 binary-conjunction))
+			   (formula-2 binary-conjunction))
   :fail)
 
 (defmethod match-formulas ((formula-1 atomic-formula)
-						(formula-2 binary-disjunction))
+			   (formula-2 binary-disjunction))
   :fail)
 
 (defmethod match-formulas ((formula-1 atomic-formula)
-						(formula-2 implication))
+			   (formula-2 implication))
   :fail)
 
 (defmethod match-formulas ((formula-1 atomic-formula)
-						(formula-2 equivalence))
+			   (formula-2 equivalence))
   :fail)
 
 (defmethod match-formulas ((formula-1 negation)
-						(formula-2 atomic-formula))
+			   (formula-2 atomic-formula))
   :fail)
 
 (defmethod match-formulas ((formula-1 negation)
-						(formula-2 negation))
+			   (formula-2 negation))
   (match-formulas (argument formula-1)
-				       (argument formula-2)))
+		  (argument formula-2)))
 
 (defmethod match-formulas ((formula-1 negation)
-						(formula-2 binary-conjunction))
+			   (formula-2 binary-conjunction))
   :fail)
 
 (defmethod match-formulas ((formula-1 negation)
-						(formula-2 binary-disjunction))
+			   (formula-2 binary-disjunction))
   :fail)
 
 (defmethod match-formulas ((formula-1 negation)
-						(formula-2 implication))
+			   (formula-2 implication))
   :fail)
 
 (defmethod match-formulas ((formula-1 negation)
