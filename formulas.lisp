@@ -460,7 +460,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 			   :rhs top)
 	    (labels ((make-conjunction (ds)
 		       (if (null (cddr ds))
-			   (make-binary-conjunction (first ds) 
+			   (make-binary-conjunction (first ds)
 						    (second ds))
 			   (make-binary-conjunction (first ds)
 						    (make-conjunction (cdr ds))))))
@@ -468,7 +468,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 
 (defmethod print-object :after ((gen generalization) stream)
   (call-next-method)
-  (format stream 
+  (format stream
 	  "~A[~A]"
 	  (bound-variable gen)
 	  (matrix gen)))
@@ -500,7 +500,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 
 (defun account-for-extension (constants predicate)
   "Make a formula saying that the extension of PREDICATE is exhausted
-by the list CONSTANTS of constant symbols.  E.g, 
+by the list CONSTANTS of constant symbols.  E.g,
 
 \(ACCOUNT-FOR-EXTENSION '(A B C) 'VERTEX\)
 
@@ -555,7 +555,7 @@ should return the formula
   (:report (lambda (condition stream)
 	     (let ((exp (expression condition))
 		   (sig (signature condition)))
-	       (format stream 
+	       (format stream
 		       "The parsed expression~%~%  ~A~%~%does not belong to the signature~%~%  ~A"
 		       exp
 		       sig)))))
@@ -584,7 +584,7 @@ should return the formula
 (defmethod subst-term-for-var-in-term ((term term)
 				       (var sorted-variable)
 				       (target-term unsorted-variable))
-  (error 'incompatible-variable-kinds-error))	 
+  (error 'incompatible-variable-kinds-error))
 
 (defmethod subst-term-for-var-in-term ((term term)
 				       (var sorted-variable)
@@ -598,7 +598,7 @@ should return the formula
 				       (target-term function-term))
   (let ((f (function-symbol target-term))
 	(args (arguments target-term)))
-    (apply #'make-function-term 
+    (apply #'make-function-term
 	   f
 	   (mapcar #'(lambda (x) (subst-term-for-var-in-term term var x))
 		   args))))
@@ -608,15 +608,15 @@ should return the formula
 
 WARNING: No regard is given to variables appearing in TERM that may become
 bound once the substitution is carried out: no renaming is done either
-in TERM or FORMULA."))  
+in TERM or FORMULA."))
 
 (defmethod instantiate (term variable (formula atomic-formula))
   (let ((pred (predicate formula))
 	(args (arguments formula)))
     (apply #'make-atomic-formula
 	   pred
-	   (mapcar #'(lambda (arg) 
-		       (subst-term-for-var-in-term term variable arg)) 
+	   (mapcar #'(lambda (arg)
+		       (subst-term-for-var-in-term term variable arg))
 		   args))))
 
 (defmethod instantiate (term variable (formula binary-connective-formula))
@@ -747,7 +747,7 @@ sending the output to SUBST-1."
       (destructuring-bind (var-2 . value-2)
 	  var-value-2
 	(setf new-subst
-	      (acons var-2 
+	      (acons var-2
 		     (apply-substitution subst-1 value-2 :test test)
 		     new-subst))))
     (dolist (var-value-1 (remove-all-from-domain subst-1
@@ -801,7 +801,7 @@ sending the output to SUBST-1."
   (error 'incompatible-variable-kinds-error))
 
 (defmethod unify ((var-1 sorted-variable) (var-2 unsorted-variable))
-  (error 'incompatible-variable-kinds-error))  
+  (error 'incompatible-variable-kinds-error))
 
 (defmethod unify ((var-1 sorted-variable) (var-2 sorted-variable))
   (let ((sort-1 (variable-sort var-1))
@@ -1242,11 +1242,11 @@ value."
 			    (form-2 binary-connective-formula))
   nil)
 
-(defmethod equal-formulas? ((form-1 negation) 
+(defmethod equal-formulas? ((form-1 negation)
 			    (form-2 multiple-arity-connective-formula))
   nil)
 
-(defmethod equal-formulas? ((form-1 negation) 
+(defmethod equal-formulas? ((form-1 negation)
 			    (form-2 generalization))
   nil)
 
@@ -1415,14 +1415,14 @@ value."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-condition malformed-formula-error (error)
-  ((text :initarg :text 
+  ((text :initarg :text
 	 :reader malformed-formula-error-text))
   (:report (lambda (condition stream)
 	     (let ((text (malformed-formula-error-text condition)))
 	       (if (null text)
 		   (format stream
 			   "Weird: no text was given.~%")
-		   (format stream 
+		   (format stream
 			   "The given text,~%~%  ~A,~%~%is not a formula."
 			   text))))))
 
@@ -1431,9 +1431,9 @@ value."
        :reader operator))
   (:report (lambda (condition stream)
 	     (let ((op (operator condition)))
-	       (format stream 
+	       (format stream
 		       "The operator ~A expects at least one argument, but none were supplied."
-		       op)))))		       
+		       op)))))
 
 (define-condition parse-form-at-least-two-args-expected-but-only-one-supplied-error (error)
   ((op :initarg :op
@@ -1443,7 +1443,7 @@ value."
   (:report (lambda (condition stream)
 	     (let ((op (operator condition))
 		   (first-arg (first-argument condition)))
-	       (format stream 
+	       (format stream
 		       "The operator ~A requires at least two arguments, but only one,~%~%  ~A,~%~%was supplied."
 		       op first-arg)))))
 
@@ -1456,10 +1456,10 @@ value."
 	     (let* ((op (operator condition))
 		    (args (arguments condition))
 		    (num-args (length args)))
-	       (format stream 
+	       (format stream
 		       "The unary operator ~A expects exactly one argument, but multiple arguments were supplied:~%~%"
 		       op)
-	       (loop 
+	       (loop
 		  for i from 1 upto num-args
 		  for arg in args
 		  do
@@ -1475,7 +1475,7 @@ value."
 		    (args (arguments condition))
 		    (num-args (length args)))
 	       (format stream "The binary operator ~A expects exactly two arguments, but at least three arguments were supplied:~%~%" op)
-	       (loop 
+	       (loop
 		  for i from 1 upto num-args
 		  for arg in args
 		  do
@@ -1734,14 +1734,14 @@ value."
     response))
 
 (define-condition non-atomic-formula-error (error)
-  ((text :initarg :text 
+  ((text :initarg :text
 	 :reader non-atomic-formula-error-text))
   (:report (lambda (condition stream)
 	     (let ((text (non-atomic-formula-error-text condition)))
 	       (if (null text)
 		   (format stream
 			   "Weird: no text was given (or text is simply NIL)")
-		   (format stream 
+		   (format stream
 			   "The given text,~%~%  ~A,~%~%is an atomic formula."
 			   text))))))
 
@@ -1751,7 +1751,7 @@ value."
 	(error 'non-atomic-formula-error :text input)
 	input)))
 
-(defun read-composite-formula-in-signature (signature 
+(defun read-composite-formula-in-signature (signature
 					    &optional (stream *standard-input*))
   (let ((formula (read-composite-formula stream)))
     (if (belongs-to-signature? signature formula)
