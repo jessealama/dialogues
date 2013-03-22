@@ -1,12 +1,4 @@
-
-(in-package :cl-user)
-
-(defpackage :dialogues-asd
-  (:use :cl :asdf))
-
-(in-package :dialogues-asd)
-
-(defsystem :dialogues
+(asdf:defsystem :dialogues
   :description "A system for working with and exploring Lorenzen dialogue games"
   :long-description "This system is intended to offer a web site where
 one can explore logic through Lorenzen dialogue games.  (It may also
