@@ -1300,10 +1300,6 @@ value."
   nil)
 
 (defmethod equal-formulas? ((form-1 implication)
-			    (form-2 equivalence))
-  nil)
-
-(defmethod equal-formulas? ((form-1 implication)
 			    (form-2 binary-disjunction))
   nil)
 
