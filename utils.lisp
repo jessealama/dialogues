@@ -77,11 +77,11 @@
       (null lst-2)))
 
 (defun first-n (n lst)
-  (loop 
+  (loop
      for i from 1 upto n
      for elt in lst
      collect elt into result
-     finally (return result))) 
+     finally (return result)))
 
 (defun map-initial-pairs (lst-1 lst-2 fn)
   (cond ((null lst-1)
@@ -155,7 +155,7 @@
   (if lst
       (let ((head (car lst))
 	    (tail (cdr lst)))
-	(concatenate 'string 
+	(concatenate 'string
 		     (if tail
 			 (format nil "~A, " head)
 			 (format nil "~A" head))
@@ -202,7 +202,7 @@
     response))
 
 (defun read-number-in-interval (a b)
-  (let (response)    
+  (let (response)
     (until (and (numberp response)
 		(<= a response)
 		(<= response b))
