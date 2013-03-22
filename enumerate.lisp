@@ -4,7 +4,7 @@
 
 (defgeneric complete-enumeration (depth signature))
 
-(defmethod complete-enumeration (depth 
+(defmethod complete-enumeration (depth
 				 (sig finite-variable-propositional-signature))
   (let ((earlier-values (make-array (list (1+ depth))
 				    :initial-element nil)))
@@ -19,7 +19,7 @@
 		    preds))
 		 (t
 		  (if (null (aref earlier-values depth))
-		      (loop 
+		      (loop
 			 with sum-pairs = (pairs-summing-to (1- depth))
 			 for (a . b) in sum-pairs
 			 append (let ((ce-a (ce a))
@@ -138,7 +138,7 @@
 						    (rhs formula-2)
 						    (append iso-lhs bindings))
 		:fail)))
-      :fail))  
+      :fail))
 
 (defgeneric reduced-enumeration (depth signature)
   (:documentation "A list of all formulas of depth DEPTH from
@@ -178,7 +178,7 @@ SIGNATURE, modulo some notion of equivalence that depends on SIGNATURE."))
 		  preds))
 		 (t
 		  (if (null (aref earlier-complete-values depth))
-		      (loop 
+		      (loop
 			 with sum-pairs = (pairs-summing-to (1- depth))
 			 for (a . b) in sum-pairs
 			 append (let ((ce-a (ce a))
@@ -205,7 +205,7 @@ SIGNATURE, modulo some notion of equivalence that depends on SIGNATURE."))
 		  (when (null (aref earlier-reduced-values 0))
 		    (setf (aref earlier-reduced-values 0) reduced-preds))))
 	       ((null (aref earlier-reduced-values depth))
-		(loop 
+		(loop
 		   with sum-pairs = (pairs-summing-to (1- depth))
 		   for (a . b) in sum-pairs
 		   append (let ((ce-a (ce a))
@@ -227,5 +227,5 @@ SIGNATURE, modulo some notion of equivalence that depends on SIGNATURE."))
 				     (mapcar #'negate (re (1- depth)))))))))
 	 (aref earlier-reduced-values depth)))
       (re depth))))
-  
+
 ;;; enumerate.lisp ends here
