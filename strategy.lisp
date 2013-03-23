@@ -237,9 +237,6 @@ the strategy.  If there no such node, return NIL."
 	0
 	(1+ (depth p)))))
 
-(defun strategy-node-depth (node)
-  )
-
 (define-constant +strategy-max-depth+
     75
   :test #'=
