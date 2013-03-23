@@ -14,12 +14,6 @@
     :initarg :parent
     :initform nil
     :documentation "The parent of this node")
-   (depth
-    :type (or null fixnum)
-    :accessor depth
-    :initarg :depth
-    :initform nil
-    :documentation "The depth of this node from the root (we start counting at 0).")
    (children
     :type list
     :accessor children
