@@ -1588,27 +1588,6 @@ value."
 	  (error 'parse-form-at-least-two-args-expected-but-only-one-supplied-error
 		 :operator op)
 	  (if (null (cddr arguments))
-	      (let ((var (form->formula (car arguments))))
-		(if (eql (class-of var) 'unsorted-variable-term)
-		    (let ((matrix (form->formula (cadr arguments))))
-		      (if (eql (class-of matrix) 'formula)
-			  (make-universal var matrix)
-			  (error 'parse-form-formula-expected-error
-				 :operator op
-				 :form (cadr arguments))))
-		    (error 'parse-form-variable-expected
-			   :operator op
-			   :form (car arguments))))
-	      (error 'parse-form-exactly-two-args-expected-but-at-least-three-supplied-error
-		     :operator op)))))
-
-(defmethod op-and-args->formula ((op (eql 'all)) arguments)
-  (if (null arguments)
-      (error 'parse-form-empty-argument-list-error :operator op)
-      (if (null (cdr arguments))
-	  (error 'parse-form-at-least-two-args-expected-but-only-one-supplied-error
-		 :operator op)
-	  (if (null (cddr arguments))
 	      (let ((var (form->term (car arguments))))
 		(if (eql (class-of var) 'unsorted-variable-term)
 		    (let ((matrix (form->formula (cadr arguments))))
