@@ -512,9 +512,6 @@
    :predicate
    (loop
       with len = (dialogue-length dialogue)
-      for move in (if final-move-only
-		      (subseq (dialogue-plays dialogue) (1- len))
-		      (dialogue-plays dialogue))
       for i from (if final-move-only
 		     (1- len)
 		     0)
