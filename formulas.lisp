@@ -1857,7 +1857,7 @@ value."
     (lex< (format nil "~a" pred-1)
 	  (format nil "~a" pred-2))))
 
-(defmethod formula-< ((formula-1 atomic-formula) formula-2)
+(defmethod formula-< ((formula-1 atomic-formula) (formula-2 t))
   t)
 
 (defmethod formula-< ((formula-1 unary-connective-formula) (formula-2 atomic-formula))
