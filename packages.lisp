@@ -55,6 +55,12 @@
 	   #:SCOTT-FORMULA
 	   #:SMETANICH-FORMULA
 
+	   ;; symbolic attacks
+	   #:*ATTACK-LEFT-CONJUNCT*
+	   #:*ATTACK-RIGHT-CONJUNCT*
+	   #:*WHICH-INSTANCE?*
+	   #:*WHICH-DISJUNCT?*
+
 	   ;; server configuration
 	   #:*DIALOGUE-SERVER-PORT*))
 
