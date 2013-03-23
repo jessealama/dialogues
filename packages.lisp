@@ -62,6 +62,24 @@
 	   #:*WHICH-INSTANCE?*
 	   #:*WHICH-DISJUNCT?*
 
+	   ;; signatures
+	   #:*ALPHABETIC-PROPOSITIONAL-SIGNATURE*
+
+	   ;; translations
+	   #:goedel-gentzen-translation
+	   #:double-negate-translation
+	   #:double-negate-all-subformulas-translation
+	   #:kuroda-translation
+	   #:negate-atomic-subformulas-translation
+	   #:double-negate-atomic-subformulas-translation
+	   #:self-conjoin-atomic-subformulas-translation
+	   #:self-disjoin-atomic-subformulas-translation
+	   #:contrapositivify-translation
+	   #:contrapositive-translation
+	   #:identity-translation
+	   #:atomic->excluded-middle-translation
+	   #:converse-translation
+
 	   ;; server configuration
 	   #:*DIALOGUE-SERVER-PORT*))
 
