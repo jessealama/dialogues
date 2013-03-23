@@ -1,6 +1,6 @@
 ;;; ucw-turns.lisp UCW functionality for taking turns in dialogues
 
-(in-package :dialogues)
+(in-package :dialogues-ucw)
 
 (defclass game-component ()
   ((game :accessor game

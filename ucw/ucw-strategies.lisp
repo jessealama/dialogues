@@ -1,6 +1,6 @@
 ;;; ucw-strategies UCW functionality around strategies
 
-(in-package :dialogues)
+(in-package :dialogues-ucw)
 
 (defcomponent strategy-editor (ruleset-component)
   ((strategy :accessor strategy

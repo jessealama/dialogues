@@ -1,6 +1,6 @@
 ;;; ucw-formulas UCW functionality for formulas, terms, signatures, and translations
 
-(in-package :dialogues)
+(in-package :dialogues-ucw)
 
 (defclass signature-component ()
   ((signature :initarg :signature

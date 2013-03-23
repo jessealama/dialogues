@@ -1,6 +1,6 @@
 ;;; ucw-ruleset.lisp UCW functionality for rulesets
 
-(in-package :dialogues)
+(in-package :dialogues-ucw)
 
 (defclass ruleset-component ()
   ((ruleset :initarg :ruleset

@@ -1,5 +1,5 @@
 
-(in-package :dialogues)
+(in-package :dialogues-ucw)
 
 (defparameter *maintainer-email* "j.alama@fct.unl.pt")
 

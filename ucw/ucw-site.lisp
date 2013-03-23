@@ -1,6 +1,6 @@
 ;;; ucw-site.lisp A UCW-based dialogue site
 
-(in-package :dialogues)
+(in-package :dialogues-ucw)
 
 (defentry-point "" (:application *dialogue-application*)
     ()

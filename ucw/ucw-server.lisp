@@ -1,5 +1,5 @@
 
-(in-package :dialogues)
+(in-package :dialogues-ucw)
 
 ;; Server configuration
 
