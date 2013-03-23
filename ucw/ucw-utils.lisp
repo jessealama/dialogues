@@ -9,7 +9,7 @@
 ;;; Error handling
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;; A proposal for handling conditions. See 
+;;; A proposal for handling conditions. See
 ;;;
 ;;;  http://paste.lisp.org/display/111175
 ;;;
@@ -40,9 +40,9 @@
 			       `(,typespec (let ,(when lambda-list
 						       `((,(car lambda-list) ,res)))
 					     ,@forms)))))
-		       
+
 		       clauses))
-	   
+
 	   (apply #'values ,res)))))
 
 (defun html-quote (str)

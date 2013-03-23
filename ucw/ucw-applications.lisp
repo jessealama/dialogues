@@ -22,7 +22,7 @@
     (<:blockquote
      (<:as-html condition))
     (<:p "Please " (<:a :href mailto-uri "notify the site maintainer") " about this.")
-  (<:p "What next?  You can either go back with your browser or simply " 
+  (<:p "What next?  You can either go back with your browser or simply "
        (<ucw:a :action (call 'start-game-component)
 	       "quit and start over") ".")))
 

@@ -50,7 +50,7 @@ that all the rules in your edited ruleset are satisfied.")
 (defparameter *available-rulesets*
   (append
    ;; main rulesets
-   (list d-dialogue-rules 
+   (list d-dialogue-rules
 	 e-dialogue-rules
 	 classical-dialogue-rules
 	 nearly-classical-dialogue-rules)
