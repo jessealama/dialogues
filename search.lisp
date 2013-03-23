@@ -67,14 +67,14 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
       (progn
 	(setf (node-expanded? node) t)
 	(incf (problem-num-expanded problem))
-	(loop 
+	(loop
 	   with nodes = nil
 	   for successor in (successors problem node)
 	   do
 	     (destructuring-bind (action . state)
 		 successor
-	       (push (make-node :parent node 
-				:action action 
+	       (push (make-node :parent node
+				:action action
 				:state state
 				:depth (1+ (node-depth node)))
 		     nodes))
@@ -110,7 +110,7 @@ linear sequence), return NIL."
 	    (first-splitting-descendent (first succs))
 	    node))))
 
-(defun make-initial-queue (initial-state 
+(defun make-initial-queue (initial-state
 			   &key (queueing-function #'enqueue-at-end))
   (let ((q (make-empty-queue)))
     (funcall queueing-function q (list (make-node :state initial-state)))
@@ -191,7 +191,7 @@ QUEUING-FN decides which nodes to look at first."
   "Give the sequence of actions that produced NODE.  When NODE is a
 solution to a search problem, this function gives a \"printout\" of
 how the node was obtained, starting from an initial node."
-  (labels ((explain-backwards (n) 
+  (labels ((explain-backwards (n)
 	     (when (node-parent n)
 	       (cons (node-action n)
 		     (explain-backwards (node-parent n))))))
@@ -258,27 +258,25 @@ unexpanded."
 	    (expand current-node problem))
 	  (dolist (successor (node-successors current-node))
 	    (push successor to-do)))))))
-						       
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Avoiding repeated states
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun looping-node? (node &optional depth (test #'equal))
   "Did this node's state appear previously in the path?"
-  (let ((n (node-parent node)))
-    (if depth
-	(loop for i from 1 to depth do
-	     (when (null n)
-	       (return nil))
-	     (when (funcall test (node-state node) (node-state n))
-	       (return t))
-	     (setf n (node-parent n)))
-	(loop for i = 1 do
-	     (when (null n)
-	       (return nil))
-	     (when (funcall test (node-state node) (node-state n))
-	       (return t))
-	     (setf n (node-parent n))))))
+  (loop
+     :with n = (node-parent node)
+     :with i = 1
+     :do
+     (when (and depth (> i depth))
+       (return nil))
+     (when (null n)
+       (return nil))
+     (when (funcall test (node-state node) (node-state n))
+       (return t))
+     (setf n (node-parent n))
+     (incf i)))
 
 (defun return-node? (node &optional (test #'equal))
   "Is this a node that returns to the state it just came from?"
@@ -310,7 +308,7 @@ the path."
   "Do depth-first search, but eliminate paths with repeated states."
   (general-search problem
 		  #'(lambda (old-q nodes)
-		      (enqueue-at-front old-q 
+		      (enqueue-at-front old-q
 					(eliminate-cycles nodes
 							  test)))))
 
@@ -318,7 +316,7 @@ the path."
   "Do depth-first search, but eliminate paths with repeated states."
   (general-search-for-bottom problem
 			     #'(lambda (old-q nodes)
-				 (enqueue-at-front old-q 
+				 (enqueue-at-front old-q
 						   (eliminate-cycles nodes
 								     test)))))
 
@@ -328,7 +326,7 @@ state."
   (general-search problem
 		  #'(lambda (old-q nodes)
 		      (enqueue-at-end old-q (eliminate-returns nodes)))))
-			      
+
 (defun no-duplicates-breadth-first-search (problem)
   "Do breadth-first search, but eliminate all duplicate states."
   (let ((table (make-hash-table :test #'equal)))
