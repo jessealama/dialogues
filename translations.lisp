@@ -104,7 +104,7 @@
 				      (kuroda-helper (matrix form))))
 		   ((universal-generalization? form)
 		    (make-universal (bound-variable form)
-				    (negate 
+				    (negate
 				     (negate
 				      (kuroda-helper (matrix form)))))))))
     (negate (negate (kuroda-helper formula)))))
@@ -174,7 +174,7 @@
   (:documentation "Replace all atomic subformulas p by (p &and; p)"))
 
 (defmethod self-conjoin-atomic-subformulas ((formula atomic-formula))
-  (make-binary-conjunction formula formula))			   
+  (make-binary-conjunction formula formula))
 
 (defmethod self-conjoin-atomic-subformulas ((formula unary-connective-formula))
   (make-instance (class-of formula)
@@ -201,7 +201,7 @@
   (:documentation "Replace all atomic subformulas p by (p &or; p)"))
 
 (defmethod self-disjoin-atomic-subformulas ((formula atomic-formula))
-  (make-binary-disjunction formula formula))			   
+  (make-binary-disjunction formula formula))
 
 (defmethod self-disjoin-atomic-subformulas ((formula unary-connective-formula))
   (make-instance (class-of formula)
