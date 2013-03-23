@@ -164,7 +164,7 @@ attacks which, being symbols, do qualify as terms."
       (and (eq statement-1 *attack-right-conjunct*)
 	   (not (eq statement-2 *attack-left-conjunct*)))))
 
-(defmethod statement-< ((statement-1 symbolic-attack) statement-2)
+(defmethod statement-< ((statement-1 symbolic-attack) (statement-2 t))
   nil)
 
 (defmethod statement-< ((statement-1 formula) (statement-2 symbolic-attack))
