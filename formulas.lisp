@@ -1829,8 +1829,6 @@ value."
 (defgeneric uniquify-atoms (formula)
   (:documentation "Ensure that all the atoms of FORMULA are distinct objects, even if they have the same print name.  (We treat only the propositional case.)"))
 
-(defgeneric uniquify-atoms (formula))
-
 (defmethod uniquify-atoms ((atom atomic-formula))
   (make-instance 'atomic-formula
 		 :predicate (predicate atom)
