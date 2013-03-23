@@ -8,19 +8,6 @@
 	      :type finite-variable-propositional-signature
 	      :accessor signature)))
 
-;; (defgeneric render-signature (signature))
-
-;; (defmethod render-signature ((sig finite-variable-propositional-signature))
-;;   (<:em "Predicates: ")
-;;   (with-slots (predicates) sig
-;;     (if (null predicates)
-;; 	(<:em "(none)")
-;; 	(let ((first (car predicates)))
-;; 	  (<:em (<:as-html first))
-;; 	  (dolist (pred (cdr predicates))
-;; 	    (<:as-is ", ")
-;; 	    (<:em (<:as-html pred)))))))
-
 (defcomponent formula-corrector (signature-component)
   ((text :initarg :text :accessor formula-corrector-text)))
 
