@@ -333,8 +333,8 @@ The list of heuristic rules can be used to help cut down the set of possibilitie
 The ruleset that will be used during the game will be the union of the rules in the chosen base rule set, together with whatever optional, extra rules were chosen.  We have a adopted a 'the-user-is-always-right' approach: there is no check for whether the constructed ruleset is 'consistent' or has any logical significance."
 		"Extras")
 	  (<:td (if (null (ruleset self))
-		    ((<:table :rules "cols"
-			      :summary "The purpose of this table is to augment the ruleset that was chosen in the previous file.")
+		    (<:table ;; :rules "cols"
+		     :summary "The purpose of this table is to augment the ruleset that was chosen in the previous file."
 		     (<:thead
 		      (<:colgroup
 		       (<:col)
@@ -358,7 +358,7 @@ The ruleset that will be used during the game will be the union of the rules in 
 		       :valign "center"
 		       (<:td
 			(<:table
-			 :rules "rows"
+			 ;; :rules "rows"
 			 (rule-checkbox-row rule-d10 rule-d10-checked)
 			 (rule-checkbox-row rule-d11 rule-d11-checked)
 			 (rule-checkbox-row rule-d12 rule-d12-checked)
@@ -366,7 +366,7 @@ The ruleset that will be used during the game will be the union of the rules in 
 			 (rule-checkbox-row rule-e rule-e-checked)))
 		       (<:td
 			(<:table
-			 :rules "rows"
+			 ;; :rules "rows"
 			 (rule-checkbox-row rule-d10-literal rule-d10-literal-checked)
 			 (rule-checkbox-row rule-d11-most-recent-attack rule-d11-most-recent-attack-checked)
 			 (rule-checkbox-row rule-d11-queue rule-d11-queue-checked)
@@ -379,7 +379,7 @@ The ruleset that will be used during the game will be the union of the rules in 
 			 (rule-checkbox-row rule-d14 rule-d14-checked)))
 		       (<:td
 			(<:table
-			 :rules "rows"
+			 ;; :rules "rows"
 			 (rule-checkbox-row rule-no-repetitions rule-no-repetitions-checked)
 			 (rule-checkbox-row opponent-no-repeats opponent-no-repeats-checked)
 			 (rule-checkbox-row proponent-no-repeats proponent-no-repeats-checked))))))
