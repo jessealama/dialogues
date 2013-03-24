@@ -52,12 +52,13 @@
 	 (player-choice (if (eql player 'p)
 			    (first-proponent-choice strategy)
 			    (first-opponent-choice strategy))))
-    ((<:table
-     :rules "cols"
+    (<:table
+     ;; :rules "cols"
      :width "100%"
      :frame "box"
      :cellpadding "5"
-     :bgcolor "IndianRed")
+     ;; :bgcolor "IndianRed"
+
      (<:colgroup
       (<:col)
       (<:col)
@@ -74,8 +75,8 @@
        (<:th "Heuristics")))
      (<:tbody
       (<:tr
-       ((<:td :nowrap "nowrap"
-	      :align "center")
+       (<:td ;; :nowrap "nowrap"
+	     ;; :align "center"
 	     (<:strong (<:as-html (name (ruleset strategy))))
 	     ": "
 	     (<:as-html (description (ruleset strategy))))
@@ -84,8 +85,8 @@
 	(if (eql player 'p)
 	    (<:strong "P")
 	    (<:strong "O")))
-       ((<:td :nowrap "nowrap"
-	      :align "center")
+       (<:td ;; :nowrap "nowrap"
+	:align "center"
 	     (<:as-is (render-fancily (move-statement (move (root strategy))))))
        (if extra-rules
 	   (<:td
@@ -157,8 +158,9 @@
 	     (<:as-html depth))
        (<:td :align "center"
 	     (<:strong (<:as-html player)))
-       ((<:td :align "left"
-	      :nowrap "nowrap")
+       (<:td :align "left"
+	     ;; :nowrap "nowrap"
+
 	     (<:as-is (render-fancily statement)))
        (<:td :align "left"
 	     (unless (initial-move? move)
@@ -196,8 +198,8 @@
 	   (render-segment-from-to-with-padding-as-row strategy leaf 0)))
 	(let* ((succs (node-successors first-splitter))
 	       (num-succs (length succs)))
-	  ((<:table :rules "groups"
-		    :frame "void")
+	  (<:table ;; :rules "groups"
+	   :frame "void"
 	   (<:thead
 	    (render-segment-from-to-with-padding-as-row strategy first-splitter (floor (/ num-succs 2))))
 	   (<:tbody
@@ -260,7 +262,8 @@
   (let ((id (format nil "~a-radio" ruleset)))
     `(<:tr
       :valign "top"
-      ((<:td :nowrap "nowrap")
+      (<:td ;; :nowrap "nowrap"
+
        (<ucw:input :type "radio"
 		   :name "selected-rules"
 		   :accessor (name ,ruleset)
@@ -299,25 +302,26 @@
   (with-slots (player statement stance reference)
       move
     (if color
-	((<:tr
-	  :nowrap "nowrap"
-	  :valign "top"
-	  :bgcolor color
-	  :style "color:white;")
+	(<:tr
+	 ;; :nowrap "nowrap"
+	 :valign "top"
+	 ;; :bgcolor color
+	 :style "color:white;"
 	 (<:td (<:as-html index))
 	 (<:td (<:strong (<:as-html player)))
-	 ((<:td :nowrap "nowrap")
+	 (<:td ;; :nowrap "nowrap"
+
 	  (<:as-is (render-fancily statement)))
 	 (unless (initial-move? move)
 	   (if (attacking-move? move)
 	       (<:td (<:as-html "[A," reference "]"))
 	       (<:td (<:as-html "[D," reference "]")))))
-	((<:tr :nowrap "nowrap"
-	       :valign "top")
+	(<:tr ;; :nowrap "nowrap"
+	 :valign "top"
 	 (<:td (<:as-html index))
 	 (<:td (<:strong (<:as-html player)))
 	 (<:td
-	  :nowrap "nowrap"
+	  ;; :nowrap "nowrap"
 	  (<:as-is (render-fancily statement)))
 	 (unless (initial-move? move)
 	   (if (attacking-move? move)
@@ -330,12 +334,12 @@
     (with-slots (player statement stance reference)
 	move
       (if (member node alternatives)
-	  ((<:tr :bgcolor "indigo"
-		 :nowrap "nowrap"
-		 :valign "top"
-		 :style "font-style:bold;color:white;")
+	  (<:tr ;; :bgcolor "indigo"
+	   ;; :nowrap "nowrap"
+	   :valign "top"
+	   :style "font-style:bold;color:white;"
 	   (<:td
-	    :nowrap "nowrap"
+	    ;; :nowrap "nowrap"
 	    :align "center"
 	    (<ucw:a
 	     :action (setf (children (parent node))
@@ -382,9 +386,9 @@
        $padding
        (<:td
 	:align "center"
-	((<:table :bgcolor "silver"
-		  :cellspacing "0"
-		  :style "align: center;")
+	(<:table ;; :bgcolor "silver"
+	 :cellspacing "0"
+	 :style "align: center;"
 	 (loop
 	    for current-node = begin then (first (children current-node))
 	    do
@@ -396,9 +400,9 @@
 
 (defun render-node-with-alternative-hiding-closed-branches (node alternative ruleset)
   (if (branch-closed? node)
-      ((<:table :style "align: center;"
-		:bgcolor "silver"
-		:cellspacing "0")
+      (<:table :style "align: center;"
+	       ;; :bgcolor "silver"
+	       :cellspacing "0"
        (render-strategy-node-as-table-row node nil)
        (<:tr
 	(<:td
@@ -433,8 +437,9 @@
       (let ((first-splitter (first-splitter node)))
 	(if (null first-splitter)
 	    (let ((leaf (first (leaves node))))
-	      ((<:table :style "align: center;"
-			:bgcolor "silver")
+	      (<:table :style "align: center;"
+		       ;; :bgcolor "silver"
+
 	       (render-segment-with-padding-as-row node
 						   leaf
 						   0
@@ -445,10 +450,10 @@
 				       #'move-<
 				       :key #'move))
 		   (num-succs (length succs)))
-	      ((<:table :rules "groups"
-			:frame "void"
-			:bgcolor "silver"
-			:style "align: center;")
+	      (<:table ;; :rules "groups"
+		       :frame "void"
+		       ;; :bgcolor "silver"
+		       :style "align: center;"
 		       (<:thead
 			(render-segment-with-padding-as-row node
 							    first-splitter
@@ -490,8 +495,9 @@
   (let ((first-splitter (first-splitter node)))
     (if (null first-splitter)
 	(let ((leaf (first (leaves node))))
-	  ((<:table :style "align: center;"
-		    :bgcolor "silver")
+	  (<:table :style "align: center;"
+		   ;; :bgcolor "silver"
+
 	   (render-segment-with-padding-as-row node
 					       leaf
 					       0
@@ -502,10 +508,10 @@
 				   #'move-<
 				   :key #'move))
 	       (num-succs (length succs)))
-	  ((<:table :rules "groups"
-		    :frame "void"
-		    :bgcolor "silver"
-		    :style "align: center;")
+	  (<:table ;; :rules "groups"
+	   :frame "void"
+	   ;; :bgcolor "silver"
+	   :style "align: center;"
 	    (<:thead
 	     (render-segment-with-padding-as-row node
 						 first-splitter
@@ -521,7 +527,7 @@
 		       for i from 0 upto (1- cleft-point)
 		       for succ = (nth i succs-sorted)
 		       do
-			 ((<:td :align "center")
+			 (<:td :align "center"
 			   (render-node-with-alternative succ
 							 alternative)))
 		    (<:td)
@@ -530,13 +536,13 @@
 		       for i from cleft-point upto (1- num-succs)
 		       for succ = (nth i succs-sorted)
 		       do
-			 ((<:td :align "center")
+			 (<:td :align "center"
 			   (render-node-with-alternative succ
 							 alternative))))
 		  (loop
 		     for succ in succs-sorted
 		     do
-		       ((<:td :align "center")
+		       (<:td :align "center"
 		         (render-node-with-alternative succ
 						       alternative)))))))))))
 
@@ -548,8 +554,8 @@
    :style "align: center;background-color:silver;"
    :frame "box"
    :summary "The strategy so far."
-   ((<:caption :style "background-color:silver;font-style:oblique;"
-	       :align "bottom")
+   (<:caption :style "background-color:silver;font-style:oblique;"
+	      ;; :align "bottom"
     "The strategy so far.  Nodes in "
     (<:span
      :style "background-color:FireBrick;color:white;"
@@ -569,7 +575,7 @@
      "gold")
     " are yet to be explored.")
    (<:tr
-    ((<:td :align "center")
+    (<:td :align "center"
      (render-node-with-alternative-hiding-closed-branches (root strategy) alternative (ruleset strategy))))))
 
 (defun render-strategy-with-alternative (strategy alternative)
@@ -580,8 +586,8 @@
    :style "align:center;background-color:silver;"
    :frame "box"
    :summary "The strategy so far."
-   ((<:caption :style "background-color:silver;font-style:oblique;"
-	       :align "bottom")
+   (<:caption :style "background-color:silver;font-style:oblique;"
+	      ;; :align "bottom"
     "The strategy so far.  Nodes in "
     (<:span
      :style "background-color:FireBrick;color:white;"
