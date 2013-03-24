@@ -254,13 +254,13 @@
       (-> (v p (& p q)) p))
 
   (define-famous-formula disjunctive-absorption-disjunctive-consequent
-      (converse disjunctive-absorption-disjunctive-antecedent))
+      (-> p (v p (& p q))))
 
   (define-famous-formula conjunctive-absorption-conjunctive-antecedent
       (-> (& p (v p q)) p))
 
   (define-famous-formula conjunctive-absorption-conjunctive-consequent
-      (converse conjunctive-absorption-conjunctive-antecedent))
+      (-> p (& p (v p q))))
 
   (define-famous-formula frege-formula
       (-> (-> p (-> q r))
