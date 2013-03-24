@@ -191,7 +191,7 @@
      (<:td))))
 
 (defun render-strategy (strategy)
-  (let ((first-splitter (first-splitting-descendent strategy)))
+  (let ((first-splitter (first-splitting-descendant strategy)))
     (if (null first-splitter)
 	(let ((leaf (first (leaf-nodes strategy))))
 	  (<:table
