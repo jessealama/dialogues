@@ -14,30 +14,30 @@
       (s (make-atomic-formula 's)))
   (define-famous-formula peirce-formula
       (-> (-> (-> p q) p) p))
-  
-  (define-famous-formula excluded-middle 
+
+  (define-famous-formula excluded-middle
       (v p (neg p)))
-  
-  (define-famous-formula dummett-formula 
+
+  (define-famous-formula dummett-formula
       (v (-> p q) (-> q p)))
-  
+
   (define-famous-formula double-negation-introduction
       (-> p
 	  (neg (neg p))))
-  
+
   (define-famous-formula double-negation-elimination
       (-> (neg (neg p)) p))
-  
+
   (define-famous-formula k-formula
       (-> p (-> q p)))
-  
+
   (define-famous-formula b-formula
       (->
        (-> p q)
        (->
 	(-> r p)
 	(-> r q))))
-  
+
   (define-famous-formula c-formula
       (->
        (-> p
@@ -45,7 +45,7 @@
        (-> q
 	   (-> p r))))
 
-  (define-famous-formula w-formula 
+  (define-famous-formula w-formula
       (->
        (-> p
 	   (-> p q))
@@ -63,15 +63,15 @@
       (v
        (neg p)
        (neg (neg p))))
-  
-  (define-famous-formula scott-formula 
+
+  (define-famous-formula scott-formula
       (-> (-> (-> (neg (neg p)) p) (v p (neg p)))
 	  (v (neg p) (neg (neg p)))))
 
-  (define-famous-formula smetanich-formula 
-      (-> (-> (neg q) p) 
+  (define-famous-formula smetanich-formula
+      (-> (-> (neg q) p)
 	  (-> (-> (-> p q) p) p)))
-  
+
   (define-famous-formula de-morgan-not-and-implies-or-not
       (-> (neg (& p q))
 	  (v (neg p) (neg q))))
@@ -128,7 +128,7 @@
 
   (define-famous-formula modus-ponens
       (-> (& (-> p q) p) q))
-  
+
   (define-famous-formula modus-tollens
       (-> (& (-> p q) (neg q)) (neg p)))
 
