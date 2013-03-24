@@ -6,7 +6,7 @@
   `(progn
      (defparameter ,name ,definition)
      (defmethod form->formula ((op (eql ',name)))
-       ,name)))
+       ,definition)))
 
 (let ((p (make-atomic-formula 'p))
       (q (make-atomic-formula 'q))
