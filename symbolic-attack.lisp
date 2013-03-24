@@ -29,9 +29,6 @@
   (defun symbolic-attack-table ()
     symbolic-attack-table))
 
-(defun symbolic-attack? (obj)
-  (member obj *propositional-symbolic-attacks*))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Printing symbolic attacks
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -69,6 +66,9 @@
 - attack the left conjunct,
 - attack the right conjunct, and
 - attack a disjunction by requesting one of the disjuncts.")
+
+(defun symbolic-attack? (obj)
+  (member obj *propositional-symbolic-attacks*))
 
 (defmethod render-plainly ((sa (eql *attack-left-conjunct*)))
   "&-left")
