@@ -26,6 +26,26 @@
 	   #:NON-ATOMIC-FORMULA-ERROR-TEXT
 	   #:NON-ATOMIC-FORMULA-ERROR-SIGNATURE
 
+	   ;; rules
+	   #:rule-d10
+	   #:rule-d10-literal
+	   #:rule-d11
+	   #:rule-d11-proponent
+	   #:rule-d11-opponent
+	   #:rule-d11-most-recent-attack
+	   #:rule-d11-queue
+	   #:rule-d12
+	   #:rule-d12-two-times
+	   #:rule-d13
+	   #:rule-d13-symmetric
+	   #:rule-d13-two-times
+	   #:rule-d13-three-times
+	   #:rule-d14
+	   #:rule-e
+	   #:rule-no-repetitions
+	   #:opponent-no-repeats
+	   #:proponent-no-repeats
+
 	   ; rule sets
 	   #:D-DIALOGUE-RULES
 	   #:e-dialogue-rules
@@ -50,9 +70,22 @@
 	   #:particle-rules+e
 	   #:sara-ad-hoc-rules
 	   #:sara-ad-hoc-rules-2
+	   #:skeletal-rules
+	   #:classical-dialogue-rules-keiff
 
 	   ;; slots
+	   #:dialogue-rules
 	   #:description
+	   #:lhs
+	   #:rhs
+	   #:arguments
+	   #:argument
+	   #:name
+	   #:predicate
+	   #:bound-variable
+	   #:matrix
+	   #:function-symbol
+	   #:rules
 
 	   ; move class
 	   #:PLAYER
@@ -65,7 +98,8 @@
 	   #:PLAYS
 	   #:DIALOGUE-SIGNATURE
 
-	   ;; formulas classes
+	   ;; formulas classes and constructors
+	   #:make-implication
 	   #:unary-connective-formula
 	   #:binary-connective-formula
 	   #:binary-conjunction
@@ -79,21 +113,6 @@
 	   #:atomic-formula
 
 	   #:lex<
-
-	   ; named formulas
-	   #:PEIRCE-FORMULA
-	   #:EXCLUDED-MIDDLE
-	   #:DUMMETT-FORMULA
-	   #:MARKOV-FORMULA
-	   #:DOUBLE-NEGATION-INTRO
-	   #:DOUBLE-NEGATION-ELIMINATION
-	   #:K-FORMULA
-	   #:B-FORMULA
-	   #:C-FORMULA
-	   #:W-FORMULA
-	   #:WEAK-EXCLUDED-MIDDLE
-	   #:SCOTT-FORMULA
-	   #:SMETANICH-FORMULA
 
 	   ;; symbolic attacks
 	   #:*ATTACK-LEFT-CONJUNCT*
@@ -119,7 +138,7 @@
 	   #:atomic->excluded-middle-translation
 	   #:converse-translation
 
-	   ;; formulas
+	   ;; concrete formulas
 	   #:peirce-formula
 	   #:excluded-middle
 	   #:weak-excluded-middle
@@ -207,6 +226,63 @@
 
 	   ;; constants
 	   #:+strategy-max-depth+
+
+	   ;; moves
+	   #:attacking-move?
+	   #:initial-move?
+	   #:move-statement
+	   #:move-reference
+	   #:last-move
+	   #:move-<
+	   #:move-stance
+	   #:move-player
+	   #:equal-moves?
+
+	   ;; strategies
+	   #:winning-strategy-for-opponent?
+	   #:winning-strategy-for-proponent?
+	   #:leaf-nodes
+	   #:first-proponent-choice
+	   #:first-opponent-choice
+	   #:winning-strategy
+	   #:node->strategy
+	   #:first-splitting-descendant
+	   #:open-in-every-branch?
+	   #:node-successors
+	   #:branch-closed?
+	   #:proponent-wins-every-branch?
+	   #:opponent-wins-every-branch?
+	   #:first-splitter
+	   #:first-splitting-descendant
+	   #:closed-in-every-branch?
+	   #:bounded-dialogue-search-bfs
+
+	   ;; nodes and trees
+	   #:root
+	   #:node-state
+	   #:node-depth
+	   #:node-successors
+	   #:expanded?
+	   #:children
+	   #:leaves
+
+	   ;; utilities
+	   #:until
+	   #:empty-queue?
+	   #:map-initial-pairs
+
+	   ;; games
+	   #:open-attack-indices
+	   #:initial-statement
+	   #:eval-entire-dialogue
+	   #:all-next-moves-at-position
+	   #:copy-and-truncate-dialogue
+	   #:next-attacks
+	   #:next-defenses
+	   #:eval-provisional-dialogue
+	   #:add-defense-to-dialogue-at-position
+	   #:add-attack-to-dialogue-at-position
+	   #:copy-dialogue
 
 	   ;; server configuration
 	   #:*DIALOGUE-SERVER-PORT*))
