@@ -273,7 +273,8 @@
    (<:li (<:tt "not") "."))
   (<:p "Atomic formulas are simply the letters of the alphabet A, B, " (<:as-is "&hellip;") ", Z.  The case you use to write connectives and atomic formulas doesn't matter (anything you enter will be upcased).")
   (<:p "Here are some " (html-quote "famous formulas") " that can be referred to by name:")
-  ((<:table :rules "all")
+  (<:table
+   ;; :rules "all"
    (<:thead
     (<:tr
      (<:th "Name")
