@@ -205,6 +205,9 @@
 	   #:il-disjunction-formula
 	   #:il-negation-formula
 
+	   ;; constants
+	   #:+strategy-max-depth+
+
 	   ;; server configuration
 	   #:*DIALOGUE-SERVER-PORT*))
 
