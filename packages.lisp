@@ -284,6 +284,8 @@
 	   #:add-attack-to-dialogue-at-position
 	   #:copy-dialogue
 
+	   #:render-plainly
+
 	   ;; server configuration
 	   #:*DIALOGUE-SERVER-PORT*))
 
