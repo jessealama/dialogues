@@ -5,6 +5,7 @@
   (:use :cl :alexandria)
   (:export ; utils
            #:EMPTY-STRING? ; funny: this has nothing to do with dialogues
+	   #:concat-strings
 
 	   #:PQRS-PROPOSITIONAL-SIGNATURE
 	   #:MAKE-DIALOGUE
@@ -47,6 +48,8 @@
 	   #:proponent-no-repeats
 
 	   ; rule sets
+	   #:ruleset
+	   #:copy-ruleset
 	   #:D-DIALOGUE-RULES
 	   #:e-dialogue-rules
 	   #:classical-dialogue-rules
@@ -113,6 +116,7 @@
 	   #:atomic-formula
 
 	   #:lex<
+	   #:uniquify-atoms
 
 	   ;; symbolic attacks
 	   #:*ATTACK-LEFT-CONJUNCT*
@@ -122,8 +126,11 @@
 
 	   ;; signatures
 	   #:*ALPHABETIC-PROPOSITIONAL-SIGNATURE*
+	   #:finite-variable-propositional-signature
+	   #:belongs-to-signature?
 
 	   ;; translations
+	   #:apply-translation
 	   #:goedel-gentzen-translation
 	   #:double-negate-translation
 	   #:double-negate-all-subformulas-translation
@@ -272,6 +279,7 @@
 	   #:map-initial-pairs
 
 	   ;; games
+	   #:dialogue
 	   #:open-attack-indices
 	   #:initial-statement
 	   #:eval-entire-dialogue
