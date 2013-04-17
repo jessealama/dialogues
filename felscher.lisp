@@ -6,6 +6,9 @@
 ;;; Argumentation forms
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun equal-players? (player-1 player-2)
+  (string= (symbol-name player-1) (symbol-name player-2)))
+
 (defparameter rule-d01-alternating
   (make-offensive-rule
    :name "d01-alternating"
