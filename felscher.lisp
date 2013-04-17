@@ -255,13 +255,13 @@
 (defparameter rule-d00-proponent
   (make-particle-rule :name "d00-proponent"
 	     :precondition (evenp current-position)
-	     :body (eq current-player 'p)
+	     :body (string= (symbol-name current-player) "P")
 	     :description "Proponent plays even-numbered positions.  (Counting starts at zero.)"))
 
 (defparameter rule-d00-opponent
   (make-particle-rule :name "d00-opponent"
 	     :precondition (oddp current-position)
-	     :body (eq current-player 'o)
+	     :body (string= (symbol-name current-player) "O")
 	     :description "Opponent plays odd-numbered positions.  (Counting starts at zero.)"))
 
 (defparameter rule-d01-composite
