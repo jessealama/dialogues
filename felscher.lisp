@@ -12,8 +12,8 @@
 (defparameter rule-d01-alternating
   (make-offensive-rule
    :name "d01-alternating"
-   :body (not (eq current-player
-		  (move-player (nth-move dialogue current-reference))))
+   :body (not (equal-players? current-player
+                              (move-player (nth-move dialogue current-reference))))
    :description "A player cannot respond to his own statements."))
 
 (defparameter rule-d01-conjunction
