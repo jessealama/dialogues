@@ -294,6 +294,7 @@
 	   #:add-defense-to-dialogue-at-position
 	   #:add-attack-to-dialogue-at-position
 	   #:copy-dialogue
+           #:add-move-to-dialogue-at-position
 
 	   #:render-plainly
 
