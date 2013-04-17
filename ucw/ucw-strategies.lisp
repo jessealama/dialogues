@@ -342,7 +342,7 @@
 	    ;; :nowrap "nowrap"
 	    :align "center"
 	    (<ucw:a
-	     :action (setf (children (parent node))
+	     :action (setf (children (dialogues::parent node))
 			   (list node))
 	     :style "text-decoration:none;color:white;"
 	     :title (if (eq stance 'a)
