@@ -73,8 +73,8 @@
 	(format stream "~A (initial move)" statement))))
 
 (defun equal-moves? (move-1 move-2)
-  (and (eq (move-player move-1) (move-player move-2))
-       (eq (move-stance move-1) (move-stance move-2))
+  (and (string= (symbol-name (move-player move-1)) (symbol-name (move-player move-2)))
+       (string= (symbol-name (move-stance move-1)) (symbol-name (move-stance move-2)))
        (let ((ref-1 (move-reference move-1))
 	     (ref-2 (move-reference move-2)))
 	 (if (integerp ref-1)
@@ -84,10 +84,10 @@
 			  (move-statement move-2))))
 
 (defun attacking-move? (move)
-  (eq (move-stance move) 'a))
+  (string= (symbol-name (move-stance move)) "A"))
 
 (defun defensive-move? (move)
-  (eq (move-stance move) 'd))
+  (string= (symbol-name (move-stance move)) "D"))
 
 (defun initial-move? (move)
   (and (null (move-stance move))
