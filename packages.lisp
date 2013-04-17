@@ -263,6 +263,9 @@
 	   #:first-splitting-descendant
 	   #:closed-in-every-branch?
 	   #:bounded-dialogue-search-bfs
+           #:strategy-node
+           #:strategy
+           #:depth
 
 	   ;; nodes and trees
 	   #:root
