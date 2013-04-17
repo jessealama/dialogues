@@ -130,8 +130,10 @@
 		       (when attacked-play
 			 (let ((attacked-player (move-player attacked-play)))
 			   (when attacked-player
-			     (and (not (eq current-player attacking-player))
-				  (eq current-player attacked-player))))))))))))
+			     (and (not (equal-players? current-player
+                                                       attacking-player))
+				  (equal-players? current-player
+                                                  attacked-player))))))))))))
    :description "A player X can defend only against the other player's attacks, which themselves are supposed to be against X's statements."))
 
 (defparameter rule-d02-formula
