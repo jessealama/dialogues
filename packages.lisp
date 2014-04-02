@@ -2,7 +2,7 @@
 (in-package :cl-user)
 
 (defpackage :dialogues
-  (:use :cl :alexandria)
+  (:use :cl :alexandria :yacc)
   (:export ; utils
            #:EMPTY-STRING? ; funny: this has nothing to do with dialogues
 	   #:concat-strings
