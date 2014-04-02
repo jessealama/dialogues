@@ -16,6 +16,9 @@ ifneq ($(strip $(fasls)),)
 	rm -f $(fasls)
 endif
 
+kuno: kuno.lisp
+	CC=gcc sbcl --script $<
+
 test:
 	test -d test
 	test -r test/Makefile
