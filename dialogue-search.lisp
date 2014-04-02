@@ -95,7 +95,7 @@
 (defun bounded-dialogue-search-bfs (rules initial-statement signature depth
 				    &optional (initial-state (make-dialogue initial-statement signature rules))
 				              initial-queue)
-				    
+
   (if (belongs-to-signature? signature initial-statement)
       (let ((problem (make-dialogue-search-problem :initial-state initial-state
 						   :signature signature
@@ -142,7 +142,7 @@
 	 (when (null result)
 	   (return nil)))
      finally
-       (return t)))    
+       (return t)))
 
 (defun proponent-has-winning-strategy? (dialogue cutoff &optional (start 1))
   (cond ((minusp cutoff) :cutoff)
@@ -158,7 +158,7 @@
 			      (add-move-to-dialogue-at-position dialogue
 								opponent-move
 								start)))
-			 (some-non-cutoff-result 
+			 (some-non-cutoff-result
 			  #'(lambda (proponent-move)
 			      (let ((dialogue-proponent
 				     (add-move-to-dialogue-at-position dialogue
@@ -383,6 +383,6 @@ is assumed that OPPONENT-NODE is expanded."
 (defun explain-strategy (winning-strategy)
   (declare (ignore winning-strategy))
   (format t "implement something sensible here"))
-  
+
 
 ;;; dialogue-search.lisp ends here
