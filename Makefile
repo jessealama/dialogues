@@ -13,6 +13,7 @@ clean:
 	find . -mindepth 1 -maxdepth 1 -type d ! -name '.git' -exec $(MAKE) -C {} clean ';'
 
 kuno: kuno.lisp
+	which sbcl
 	CC=gcc sbcl --script $<
 
 test:
