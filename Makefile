@@ -5,6 +5,9 @@ ccl-fasls = $(wildcard *.dx64fsl)
 plain-fasls = $(wildcard *.fasl)
 fasls = $(ccl-fasls) $(plain-fasls)
 
+all:
+	# nothing to do yet
+
 clean:
 ifneq ($(strip $(emacs-backups)),)
 	rm -f $(emacs-backups)
