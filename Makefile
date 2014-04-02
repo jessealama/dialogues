@@ -5,8 +5,7 @@ ccl-fasls = $(wildcard *.dx64fsl)
 plain-fasls = $(wildcard *.fasl)
 fasls = $(ccl-fasls) $(plain-fasls)
 
-all:
-	# nothing to do yet
+all: kuno
 
 clean:
 ifneq ($(strip $(emacs-backups)),)
