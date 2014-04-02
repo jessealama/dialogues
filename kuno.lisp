@@ -70,7 +70,32 @@
 					       :junk-allowed nil))
       (error ()
 	(error-message "'~a' is not an acceptable value for the timeout option." timeout-str)
-	(clon:exit 1))))
-  (clon:exit))
+	(clon:exit 1)))
+    (cond ((rest remainder)
+           (error-message "Too many arguments (exactly one is expected).")
+           (help-and-die))
+          (remainder
+           (let ((arg (first remainder)))
+             (format *standard-output* "Given argument is \"~a\"." arg)
+             (terpri *standard-output*)
+             (if (file-readable? arg)
+                 (let ((tptp (handler-case (dialogues::parse-tptp (pathname arg))
+                               (error () nil))))
+                   (if tptp
+                       (let ((conjecture (dialogues::conjecture-formula tptp)))
+                         (setf conjecture (dialogues::formula conjecture))
+                         (format *standard-output* "~a" (dialogues::render tptp))
+                         (if conjecture
+                             (let ((result (dialogues::intuitionistically-valid--e? conjecture
+                                                                                    10
+                                                                                    dialogues::*alphabetic-propositional-signature*)))
+                               (format *standard-output* "~a" result))))
+                       (format *standard-output* "This is not a parsable TPTP file.")))
+                 (format *standard-output* "This is an unreadable (or non-existing) file."))
+             (terpri *standard-output*))
+           (clon:exit 0))
+          (t
+           (error-message "Not enough arguments (exactly one argument is expected, but zero were given.")
+           (help-and-die)))))
 
 (clon:dump "kuno" main)
