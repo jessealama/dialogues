@@ -125,6 +125,7 @@
     ("(P &rarr; ¬P) | (¬P &rarr; P)" "anti-connexive-formula" ,anti-connexive-formula)
     ("Ex contradictione quodlibet" "ex-contradictione-quodlibet" ,ex-contradictione-quodlibet)
     ("Implicational ex falso quodlibet" "implicational-ex-falso" ,implicational-ex-falso)
+    ("Implicational ex falso quodlibet (positive antecedent)" "implicational-ex-falso-variant" ,implicational-ex-falso-variant)
     ("KP" "kp" ,kp)
     ("WKP" "wkp" ,wkp)
     ("Distributivity of implication over disjunction" "distributivity-of-implication-over-disjunction" ,distributivity-of-implication-over-disjunction)
@@ -204,7 +205,8 @@
 	(find disjunction-introduction-right famous-formulas :key #'third)
 	(find il-disjunction-formula famous-formulas :key #'third)
 	(find il-negation-formula famous-formulas :key #'third)
-	(find implicational-ex-falso famous-formulas :key #'third)))
+	(find implicational-ex-falso famous-formulas :key #'third)
+        (find implicational-ex-falso-variant famous-formulas :key #'third)))
 
 (defparameter *type-theory-formulas*
   (list (find k-formula famous-formulas :key #'third)
