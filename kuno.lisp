@@ -61,8 +61,6 @@
   (clon:make-context)
   (when (clon:getopt :short-name "h")
     (help-and-die))
-  (unless (clon:remainder)
-    (help-and-die))
   (let ((timeout-str (clon:getopt :long-name "timeout"))
 	(timeout nil)
 	(remainder (clon:remainder)))
