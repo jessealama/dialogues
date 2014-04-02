@@ -75,6 +75,7 @@
 	   #:sara-ad-hoc-rules-2
 	   #:skeletal-rules
 	   #:classical-dialogue-rules-keiff
+           #:lille-classical-dialogue-rules
 
 	   ;; slots
 	   #:dialogue-rules
@@ -168,6 +169,7 @@
 	   #:anti-connexive-formula
 	   #:ex-contradictione-quodlibet
 	   #:implicational-ex-falso
+	   #:implicational-ex-falso-variant
 	   #:kp
 	   #:wkp
 	   #:distributivity-of-implication-over-disjunction
