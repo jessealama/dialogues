@@ -835,6 +835,19 @@
 			    (not (repetition-in-dialogue? opp-move dialogue)))
 			dialogue)))
 
+(defparameter lille-classical-dialogue-rules
+  (make-instance 'ruleset
+                 :rules (append argumentation-forms
+                                (list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack)
+                                (list opponent-no-repeats
+                                      rule-d10))
+                 :name "Lille"
+                 :description "Conjectural Lille dialogue rules (particle rules, D10, and Opponent-no-repetition)"))
+
 (defparameter e-dialogue-rules-no-pro-repetitions
   (make-instance 'ruleset
 		 :rules (append argumentation-forms
