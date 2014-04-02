@@ -1,4 +1,4 @@
-.PHONY: clean test
+.PHONY: clean test all
 
 emacs-backups = $(wildcard *~)
 ccl-fasls = $(wildcard *.dx64fsl)
