@@ -66,9 +66,6 @@
 (defgeneric render (tptp-thing)
   (:documentation "A plain text rendering of TPTP-THING."))
 
-(defgeneric render-html (tptp-thing session)
-  (:documentation "An HTML rendering of TPTP-THING for the hunchentoot session SESSION."))
-
 (defmethod render ((formula fof))
   (format nil "fof(~a,~a,~a)."
 	  (name formula)
@@ -76,40 +73,6 @@
 	  (formula formula)))
 
 
-
-(defmethod render-html ((x tptp-formula) session)
-  (with-slots (name role formula)
-      x
-    (let ((rendered-formula (render-html formula session)))
-      (register-groups-bind (sans-outer-parens)
-	  ("^[(](.+)[)]$" rendered-formula)
-	(setf rendered-formula sans-outer-parens))
-      (with-html-output-to-string (dummy)
-	((:td :class "formula-name")
-	 (fmt "~a" name))
-	((:td :class (format nil "~a" role)))
-	((:td :class "formula-proper")
-	 (fmt "~a" rendered-formula))
-	(if (slot-boundp x 'source)
-	    (htm ((:td :class "formula-source")
-		  (fmt "~a" (render-html (source x) session))))
-	    (htm ((:td :class "formula-source"))))
-	(if (slot-boundp x 'optional-info)
-	    (htm ((:td :class "formula-optional-info")
-		  (fmt "~a" (render-html (optional-info x) session))))
-	    (htm ((:td :class "formula-optional-info"))))))))
-
-(defmethod render-html ((fof fof) session)
-  (with-html-output-to-string (dummy)
-    ((:tr :id (format nil "~a" (name fof))
-	  :class "fof")
-     (fmt "~a" (call-next-method)))))
-
-(defmethod render-html ((x cnf) session)
-  (with-html-output-to-string (dummy)
-    ((:tr :id (format nil "~a" (name x))
-	  :class "cnf")
-     (fmt "~a" (call-next-method)))))
 
 (defmethod render ((formula cnf))
   (format nil "cnf(~a,~a,~a)."
@@ -265,102 +228,6 @@
 
 (defmethod render ((problem tptp-db))
   (render (formulas problem)))
-
-(defmethod render-html ((formula-list null) session)
-  "")
-
-(defmethod render-html ((formula-list list) session)
-  (with-html-output-to-string (dummy)
-    ((:table :class "tptp-db" :title "TPTP formulas")
-     (:caption "TPTP formulas")
-     (:thead
-      (:tr
-       (:th "Name")
-       (:th "Role")
-       (:th "Formula")
-       (:th "Source")
-       (:th "Optional Info")))
-     (:tbody
-      (dolist (formula formula-list)
-	(htm (fmt "~a" (render-html formula session)))))
-     (:tfoot
-      (:tr
-       ((:td :colspan 3)
-	(:p ((:span :class "conjecture") "Conjectures")
-	    ", "
-	    ((:span :class "definition") "Definitions")
-	    ", "
-	    ((:span :class "axiom") "Axioms")
-	    ", "
-	    ((:span :class "lemma") "Lemmas")
-	    ", "
-	    ((:span :class "hypothesis") "Hypotheses")
-	    ", "
-	    ((:span :class "plain") "Plain"))))))))
-
-(defmethod render-html ((problem tptp-db) session)
-  (with-slots (formulas)
-      problem
-    (with-html-output-to-string (dummy)
-      (let ((includes (remove-if-not #'(lambda (x) (typep x 'include-instruction)) formulas))
-	    (non-includes (remove-if #'(lambda (x) (typep x 'include-instruction)) formulas)))
-	(when includes
-	  (htm
-	   ((:table :title "Include statements" :class "include-table")
-	    (:caption "Include statements")
-	    (:thead
-	     (:tr
-	      (:th "File")
-	      (:th "Selection")))
-	    (dolist (include includes)
-	      (htm (:tbody
-		    (fmt "~a" (render-html include session)))))
-	    (:tfoot
-	     ((:form :method "post"
-		     :action "expand"
-		     :enctype "multipart/form-data")
-	      ((:input :type "submit"
-		       :title "Expand these include statements"
-		       :value "Expand")))))))
-	(let ((session-problem (session-value :problem session))
-	      (session-solution (session-value :solution session)))
-	  (cond ((eq problem session-problem)
-		 (htm (fmt "~a" (render-html non-includes session))))
-		((eq problem session-solution)
-		 (let ((solution-properties (session-value :solution-properties session)))
-		   (let ((restrict-signature (gethash "restrict-signature" solution-properties))
-			 (kowalski (gethash "kowalski" solution-properties))
-			 (squeeze-quantifiers (gethash "squeeze-quantifiers" solution-properties))
-			 (supporting-axioms (gethash "supporting-axioms" solution-properties))
-			 (reduce-equivalences (gethash "reduce-equivalences" solution-properties)))
-		     (let ((reformulated non-includes))
-		       (when restrict-signature
-			 (when (not (solution-restricted-p problem))
-			   (setf reformulated (restrict-solution-to-problem-language problem))))
-		       (when kowalski
-			 (setf reformulated (kowalski reformulated)))
-		       (when squeeze-quantifiers
-			 (setf reformulated (squeeze-quantifiers reformulated)))
-		       (when supporting-axioms
-			 (setf reformulated (supporting-axioms (if (typep reformulated 'tptp-db)
-								   reformulated
-								   problem))))
-		       (when reduce-equivalences
-			 (setf reformulated (reduce-equivalences reformulated nil)))
-		       (setf (session-value :solution session)
-			     (if (typep reformulated 'tstp-db)
-				 reformulated
-				 (make-instance 'tstp-db
-						:problem session-problem
-						:restricted nil
-						:formulas (if (typep reformulated 'list)
-							      reformulated
-							      (if (typep reformulated 'tptp-db)
-								  (formulas reformulated)
-								  (error "huh?"))))))
-		       (htm (fmt "~a" (render-html reformulated session)))))))
-		(t
-		 (htm (fmt "~a" (render-html non-includes session))))))))))
 
 (defmethod kowalski ((l null))
   nil)
@@ -608,24 +475,6 @@
       include
     (format nil "include(~a,[~{~a~^,~}])." file selection)))
 
-(defmethod render-html ((include include-instruction) session)
-  (with-slots (file selection)
-      include
-    (with-html-output-to-string (dummy)
-      (:tr
-       ((:td :class "file-name") (fmt "~a" file))
-       (if (null selection)
-	   (htm ((:td :class "formula-selection") "(none)"))
-	   (htm ((:td :class "formula-selection")
-		 (loop
-		    :with len = (length selection)
-		    :for formula :in selection
-		    :for i :from 1
-		    :do
-		    (htm ((:span :class "formula-name") (fmt "~a" formula)))
-		    (when (< i len)
-		      (htm (str ", ")))))))))))
-
 (defgeneric simplify-justification (tptp))
 
 (defmethod simplify-justification ((l list))
@@ -804,8 +653,6 @@
 (defmethod squeeze-quantifiers ((x null))
   nil)
 
-(defgeneric supporting-axioms (tptp))
-
 (defgeneric exists-path (from to thing))
 
 (defmethod exists-path (from to (db tptp-db))
@@ -833,20 +680,6 @@
 	 :when path :do (return (cons from path))
 	 :finally (return nil))))
 
-(defmethod supporting-axioms ((x inference-record))
-  (let ((parents (parents x)))
-    (when parents
-      (supporting-axioms parents))))
-
-(defmethod supporting-axioms ((x general-list))
-  (reduce #'append (mapcar #'supporting-axioms (terms x))))
-
-(defmethod supporting-axioms ((x string))
-  (list x))
-
-(defmethod supporting-axioms ((x integer))
-  (list (format nil "~d" x)))
-
 (defgeneric axioms (tptp))
 
 (defmethod axioms ((db tptp-db))
@@ -866,35 +699,6 @@
 	      (t
 	       (error "Don't know how to determine whether '~a' is an axiom." formula))))
       t))
-
-(defmethod supporting-axioms ((db tptp-db))
-  (let ((support-table (make-hash-table :test #'equal)))
-    (dolist (formula (formulas db))
-      (let ((name (stringify (name formula))))
-	(if (slot-boundp formula 'source)
-	    (setf (gethash name support-table)
-		  (supporting-axioms (source formula)))
-	    (setf (gethash name support-table) nil))))
-    (flet ((axiom-p (name) (null (gethash name support-table))))
-      (let ((keys (hash-table-keys support-table)))
-	(let ((axioms (remove-if-not #'axiom-p keys))
-	      (non-axioms (remove-if #'axiom-p keys)))
-	  (let ((full-table (make-hash-table :test #'equal)))
-	    (dolist (axiom axioms)
-	      (setf (gethash axiom full-table) nil))
-	    (dolist (non-axiom non-axioms)
-	      (flet ((supports (axiom)
-		       (exists-path non-axiom axiom support-table)))
-		(setf (gethash non-axiom full-table)
-		      (remove-if-not #'supports axioms))))
-	    (flet ((update-formula (formula)
-		     (setf (optional-info formula)
-		     (make-instance 'general-list
-				    :terms (gethash (stringify (name formula))
-						    full-table)))))
-	      (dolist (formula (formulas db))
-		(update-formula formula))))))))
-  db)
 
 (defgeneric easily-equivalent (formula-1 formula-2 background-premises)
   (:documentation "Can we quickly prove that FORMULA-1 and FORMULA-2
@@ -997,9 +801,6 @@
 (defmethod premises ((x null))
   nil)
 
-(defmethod premises ((x inference-record))
-  (premises (parents x)))
-
 (defmethod premises ((x null))
   nil)
 
@@ -1025,9 +826,9 @@
 (defun replace-premises (formula new-premises)
   (setf (source formula)
 	(make-instance 'atomic-expression
-		       :head (intern "inference" :tipi)
+		       :head (intern "inference" :dialogues)
 		       :arguments (list (make-instance 'atomic-expression
-						       :head (intern "unknown" :tipi)
+						       :head (intern "unknown" :dialogues)
 						       :arguments nil)
 					(make-instance 'general-list)
 					(make-instance 'general-list
@@ -1109,28 +910,6 @@
 									to
 									additional-premises))
 					  arguments)))))
-
-(defmethod update-inference-parents :around ((record inference-record) from to additional-premises)
-  (let ((new-record (call-next-method)))
-    (make-instance 'inference-record
-		   :rule (rule new-record)
-		   :useful-info (useful-info new-record)
-		   :parents (make-instance 'general-list
-					   :terms (remove-duplicates (append (terms (parents new-record))
-									     (mapcar #'name additional-premises))
-								     :test #'string=
-								     :key #'stringify)))))
-
-(defmethod update-inference-parents ((record inference-record) from to additional-premises)
-  (with-slots (rule useful-info parents)
-      record
-    (make-instance 'inference-record
-		   :rule rule
-		   :useful-info useful-info
-		   :parents (make-instance 'general-list
-					   :terms (mapcar #'(lambda (x)
-								      (update-inference-parents x from to nil))
-								  (terms parents))))))
 
 (defmethod update-inference-parents ((x string) from to additional-premises)
   (if (string= x (stringify from))
@@ -1405,7 +1184,7 @@
     (make-instance (class-of atom)
 		   :predicate (if (string= (stringify predicate)
 					   (stringify old-name))
-				  (intern (stringify new-name) :tipi)
+				  (intern (stringify new-name) :dialogues)
 				  predicate)
 		   :arguments (mapcar #'(lambda (x)
 					  (rename-symbol x old-name new-name))
@@ -1417,7 +1196,7 @@
     (make-instance (class-of atom)
 		   :head (if (string= (stringify head)
 				      (stringify old-name))
-			     (intern (stringify new-name) :tipi)
+			     (intern (stringify new-name) :dialogues)
 			     head)
 		   :arguments (mapcar #'(lambda (x)
 					  (rename-symbol x old-name new-name))
