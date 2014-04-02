@@ -171,6 +171,9 @@
   (when (stringp str)
     (string= str "")))
 
+(defun stringify (x)
+  (format nil "~a" x))
+
 (defun contains-whitespace? (str)
   (find-if #'(lambda (x)
 	       (or (char= x #\Newline)
