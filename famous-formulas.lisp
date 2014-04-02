@@ -108,6 +108,9 @@
   (define-famous-formula implicational-ex-falso
       (-> (neg p) (-> p q)))
 
+  (define-famous-formula implicational-ex-falso-variant
+      (-> p (-> (neg p) q)))
+
   (define-famous-formula kp
       (-> (-> (neg p)
 	      (v q r))
