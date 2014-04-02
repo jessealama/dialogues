@@ -111,7 +111,8 @@
 		 (e-dialogue-rules e-dialogue-rules)
 		 (classical-dialogue-rules classical-dialogue-rules)
 		 (nearly-classical-dialogue-rules nearly-classical-dialogue-rules)
-		 (skeletal-rules skeletal-rules)))))
+		 (skeletal-rules skeletal-rules)
+                 (lille-classical-dialogue-rules lille-classical-dialogue-rules)))))
 	 ($trimmed-extra-rules
 	  (remove-if #'(lambda (rule)
 			 (member rule (rules $ruleset)))
@@ -315,7 +316,7 @@ selected. The default is the identity translation, which does nothing."
 	    (ruleset-option d-dialogue-rules)
 	    (ruleset-option e-dialogue-rules)
 	    (ruleset-option classical-dialogue-rules)
-	    (ruleset-option classical-dialogue-rules-keiff)
+	    (ruleset-option lille-classical-dialogue-rules)
 	    (ruleset-option nearly-classical-dialogue-rules))))
 	 (<:tr
 	  :style "background-color:#7B942E;"
