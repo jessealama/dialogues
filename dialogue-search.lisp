@@ -214,6 +214,18 @@ game tree developed down to depth DEPTH."
 		   formula
 		   depth))
 
+(defun intuitionistically-valid--e? (formula depth signature)
+  (dialogue-valid? e-dialogue-rules
+                   signature
+                   formula
+                   depth) )
+
+(defun intuitionistically-valid--d? (formula depth signature)
+  (dialogue-valid? d-dialogue-rules
+                   signature
+                   formula
+                   depth))
+
 (defvar search-tree-directory (make-hash-table :test #'equal)
   "A mapping from triples (FORMULA RULESET DEPTH) to search trees.
 
