@@ -8,12 +8,9 @@ fasls = $(ccl-fasls) $(plain-fasls)
 all: kuno
 
 clean:
-ifneq ($(strip $(emacs-backups)),)
-	rm -f $(emacs-backups)
-endif
-ifneq ($(strip $(fasls)),)
-	rm -f $(fasls)
-endif
+	find . -mindepth 1 -maxdepth 1 -type f -name '*~' -delete
+	find . -mindepth 1 -maxdepth 1 -type f -name '.*~' -delete
+	find . -mindepth 1 -maxdepth 1 -type d ! -name '.git' -exec $(MAKE) -C {} clean ';'
 
 kuno: kuno.lisp
 	CC=gcc sbcl --script $<
