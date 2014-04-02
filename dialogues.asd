@@ -3,7 +3,11 @@
   :author "Jesse Alama <jesse.alama@gmail.com>"
   :maintainer "Jesse Alama <jesse.alama@gmail.com>"
   :serial t
-  :depends-on (:alexandria)
+  :depends-on (:alexandria
+               :named-readtables
+               :yacc
+               :fiveam
+               :cl-fad)
   :components ((:file "packages")
 	       (:file "utils")
 	       (:file "signature")
