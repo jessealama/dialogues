@@ -20,3 +20,7 @@ test:
 	test -d test
 	test -r test/Makefile
 	+make -C test
+
+# Local Variables:
+# mode: makefile-gmake
+# End:
