@@ -1183,42 +1183,4 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 	   :unless (equal-terms-p argument-1 argument-2) :do (return nil)
 	   :finally (return t))))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Hunting for terms
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defgeneric terms-with-functor (functor-name tptp)
-  (:documentation "The (function) terms inside TPTP whose functor is FUNCTOR-NAME."))
-
-(defmethod terms-with-functor (functor-name (x null))
-  nil)
-
-(defmethod terms-with-functor (functor-name (l list))
-  (let ((terms (mapcar #'(lambda (x) (terms-with-functor functor-name x)) l)))
-    (remove-duplicates (reduce #'append terms) :test #'equal-terms-p)))
-
-(defmethod terms-with-functor (functor-name (atom atomic-formula))
-  (terms-with-functor functor-name (arguments atom)))
-
-(defmethod terms-with-functor (functor-name (neg negation))
-  (terms-with-functor functor-name (argument neg)))
-
-(defmethod terms-with-functor (functor-name (x binary-connective-formula))
-  (terms-with-functor functor-name (list (lhs x) (rhs x))))
-
-(defmethod terms-with-functor (functor-name (x multiple-arity-connective-formula))
-  (terms-with-functor functor-name (items x)))
-
-(defmethod terms-with-functor (functor-name (gen generalization))
-  (terms-with-functor functor-name (matrix gen)))
-
-(defmethod terms-with-functor (functor-name (var variable-term))
-  nil)
-
-(defmethod terms-with-functor (functor-name (term atomic-expression))
-  (if (string= (stringify functor-name)
-	       (stringify (head term)))
-      (cons term (terms-with-functor functor-name (arguments term)))
-      (terms-with-functor functor-name (arguments term))))
-
 ;;; expressions.lisp ends here
