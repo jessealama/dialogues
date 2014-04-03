@@ -1160,27 +1160,4 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 		 :bindings (bindings gen)
 		 :matrix (flatten-conjunctions/disjunctions (matrix gen))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (Syntactic) equality of terms
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defgeneric equal-terms-p (term-1 term-2)
-  (:documentation "Are terms TERM-1 and TERM-2 equal?"))
-
-(defmethod equal-terms-p ((term-1 t) (term-2 t))
-  nil)
-
-(defmethod equal-terms-p ((term-1 atomic-expression) (term-2 atomic-expression))
-  (let ((head-1 (head term-1))
-	(head-2 (head term-2))
-	(arguments-1 (arguments term-1))
-	(arguments-2 (arguments term-2)))
-    (when (string= (stringify head-1) (stringify head-2))
-      (when (length= arguments-1 arguments-2)
-	(loop
-	   :for argument-1 :in arguments-1
-	   :for argument-2 :in arguments-2
-	   :unless (equal-terms-p argument-1 argument-2) :do (return nil)
-	   :finally (return t))))))
-
 ;;; expressions.lisp ends here
