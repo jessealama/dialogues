@@ -1022,4 +1022,40 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defmethod contains-equivalence-p ((gen generalization))
   (contains-equivalence-p (matrix gen)))
 
+(defgeneric binarize (tptp-thing)
+  (:documentation "Ensure that all multiple arity conjunctions and disjunctions are made binary."))
+
+(defmethod binarize ((x atomic-formula))
+  x)
+
+(defmethod binarize ((x multiple-arity-conjunction))
+  (binarize (multiple-arity-conjunction->binary-conjunction x)))
+
+(defmethod binarize ((x multiple-arity-disjunction))
+  (binarize (multiple-arity-disjunction->binary-disjunction x)))
+
+(defmethod binarize ((x binary-disjunction))
+  (make-binary-disjunction (binarize (lhs x))
+                           (binarize (rhs x))))
+
+(defmethod binarize ((x binary-conjunction))
+  (make-binary-conjunction (binarize (lhs x))
+                           (binarize (rhs x))))
+
+(defmethod binarize ((x negation))
+  (negate (binarize (argument x))))
+
+(defmethod binarize ((x equivalence))
+  (make-equivalence (binarize (lhs x))
+                    (binarize (rhs x))))
+
+(defmethod binarize ((x implication))
+  (make-implication (binarize (antecedent x))
+                    (binarize (consequent x))))
+
+(defmethod binarize ((gen generalization))
+    (make-instance (class-of gen)
+                   :bindings (bindings gen)
+                   :matrix (binarize (matrix gen))))
+
 ;;; expressions.lisp ends here
