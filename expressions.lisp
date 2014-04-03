@@ -913,9 +913,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defmacro neg (argument)
   `(negate ,argument))
 
-(defclass tptp-source ()
-  nil)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Flatten
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
