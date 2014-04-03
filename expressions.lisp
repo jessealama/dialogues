@@ -993,19 +993,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defmethod negative-formula-p ((eq disequation))
   t)
 
-(defgeneric positivize (formula))
-
-(defmethod positivize ((formula t))
-  formula)
-
-(defmethod positivize ((formula negation))
-  (argument formula))
-
-(defmethod positivize ((eq disequation))
-  (make-instance 'equation
-		 :lhs (lhs eq)
-		 :rhs (rhs eq)))
-
 (defun same-variable-name (variable-1 variable-2)
   (string= (stringify (head variable-1))
 	   (stringify (head variable-2))))
