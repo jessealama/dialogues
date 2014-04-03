@@ -973,6 +973,10 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defmethod equivalence->conjunction ((x negation))
   (negate (equivalence->conjunction (argument x))))
 
+(defmethod equivalence->conjunction ((x implication))
+  (make-implication (equivalence->conjunction (antecedent x))
+                    (equivalence->conjunction (consequent x))))
+
 (defmethod equivalence->conjunction ((x equivalence))
   (make-binary-conjunction
    (make-implication (equivalence->conjunction (lhs x))
