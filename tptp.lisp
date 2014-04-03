@@ -676,54 +676,6 @@
 	:key #'(lambda (x) (stringify (name x)))
 	:test #'string=))
 
-(defgeneric confirm-premise-minimality (tptp-thing background)
-  (:documentation "Confirm that the premises of TPTP-THING are
-  minimized.  BACKGROUND specifies the ambient set of all available
-  premises."))
-
-(defmethod confirm-premise-minimality ((db tptp-db) dummy)
-  (declare (ignore dummy))
-  (with-slots (formulas)
-      db
-    (loop
-       :for i :from 0
-       :for formula :in formulas
-       :for name = (name formula)
-       :do
-       (format t "Checking minimality of ~a...~%" name)
-       (multiple-value-bind (minimized index-of-removable-premise)
-	   (confirm-premise-minimality formula db)
-	 (declare (ignore index-of-removable-premise))
-	 (unless minimized
-	   (return (values nil i))))
-       :finally
-       (return (values t nil)))))
-
-(defmethod confirm-premise-minimality ((x tptp-formula) (db tptp-db))
-  (if (slot-boundp x 'source)
-      (with-slots (source name formula)
-	  x
-	(let ((premises (premises x)))
-	  (let ((premise-formulas (mapcar #'(lambda (x) (formula-with-name db x))
-					  premises))
-		(conjecture (make-instance 'fof
-					   :name name
-					   :role "conjecture"
-					   :formula (fofify formula)
-					   :source source)))
-	    (loop
-	       :for i :from 0
-	       :for premise in premise-formulas
-	       :for other-formulas = (append (subseq premise-formulas 0 i)
-					     (subseq premise-formulas (1+ i)))
-	       :for problem = (make-instance 'derivability-problem
-					     :conjecture conjecture
-					     :formulas (mapcar #'fofify other-formulas))
-	       :for solution = (solve-problem problem :timeout 10)
-	       :when (szs-implies? solution "Theorem") :do (return (values nil i))
-	       :finally (return (values t nil))))))
-      (values t nil)))
-
 (defun extract-problem (formula db)
   (if (slot-boundp formula 'source)
       (let ((premises (premises formula)))
