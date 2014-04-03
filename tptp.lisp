@@ -1248,49 +1248,6 @@
      :do (setf (gethash name dep-table) (mapcar #'stringify premises))
      :finally (return dep-table)))
 
-(defgeneric subproof-terminating-at (tptp step)
-  (:documentation "The subproof of TPTP that terminates at STEP."))
-
-(defmethod subproof-terminating-at (tptp (step integer))
-  (subproof-terminating-at tptp (format nil "~d" step)))
-
-(defmethod subproof-terminating-at :around ((tptp tptp-db) (step string))
-  (if (formula-with-name tptp step)
-      (call-next-method)
-      (error "No such formula '~a' in the given TPTP database." step)))
-
-(defmethod subproof-terminating-at ((tptp tptp-db) (step string))
-  (let ((formulas (formulas tptp))
-	(q (make-instance 'q))
-	(supporting-formula-table (make-hash-table :test #'equal)))
-    (enqueue-at-front q (list (formula-with-name tptp step)))
-    (loop
-       :until (empty-queue? q)
-       :do
-       (let ((formula (remove-front q)))
-	 (let ((formula-name (name formula)))
-	   (unless (gethash formula-name supporting-formula-table)
-	     (when (slot-boundp formula 'source)
-	       (let ((source (source formula)))
-		 (let ((atoms (flatten-tptp source)))
-		   (loop
-		      :for atom in atoms
-		      :for atom-string = (format nil "~a" atom)
-		      :when (formula-with-name tptp atom-string)
-		      :do
-		      (enqueue-at-end q (list (formula-with-name tptp
-								 atom-string))))))))
-	   (setf (gethash formula-name supporting-formula-table) t))))
-    (let ((supporting-formulas (hash-table-keys supporting-formula-table)))
-      (let ((sorted-supporting (sort supporting-formulas
-				     #'(lambda (formula-1 formula-2)
-					 (< (position (stringify formula-1) formulas :key #'(lambda (x) (stringify (name x))) :test #'string=)
-					    (position (stringify formula-2) formulas :key #'(lambda (x) (stringify (name x))) :test #'string=))))))
-	(make-instance 'tptp-db
-		       :formulas (mapcar #'(lambda (name)
-					     (formula-with-name tptp name))
-					 sorted-supporting))))))
-
 (defgeneric formulas-independent-of (db formula)
   (:documentation "The formulas of DB that cannot be traced back to
   FORMULA as a premise."))
