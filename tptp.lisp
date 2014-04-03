@@ -475,57 +475,6 @@
       include
     (format nil "include(~a,[~{~a~^,~}])." file selection)))
 
-(defgeneric simplify-justification (tptp))
-
-(defmethod simplify-justification ((l list))
-  (simplify-justification (make-instance 'tptp-db :formulas l)))
-
-(defmethod simplify-justification ((tptp-string string))
-  (simplify-justification (parse-tptp tptp-string)))
-
-(defmethod simplify-justification ((tptp-path pathname))
-  (simplify-justification (parse-tptp tptp-path)))
-
-(defmethod simplify-justification ((tptp-db tptp-db))
-  (let* ((formulas (formulas tptp-db))
-	 (new-formulas nil)
-	 (names (mapcar #'name formulas))
-	 (names-table (make-hash-table :test #'equal)))
-    (dolist (name names)
-      (setf (gethash name names-table) t))
-    (dolist (formula formulas)
-      (if (slot-boundp formula 'source)
-	  (let* ((source (source formula))
-		 (earlier-table (make-hash-table :test #'equal))
-		 (atoms (flatten-tptp source)))
-	    (dolist (atom atoms)
-	      (when (gethash atom names-table)
-		(unless (gethash atom earlier-table)
-		  (setf (gethash atom earlier-table) t))))
-	    (let ((new-source (make-instance 'general-list
-					     :terms (hash-table-keys earlier-table))))
-	      (let ((new-formula (make-instance (class-of formula)
-						:name (name formula)
-						:role (role formula)
-						:formula (formula formula)
-						:source new-source)))
-		(when (slot-boundp formula 'optional-info)
-		  (setf (optional-info new-formula)
-			(optional-info formula)))
-		(push new-formula new-formulas))))
-	  (let ((new-formula (make-instance (class-of formula)
-					    :name (name formula)
-					    :role (role formula)
-					    :formula (formula formula))))
-	    (setf (source new-formula)
-		  (make-instance 'general-list :terms nil))
-	    (push new-formula new-formulas))))
-    (make-instance 'tptp-db
-		   :formulas (reverse new-formulas))))
-
-(defmethod simplify-justification ((include include-instruction))
-  include)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Expanding includes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
