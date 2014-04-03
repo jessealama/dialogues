@@ -989,4 +989,37 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 		 :bindings (bindings gen)
 		 :matrix (equivalence->conjunction (matrix gen))))
 
+(defgeneric contains-equivalence-p (tptp-thing)
+  (:documentation "Does TPTP-THING contain an equivalence?"))
+
+(defmethod contains-equivalence-p ((x atomic-formula))
+  nil)
+
+(defmethod contains-equivalence-p ((x multiple-arity-conjunction))
+  (some #'contains-equivalence-p (conjuncts x)))
+
+(defmethod contains-equivalence-p ((x multiple-arity-disjunction))
+  (some #'contains-equivalence-p (disjuncts x)))
+
+(defmethod contains-equivalence-p ((x binary-disjunction))
+  (or (contains-equivalence-p (lhs x))
+      (contains-equivalence-p (rhs x))))
+
+(defmethod contains-equivalence-p ((x binary-conjunction))
+  (or (contains-equivalence-p (lhs x))
+      (contains-equivalence-p (rhs x))))
+
+(defmethod equivalence->conjunction ((x negation))
+  (contains-equivalence-p (argument x)))
+
+(defmethod contains-equivalence-p ((x equivalence))
+  t)
+
+(defmethod contains-equivalence-p ((x implication))
+  (or (contains-equivalence-p (antecedent x))
+      (contains-equivalence-p (consequent x))))
+
+(defmethod contains-equivalence-p ((gen generalization))
+  (contains-equivalence-p (matrix gen)))
+
 ;;; expressions.lisp ends here
