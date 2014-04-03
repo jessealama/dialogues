@@ -80,16 +80,17 @@
                  (let ((tptp (handler-case (dialogues::parse-tptp (pathname arg))
                                (error () nil))))
                    (if tptp
-                       (let ((conjecture (dialogues::conjecture-formula tptp)))
-                         (setf conjecture (dialogues::formula conjecture))
-                         (when (dialogues::contains-equivalence-p conjecture)
-                           (setf conjecture (dialogues::equivalence->conjunction conjecture)))
-                         (format *standard-output* "~a" (dialogues::render tptp))
-                         (if conjecture
-                             (let ((result (dialogues::intuitionistically-valid--e? conjecture
+                       (if (dialogues::has-conjecture-p tptp)
+                           (let ((problem (dialogues::problematize tptp)))
+                             (setf problem (dialogues::equivalence->conjunction problem))
+                             (setf problem (dialogues::binarize problem))
+                             (format *standard-output* "~a" problem)
+                             (terpri *standard-output*)
+                             (let ((result (dialogues::intuitionistically-valid--e? problem
                                                                                     10
                                                                                     dialogues::*alphabetic-propositional-signature*)))
-                               (format *standard-output* "~a" result))))
+                               (format *standard-output* "~a" result)))
+                           (error-message "No conjecture formula!"))
                        (format *standard-output* "This is not a parsable TPTP file.")))
                  (format *standard-output* "This is an unreadable (or non-existing) file."))
              (terpri *standard-output*))
