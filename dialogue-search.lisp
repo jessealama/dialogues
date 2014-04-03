@@ -220,6 +220,18 @@ game tree developed down to depth DEPTH."
                    formula
                    depth) )
 
+(defun intuitionistically-valid--e-no-pro-repeats? (formula depth signature)
+  (dialogue-valid? e-dialogue-rules-no-pro-repetitions
+                   signature
+                   formula
+                   depth))
+
+(defun intuitionistically-valid--e-no-pro-double-repeats? (formula depth signature)
+  (dialogue-valid? e-dialogue-rules-no-pro-double-repetitions
+                   signature
+                   formula
+                   depth) )
+
 (defun intuitionistically-valid--d? (formula depth signature)
   (dialogue-valid? d-dialogue-rules
                    signature
