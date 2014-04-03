@@ -1006,46 +1006,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 		 :lhs (lhs eq)
 		 :rhs (rhs eq)))
 
-(defmethod kowalski ((x multiple-arity-disjunction))
-  (let ((disjuncts (disjuncts x)))
-    (setf disjuncts (remove-if #'(lambda (x) (and (typep x 'atomic-formula)
-						  (length= 0 (arguments x))
-						  (string= (stringify (predicate x))
-							   "false")))
-			       disjuncts))
-    (let ((negated-disjuncts (remove-if-not #'negative-formula-p disjuncts))
-	  (non-negated-disjuncts (remove-if #'negative-formula-p disjuncts)))
-      (if negated-disjuncts
-	  (if non-negated-disjuncts
-	      (kowalski (make-implication (apply #'make-multiple-arity-conjunction negated-disjuncts)
-					  (apply #'make-multiple-arity-disjunction non-negated-disjuncts)))
-	      (kowalski (make-implication (apply #'make-multiple-arity-conjunction negated-disjuncts)
-					  *nullary-false*)))
-	  (apply #'make-multiple-arity-disjunction
-		 (mapcar #'kowalski non-negated-disjuncts))))))
-
-(defmethod kowalski ((x multiple-arity-conjunction))
-  (make-instance 'multiple-arity-conjunction
-		 :items (mapcar #'kowalski (items x))))
-
-(defmethod kowalski ((x binary-disjunction))
-  (let ((disjuncts (disjuncts x)))
-    (setf disjuncts (remove-if #'(lambda (x) (and (typep x 'atomic-formula)
-						  (length= 0 (arguments x))
-						  (string= (stringify (predicate x))
-							   "false")))
-			       disjuncts))
-    (let ((negated-disjuncts (remove-if-not #'negative-formula-p disjuncts))
-	  (non-negated-disjuncts (remove-if #'negative-formula-p disjuncts)))
-      (if negated-disjuncts
-	  (if non-negated-disjuncts
-	      (kowalski (make-implication (apply #'make-multiple-arity-conjunction (mapcar #'positivize negated-disjuncts))
-					  (apply #'make-multiple-arity-disjunction non-negated-disjuncts)))
-	      (kowalski (make-implication (apply #'make-multiple-arity-conjunction (mapcar #'positivize negated-disjuncts))
-					  *nullary-false*)))
-	  (apply #'make-multiple-arity-disjunction
-		 (mapcar #'kowalski non-negated-disjuncts))))))
-
 (defun same-variable-name (variable-1 variable-2)
   (string= (stringify (head variable-1))
 	   (stringify (head variable-2))))
