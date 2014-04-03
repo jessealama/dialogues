@@ -982,17 +982,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defmethod flatten-tptp ((l general-list))
   (flatten-tptp (terms l)))
 
-(defgeneric negative-formula-p (formula))
-
-(defmethod negative-formula-p ((formula t))
-  nil)
-
-(defmethod negative-formula-p ((neg negation))
-  t)
-
-(defmethod negative-formula-p ((eq disequation))
-  t)
-
 (defun same-variable-name (variable-1 variable-2)
   (string= (stringify (head variable-1))
 	   (stringify (head variable-2))))
