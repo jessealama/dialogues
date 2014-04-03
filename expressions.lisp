@@ -1360,4 +1360,4 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defmethod eliminate-truth-values ((l list))
   (mapcar #'eliminate-truth-values l))
 
-;;; formulas.lisp ends here
+;;; expressions.lisp ends here
