@@ -982,43 +982,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defmethod flatten-tptp ((l general-list))
   (flatten-tptp (terms l)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Kowalski form for clauses
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defgeneric kowalski (formula))
-
-(defmethod kowalski ((x generalization))
-  (make-instance (class-of x)
-		 :bindings (bindings x)
-		 :matrix (kowalski (matrix x))))
-
-(defmethod kowalski ((x binary-connective-formula))
-  (make-instance (class-of x)
-		 :lhs (kowalski (lhs x))
-		 :rhs (kowalski (rhs x))))
-
-(defmethod kowalski ((x implication))
-  (let ((a (antecedent x))
-        (c (consequent x)))
-    (cond ((constant-true-p a)
-           (kowalski c))
-          ((constant-false-p a)
-           contradiction)
-          ((constant-true-p c)
-           top)
-          ((constant-false-p c)
-           (kowalski (negate a)))
-          (t
-           (call-next-method)))))
-
-(defmethod kowalski ((x atomic-formula))
-  x)
-
-(defmethod kowalski ((x negation))
-  (make-instance 'negation
-		 :argument (kowalski (argument x))))
-
 (defgeneric negative-formula-p (formula))
 
 (defmethod negative-formula-p ((formula t))
