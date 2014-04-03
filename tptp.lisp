@@ -676,26 +676,6 @@
 	:key #'(lambda (x) (stringify (name x)))
 	:test #'string=))
 
-(defun extract-problem (formula db)
-  (if (slot-boundp formula 'source)
-      (let ((premises (premises formula)))
-	(let ((premise-formulas (mapcar #'(lambda (x) (formula-with-name db x))
-					premises))
-	      (conjecture (make-instance 'fof
-					 :name (name formula)
-					 :role "conjecture"
-					 :formula (fofify (formula formula)))))
-	  (make-instance 'derivability-problem
-			 :conjecture conjecture
-			 :formulas (mapcar #'strip-source
-					   (mapcar #'fofify premise-formulas)))))
-      (make-instance 'derivability-problem
-		     :conjecture (make-instance 'fof
-						:name (name formula)
-						:role "conjecture"
-						:formula (fofify (formula formula)))
-		     :formulas nil)))
-
 (defgeneric strip-source (tptp-thing))
 
 (defmethod strip-source ((x null))
