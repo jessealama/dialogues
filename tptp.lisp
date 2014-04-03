@@ -1312,3 +1312,21 @@
                         :if-does-not-exist :create)
     (format file "~{~a~^~%~}" (formulas db)))
   t)
+
+(defgeneric problematize (db)
+  (:documentation "Make a single problem formula out of a whole TPTP DB."))
+
+(defmethod problematize ((path pathname))
+  (problematize (parse-tptp path)))
+
+(defmethod problematize ((db tptp-db))
+  (if (has-conjecture-p db)
+      (let ((c (conjecture-formula db))
+            (premises (non-conjecture-formulas db)))
+        (setf c (formula c))
+        (setf premises (mapcar #'formula premises))
+        (if (null premises)
+            c
+            (make-implication (apply #'make-multiple-arity-conjunction
+                                     premises)
+                              c)))))
