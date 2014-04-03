@@ -810,6 +810,24 @@
 			     (not (repetition-in-dialogue? pro-move dialogue)))
 			 dialogue)))
 
+(defun double-repetition-in-dialogue? (move dialogue)
+  "Whether there is a move in DIALOGUE equal to MOVE (but not
+  identical to it, in the sense of EQ)"
+  (>= (count-if #'(lambda (other-move)
+                    (and (not (eq move other-move))
+                         (equal-moves? move other-move)))
+                (dialogue-plays dialogue))
+      2))
+
+(defparameter proponent-no-duplicate-repeats
+  (make-structural-rule
+   :name "P-no-repeat-twice"
+   :description "Proponent is allowed to repeat a move, but not twice."
+   :predicate
+   (every-proponent-move #'(lambda (pro-move)
+                             (not (double-repetition-in-dialogue? pro-move dialogue)))
+                         dialogue)))
+
 (defparameter rule-d14
   (make-structural-rule
    :name "D14"
