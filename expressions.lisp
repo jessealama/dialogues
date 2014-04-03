@@ -1160,4 +1160,41 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 		 :bindings (bindings gen)
 		 :matrix (flatten-conjunctions/disjunctions (matrix gen))))
 
+(defgeneric equivalence->conjunction (tptp-thing)
+  (:documentation "Replace equivalences by conjunctions of implications."))
+
+(defmethod equivalence->conjunction ((x atomic-formula))
+  x)
+
+(defmethod equivalence->conjunction ((x multiple-arity-conjunction))
+  (apply #'make-multiple-arity-conjunction
+	 (mapcar #'equivalence->conjunction (conjuncts x))))
+
+(defmethod equivalence->conjunction ((x multiple-arity-disjunction))
+  (apply #'make-multiple-arity-disjunction
+	 (mapcar #'equivalence->conjunction (disjuncts x))))
+
+(defmethod equivalence->conjunction ((x binary-disjunction))
+  (make-binary-disjunction (equivalence->conjunction (lhs x))
+                           (equivalence->conjunction (rhs x))))
+
+(defmethod equivalence->conjunction ((x binary-conjunction))
+  (make-binary-conjunction (equivalence->conjunction (lhs x))
+                           (equivalence->conjunction (rhs x))))
+
+(defmethod equivalence->conjunction ((x negation))
+  (negate (equivalence->conjunction (argument x))))
+
+(defmethod equivalence->conjunction ((x equivalence))
+  (make-binary-conjunction
+   (make-implication (equivalence->conjunction (lhs x))
+                     (equivalence->conjunction (rhs x)))
+   (make-implication (equivalence->conjunction (rhs x))
+                     (equivalence->conjunction (lhs x)))))
+
+(defmethod equivalence->conjunction ((gen generalization))
+  (make-instance (class-of gen)
+		 :bindings (bindings gen)
+		 :matrix (equivalence->conjunction (matrix gen))))
+
 ;;; expressions.lisp ends here
