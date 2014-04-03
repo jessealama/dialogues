@@ -676,24 +676,6 @@
 	:key #'(lambda (x) (stringify (name x)))
 	:test #'string=))
 
-(defgeneric strip-source (tptp-thing))
-
-(defmethod strip-source ((x null))
-  nil)
-
-(defmethod strip-source ((l list))
-  (mapcar #'strip-source l))
-
-(defmethod strip-source ((db tptp-db))
-  (make-instance 'tptp-db
-		 :formulas (mapcar #'strip-source (formulas db))))
-
-(defmethod strip-source ((x tptp-formula))
-  (make-instance (class-of x)
-		 :name (name x)
-		 :role (role x)
-		 :formula (formula x)))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Renaming predicate and function symbols
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
