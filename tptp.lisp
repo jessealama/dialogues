@@ -229,12 +229,6 @@
 (defmethod render ((problem tptp-db))
   (render (formulas problem)))
 
-(defmethod kowalski ((l null))
-  nil)
-
-(defmethod kowalski ((l list))
-  (mapcar #'kowalski l))
-
 (defmethod render ((problem derivability-problem))
   (with-output-to-string (s)
     (dolist (formula (formulas problem))
@@ -553,27 +547,6 @@
 
 (defun formulas-w/o-includes (tptp-db)
   (remove-if #'(lambda (x) (eql (type-of x) 'include-instruction)) (formulas tptp-db)))
-
-(defmethod kowalski :around ((formula tptp-formula))
-  (let ((new-formula (call-next-method)))
-    (when (slot-boundp formula 'source)
-      (setf (source new-formula)
-	    (source formula)))
-    (when (slot-boundp formula 'optional-info)
-      (setf (optional-info new-formula)
-	    (optional-info formula)))
-    new-formula))
-
-(defmethod kowalski ((formula tptp-formula))
-  (make-instance (class-of formula)
-		 :name (name formula)
-		 :role (role formula)
-		 :formula (kowalski (formula formula))))
-
-(defmethod kowalski ((db tptp-db))
-  (make-instance 'tptp-db
-		 :path (path db)
-		 :formulas (mapcar #'kowalski (formulas db))))
 
 (defmethod squeeze-quantifiers ((db tptp-db))
   (make-instance 'tptp-db
