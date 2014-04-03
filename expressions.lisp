@@ -1360,33 +1360,4 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defmethod eliminate-truth-values ((l list))
   (mapcar #'eliminate-truth-values l))
 
-(defgeneric contains-predicate? (expression predicate)
-  (:documentation "Does EXPRESSION contain a subexpression with the predicate symbol PREDICATE?"))
-
-(defmethod contains-predicate? ((atom atomic-expression) predicate)
-  nil)
-
-(defmethod contains-predicate? ((term function-term) predicate)
-  nil)
-
-(defmethod contains-predicate? ((term variable-term) predicate)
-  nil)
-
-(defmethod contains-predicate? ((atom atomic-formula) predicate)
-  (string= (stringify (predicate atom)) (stringify predicate)))
-
-(defmethod contains-predicate? ((neg negation) predicate)
-  (contains-predicate? (argument neg) predicate))
-
-(defmethod contains-predicate? ((multi multiple-arity-connective-formula) predicate)
-  (some #'(lambda (x) (contains-predicate? x predicate))
-	(items multi)))
-
-(defmethod contains-predicate? ((x binary-connective-formula) predicate)
-  (or (contains-predicate? (lhs x) predicate)
-      (contains-predicate? (rhs x) predicate)))
-
-(defmethod contains-predicate? ((gen generalization) predicate)
-  (contains-predicate? (matrix gen) predicate))
-
 ;;; formulas.lisp ends here
