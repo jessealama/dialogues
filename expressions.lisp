@@ -916,22 +916,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defclass tptp-source ()
   nil)
 
-(defclass inference-record (tptp-source)
-  ((rule
-    :accessor rule
-    :initarg :rule
-    :initform (error "An inference record needs a rule of inference"))
-   (useful-info
-    :type general-list
-    :accessor useful-info
-    :initarg :useful-info
-    :initform (make-instance 'general-list))
-   (parents
-    :type general-list
-    :accessor parents
-    :initarg :parents
-    :initform (make-instance 'general-list))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Flatten
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -945,11 +929,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 
 (defmethod flatten-tptp ((tptp-thing string))
   (list tptp-thing))
-
-(defmethod flatten-tptp ((ir inference-record))
-  (append (flatten-tptp (rule ir))
-	  (flatten-tptp (useful-info ir))
-	  (flatten-tptp (parents ir))))
 
 (defmethod flatten-tptp ((tptp-thing cons))
   (append (flatten-tptp (car tptp-thing))
@@ -1020,9 +999,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 	(make-instance 'universal-generalization
 		       :bindings free
 		       :matrix formula))))
-
-(defmethod print-object ((ir inference-record) stream)
-  (format stream "inference(~a,~a,~a)" (rule ir) (useful-info ir) (parents ir)))
 
 (defgeneric flatten-conjunctions/disjunctions (tptp-thing))
 
