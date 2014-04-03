@@ -82,6 +82,8 @@
                    (if tptp
                        (let ((conjecture (dialogues::conjecture-formula tptp)))
                          (setf conjecture (dialogues::formula conjecture))
+                         (when (dialogues::contains-equivalence-p conjecture)
+                           (setf conjecture (dialogues::equivalence->conjunction conjecture)))
                          (format *standard-output* "~a" (dialogues::render tptp))
                          (if conjecture
                              (let ((result (dialogues::intuitionistically-valid--e? conjecture
