@@ -548,33 +548,6 @@
 (defun formulas-w/o-includes (tptp-db)
   (remove-if #'(lambda (x) (eql (type-of x) 'include-instruction)) (formulas tptp-db)))
 
-(defmethod squeeze-quantifiers ((db tptp-db))
-  (make-instance 'tptp-db
-		 :path (path db)
-		 :formulas (mapcar #'squeeze-quantifiers (formulas db))))
-
-(defmethod squeeze-quantifiers :around ((formula tptp-formula))
-  (let ((new-formula (call-next-method)))
-    (when (slot-boundp formula 'source)
-      (setf (source new-formula)
-	    (source formula)))
-    (when (slot-boundp formula 'optional-info)
-      (setf (optional-info new-formula)
-	    (optional-info formula)))
-    new-formula))
-
-(defmethod squeeze-quantifiers ((formula tptp-formula))
-  (make-instance (class-of formula)
-		 :name (name formula)
-		 :role (role formula)
-		 :formula (squeeze-quantifiers (formula formula))))
-
-(defmethod squeeze-quantifiers ((l list))
-  (mapcar #'squeeze-quantifiers l))
-
-(defmethod squeeze-quantifiers ((x null))
-  nil)
-
 (defgeneric exists-path (from to thing))
 
 (defmethod exists-path (from to (db tptp-db))
