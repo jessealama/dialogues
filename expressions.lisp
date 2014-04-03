@@ -1009,7 +1009,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (or (contains-equivalence-p (lhs x))
       (contains-equivalence-p (rhs x))))
 
-(defmethod equivalence->conjunction ((x negation))
+(defmethod contains-equivalence-p ((x negation))
   (contains-equivalence-p (argument x)))
 
 (defmethod contains-equivalence-p ((x equivalence))
