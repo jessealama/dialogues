@@ -86,9 +86,14 @@
                              (setf problem (dialogues::binarize problem))
                              (format *standard-output* "~a" problem)
                              (terpri *standard-output*)
-                             (let ((result (dialogues::intuitionistically-valid--e? problem
-                                                                                    10
-                                                                                    dialogues::*alphabetic-propositional-signature*)))
+                             (let ((result (handler-case
+                                               (trivial-timeout:with-timeout (timeout)
+                                                 (dialogues::intuitionistically-valid--e-no-pro-repeats? problem
+                                                                                          20
+                                                                                          dialogues::*alphabetic-propositional-signature*))
+                                             (trivial-timeout:timeout-error (c)
+                                               (declare (ignore c))
+                                               :timeout))))
                                (format *standard-output* "~a" result)))
                            (error-message "No conjecture formula!"))
                        (format *standard-output* "This is not a parsable TPTP file.")))
