@@ -215,16 +215,56 @@ game tree developed down to depth DEPTH."
 		   depth))
 
 (defun intuitionistically-valid--e? (formula depth signature)
-  (dialogue-valid? e-dialogue-rules
-                   signature
-                   formula
-                   depth) )
+  (let ((dialogue (make-dialogue formula signature e-dialogue-rules)))
+    (if (and (implication? formula)
+             (binary-conjunction? (antecedent formula)))
+        (let ((a (antecedent formula))
+              (c (consequent formula)))
+          (let ((a-1 (lhs a))
+                (a-2 (rhs a)))
+            (add-move-to-dialogue dialogue
+                                  (make-opponent-move a 'a 0))
+            (add-move-to-dialogue dialogue
+                                  (make-proponent-move *attack-left-conjunct* 'a 1))
+            (add-move-to-dialogue dialogue
+                                  (make-opponent-move a-1 'd 2))
+            (add-move-to-dialogue dialogue
+                                  (make-proponent-move *attack-right-conjunct* 'a 1))
+            (add-move-to-dialogue dialogue
+                                  (make-opponent-move a-2 'd 4))
+            (when (atomic-formula? c)
+              (error "Don't know how to deal with the atomic consequent of the given formula~%~%  ~a~%" formula))
+            (add-move-to-dialogue dialogue
+                                  (make-proponent-move c 'd 1))
+            ;(break "dialogue looks like:~%~A" dialogue)
+            (proponent-has-winning-strategy? dialogue depth 7)))
+        (proponent-has-winning-strategy? dialogue depth 1))))
 
 (defun intuitionistically-valid--e-no-pro-repeats? (formula depth signature)
-  (dialogue-valid? e-dialogue-rules-no-pro-repetitions
-                   signature
-                   formula
-                   depth))
+(let ((dialogue (make-dialogue formula signature e-dialogue-rules-no-pro-repetitions)))
+    (if (and (implication? formula)
+             (binary-conjunction? (antecedent formula)))
+        (let ((a (antecedent formula))
+              (c (consequent formula)))
+          (let ((a-1 (lhs a))
+                (a-2 (rhs a)))
+            (add-move-to-dialogue dialogue
+                                  (make-opponent-move a 'a 0))
+            (add-move-to-dialogue dialogue
+                                  (make-proponent-move *attack-left-conjunct* 'a 1))
+            (add-move-to-dialogue dialogue
+                                  (make-opponent-move a-1 'd 2))
+            (add-move-to-dialogue dialogue
+                                  (make-proponent-move *attack-right-conjunct* 'a 1))
+            (add-move-to-dialogue dialogue
+                                  (make-opponent-move a-2 'd 4))
+            (when (atomic-formula? c)
+              (error "Don't know how to deal with the atomic consequent of the given formula~%~%  ~a~%" formula))
+            (add-move-to-dialogue dialogue
+                                  (make-proponent-move c 'd 1))
+            ;(break "dialogue looks like:~%~A" dialogue)
+            (proponent-has-winning-strategy? dialogue depth 7)))
+        (proponent-has-winning-strategy? dialogue depth 1))))
 
 (defun intuitionistically-valid--e-no-pro-double-repeats? (formula depth signature)
   (dialogue-valid? e-dialogue-rules-no-pro-double-repetitions
