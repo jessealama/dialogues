@@ -60,7 +60,7 @@
   "Entry point for the standalone application."
   (clon:make-context)
   (when (clon:getopt :short-name "h")
-    (help-and-die))
+    (help-and-die 0))
   (let ((timeout-str (clon:getopt :long-name "timeout"))
 	(timeout nil)
 	(remainder (clon:remainder)))
