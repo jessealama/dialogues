@@ -51,10 +51,10 @@
   (format *error-output* "~a" #\Space)
   (apply #'format *error-output* format-string format-args))
 
-(defmacro help-and-die ()
+(defmacro help-and-die (&optional (exit-code 1))
   `(progn
      (clon:help)
-     (clon:exit)))
+     (clon:exit ,exit-code)))
 
 (defun main ()
   "Entry point for the standalone application."
