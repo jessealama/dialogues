@@ -147,8 +147,6 @@
     (setf problem (dialogues::problematize tptp))
     (setf problem (dialogues::equivalence->conjunction problem))
     (setf problem (dialogues::binarize problem))
-    (format *standard-output* "~a" problem)
-    (terpri *standard-output*)
     (setf result (solve-problem problem timeout depth))
     (setf szs-result (result->szs result))
     (format *standard-output* "% SZS Status ~a for ~a " szs-result (namestring arg))
