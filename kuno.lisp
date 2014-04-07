@@ -51,7 +51,7 @@
   (format *error-output* "~a" #\Space)
   (apply #'format *error-output* format-string format-args))
 
-(defmacro help-and-die (&optional (exit-code 1))
+(defmacro help-and-exit (&optional (exit-code 0))
   `(progn
      (clon:help)
      (clon:exit ,exit-code)))
@@ -60,7 +60,7 @@
   "Entry point for the standalone application."
   (clon:make-context)
   (when (clon:getopt :short-name "h")
-    (help-and-die 0))
+    (help-and-exit 0))
   (let ((timeout-str (clon:getopt :long-name "timeout"))
 	(timeout nil)
 	(remainder (clon:remainder)))
@@ -71,7 +71,7 @@
 	(clon:exit 1)))
     (cond ((rest remainder)
            (error-message "Too many arguments (exactly one is expected).")
-           (help-and-die))
+           (help-and-exit 1))
           (remainder
            (let ((arg (first remainder)))
              (format *standard-output* "Given argument is \"~a\"." arg)
@@ -102,6 +102,6 @@
            (clon:exit 0))
           (t
            (error-message "Not enough arguments (exactly one argument is expected, but zero were given.")
-           (help-and-die)))))
+           (help-and-exit 1)))))
 
 (clon:dump "kuno" main)
