@@ -1,10 +1,5 @@
 .PHONY: clean test
 
-emacs-backups = $(wildcard *~)
-ccl-fasls = $(wildcard *.dx64fsl)
-plain-fasls = $(wildcard *.fasl)
-fasls = $(ccl-fasls) $(plain-fasls)
-
 clean:
 	find . -mindepth 1 -maxdepth 1 -type f -name '*~' -delete
 	find . -mindepth 1 -maxdepth 1 -type f -name '.*~' -delete
