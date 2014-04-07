@@ -785,12 +785,6 @@
 (defmethod definition-p ((x tptp-formula))
   (string= (role x) "definition"))
 
-(defgeneric hypothesis-p (x)
-  (:documentation "Is X a hypothesis?"))
-
-(defmethod hypothesis-p ((x tptp-formula))
-  (string= (role x) "hypothesis"))
-
 (defgeneric problematize (db)
   (:documentation "Make a single problem formula out of a whole TPTP DB."))
 
