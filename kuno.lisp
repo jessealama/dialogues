@@ -56,6 +56,10 @@
      (clon:help)
      (clon:exit ,exit-code)))
 
+(defun parse-integer-thing (x)
+  (handler-case (parse-integer x :junk-allowed nil)
+    (error () nil)))
+
 (defun main ()
   "Entry point for the standalone application."
   (clon:make-context)
