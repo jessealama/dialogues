@@ -12,7 +12,7 @@ clean:
 
 kuno: $(wildcard *.lisp) Makefile
 	which sbcl
-	CC=gcc sbcl --script $<
+	CC=gcc sbcl --script kuno.lisp
 
 test:
 	test -d test
