@@ -85,6 +85,7 @@
     (help-and-exit 0))
   (let ((remainder (clon:remainder))
         (timeout-arg (clon:getopt :long-name "timeout"))
+        (depth-arg (clon:getopt :long-name "depth"))
         arg
         timeout
         tptp
