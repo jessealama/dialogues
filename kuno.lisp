@@ -101,9 +101,11 @@
         (depth-arg (clon:getopt :long-name "depth"))
         arg
         timeout
+        depth
         tptp
         problem
-        result)
+        result
+        szs-result)
 
     ;; arguments
     (when (null remainder)
@@ -148,7 +150,8 @@
     (format *standard-output* "~a" problem)
     (terpri *standard-output*)
     (setf result (solve-problem problem timeout depth))
-    (format *standard-output* "~a" result)
+    (setf szs-result (result->szs result))
+    (format *standard-output* "% SZS Status ~a for ~a " szs-result (namestring arg))
     (terpri *standard-output*)
     (clon:exit 0)))
 
