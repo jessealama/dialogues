@@ -149,7 +149,7 @@
     (setf problem (dialogues::binarize problem))
     (setf result (solve-problem problem timeout depth))
     (setf szs-result (result->szs result))
-    (format *standard-output* "% SZS Status ~a for ~a " szs-result (namestring arg))
+    (format *standard-output* "% SZS status ~a for ~a " szs-result (namestring arg))
     (terpri *standard-output*)
     (clon:exit 0)))
 
