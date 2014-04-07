@@ -81,15 +81,15 @@
 (defun result->szs (result)
   (cond ((keywordp result)
          (cond ((eql result :cutoff)
-                "RSO (ResourceOut)")
+                "ResourceOut")
                ((eql result :timeout)
-                "TMO (Timeout)")
+                "Timeout")
                (t
-                "UNK (Unknown)")))
+                "Unknown")))
         (result
-         "THM (Theorem)")
+         "Theorem")
         (t
-         "CSA (CounterSatisfiable)")))
+         "CounterSatisfiable")))
 
 (defun main ()
   "Entry point for the standalone application."
