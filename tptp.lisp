@@ -548,33 +548,6 @@
 (defun formulas-w/o-includes (tptp-db)
   (remove-if #'(lambda (x) (eql (type-of x) 'include-instruction)) (formulas tptp-db)))
 
-(defgeneric exists-path (from to thing))
-
-(defmethod exists-path (from to (db tptp-db))
-  (exists-path from to (dependency-table db)))
-
-(defmethod exists-path (from (to integer) thing)
-  (exists-path from (format nil "~a" to) thing))
-
-(defmethod exists-path ((from integer) to thing)
-  (exists-path (format nil "~a" from) to thing))
-
-(defmethod exists-path (from (to symbol) thing)
-  (exists-path from (symbol-name to) thing))
-
-(defmethod exists-path ((from symbol) to thing)
-  (exists-path (symbol-name from) to thing))
-
-(defmethod exists-path ((from string) (to string) (table hash-table))
-  (if (string= from to)
-      (list from)
-      (loop
-	 :with predecessors = (gethash from table)
-	 :for pred :in predecessors
-	 :for path = (exists-path pred to table)
-	 :when path :do (return (cons from path))
-	 :finally (return nil))))
-
 (defgeneric axioms (tptp))
 
 (defmethod axioms ((db tptp-db))
@@ -727,18 +700,6 @@
 		 :name (name x)
 		 :role (role x)
 		 :formula (eliminate-truth-values (formula x))))
-
-(defgeneric dependency-table (tptp)
-  (:documentation "A hash table whose keys are strings naming formulas of TPTP and whose values for a key X is the list of one-step dependencies of X."))
-
-(defmethod dependency-table ((db tptp-db))
-  (loop
-     :with dep-table = (make-hash-table :test #'equal)
-     :for formula :in (formulas db)
-     :for name = (stringify (name formula))
-     :for premises = (premises formula)
-     :do (setf (gethash name dep-table) (mapcar #'stringify premises))
-     :finally (return dep-table)))
 
 (defmethod universally-close :around ((x tptp-formula))
   (let ((new-formula (call-next-method)))
