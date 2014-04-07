@@ -20,7 +20,7 @@
 
 (clon:defsynopsis (:postfix "FILES...")
   (text :contents
-	"Kuno -- A theorem prover based on dialogue games")
+	"Kuno -- An theorem prover for intuitionistic logic based on dialogue games")
   (group (:header "Flags (non valued options):")
     (flag :short-name "h" :long-name "help"
 	  :description "Print this help and exit."))
