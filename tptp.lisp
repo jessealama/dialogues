@@ -595,18 +595,6 @@
 (defmethod premises ((x atomic-expression))
   nil)
 
-(defun replace-premises (formula new-premises)
-  (setf (source formula)
-	(make-instance 'atomic-expression
-		       :head (intern "inference" :dialogues)
-		       :arguments (list (make-instance 'atomic-expression
-						       :head (intern "unknown" :dialogues)
-						       :arguments nil)
-					(make-instance 'general-list)
-					(make-instance 'general-list
-						       :terms new-premises))))
-  formula)
-
 (defgeneric find-formula (formulas name))
 
 (defmethod find-formula ((formulas null) name)
