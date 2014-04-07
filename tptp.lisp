@@ -675,12 +675,6 @@
 		 :role (role x)
 		 :formula (flatten-conjunctions/disjunctions (formula x))))
 
-(defmethod terms-with-functor (functor-name (db tptp-db))
-  (terms-with-functor functor-name (formulas db)))
-
-(defmethod terms-with-functor (functor-name (x tptp-formula))
-  (terms-with-functor functor-name (formula x)))
-
 (defmethod universally-close :around ((x tptp-formula))
   (let ((new-formula (call-next-method)))
     (when (slot-boundp x 'source)
