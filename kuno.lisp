@@ -136,7 +136,7 @@
     (setf problem (dialogues::binarize problem))
     (format *standard-output* "~a" problem)
     (terpri *standard-output*)
-    (setf result (solve-problem problem timeout))
+    (setf result (solve-problem problem timeout depth))
     (format *standard-output* "~a" result)
     (terpri *standard-output*)
     (clon:exit 0)))
