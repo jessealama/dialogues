@@ -1,4 +1,4 @@
-.PHONY: clean test
+.PHONY: clean test all
 
 all:
 	# nothing to do
