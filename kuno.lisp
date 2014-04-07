@@ -7,7 +7,6 @@
 (let ((quicklisp-init (merge-pathnames "quicklisp/setup.lisp" (user-homedir-pathname))))
   (when (probe-file quicklisp-init)
     (load quicklisp-init)))
-(quicklisp:quickload "alexandria")
 (quicklisp:quickload "trivial-timeout")
 (push (truename (sb-posix:getcwd)) asdf:*central-registry*)
 (asdf:load-system "dialogues")
