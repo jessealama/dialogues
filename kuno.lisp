@@ -78,6 +78,19 @@
       (declare (ignore c))
       :timeout)))
 
+(defun result->szs (result)
+  (cond ((keywordp result)
+         (cond ((eql result :cutoff)
+                "RSO (ResourceOut)")
+               ((eql result :timeout)
+                "TMO (Timeout)")
+               (t
+                "UNK (Unknown)")))
+        (result
+         "THM (Theorem)")
+        (t
+         "CSA (CounterSatisfiable)")))
+
 (defun main ()
   "Entry point for the standalone application."
   (clon:make-context)
