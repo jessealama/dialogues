@@ -107,6 +107,12 @@
       (error-message "'~a' is not an acceptable value for the timeout option." timeout-arg)
       (clon:exit 1))
 
+    ;; depth option
+    (setf depth (parse-integer-noerror depth-arg))
+    (unless (integerp depth)
+      (error-message "'~a' is not an acceptable value for the depth option." timeout-arg)
+      (clon:exit 1))
+
     (format *standard-output* "Given argument is \"~a\"." (namestring arg))
     (terpri *standard-output*)
     (unless (file-readable? arg)
