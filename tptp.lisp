@@ -109,9 +109,6 @@
   (let ((sorted (sort formula-list #'string< :key #'name)))
     sorted))
 
-(defparameter *tptp-to-lisp-stylesheet*
-  #p"/Users/alama/sources/xsl4tptp/tptp-to-lisp.xsl")
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; TPTP databases
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
