@@ -59,6 +59,10 @@
   (handler-case (parse-integer x :junk-allowed nil)
     (error () nil)))
 
+(defun parse-tptp-noerror (x)
+  (handler-case (dialogues::parse-tptp x)
+    (error () nil)))
+
 (defun main ()
   "Entry point for the standalone application."
   (clon:make-context)
