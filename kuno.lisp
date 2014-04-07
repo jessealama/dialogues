@@ -29,7 +29,12 @@
 		   :long-name "timeout"
 		   :description "Spend at most TIME seconds solving any particular problem."
 		   :argument-name "TIME"
-		   :default-value "30"))))
+		   :default-value "30")
+           (stropt :short-name "d"
+		   :long-name "depth"
+		   :description "Consider winning strategies have depth at most DEPTH."
+		   :argument-name "DEPTH"
+		   :default-value "20"))))
 
 (defun file-readable? (path)
   (and (probe-file path)
