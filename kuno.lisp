@@ -69,9 +69,11 @@
   (when (clon:getopt :short-name "h")
     (help-and-exit 0))
   (let ((remainder (clon:remainder))
-        (arg nil)
         (timeout-arg (clon:getopt :long-name "timeout"))
-        (timeout nil))
+        arg
+        timeout
+        tptp
+        problem)
 
     ;; arguments
     (when (null remainder)
@@ -80,7 +82,7 @@
     (when (rest remainder)
       (error-message "Too many arguments (exactly one is expected).")
       (help-and-exit 1))
-    (setf arg (first remainder))
+    (setf arg (pathname (first remainder)))
 
     ;; timeout option
     (setf timeout (parse-integer-noerror timeout-arg))
@@ -88,31 +90,38 @@
       (error-message "'~a' is not an acceptable value for the timeout option." timeout-arg)
       (clon:exit 1))
 
-    (format *standard-output* "Given argument is \"~a\"." arg)
+    (format *standard-output* "Given argument is \"~a\"." (namestring arg))
     (terpri *standard-output*)
     (unless (file-readable? arg)
       (format *standard-output* "This is an unreadable (or non-existing) file.")
       (clon:exit 1))
-    (let ((tptp (handler-case (dialogues::parse-tptp (pathname arg))
-                  (error () nil))))
-      (if tptp
-          (if (dialogues::has-conjecture-p tptp)
-              (let ((problem (dialogues::problematize tptp)))
-                (setf problem (dialogues::equivalence->conjunction problem))
-                (setf problem (dialogues::binarize problem))
-                (format *standard-output* "~a" problem)
-                (terpri *standard-output*)
-                (let ((result (handler-case
-                                  (trivial-timeout:with-timeout (timeout)
-                                    (dialogues::intuitionistically-valid--e-no-pro-repeats? problem
-                                                                                            20
-                                                                                            dialogues::*alphabetic-propositional-signature*))
-                                (trivial-timeout:timeout-error (c)
-                                  (declare (ignore c))
-                                  :timeout))))
-                  (format *standard-output* "~a" result)))
-              (error-message "No conjecture formula!"))
-          (format *standard-output* "This is not a parsable TPTP file.")))
+
+    ;; parse
+    (setf tptp (parse-tptp-noerror arg))
+    (when (null tptp)
+      (format *standard-output* "This is not a parsable TPTP file.")
+      (clon:exit 1))
+
+    ;; is there a conjecture?
+    (unless (dialogues::has-conjecture-p tptp)
+      (error-message "No conjecture formula!")
+      (clon:exit 1))
+
+    ;; everything appears to be in order -- let's go
+    (setf problem (dialogues::problematize tptp))
+    (setf problem (dialogues::equivalence->conjunction problem))
+    (setf problem (dialogues::binarize problem))
+    (format *standard-output* "~a" problem)
+    (terpri *standard-output*)
+    (let ((result (handler-case
+                      (trivial-timeout:with-timeout (timeout)
+                        (dialogues::intuitionistically-valid--e-no-pro-repeats? problem
+                                                                                20
+                                                                                dialogues::*alphabetic-propositional-signature*))
+                    (trivial-timeout:timeout-error (c)
+                      (declare (ignore c))
+                      :timeout))))
+      (format *standard-output* "~a" result))
     (terpri *standard-output*)
     (clon:exit 0)))
 
