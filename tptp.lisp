@@ -681,26 +681,6 @@
 (defmethod terms-with-functor (functor-name (x tptp-formula))
   (terms-with-functor functor-name (formula x)))
 
-(defmethod eliminate-truth-values ((db tptp-db))
-  (make-instance 'tptp-db
-		 :formulas (mapcar #'eliminate-truth-values (formulas db))))
-
-(defmethod eliminate-truth-values :around ((x tptp-formula))
-  (let ((new-formula (call-next-method)))
-    (when (slot-boundp x 'source)
-      (setf (source new-formula)
-	    (source x)))
-    (when (slot-boundp x 'optional-info)
-      (setf (optional-info new-formula)
-	    (optional-info x)))
-    new-formula))
-
-(defmethod eliminate-truth-values ((x tptp-formula))
-  (make-instance (class-of x)
-		 :name (name x)
-		 :role (role x)
-		 :formula (eliminate-truth-values (formula x))))
-
 (defmethod universally-close :around ((x tptp-formula))
   (let ((new-formula (call-next-method)))
     (when (slot-boundp x 'source)
