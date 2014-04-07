@@ -568,37 +568,6 @@
 	       (error "Don't know how to determine whether '~a' is an axiom." formula))))
       t))
 
-(defgeneric fofify (tptp))
-
-(defmethod fofify ((l list))
-  (mapcar #'fofify l))
-
-(defmethod fofify ((x null))
-  nil)
-
-(defmethod fofify ((db tptp-db))
-  (make-instance 'tptp-db
-		 :path (path db)
-		 :formulas (mapcar #'fofify (formulas db))))
-
-(defmethod fofify :around ((formula tptp-formula))
-  (let ((new-formula (call-next-method)))
-    (when (slot-boundp formula 'source)
-      (setf (source new-formula) (source formula)))
-    (when (slot-boundp formula 'optional-info)
-      (setf (optional-info new-formula)
-	    (optional-info formula)))
-    new-formula))
-
-(defmethod fofify ((x formula))
-  (universally-close x))
-
-(defmethod fofify ((formula tptp-formula))
-  (make-instance 'fof
-		 :name (name formula)
-		 :role (role formula)
-		 :formula (fofify (formula formula))))
-
 (defgeneric premises (thing))
 
 (defmethod premises ((x null))
