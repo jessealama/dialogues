@@ -262,24 +262,6 @@
 		 :formulas (remove (conjecture-formula problem)
 				   (formulas problem))))
 
-(defgeneric remove-formula (formulas formula))
-
-(defmethod remove-formula ((formulas tptp-db) (formula-name string))
-  "Remove any formula in FORMULAS whose name is FORMULA-NAME."
-  (make-instance 'tptp-db
-		 :formulas (remove formula-name
-				   (formulas formulas)
-				   :test (lambda (x y) (string= (stringify x)
-                                                                (stringify y)))
-				   :key #'name)))
-
-(defmethod remove-formula (formulas (formula-name number))
-  "Remove any formula in FORMULAS whose name is FORMULA-NAME."
-  (remove-formula formulas (stringify formula-name)))
-
-(defmethod remove-formula ((formulas tptp-db) (formula tptp-formula))
-  (remove-formula formulas (name formula)))
-
 (defun formulas-with-status (problem status)
   (remove-if-not #'(lambda (stat) (string= stat status))
 		 (formulas problem)
