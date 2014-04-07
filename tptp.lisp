@@ -402,46 +402,6 @@
 (defmethod premises ((db tptp-db))
   (non-conjecture-formulas db))
 
-(defgeneric restrict-to (db formulas)
-  (:documentation "Restrict DB to the formulas in FORMULAS."))
-
-(defmethod restrict-to ((db tptp-db) (formulas list))
-  (let ((new-formulas nil))
-    (dolist (formula formulas)
-      (cond ((stringp formula)
-	     (let ((formula-in-db (formula-with-name db formula)))
-	       (when formula-in-db
-		 (push formula-in-db new-formulas))))
-	    ((typep formula 'formula)
-	     (let ((formula-in-db (formula-with-name db (name formula))))
-	       (when formula-in-db
-		 (push formula-in-db new-formulas))))
-	    (t
-	     (error "Don't know how to handle ~a." formula))))
-    (make-instance 'tptp-db
-		   :formulas new-formulas)))
-
-(defmethod restrict-to ((problem derivability-problem) (formulas list))
-  (let* ((new-formulas nil)
-	 (conjecture (conjecture problem))
-	 (conjecture-name (name conjecture)))
-    (dolist (formula formulas)
-      (cond ((stringp formula)
-	     (let ((formula-in-db (formula-with-name problem formula)))
-	       (when formula-in-db
-		 (unless (string= formula conjecture-name)
-		   (push formula-in-db new-formulas)))))
-	    ((typep formula 'formula)
-	     (let ((formula-in-db (formula-with-name problem (name formula))))
-	       (when formula-in-db
-		 (unless (string= (name formula) conjecture-name)
-		   (push formula-in-db new-formulas)))))
-	    (t
-	     (error "Don't know how to handle ~a." formula))))
-    (make-instance 'derivability-problem
-		   :conjecture conjecture
-		   :formulas new-formulas)))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Includes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
