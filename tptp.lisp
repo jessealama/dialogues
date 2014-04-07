@@ -779,12 +779,6 @@
 		 :role (role x)
 		 :formula (negate (formula x))))
 
-(defgeneric definition-p (x)
-  (:documentation "Is X a definition?"))
-
-(defmethod definition-p ((x tptp-formula))
-  (string= (role x) "definition"))
-
 (defgeneric problematize (db)
   (:documentation "Make a single problem formula out of a whole TPTP DB."))
 
