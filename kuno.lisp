@@ -113,10 +113,8 @@
       (error-message "'~a' is not an acceptable value for the depth option." timeout-arg)
       (clon:exit 1))
 
-    (format *standard-output* "Given argument is \"~a\"." (namestring arg))
-    (terpri *standard-output*)
     (unless (file-readable? arg)
-      (format *standard-output* "This is an unreadable (or non-existing) file.")
+      (format *standard-output* "\"~a\" is an unreadable (or non-existing) file." (namestring arg))
       (clon:exit 1))
 
     ;; parse
