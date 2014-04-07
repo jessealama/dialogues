@@ -112,29 +112,6 @@
 (defparameter *tptp-to-lisp-stylesheet*
   #p"/Users/alama/sources/xsl4tptp/tptp-to-lisp.xsl")
 
-(defgeneric xmlize-tptp (tptp))
-
-(defmethod xmlize-tptp :around ((tptp-file pathname))
-  (if (probe-file tptp-file)
-      (call-next-method)
-      (error "There is no file at '~a'." (namestring tptp-file))))
-
-(defmethod xmlize-tptp ((tptp-file pathname))
-  (let ((tptp4X-out (make-string-output-stream))
-	(tptp4X-err (make-string-output-stream))
-	(tptp-dir (pathname (directory-namestring tptp-file))))
-    (with-current-directory (tptp-dir)
-      (run-program "tptp4X"
-		   (list "-c" "-x" "-fxml" "--")
-		   :wait t
-		   :output tptp4X-out
-		   :error tptp4X-err
-		   :input tptp-file))
-    (prog1
-	(get-output-stream-string tptp4X-out)
-      (close tptp4X-out)
-      (close tptp4X-err))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; TPTP databases
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
