@@ -56,7 +56,7 @@
      (clon:help)
      (clon:exit ,exit-code)))
 
-(defun parse-integer-thing (x)
+(defun parse-integer-noerror (x)
   (handler-case (parse-integer x :junk-allowed nil)
     (error () nil)))
 
@@ -67,7 +67,7 @@
     (help-and-exit 0))
   (let ((timeout-str (clon:getopt :long-name "timeout"))
 	(remainder (clon:remainder)))
-    (let ((timeout (parse-integer-thing timeout-str)))
+    (let ((timeout (parse-integer-noerror timeout-str)))
       (unless (integerp timeout)
         (error-message "'~a' is not an acceptable value for the timeout option." timeout-str)
 	(clon:exit 1))
