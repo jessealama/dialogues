@@ -30,7 +30,7 @@
 		   :long-name "timeout"
 		   :description "Spend at most TIME seconds solving any particular problem."
 		   :argument-name "TIME"
-		   :default-value "5"))))
+		   :default-value "30"))))
 
 (defun file-readable? (path)
   (and (probe-file path)
