@@ -257,11 +257,6 @@
 (defun has-conjecture-p (problem)
   (not (null (conjecture-formula problem))))
 
-(defun remove-conjecture (problem)
-  (make-instance 'tptp-db
-		 :formulas (remove (conjecture-formula problem)
-				   (formulas problem))))
-
 (defun formulas-with-status (problem status)
   (remove-if-not #'(lambda (stat) (string= stat status))
 		 (formulas problem)
