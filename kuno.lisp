@@ -63,6 +63,16 @@
   (handler-case (dialogues::parse-tptp x)
     (error () nil)))
 
+(defun solve-problem (problem timeout)
+  (handler-case
+      (trivial-timeout:with-timeout (timeout)
+        (dialogues::intuitionistically-valid--e-no-pro-repeats? problem
+                                                                20
+                                                                dialogues::*alphabetic-propositional-signature*))
+    (trivial-timeout:timeout-error (c)
+      (declare (ignore c))
+      :timeout)))
+
 (defun main ()
   "Entry point for the standalone application."
   (clon:make-context)
