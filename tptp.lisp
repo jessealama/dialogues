@@ -72,8 +72,6 @@
 	  (role formula)
 	  (formula formula)))
 
-
-
 (defmethod render ((formula cnf))
   (format nil "cnf(~a,~a,~a)."
 	  (name formula)
