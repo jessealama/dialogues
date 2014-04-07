@@ -83,7 +83,8 @@
         arg
         timeout
         tptp
-        problem)
+        problem
+        result)
 
     ;; arguments
     (when (null remainder)
@@ -123,15 +124,8 @@
     (setf problem (dialogues::binarize problem))
     (format *standard-output* "~a" problem)
     (terpri *standard-output*)
-    (let ((result (handler-case
-                      (trivial-timeout:with-timeout (timeout)
-                        (dialogues::intuitionistically-valid--e-no-pro-repeats? problem
-                                                                                20
-                                                                                dialogues::*alphabetic-propositional-signature*))
-                    (trivial-timeout:timeout-error (c)
-                      (declare (ignore c))
-                      :timeout))))
-      (format *standard-output* "~a" result))
+    (setf result (solve-problem problem timeout))
+    (format *standard-output* "~a" result)
     (terpri *standard-output*)
     (clon:exit 0)))
 
