@@ -435,32 +435,6 @@
 	:key #'(lambda (x) (stringify (name x)))
 	:test #'string=))
 
-(defmethod flatten-conjunctions/disjunctions ((x null))
-  nil)
-
-(defmethod flatten-conjunctions/disjunctions ((l list))
-  (mapcar #'flatten-conjunctions/disjunctions l))
-
-(defmethod flatten-conjunctions/disjunctions ((db tptp-db))
-  (make-instance 'tptp-db
-		 :formulas (mapcar #'flatten-conjunctions/disjunctions (formulas db))))
-
-(defmethod flatten-conjunctions/disjunctions :around ((x tptp-formula))
-  (let ((new-formula (call-next-method)))
-    (when (slot-boundp x 'source)
-      (setf (source new-formula)
-	    (source x)))
-    (when (slot-boundp x 'optional-info)
-      (setf (optional-info new-formula)
-	    (optional-info x)))
-    new-formula))
-
-(defmethod flatten-conjunctions/disjunctions ((x tptp-formula))
-  (make-instance (class-of x)
-		 :name (name x)
-		 :role (role x)
-		 :formula (flatten-conjunctions/disjunctions (formula x))))
-
 (defmethod universally-close :around ((x tptp-formula))
   (let ((new-formula (call-next-method)))
     (when (slot-boundp x 'source)

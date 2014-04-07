@@ -913,41 +913,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defmacro neg (argument)
   `(negate ,argument))
 
-(defgeneric flatten-conjunctions/disjunctions (tptp-thing))
-
-(defmethod flatten-conjunctions/disjunctions ((x atomic-formula))
-  x)
-
-(defmethod flatten-conjunctions/disjunctions ((x multiple-arity-conjunction))
-  (apply #'make-multiple-arity-conjunction
-	 (mapcar #'flatten-conjunctions/disjunctions (conjuncts x))))
-
-(defmethod flatten-conjunctions/disjunctions ((x multiple-arity-disjunction))
-  (apply #'make-multiple-arity-disjunction
-	 (mapcar #'flatten-conjunctions/disjunctions (disjuncts x))))
-
-(defmethod flatten-conjunctions/disjunctions ((x binary-disjunction))
-  (apply #'make-multiple-arity-disjunction
-	 (mapcar #'flatten-conjunctions/disjunctions (disjuncts x))))
-
-(defmethod flatten-conjunctions/disjunctions ((x binary-conjunction))
-  (apply #'make-multiple-arity-conjunction
-	 (mapcar #'flatten-conjunctions/disjunctions (conjuncts x))))
-
-(defmethod flatten-conjunctions/disjunctions ((x negation))
-  (make-instance 'negation
-		 :argument (flatten-conjunctions/disjunctions (argument x))))
-
-(defmethod flatten-conjunctions/disjunctions ((x binary-connective-formula))
-  (make-instance (class-of x)
-		 :lhs (flatten-conjunctions/disjunctions (lhs x))
-		 :rhs (flatten-conjunctions/disjunctions (rhs x))))
-
-(defmethod flatten-conjunctions/disjunctions ((gen generalization))
-  (make-instance (class-of gen)
-		 :bindings (bindings gen)
-		 :matrix (flatten-conjunctions/disjunctions (matrix gen))))
-
 (defgeneric equivalence->conjunction (tptp-thing)
   (:documentation "Replace equivalences by conjunctions of implications."))
 
