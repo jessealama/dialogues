@@ -342,6 +342,12 @@ game tree developed down to depth DEPTH."
                    formula
                    depth))
 
+;; constrained search (not just constrained rulesets)
+
+(defun intuitionistically-valid--e-no-repeats--prefer-defenses? (formula depth signature)
+  (let ((dialogue (make-dialogue formula signature e-dialogue-rules-no-repetitions)))
+    (proponent-has-winning-strategy--defenses-preferred? dialogue depth 1)))
+
 (defvar search-tree-directory (make-hash-table :test #'equal)
   "A mapping from triples (FORMULA RULESET DEPTH) to search trees.
 
