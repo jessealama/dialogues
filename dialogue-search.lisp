@@ -124,6 +124,8 @@
 	 for search-result in list
 	 do
 	   (let ((result (funcall pred search-result)))
+             (setf all-are-cutoffs (and all-are-cutoffs
+                                        (eq result :cutoff)))
 	     (unless (eq result :cutoff)
 	       (unless (null result)
 		 (return t))))
