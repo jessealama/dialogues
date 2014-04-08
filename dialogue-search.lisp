@@ -176,6 +176,42 @@
 		 :cutoff
 		 every-result)))))
 
+(defun proponent-has-winning-strategy--defenses-preferred? (dialogue cutoff &optional (start 1))
+  (cond ((minusp cutoff) :cutoff)
+	((zerop cutoff)
+	 (if (evenp start)
+	     :cutoff
+	     (or (null (all-next-opponent-moves-at-position dialogue start))
+		 :cutoff)))
+	(t (let ((every-result
+		  (every-disallowing-cutoffs
+		   #'(lambda (opponent-move)
+		       (let ((dialogue-opponent
+			      (add-move-to-dialogue-at-position dialogue
+								opponent-move
+								start)))
+			 (some-non-cutoff-result
+			  #'(lambda (proponent-move)
+			      (let ((dialogue-proponent
+				     (add-move-to-dialogue-at-position dialogue
+								       proponent-move
+								       (1+ start))))
+				(proponent-has-winning-strategy--defenses-preferred? dialogue-proponent
+                                                                                     (- cutoff 2)
+                                                                                     (+ start 2))))
+			  (let ((all-pro-moves (all-next-proponent-moves-at-position dialogue-opponent
+                                                                                     (+ start 1))))
+                            (let ((defense (find-if #'defensive-move? all-pro-moves)))
+                              (if defense
+                                  (progn
+                                    ;; (break "a defense is available in~%~a~%picking it" all-pro-moves)
+                                    (list defense))
+                                  all-pro-moves))))))
+		   (all-next-opponent-moves-at-position dialogue start))))
+	     (if (eq every-result :cutoff)
+		 :cutoff
+		 every-result)))))
+
 (defun dialogue-valid? (rules signature statement depth)
   "Determine whether statement is valid in the dialogue games defined by
 RULES.  \"Valid\" means that Proponent has a winning strategy in the
