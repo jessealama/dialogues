@@ -401,6 +401,9 @@
 		 :predicate predicate
 		 :arguments (mapcar #'form->term arguments)))
 
+(defmethod make-atomic-formula ((predicate string) &rest arguments)
+  (apply #'make-atomic-formula (symbolify predicate) arguments))
+
 (defparameter contradiction (make-atomic-formula 'bottom))
 
 (defparameter top (make-atomic-formula 'top))
