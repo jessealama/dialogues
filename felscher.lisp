@@ -882,6 +882,23 @@
 				      proponent-no-repeats))
 		 :description "E rules (D rules + Opponent must always respond to the immediately previous move); Proponent repetitions disallowed"))
 
+(defparameter e-dialogue-rules-no-repetitions
+  (make-instance 'ruleset
+		 :rules (append argumentation-forms
+				(list rule-d00-atomic
+				      rule-d00-proponent
+				      rule-d00-opponent
+				      rule-d01-composite
+				      rule-d02-attack
+				      rule-d10
+				      rule-d11
+				      rule-d12
+				      rule-d13
+				      rule-e
+				      proponent-no-repeats
+                                      opponent-no-repeats))
+		 :description "E rules (D rules + Opponent must always respond to the immediately previous move); all repetitions disallowed"))
+
 (defparameter e-dialogue-rules-no-pro-double-repetitions
   (make-instance 'ruleset
 		 :rules (append argumentation-forms
