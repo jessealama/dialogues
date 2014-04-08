@@ -71,9 +71,9 @@
 (defun solve-problem (problem timeout depth)
   (handler-case
       (trivial-timeout:with-timeout (timeout)
-        (dialogues::intuitionistically-valid--e-no-pro-repeats? problem
-                                                                depth
-                                                                dialogues::*alphabetic-propositional-signature*))
+        (dialogues::intuitionistically-valid--e-no-repeats? problem
+                                                            depth
+                                                            dialogues::*alphabetic-propositional-signature*))
     (trivial-timeout:timeout-error (c)
       (declare (ignore c))
       :timeout)))
