@@ -702,8 +702,14 @@ fail, only whether all of them are satisfied."
 	    (let* ((provisional-move (make-move player statement stance index))
 		   (provisional-extension (provisionally-extend-dialogue dialogue provisional-move)))
 	      (when (fast-eval-entire-dialogue provisional-extension)
-		(push (list statement index)
-		      result))))))))
+                (let ((pair (list statement index)))
+                  (pushnew pair result :test #'(lambda (pair-1 pair-2)
+                                                 (destructuring-bind (statement-1 index-1)
+                                                     pair-1
+                                                   (destructuring-bind (statement-2 index-2)
+                                                       pair-2
+                                                     (and (= index-1 index-2)
+                                                          (equal-statements? statement-1 statement-2))))))))))))))
 
 (defun all-next-moves-at-position (dialogue position)
   (unless (zerop position) ;; not allowed to change the initial move
