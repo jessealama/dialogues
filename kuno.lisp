@@ -146,24 +146,20 @@
       (error-message "No conjecture formula!")
       (clon:exit 1))
 
-    ;; is bottom lurking anywhere?
-    (when (dialogues::contains-contradiction-p tptp)
-      (error-message "Bottom found; bailing out.")
-      (clon:exit 1))
-
-    ;; is top lurking anywhere?
-    (when (dialogues::contains-verum-p tptp)
-      (error-message "Top found; bailing out.")
-      (clon:exit 1))
-
-    ;; everything appears to be in order -- let's go
-    (setf problem (dialogues::problematize tptp))
-    (setf problem (dialogues::equivalence->conjunction problem))
-    (setf problem (dialogues::binarize problem))
-    (setf result (solve-problem problem timeout depth))
-    (setf szs-result (result->szs result))
-    (format *standard-output* "% SZS status ~a for ~a " szs-result (namestring arg))
-    (terpri *standard-output*)
-    (clon:exit 0)))
+    (cond ((dialogues::contains-contradiction-p tptp)
+           (error-message "Bottom found; bailing out.")
+           (clon:exit 1))
+          ((dialogues::contains-verum-p tptp)
+           (error-message "Top found; bailing out.")
+           (clon:exit 1))
+          (t
+           (setf problem (dialogues::problematize tptp))
+           (setf problem (dialogues::equivalence->conjunction problem))
+           (setf problem (dialogues::binarize problem))
+           (setf result (solve-problem problem timeout depth))
+           (setf szs-result (result->szs result))
+           (format *standard-output* "% SZS status ~a for ~a " szs-result (namestring arg))
+           (terpri *standard-output*)
+           (clon:exit 0)))))
 
 (clon:dump "kuno" main)
