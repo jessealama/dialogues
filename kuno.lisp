@@ -87,6 +87,8 @@
                 "ResourceOut")
                ((eql result :timeout)
                 "Timeout")
+               ((eql result :inappropriate)
+                "Inappropriate")
                (t
                 "Unknown")))
         (result
