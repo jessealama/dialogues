@@ -112,7 +112,8 @@
         tptp
         problem
         result
-        szs-result)
+        szs-result
+        comment)
 
     ;; arguments
     (when (null remainder)
