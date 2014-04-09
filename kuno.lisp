@@ -142,19 +142,19 @@
 
     ;; parse
     (setf tptp (parse-tptp-noerror arg))
-    (when (null tptp)
-      (format *standard-output* "This is not a parsable TPTP file.")
-      (clon:exit 1))
-
-    ;; is there a conjecture?
-    (unless (dialogues::has-conjecture-p tptp)
-      (error-message "No conjecture formula!")
-      (clon:exit 1))
 
     (setf result
-          (cond ((dialogues::contains-contradiction-p tptp)
+          (cond ((null tptp)
+                 (setf comment "Unparsable TPTP file.")
+                 :syntax-error)
+                ((not (dialogues::has-conjecture-p tptp))
+                 (setf comment "No conjecture formula.")
+                 :inappropriate)
+                ((dialogues::contains-contradiction-p tptp)
+                 (setf comment "At least one occurrence of falsum was found.")
                  :inappropriate)
                 ((dialogues::contains-verum-p tptp)
+                 (setf comment "At least one occurrence of verum was found.")
                  :inappropriate)
                 (t
                  (setf problem (dialogues::problematize tptp))
@@ -163,7 +163,9 @@
                  (solve-problem problem timeout depth))))
 
     (setf szs-result (result->szs result))
-    (format *standard-output* "% SZS status ~a for ~a " szs-result (namestring arg))
+    (format *standard-output* "% SZS status ~a for ~a" szs-result (namestring arg))
+    (when (stringp comment)
+      (format *standard-output* " : ~a" comment))
     (terpri *standard-output*)
     (clon:exit 0)))
 
