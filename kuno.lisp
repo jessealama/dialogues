@@ -146,15 +146,16 @@
       (error-message "No conjecture formula!")
       (clon:exit 1))
 
-    (cond ((dialogues::contains-contradiction-p tptp)
-           (setf szs-result :inappropriate))
-          ((dialogues::contains-verum-p tptp)
-           (setf szs-result :inappropriate))
-          (t
-           (setf problem (dialogues::problematize tptp))
-           (setf problem (dialogues::equivalence->conjunction problem))
-           (setf problem (dialogues::binarize problem))
-           (setf result (solve-problem problem timeout depth))))
+    (setf result
+          (cond ((dialogues::contains-contradiction-p tptp)
+                 :inappropriate)
+           ((dialogues::contains-verum-p tptp)
+            :inappropriate)
+           (t
+            (setf problem (dialogues::problematize tptp))
+            (setf problem (dialogues::equivalence->conjunction problem))
+            (setf problem (dialogues::binarize problem))
+            (solve-problem problem timeout depth))))
 
     (setf szs-result (result->szs result))
     (format *standard-output* "% SZS status ~a for ~a " szs-result (namestring arg))
