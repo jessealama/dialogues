@@ -1435,6 +1435,37 @@ value."
 (defmethod contains-contradiction-p ((x multiple-arity-disjunction))
   (some #'contains-contradiction-p (arguments x)))
 
+(defgeneric contains-verum-p (x)
+  (:documentation "Is a verum (top) found anywhere inside X?"))
+
+(defmethod contains-verum-p ((x atomic-formula))
+  (string= (predicate x) "true"))
+
+(defmethod contains-verum-p ((x negation))
+  (contains-verum-p (argument x)))
+
+(defmethod contains-verum-p ((x binary-conjunction))
+  (or (contains-verum-p (lhs x))
+      (contains-verum-p (rhs x))))
+
+(defmethod contains-verum-p ((x binary-disjunction))
+  (or (contains-verum-p (lhs x))
+      (contains-verum-p (rhs x))))
+
+(defmethod contains-verum-p ((x implication))
+  (or (contains-verum-p (antecedent x))
+      (contains-verum-p (consequent x))))
+
+(defmethod contains-verum-p ((x equivalence))
+  (or (contains-verum-p (lhs x))
+      (contains-verum-p (rhs x))))
+
+(defmethod contains-verum-p ((x multiple-arity-conjunction))
+  (some #'contains-verum-p (arguments x)))
+
+(defmethod contains-verum-p ((x multiple-arity-disjunction))
+  (some #'contains-verum-p (arguments x)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Reading formulas
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
