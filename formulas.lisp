@@ -1404,6 +1404,37 @@ value."
        (atomic-formula? formula-2)
        (equal-formulas? formula-1 formula-2)))
 
+(defgeneric contains-contradiction-p (x)
+  (:documentation "Is a contradiction (bottom) found anywhere inside X?"))
+
+(defmethod contains-contradiction-p ((x atomic-formula))
+  (string= (predicate x) "false"))
+
+(defmethod contains-contradiction-p ((x negation))
+  (contains-contradiction-p (argument x)))
+
+(defmethod contains-contradiction-p ((x binary-conjunction))
+  (or (contains-contradiction-p (lhs x))
+      (contains-contradiction-p (rhs x))))
+
+(defmethod contains-contradiction-p ((x binary-disjunction))
+  (or (contains-contradiction-p (lhs x))
+      (contains-contradiction-p (rhs x))))
+
+(defmethod contains-contradiction-p ((x implication))
+  (or (contains-contradiction-p (antecedent x))
+      (contains-contradiction-p (consequent x))))
+
+(defmethod contains-contradiction-p ((x equivalence))
+  (or (contains-contradiction-p (lhs x))
+      (contains-contradiction-p (rhs x))))
+
+(defmethod contains-contradiction-p ((x multiple-arity-conjunction))
+  (some #'contains-contradiction-p (arguments x)))
+
+(defmethod contains-contradiction-p ((x multiple-arity-disjunction))
+  (some #'contains-contradiction-p (arguments x)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Reading formulas
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
