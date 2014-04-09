@@ -147,19 +147,18 @@
       (clon:exit 1))
 
     (cond ((dialogues::contains-contradiction-p tptp)
-           (error-message "Bottom found; bailing out.")
-           (clon:exit 1))
+           (setf szs-result :inappropriate))
           ((dialogues::contains-verum-p tptp)
-           (error-message "Top found; bailing out.")
-           (clon:exit 1))
+           (setf szs-result :inappropriate))
           (t
            (setf problem (dialogues::problematize tptp))
            (setf problem (dialogues::equivalence->conjunction problem))
            (setf problem (dialogues::binarize problem))
            (setf result (solve-problem problem timeout depth))
-           (setf szs-result (result->szs result))
-           (format *standard-output* "% SZS status ~a for ~a " szs-result (namestring arg))
-           (terpri *standard-output*)
-           (clon:exit 0)))))
+           (setf szs-result (result->szs result))))
+
+    (format *standard-output* "% SZS status ~a for ~a " szs-result (namestring arg))
+    (terpri *standard-output*)
+    (clon:exit 0)))
 
 (clon:dump "kuno" main)
