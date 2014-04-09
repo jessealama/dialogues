@@ -146,6 +146,11 @@
       (error-message "No conjecture formula!")
       (clon:exit 1))
 
+    ;; is bottom lurking anywhere?
+    (when (dialogues::contains-contradiction-p tptp)
+      (error-message "Bottom found; bailing out.")
+      (clon:exit 1))
+
     ;; everything appears to be in order -- let's go
     (setf problem (dialogues::problematize tptp))
     (setf problem (dialogues::equivalence->conjunction problem))
