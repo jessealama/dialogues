@@ -89,6 +89,8 @@
                 "Timeout")
                ((eql result :inappropriate)
                 "Inappropriate")
+               ((eql result :syntax-error)
+                "SyntaxError")
                (t
                 "Unknown")))
         (result
