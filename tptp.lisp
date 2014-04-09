@@ -491,3 +491,9 @@
             (make-implication (apply #'make-multiple-arity-conjunction
                                      premises)
                               c)))))
+
+(defmethod contains-contradiction-p ((x tptp-db))
+  (some #'contains-contradiction-p (formulas x)))
+
+(defmethod contains-contradiction-p ((x tptp-formula))
+  (contains-contradiction-p (formula x)))
