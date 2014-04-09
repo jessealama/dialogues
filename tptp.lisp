@@ -497,3 +497,9 @@
 
 (defmethod contains-contradiction-p ((x tptp-formula))
   (contains-contradiction-p (formula x)))
+
+(defmethod contains-verum-p ((x tptp-db))
+  (some #'contains-verum-p (formulas x)))
+
+(defmethod contains-verum-p ((x tptp-formula))
+  (contains-verum-p (formula x)))
