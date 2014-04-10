@@ -60,7 +60,7 @@
   (call-next-method))
 
 (defmethod print-object ((x cnf) stream)
-  (format stream "fof")
+  (format stream "cnf")
   (call-next-method))
 
 (defgeneric render (tptp-thing)
