@@ -92,21 +92,21 @@
 		(universal-generalization? s)))
    :description "If one asserts a term as an attack, then the assertion being attacked must be a universal generalization."))
 
-(defparameter rule-d01-which-instance
-  (make-offensive-rule
-   :name "d01-which-instance"
-   :precondition (eq current-statement *which-instance?*)
-   :body (let ((s (nth-statement dialogue current-reference)))
-	   (and (non-symbolic-attack-formula? s)
-		(existential-generalization? s)))
-   :description "The WHICH-INSTANCE? attack applies only to existential generalizations."))
+;; (defparameter rule-d01-which-instance
+;;   (make-offensive-rule
+;;    :name "d01-which-instance"
+;;    :precondition (eq current-statement *which-instance?*)
+;;    :body (let ((s (nth-statement dialogue current-reference)))
+;; 	   (and (non-symbolic-attack-formula? s)
+;; 		(existential-generalization? s)))
+;;    :description "The WHICH-INSTANCE? attack applies only to existential generalizations."))
 
-(defparameter rule-d01-existential
-  (make-offensive-rule
-   :name "d01-existential"
-   :precondition (existential-generalization? (nth-statement dialogue current-reference))
-   :body (eq current-statement *which-instance?*)
-   :description "WHICH-INSTANCE? is the only permissible attack on existential generalizations."))
+;; (defparameter rule-d01-existential
+;;   (make-offensive-rule
+;;    :name "d01-existential"
+;;    :precondition (existential-generalization? (nth-statement dialogue current-reference))
+;;    :body (eq current-statement *which-instance?*)
+;;    :description "WHICH-INSTANCE? is the only permissible attack on existential generalizations."))
 
 (defparameter rule-d01-formula
   (make-offensive-rule
