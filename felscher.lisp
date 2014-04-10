@@ -551,6 +551,38 @@
 	       (return nil))))
        finally (return t))))
 
+(defmethod fresh-in (dialogue term)
+  "Does TERM appear anywhere at all in DIALOGUE?  If no, then it is said to be fresh."
+  (every #'(lambda (x)
+             (not (appears-in term (move-statement x))))
+         (dialogue-plays dialogue)))
+
+(defparameter rule-o-attacks-universal
+   (make-structural-rule
+    :name "Pro attacks universal"
+    :description "The only permissible attack on a a univeral asserted by Proponent is to introduce a fresh variable."
+    :predicate
+    (loop
+       with len = (dialogue-length dialogue)
+       for move in (if final-move-only
+		       (subseq (dialogue-plays dialogue) (1- len))
+		       (dialogue-plays dialogue))
+       for i from (if final-move-only
+		      (1- len)
+		      0)
+       do
+	 (when (opponent-move? move)
+	   (let ((reference (move-reference move))
+                 (attack (move-statement move)))
+             (when (which-instance-attack-p attack)
+               (let ((instance (instance attack))
+                     (earlier-move (nth-move dialogue reference)))
+                 (let ((earlier-assertion (move-statement earlier-move)))
+                   (when (universal-generalization? earlier-assertion)
+                     (return (and (variable-p instance)
+                                  (fresh-in-dialogue dialogue instance)))))))))
+       finally (return t))))
+
 (defparameter rule-e-implication-opponent
    (make-structural-rule
     :name "E-for-implications (Opponent)"
