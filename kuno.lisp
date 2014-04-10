@@ -143,24 +143,27 @@
       (clon:exit 1))
 
     ;; parse
+
     (setf tptp (parse-tptp-noerror arg))
 
     (multiple-value-bind (result comment exit-cleanly-p)
-        (cond ((null tptp)
-               (values :syntax-error "Unparsable TPTP file." nil))
-              ((not (dialogues::has-conjecture-p tptp))
-               (values :inappropriate "No conjecture formula." t))
-              ((dialogues::contains-contradiction-p tptp)
-               (values :inappropriate "At least one occurrence of falsum was found." t))
-              ((dialogues::contains-verum-p tptp)
-               (values :inappropriate "At least one occurrence of verum was found." t))
-              (t
-               (setf problem (dialogues::problematize tptp))
-               (setf problem (dialogues::equivalence->conjunction problem))
-               (setf problem (dialogues::binarize problem))
-               (values (solve-problem problem timeout depth)
-                       nil
-                       t)))
+        (handler-case
+            (cond ((null tptp)
+                   (values :syntax-error "Unparsable TPTP file." nil))
+                  ((not (dialogues::has-conjecture-p tptp))
+                   (values :inappropriate "No conjecture formula." t))
+                  ((dialogues::contains-contradiction-p tptp)
+                   (values :inappropriate "At least one occurrence of falsum was found." t))
+                  ((dialogues::contains-verum-p tptp)
+                   (values :inappropriate "At least one occurrence of verum was found." t))
+                  (t
+                   (setf problem (dialogues::problematize tptp))
+                   (setf problem (dialogues::equivalence->conjunction problem))
+                   (setf problem (dialogues::binarize problem))
+                   (values (solve-problem problem timeout depth)
+                           nil
+                           t)))
+          (error () (values :error "Internal error" nil)))
       (setf szs-result (result->szs result))
       (format *standard-output* "% SZS status ~a for ~a" szs-result (namestring arg))
       (when (stringp comment)
