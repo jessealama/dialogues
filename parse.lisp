@@ -903,11 +903,13 @@
 			       :direction :input
 			       :if-does-not-exist :error)
     (initialize-lexer)
-    (let ((db (parse-with-lexer #'(lambda ()
-				    (lexer tptp-stream))
-				*tptp-v5.4.0.0-parser*)))
-      (setf (path db) tptp-path)
-      db)))
+    (parse-with-lexer #'(lambda ()
+                          (lexer tptp-stream))
+                      *tptp-v5.4.0.0-parser*)))
+
+(defmethod parse-tptp :around ((tptp-path pathname))
+  (let ((db (call-next-method)))
+    (setf (path db) tptp-path)))
 
 (defmethod parse-tptp ((tptp tptp-db))
   tptp)
