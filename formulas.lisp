@@ -1908,5 +1908,33 @@ value."
       (formula-< (rhs formula-1)
 		 (rhs formula-2))))
 
+(defgeneric appears-in (term thing)
+  (:documentation "Does TERM appear in THING?"))
+
+(defmethod appears-in ((term term) (thing atomic-formula))
+  (some #'(lambda (x)
+            (appears-in term x))
+        (arguments thing)))
+
+(defmethod appears-in ((term term) (thing term))
+  (or (equal-terms? term thing)
+      (some #'(lambda (x)
+                (appears-in term x))
+            (arguments term))))
+
+(defmethod appears-in ((term term) (thing negation))
+  (appears-in term (argument thing)))
+
+(defmethod appears-in ((term term) (thing binary-connective-formula))
+  (or (appears-in term (lhs thing))
+      (appears-in term (rhs thing))))
+
+(defmethod appears-in ((term term) (thing multiple-arity-connective-formula))
+  (some #'(lambda (x)
+            (appears-in term x))
+        (arguments thing)))
+
+(defmethod appears-in ((term term) (thing generalization))
+  (appears-in term (matrix thing)))
 
 ;;; formulas.lisp ends here
