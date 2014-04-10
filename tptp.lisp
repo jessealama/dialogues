@@ -503,3 +503,9 @@
 
 (defmethod contains-verum-p ((x tptp-formula))
   (contains-verum-p (formula x)))
+
+(defmethod contains-quantifier-p ((x tptp-db))
+  (some #'contains-quantifier-p (formulas x)))
+
+(defmethod contains-quantifier-p ((x tptp-formula))
+  (contains-quantifier-p (formula x)))
