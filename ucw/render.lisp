@@ -13,8 +13,8 @@
   (<:as-is "&and;")
   (<:sub "R"))
 
-(defmethod render ((sa (eql *which-instance?*)))
-  (<:as-is "?"))
+;; (defmethod render ((sa (eql *which-instance?*)))
+;;   (<:as-is "?"))
 
 (defmethod render ((sa (eql *which-disjunct?*)))
   (<:as-is "?"))
@@ -97,8 +97,8 @@ func-sym
 (defmethod render-fancily ((formula atomic-formula))
   (format nil "<i>~a</i>" (render-plainly formula)))
 
-(defmethod render-fancily ((sa (eql *which-instance?*)))
-  "?")
+;; (defmethod render-fancily ((sa (eql *which-instance?*)))
+;;   "?")
 
 (defmethod render-fancily ((sa (eql *which-disjunct?*)))
   "?")
