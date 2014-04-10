@@ -1435,6 +1435,9 @@ value."
 (defmethod contains-contradiction-p ((x multiple-arity-disjunction))
   (some #'contains-contradiction-p (arguments x)))
 
+(defmethod contains-contradiction-p ((x generalization))
+  (contains-contradiction-p (matrix x)))
+
 (defgeneric contains-verum-p (x)
   (:documentation "Is a verum (top) found anywhere inside X?"))
 
