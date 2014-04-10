@@ -1463,6 +1463,9 @@ value."
   (or (contains-verum-p (lhs x))
       (contains-verum-p (rhs x))))
 
+(defmethod contains-verum-p ((x generalization))
+  (contains-verum-p (matrix x)))
+
 (defmethod contains-verum-p ((x multiple-arity-conjunction))
   (some #'contains-verum-p (arguments x)))
 
