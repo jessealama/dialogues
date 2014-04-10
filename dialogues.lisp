@@ -1050,7 +1050,8 @@ fail, only whether all of them are satisfied."
 	 (l (setf statement *attack-left-conjunct*))
 	 (r (setf statement *attack-right-conjunct*))
 	 (d (setf statement *which-disjunct?*))
-	 (i (setf statement *which-instance?*)))
+	 ;; (i (setf statement *which-instance?*))
+         )
        (go evaluate-rules)
      statement
        (msg "You are responding to move #~A.  Enter:" index)
