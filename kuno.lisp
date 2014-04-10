@@ -165,7 +165,8 @@
                    (values (solve-problem problem timeout depth)
                            nil
                            t)))
-          (error () (values :error "Internal error" nil)))
+          (error (e)
+            (values :error (format nil "Internal error (~a)" e) nil)))
       (setf szs-result (result->szs result))
       (format *standard-output* "% SZS status ~a for ~a" szs-result (namestring arg))
       (when (stringp comment)
