@@ -8,6 +8,15 @@
     :accessor name
     :initform nil)))
 
+(defclass which-instance-attack (symbolic-attack)
+  ((instance
+    :initarg :instance
+    :accessor instance
+    :initform (error "A which-instance? attack requires an instance."))))
+
+(defun which-instance-attack-p (x)
+  (eql (class-of x) 'which-instance-attack))
+
 ;; Singleton pattern: given a name, there should be one and only one
 ;; instance of SYMBOLIC-ATTACK with that name
 (let ((symbolic-attack-table (make-hash-table :test #'equal)))
@@ -52,9 +61,6 @@
 
 (defparameter *which-disjunct?* (make-instance 'symbolic-attack
 		   :name "which-disjunct?"))
-
-(defparameter *which-instance?* (make-instance 'symbolic-attack
-		   :name "which-instance?"))
 
 (defparameter *propositional-symbolic-attacks*
   (list *attack-left-conjunct*
