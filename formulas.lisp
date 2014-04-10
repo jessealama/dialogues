@@ -1466,6 +1466,40 @@ value."
 (defmethod contains-verum-p ((x multiple-arity-disjunction))
   (some #'contains-verum-p (arguments x)))
 
+(defgeneric contains-quantifier-p (x)
+  (:documentation "Is a quantifier found anywhere inside X?"))
+
+(defmethod contains-quantifier-p ((x atomic-formula))
+  nil)
+
+(defmethod contains-quantifier-p ((x negation))
+  (contains-quantifier-p (argument x)))
+
+(defmethod contains-quantifier-p ((x binary-conjunction))
+  (or (contains-quantifier-p (lhs x))
+      (contains-quantifier-p (rhs x))))
+
+(defmethod contains-quantifier-p ((x binary-disjunction))
+  (or (contains-quantifier-p (lhs x))
+      (contains-quantifier-p (rhs x))))
+
+(defmethod contains-quantifier-p ((x implication))
+  (or (contains-quantifier-p (antecedent x))
+      (contains-quantifier-p (consequent x))))
+
+(defmethod contains-quantifier-p ((x equivalence))
+  (or (contains-quantifier-p (lhs x))
+      (contains-quantifier-p (rhs x))))
+
+(defmethod contains-quantifier-p ((x multiple-arity-conjunction))
+  (some #'contains-quantifier-p (arguments x)))
+
+(defmethod contains-quantifier-p ((x multiple-arity-disjunction))
+  (some #'contains-quantifier-p (arguments x)))
+
+(defmethod contains-quantifier-p ((x generalization))
+  t)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Reading formulas
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
