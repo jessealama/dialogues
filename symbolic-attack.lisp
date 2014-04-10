@@ -82,8 +82,8 @@
 (defmethod render-plainly ((sa (eql *attack-right-conjunct*)))
   "&-right")
 
-(defmethod render-plainly ((sa (eql *which-instance?*)))
-  "?")
+;; (defmethod render-plainly ((sa (eql *which-instance?*)))
+;;   "?")
 
 (defmethod render-plainly ((sa (eql *which-disjunct?*)))
   "?")
