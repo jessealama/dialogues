@@ -3,6 +3,11 @@
 
 (defpackage :dialogues
   (:use :cl :alexandria :yacc)
+  (:import-from :cl-fad
+		#:file-exists-p
+		#:directory-exists-p
+		#:directory-pathname-p
+		#:pathname-as-directory)
   (:export ; utils
            #:EMPTY-STRING? ; funny: this has nothing to do with dialogues
 	   #:concat-strings
