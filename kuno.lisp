@@ -91,6 +91,8 @@
                 "Inappropriate")
                ((eql result :syntax-error)
                 "SyntaxError")
+               ((eql result :error)
+                "Error")
                (t
                 "Unknown")))
         (result
