@@ -56,6 +56,6 @@
 - attack a disjunction by requesting one of the disjuncts.")
 
 (defun symbolic-attack-p (obj)
-  (typep obj 'symbolic-attack-p))
+  (typep obj 'symbolic-attack))
 
 ;;; symbolic-attack ends here
