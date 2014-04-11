@@ -31,16 +31,13 @@
 (defclass formula ()
   nil)
 
-(defun formula? (thing)
-  (typep thing 'formula))
+(defun formula-p (x)
+  (typep x 'formula))
 
 (defclass atomic-formula (formula atomic-expression)
   nil)
 
-(defun atomic-formula? (thing)
-  (typep thing 'atomic-formula))
-
-(defclass equation (atomic-formula)
+(defclass equation ()
   ((lhs
     :accessor lhs
     :initarg :lhs
@@ -50,18 +47,10 @@
     :initarg :rhs
     :initform (error "An equation needs a right-hand side."))))
 
-(defmethod initialize-instance :after ((x equation) &rest initargs &key &allow-other-keys)
-  (declare (ignore initargs))
-  (setf (predicate x) (intern "=" :dialogues)
-	(arguments x) (list (lhs x) (rhs x)))
-  x)
-
 (defmethod print-object ((x equation) stream)
-  (with-slots (lhs rhs)
-      x
-    (format stream "~a = ~a" lhs rhs)))
+  (format stream "~a = ~a" (lhs x) (rhs x)))
 
-(defclass disequation (atomic-formula)
+(defclass disequation ()
   ((lhs
     :accessor lhs
     :initarg :lhs
@@ -71,17 +60,30 @@
     :initarg :rhs
     :initform (error "A disquation needs a right-hand side."))))
 
-(defmethod initialize-instance :after ((x disequation) &rest initargs &key &allow-other-keys)
-  (declare (ignore initargs))
-  (setf (arguments x)
-	(list (lhs x) (rhs x)))
-  (setf (predicate x) (intern "!="))
-  x)
+(defmethod print-object ((x disequation) stream)
+  (format stream "~a != ~a" (lhs x) (rhs x)))
+
+(defclass verum ()
+  nil)
+
+(defmethod print-object ((x verum) stream)
+  (format stream "$true"))
+
+(defclass falsum ()
+  nil)
+
+(defmethod print-object ((x falsum) stream)
+  (format stream "$false"))
+
+(defun atomic-formula-p (thing)
+  (or (typep thing 'atomic-formula)
+      (typep thing 'equation)
+      (typep thing 'disequation)
+      (typep thing 'verum)
+      (typep thing 'falsum)))
 
 (defmethod print-object ((x disequation) stream)
-  (with-slots (lhs rhs)
-      x
-    (format stream "~a != ~a" lhs rhs)))
+  (format stream "~a != ~a" (lhs x) (rhs x)))
 
 (defclass unary-connective-formula (composite-formula)
   ((argument :initarg :argument
@@ -150,134 +152,6 @@
 (defmethod print-object ((exi-gen existential-generalization) stream)
   (format stream "(? [~{~a~^,~}] : ~a)" (bindings exi-gen) (matrix exi-gen)))
 
-(defgeneric render-plainly (statement))
-
-(defgeneric render-fancily (statement))
-
-(defmethod render-plainly ((statement term))
-  (let ((func-sym (function-symbol statement))
-	(args (arguments statement)))
-    (if (null args)
-	(format nil "~A" func-sym)
-	(if (null (cdr args))
-	    (format nil "~A(~A)"
-		    func-sym
-		    (render-plainly (car args)))
-	    (funcall #'concat-strings
-		     (format nil "~A" func-sym)
-		     "("
-		     (render-plainly (car args))
-		     (apply #'concat-strings
-			    (mapcar #'(lambda (arg)
-					(format nil ",~A" (render-plainly arg)))
-				    (cdr args)))
-		     ")")))))
-
-(defmethod render-fancily ((statement term))
-  (render-plainly statement))
-
-(defmethod render-plainly :around ((formula unary-connective-formula))
-  (let ((body (call-next-method)))
-    (concatenate 'string body (render-plainly (argument formula)))))
-
-(defmethod render-fancily :around ((formula unary-connective-formula))
-  (format nil "~a~a" (call-next-method) (render-fancily (argument formula))))
-
-(defmethod render-plainly ((neg negation))
-  "~")
-
-(defmethod render-fancily ((neg negation))
-  "¬")
-
-(defmethod render-plainly :around ((formula binary-connective-formula))
-  (concatenate 'string
-	       "("
-	       (render-plainly (lhs formula))
-	       " "
-	       (call-next-method)
-	       " "
-	       (render-plainly (rhs formula))
-	       ")"))
-
-(defmethod render-fancily :around ((formula binary-connective-formula))
-  (format nil "(~a ~a ~a)"
-	  (render-fancily (lhs formula))
-	  (call-next-method)
-	  (render-fancily (rhs formula))))
-
-(defmethod render-plainly :around ((gen generalization))
-  (concatenate 'string
-	       (call-next-method)
-	       (render-plainly (bound-variable gen))
-	       "["
-	       (render-plainly (matrix gen))
-	       "]"))
-
-(defmethod render-fancily :around ((gen generalization))
-  (format nil "~a~a[~a]"
-	  (call-next-method)
-	  (render-fancily (bound-variable gen))
-	  (render-fancily (matrix gen))))
-
-(defmethod render-plainly ((formula binary-conjunction))
-  "&")
-
-(defmethod render-fancily ((formula binary-conjunction))
-  "∧")
-
-(defmethod render-plainly ((formula binary-disjunction))
-  "v")
-
-(defmethod render-fancily ((formula binary-disjunction))
-  "∨")
-
-(defmethod render-plainly ((formula implication))
-  "-->")
-
-(defmethod render-fancily ((formula implication))
-  "→")
-
-(defmethod render-plainly ((formula equivalence))
-  "<-->")
-
-(defmethod render-fancily ((formula equivalence))
-  "↔")
-
-(defmethod render-plainly ((formula universal-generalization))
-  "forall")
-
-(defmethod render-fancily ((formula universal-generalization))
-  "∀")
-
-(defmethod render-plainly ((formula existential-generalization))
-  "exists")
-
-(defmethod render-fancily ((formula existential-generalization))
-  "∃")
-
-(defmethod render-plainly ((formula atomic-formula))
-  (let ((pred (predicate formula))
-	(args (arguments formula)))
-    (if (null args)
-	(format nil "~(~a~)" pred)
-	(if (null (cdr args))
-	    (format nil "~(~a~)(~a)"
-		    pred
-		    (render-plainly (car args)))
-	    (funcall #'concat-strings
-		     (format nil "~A" pred)
-		     "("
-		     (render-plainly (car args))
-		     (apply #'concatenate
-			    'string
-			    (mapcar #'(lambda (arg)
-					(format nil ",~A" (render-plainly arg)))
-				    (cdr args)))
-		     ")")))))
-
-(defmethod render-fancily ((formula atomic-formula))
-  (format nil "<i>~a</i>" (render-plainly formula)))
-
 (defgeneric make-atomic-formula (predicate &rest arguments))
 
 (let ((atomic-formula-store (make-hash-table)))
@@ -288,43 +162,27 @@
 			     :head predicate
 			     :arguments arguments)))))
 
-(defmethod belongs-to-signature? ((sig signature) (formula atomic-formula))
-  (let ((pred (predicate formula))
-	(args (arguments formula)))
-    (and (predicate? sig pred)
-	 (every #'(lambda (arg)
-		    (belongs-to-signature? sig arg))
-		args))))
-
-(defparameter contradiction (make-atomic-formula 'bottom))
-
-(defparameter top (make-atomic-formula 'top))
-
 (defun make-equation (lhs rhs)
   (make-atomic-formula '= lhs rhs))
 
 (defclass composite-formula (formula)
   nil)
 
-(defun composite-formula? (formula)
-  "Determine whether a formula is non-atomic.
+(defun composite-formula-p (x)
+  "Determine whether X is non-atomic.
 
-Note that, unlike other predicates such as BINARY-DISJUNCTION? and
+Unlike other predicates such as BINARY-DISJUNCTION? and
 UNIVERSAL-GENERALIZATION?, this predicate does not merely test whether
 the direct class of its argument is COMPOSITE-FORMULA.  The class
 COMPOSITE-FORMULA is defined only to provide a common superclass for
 further subclasses, such as BINARY-DISJUNCTION and
 UNIVERSAL-GENERALIZATION, that is intended to be disjoint from the
 class ATOMIC-FORMULA.  This function expresses that disjointedness."
-  (and (formula? formula)
-       (not (atomic-formula? formula))))
+  (and (formula-p x)
+       (not (atomic-formula-p x))))
 
 (defun binary-connective-formula? (thing)
   (typep thing 'binary-connective-formula))
-
-(defmethod belongs-to-signature? ((sig signature)
-				  (formula unary-connective-formula))
-  (belongs-to-signature? sig (argument formula)))
 
 (defgeneric unnegate (formula))
 
@@ -343,19 +201,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   ((items :initarg :items
 	  :accessor items
 	  :type list)))
-
-(defgeneric connective-unit (multiple-arity-connective-formula))
-
-(defmethod belongs-to-signature? ((sig signature)
-				  (formula binary-connective-formula))
-  (and (belongs-to-signature? sig (lhs formula))
-       (belongs-to-signature? sig (rhs formula))))
-
-(defmethod belongs-to-signature? ((sig signature)
-				  (formula multiple-arity-connective-formula))
-  (every #'(lambda (item)
-	     (belongs-to-signature? sig item))
-	 (items formula)))
 
 (defun implication? (thing)
   (typep thing 'implication))
@@ -394,10 +239,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defclass multiple-arity-disjunction (multiple-arity-connective-formula)
   nil)
 
-(defmethod connective-unit ((mad multiple-arity-disjunction))
-  (declare (ignore mad))
-  top)
-
 (defun multiple-arity-disjunction? (thing)
   (eql (class-of thing) 'multiple-arity-disjunction))
 
@@ -415,7 +256,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 	      (make-instance 'multiple-arity-disjunction
 			     :items disjuncts)
 	      (car disjuncts)))
-      top))
+      (make-instance 'verum)))
 
 (defun binary-disjunction->multiple-arity-disjunction (binary-disjunction)
   (make-instance 'multiple-arity-disjunction
@@ -426,12 +267,12 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (let ((disjuncts (items multiple-arity-disjunction)))
     (if (null disjuncts)
 	(make-instance 'binary-disjunction
-		       :lhs top
-		       :rhs top)
+		       :lhs (make-instance 'verum)
+		       :rhs (make-instance 'verum))
 	(if (null (cdr disjuncts))
 	    (make-instance 'binary-disjunction
 			   :lhs (first disjuncts)
-			   :rhs contradiction)
+			   :rhs (make-instance 'contradiction))
 	    (labels ((make-disjunction (ds)
 		       (if (null (cddr ds))
 			   (make-binary-disjunction (first ds)
@@ -448,10 +289,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defclass multiple-arity-conjunction (multiple-arity-connective-formula)
   nil)
 
-(defmethod connective-unit ((mac multiple-arity-conjunction))
-  (declare (ignore mac))
-  contradiction)
-
 (defun multiple-arity-conjunction? (thing)
   (eql (class-of thing) 'multiple-arity-conjunction))
 
@@ -467,7 +304,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 	      (make-instance 'multiple-arity-conjunction
 			     :items conjuncts))
 	  (cadr conjuncts))
-      contradiction))
+      (make-instance 'falsum)))
 
 (defun binary-conjunction->multiple-arity-conjunction (binary-conjunction)
   (make-instance 'multiple-arity-conjunction
@@ -477,11 +314,12 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defun multiple-arity-conjunction->binary-conjunction (multiple-arity-conjunction)
   (let ((conjuncts (items multiple-arity-conjunction)))
     (if (null conjuncts)
-	(make-binary-conjunction contradiction contradiction)
+	(make-binary-conjunction (make-instance 'falsum)
+                                 (make-instance 'falsum))
 	(if (null (cdr conjuncts))
 	    (make-instance 'binary-conjunction
 			   :lhs (first conjuncts)
-			   :rhs top)
+			   :rhs (make-instance 'verum))
 	    (labels ((make-conjunction (ds)
 		       (if (null (cddr ds))
 			   (make-binary-conjunction (first ds)
@@ -555,54 +393,17 @@ should return the formula
 (defun proper-subformula-occurrences (formula)
   (proper-subformulas-1 formula))
 
-(define-condition expression-not-in-signature-error (error)
-  ((expression :initarg :expression
-	       :reader expression)
-   (signature :initarg :signature
-	      :reader signature))
-  (:report (lambda (condition stream)
-	     (let ((exp (expression condition))
-		   (sig (signature condition)))
-	       (format stream
-		       "The parsed expression~%~%  ~A~%~%does not belong to the signature~%~%  ~A"
-		       exp
-		       sig)))))
-
-(define-condition incompatible-variable-kinds-error (error)
-  ()
-  (:report (lambda (condition stream)
-	     (declare (ignore condition))
-	     (format stream
-		     "One cannot treat one kind of variable (sorted or unsorted) as the other kind"))))
-
 (defgeneric subst-term-for-var-in-term (term var target-term))
 
 (defmethod subst-term-for-var-in-term ((term term)
-				       (var unsorted-variable)
-				       (target-term unsorted-variable))
+				       (var variable-term)
+				       (target-term variable-term))
   (if (equal-variables? var target-term)
       term
       target-term))
 
 (defmethod subst-term-for-var-in-term ((term term)
-				       (var unsorted-variable)
-				       (target-term sorted-variable))
-  (error 'incompatible-variable-kinds-error))
-
-(defmethod subst-term-for-var-in-term ((term term)
-				       (var sorted-variable)
-				       (target-term unsorted-variable))
-  (error 'incompatible-variable-kinds-error))
-
-(defmethod subst-term-for-var-in-term ((term term)
-				       (var sorted-variable)
-				       (target-term sorted-variable))
-  (if (equal-variables? var target-term)
-      term
-      target-term))
-
-(defmethod subst-term-for-var-in-term ((term term)
-				       (var unsorted-variable)
+				       (var variable-term)
 				       (target-term function-term))
   (let ((f (function-symbol target-term))
 	(args (arguments target-term)))
@@ -619,7 +420,7 @@ bound once the substitution is carried out: no renaming is done either
 in TERM or FORMULA."))
 
 (defmethod instantiate (term variable (formula atomic-formula))
-  (let ((pred (predicate formula))
+  (let ((pred (head formula))
 	(args (arguments formula)))
     (apply #'make-atomic-formula
 	   pred
@@ -639,586 +440,21 @@ in TERM or FORMULA."))
 				(items formula))))
 
 (defmethod instantiate (term variable (formula generalization))
-  (let ((bound-var (bound-variable formula))
-	(matrix (matrix formula)))
-    (if (equal-variables? bound-var variable)
-	formula
-	(make-instance (class-of formula)
-		       :bound-var bound-var
-		       :matrix (instantiate term variable matrix)))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Substitutions
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defun substitution-value (subst var &key (test #'equal-variables?))
-  (let ((bound (assoc var subst :test test)))
-    (if bound
-	(cdr bound)
-	:not-bound)))
-
-(defun substitution-domain (subst)
-  (mapcar #'car subst))
-
-(defun substitution-range (subst)
-  (mapcar #'cdr subst))
-
-(defun complete-substitution (subst additional-vars)
-  "A substitution that is just like SUBST, but which explicitly maps
-variables in ADDITIONAL-VARS, if not already present in the domain of
-SUBST, to themselves."
-  (append subst
-	  (mapcar #'(lambda (var)
-		      (cons var var))
-		  (remove-if #'(lambda (var)
-				 (assoc var subst))
-			     additional-vars))))
-
-(defun remove-from-domain (subst var)
-  (remove-if #'(lambda (v)
-		 (equal-variables? v var))
-	     subst
-	     :key #'car))
-
-(defun remove-all-from-domain (subst vars &key (test #'equal-variables?))
-  (remove-if #'(lambda (v)
-		 (member v vars :test test))
-	     subst
-	     :key #'car))
-
-(defun compatible-substitutions? (subst-1 subst-2)
-  (or (equalp subst-1 subst-2)
-      (null (intersection (substitution-domain subst-1)
-			  (substitution-domain subst-2)))))
-
-(defgeneric apply-substitution (subst formula-or-term &key test)
-  (:documentation "Apply the substitution SUBST to FORMULA-OR-TERM."))
-
-(defmethod apply-substitution ((subst (eql nil)) formula &key test)
-  (declare (ignore test))
-  formula)
-
-(defmethod apply-substitution (subst (formula atomic-formula) &key test)
-  (let ((subst-val (substitution-value subst formula :test test)))
-    (if (eq subst-val :not-bound)
-	formula
-	subst-val)))
-
-(defmethod apply-substitution (subst (formula unary-connective-formula) &key test)
-  (make-instance (class-of formula)
-		 :argument (apply-substitution subst (argument formula) :test test)))
-
-(defmethod apply-substitution (subst (formula binary-connective-formula) &key test)
-  (make-instance (class-of formula)
-		 :lhs (apply-substitution subst (lhs formula) :test test)
-		 :rhs (apply-substitution subst (rhs formula) :test test)))
-
-(defmethod apply-substitution (subst (formula multiple-arity-connective-formula) &key test)
-  (make-instance (class-of formula)
-		 :items (mapcar #'(lambda (item)
-				    (apply-substitution subst item :test test))
-				(items formula))))
-
-(defmethod apply-substitution (subst (formula generalization) &key test)
-  (let ((bound-var (bound-variable formula))
-	(matrix (matrix formula)))
-    (make-instance (class-of formula)
-		   :bound-variable bound-var
-		   :matrix (apply-substitution
-			    (remove-from-domain subst bound-var)
-			    matrix
-			    :test test))))
-
-(defmethod apply-substitution (subst (term variable-term) &key test)
-  (let ((value (substitution-value subst term :test test)))
-    (if (eql value :not-bound)
-	term
-	value)))
-
-(defmethod apply-substitution (subst (term function-term) &key test)
-  (apply #'make-function-term
-	 (function-symbol term)
-	 (mapcar #'(lambda (subterm)
-		     (apply-substitution subst subterm :test test))
-		 (arguments term))))
-
-(defun compose-substitutions (subst-1 subst-2 &key (test #'equal-variables?))
-  "Compose the substitutions SUBST-1 and SUBST-2.  The order is
-important; this function is not commutative.  The order of the
-arguments to this function follows the ordinary definition of function
-composition: with \"o\" as function composition, this function computes
-SUBST-1 o SUBST-2, which, considered as a mathematical function, is
-computed by taking an input x and applying it to SUBST-2 first, then
-sending the output to SUBST-1."
-  (let ((new-subst nil))
-    (dolist (var-value-2 subst-2)
-      (destructuring-bind (var-2 . value-2)
-	  var-value-2
-	(setf new-subst
-	      (acons var-2
-		     (apply-substitution subst-1 value-2 :test test)
-		     new-subst))))
-    (dolist (var-value-1 (remove-all-from-domain subst-1
-						 (substitution-domain subst-2)
-						 :test test)
-	     new-subst)
-      (destructuring-bind (var-1 . value-1)
-	  var-value-1
-	(setf new-subst
-	      (acons var-1 value-1 new-subst))))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Unification of formulas and terms
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defgeneric occurs-in? (source target)
-  (:documentation "Determine whether SOURCE, which can be either a term or a formula, occurs as a subformula/subterm of TARGET."))
-
-(defmethod occurs-in? ((var variable-term) (term variable-term))
-  (equal-variables? var term))
-
-(defmethod occurs-in? ((source-term function-term) (var variable-term))
-  nil)
-
-(defmethod occurs-in? ((source-term function-term) (target-term function-term))
-  (or (equal-terms? source-term target-term)
-      (some #'(lambda (term)
-		(occurs-in? source-term term))
-	    (arguments target-term))))
-
-(defmethod occurs-in? ((source-term term) (target atomic-formula))
-  (some #'(lambda (term)
-	    (occurs-in? source-term term))
-	(arguments target)))
-
-(defmethod occurs-in? ((source formula) (target term))
-  nil)
-
-(defgeneric unify (formula-or-term-1 formula-or-term-2))
-
-(defmethod unify ((formula formula) (term term))
-  nil)
-
-(defmethod unify ((term term) (formula formula))
-  nil)
-
-(defmethod unify ((var-1 unsorted-variable) (var-2 unsorted-variable))
-  (cons var-1 var-2))
-
-(defmethod unify ((var-1 unsorted-variable) (var-2 sorted-variable))
-  (error 'incompatible-variable-kinds-error))
-
-(defmethod unify ((var-1 sorted-variable) (var-2 unsorted-variable))
-  (error 'incompatible-variable-kinds-error))
-
-(defmethod unify ((var-1 sorted-variable) (var-2 sorted-variable))
-  (let ((sort-1 (variable-sort var-1))
-	(sort-2 (variable-sort var-2)))
-    (if (eql sort-1 sort-2)
-	(cons var-1 var-2)
-	:fail)))
-
-(defmethod unify ((var variable-term) (term function-term))
-  (if (some #'(lambda (ter)
-		(occurs-in? var ter))
-	    (arguments term))
-      :fail
-      (cons var term)))
-
-(defmethod unify ((term function-term) (var variable-term))
-  (if (occurs-in? var (arguments term))
-      :fail
-      (cons var term)))
-
-(defmethod unify ((term-1 function-term) (term-2 function-term))
-  (let ((func-1 (function-symbol term-1))
-	(args-1 (arguments term-1))
-	(func-2 (function-symbol term-2))
-	(args-2 (arguments term-2)))
-    (if (eql func-1 func-2)
-	(unify args-1 args-2)
-	:fail)))
-
-(defmethod unify ((list-1 list) (list-2 list))
-  (if (null list-1)
-      (if (null list-2)
-	  nil
-	  :fail)
-      (if (null list-2)
-	  :fail
-	  (let ((first-1 (car list-1))
-		(first-2 (car list-2)))
-	    (let ((mgu-head (unify first-1 first-2)))
-	      (if (eql mgu-head :fail)
-		  :fail
-		  (let ((new-tail-1 (apply-substitution mgu-head (cdr list-1)))
-			(new-tail-2 (apply-substitution mgu-head (cdr list-2))))
-		    (let ((mgu-tail (unify new-tail-1 new-tail-2)))
-		      (if (eql mgu-tail :fail)
-			  :fail
-			  (compose-substitutions mgu-head mgu-tail))))))))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Unification of propositional formulas
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defgeneric unify-propositional-formulas-simply (formula-1 formula-2))
-
-(defmethod unify-propositional-formulas-simply ((formula-1 atomic-formula)
-						(formula-2 atomic-formula))
-  (if (equal-formulas? formula-1 formula-2)
-      nil
-      (acons formula-1 formula-2 nil)))
-
-(defmethod unify-propositional-formulas-simply ((formula-1 atomic-formula)
-						(formula-2 negation))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 atomic-formula)
-						(formula-2 binary-conjunction))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 atomic-formula)
-						(formula-2 binary-disjunction))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 atomic-formula)
-						(formula-2 implication))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 atomic-formula)
-						(formula-2 equivalence))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 negation)
-						(formula-2 atomic-formula))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 negation)
-						(formula-2 negation))
-  (unify-propositional-formulas-simply (argument formula-1)
-				       (argument formula-2)))
-
-(defmethod unify-propositional-formulas-simply ((formula-1 negation)
-						(formula-2 binary-conjunction))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 negation)
-						(formula-2 binary-disjunction))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 negation)
-						(formula-2 implication))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 negation)
-						(formula-2 equivalence))
-  :fail)
-
-(defun unify-binary-connective-propositional-formulas-simply (formula-1 formula-2)
-  (let* ((lhs-1 (lhs formula-1))
-	 (lhs-2 (lhs formula-2))
-	 (mgu-lhs (unify-propositional-formulas-simply lhs-1 lhs-2)))
-    (if (eq mgu-lhs :fail)
-	:fail
-	(let ((mgu-rhs (unify-propositional-formulas-simply
-			(apply-substitution mgu-lhs (rhs formula-1) :test #'equal-atomic-formulas?)
-			(apply-substitution mgu-lhs (rhs formula-2) :test #'equal-atomic-formulas?))))
-	  (if (eq mgu-rhs :fail)
-	      :fail
-	      (compose-substitutions mgu-lhs
-				     mgu-rhs
-				     :test #'equal-atomic-formulas?))))))
-
-(defmethod unify-propositional-formulas-simply ((formula-1 binary-conjunction)
-						(formula-2 atomic-formula))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 binary-conjunction)
-						(formula-2 negation))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 binary-conjunction)
-						(formula-2 binary-conjunction))
-  (unify-binary-connective-propositional-formulas-simply formula-1
-							 formula-2))
-
-(defmethod unify-propositional-formulas-simply ((formula-1 binary-conjunction)
-						(formula-2 binary-disjunction))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 binary-conjunction)
-						(formula-2 implication))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 binary-conjunction)
-						(formula-2 equivalence))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 binary-disjunction)
-						(formula-2 atomic-formula))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 binary-disjunction)
-						(formula-2 negation))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 binary-disjunction)
-						(formula-2 binary-conjunction))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 binary-disjunction)
-						(formula-2 binary-disjunction))
-  (unify-binary-connective-propositional-formulas-simply formula-1
-							 formula-2))
-
-(defmethod unify-propositional-formulas-simply ((formula-1 binary-disjunction)
-						(formula-2 implication))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 binary-disjunction)
-						(formula-2 equivalence))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 implication)
-						(formula-2 atomic-formula))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 implication)
-						(formula-2 negation))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 implication)
-						(formula-2 binary-conjunction))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 implication)
-						(formula-2 binary-disjunction))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 implication)
-						(formula-2 implication))
-  (unify-binary-connective-propositional-formulas-simply formula-1
-							 formula-2))
-
-(defmethod unify-propositional-formulas-simply ((formula-1 implication)
-						(formula-2 equivalence))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 equivalence)
-					       (formula-2 atomic-formula))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 equivalence)
-						(formula-2 negation))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 equivalence)
-						(formula-2 binary-conjunction))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 equivalence)
-						(formula-2 binary-disjunction))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 equivalence)
-						(formula-2 implication))
-  :fail)
-
-(defmethod unify-propositional-formulas-simply ((formula-1 equivalence)
-						(formula-2 equivalence))
-  (unify-binary-connective-propositional-formulas-simply formula-1
-							 formula-2))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Matchings
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defgeneric match-formulas (formula-1 formula-2))
-
-(defmethod match-formulas ((formula-1 atomic-formula)
-						(formula-2 atomic-formula))
-  (if (equal-formulas? formula-1 formula-2)
-      nil
-      (acons formula-1 formula-2 nil)))
-
-(defmethod match-formulas ((formula-1 atomic-formula)
-			   (formula-2 negation))
-  :fail)
-
-(defmethod match-formulas ((formula-1 atomic-formula)
-			   (formula-2 binary-conjunction))
-  :fail)
-
-(defmethod match-formulas ((formula-1 atomic-formula)
-			   (formula-2 binary-disjunction))
-  :fail)
-
-(defmethod match-formulas ((formula-1 atomic-formula)
-			   (formula-2 implication))
-  :fail)
-
-(defmethod match-formulas ((formula-1 atomic-formula)
-			   (formula-2 equivalence))
-  :fail)
-
-(defmethod match-formulas ((formula-1 negation)
-			   (formula-2 atomic-formula))
-  :fail)
-
-(defmethod match-formulas ((formula-1 negation)
-			   (formula-2 negation))
-  (match-formulas (argument formula-1)
-		  (argument formula-2)))
-
-(defmethod match-formulas ((formula-1 negation)
-			   (formula-2 binary-conjunction))
-  :fail)
-
-(defmethod match-formulas ((formula-1 negation)
-			   (formula-2 binary-disjunction))
-  :fail)
-
-(defmethod match-formulas ((formula-1 negation)
-			   (formula-2 implication))
-  :fail)
-
-(defmethod match-formulas ((formula-1 negation)
-			   (formula-2 equivalence))
-  :fail)
-
-(defun match-binary-connective-propositional-formulas (formula-1 formula-2)
-  (let* ((lhs-1 (lhs formula-1))
-	 (lhs-2 (lhs formula-2))
-	 (match-lhs (match-formulas lhs-1 lhs-2)))
-    (if (eq match-lhs :fail)
-	:fail
-	(let ((match-rhs (match-formulas (rhs formula-1) (rhs formula-2))))
-	  (if (eq match-rhs :fail)
-	      :fail
-	      (if (compatible-substitutions? match-lhs match-rhs)
-		  (append match-lhs match-rhs)
-		  :fail))))))
-
-(defmethod match-formulas ((formula-1 binary-conjunction)
-						(formula-2 atomic-formula))
-  :fail)
-
-(defmethod match-formulas ((formula-1 binary-conjunction)
-						(formula-2 negation))
-  :fail)
-
-(defmethod match-formulas ((formula-1 binary-conjunction)
-						(formula-2 binary-conjunction))
-  (match-binary-connective-propositional-formulas formula-1
-						  formula-2))
-
-(defmethod match-formulas ((formula-1 binary-conjunction)
-						(formula-2 binary-disjunction))
-  :fail)
-
-(defmethod match-formulas ((formula-1 binary-conjunction)
-						(formula-2 implication))
-  :fail)
-
-(defmethod match-formulas ((formula-1 binary-conjunction)
-						(formula-2 equivalence))
-  :fail)
-
-(defmethod match-formulas ((formula-1 binary-disjunction)
-						(formula-2 atomic-formula))
-  :fail)
-
-(defmethod match-formulas ((formula-1 binary-disjunction)
-						(formula-2 negation))
-  :fail)
-
-(defmethod match-formulas ((formula-1 binary-disjunction)
-						(formula-2 binary-conjunction))
-  :fail)
-
-(defmethod match-formulas ((formula-1 binary-disjunction)
-						(formula-2 binary-disjunction))
-  (match-binary-connective-propositional-formulas formula-1
-						  formula-2))
-
-(defmethod match-formulas ((formula-1 binary-disjunction)
-						(formula-2 implication))
-  :fail)
-
-(defmethod match-formulas ((formula-1 binary-disjunction)
-						(formula-2 equivalence))
-  :fail)
-
-(defmethod match-formulas ((formula-1 implication)
-						(formula-2 atomic-formula))
-  :fail)
-
-(defmethod match-formulas ((formula-1 implication)
-						(formula-2 negation))
-  :fail)
-
-(defmethod match-formulas ((formula-1 implication)
-						(formula-2 binary-conjunction))
-  :fail)
-
-(defmethod match-formulas ((formula-1 implication)
-						(formula-2 binary-disjunction))
-  :fail)
-
-(defmethod match-formulas ((formula-1 implication)
-						(formula-2 implication))
-  (match-binary-connective-propositional-formulas formula-1
-						  formula-2))
-
-(defmethod match-formulas ((formula-1 implication)
-						(formula-2 equivalence))
-  :fail)
-
-(defmethod match-formulas ((formula-1 equivalence)
-					       (formula-2 atomic-formula))
-  :fail)
-
-(defmethod match-formulas ((formula-1 equivalence)
-						(formula-2 negation))
-  :fail)
-
-(defmethod match-formulas ((formula-1 equivalence)
-						(formula-2 binary-conjunction))
-  :fail)
-
-(defmethod match-formulas ((formula-1 equivalence)
-						(formula-2 binary-disjunction))
-  :fail)
-
-(defmethod match-formulas ((formula-1 equivalence)
-						(formula-2 implication))
-  :fail)
-
-(defmethod match-formulas ((formula-1 equivalence)
-						(formula-2 equivalence))
-  (match-binary-connective-propositional-formulas formula-1
-						  formula-2))
-
-(defun simple-substitution-for-var? (subst var)
-  "Determine whether the substitution SUBST is a a simple substitution
-that maps the variable VAR to a value, and maps nothing else to a
-value."
-  (and (not (null subst))
-       (null (cdr subst))
-       (let ((first-and-only (car subst)))
-	 (equal-variables? (car first-and-only) var))))
-
-(defun instance-of-quantified? (instantiated quantified-statement)
-  "Determine whether INSTANTIATED is obtained from
-  QUANTIFIED-STATEMENT, (ALL ?X A) or (EXISTS ?X A), by plugging in a
-  term for the free occurences of ?X."
-  (let ((mgu (unify instantiated (matrix quantified-statement))))
-    (if (eql mgu :fail)
-	nil
-	(or (null mgu)
-	    (let ((bound-var (bound-variable quantified-statement)))
-	      (simple-substitution-for-var? mgu bound-var))))))
+  (let ((bindings (bindings formula))
+        (matrix (matrix formula)))
+    (if (member variable bindings :test #'equal-variables?)
+        (let ((other-bindings (remove-if-not #'(lambda (x)
+                                                 (equal-variables? x variable))
+                                             bindings))
+              (subst (subst-term-for-var-in-term term variable matrix)))
+          (if (null other-bindings)
+              subst
+              (make-instance (class-of formula)
+                             :bindings other-bindings
+                             :matrix subst)))
+        (make-instance (class-of formula)
+                       :bindings bindings
+                       :matrix (instantiate term variable matrix)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Sundry formula-related utilities
@@ -1227,8 +463,8 @@ value."
 (defgeneric equal-formulas? (formula-1 formula-2))
 
 (defmethod equal-formulas? ((form-1 atomic-formula) (form-2 atomic-formula))
-  (and (eql (predicate form-1)
-	    (predicate form-2))
+  (and (string= (head form-1)
+                (head form-2))
        (every-pair #'(lambda (term-1 term-2)
 		       (equal-terms? term-1 term-2))
 		   (arguments form-1)
@@ -1408,15 +644,21 @@ value."
   (member formula lst :test #'equal-formulas?))
 
 (defun equal-atomic-formulas? (formula-1 formula-2)
-  (and (atomic-formula? formula-1)
-       (atomic-formula? formula-2)
+  (and (atomic-formula-p formula-1)
+       (atomic-formula-p formula-2)
        (equal-formulas? formula-1 formula-2)))
 
 (defgeneric contains-contradiction-p (x)
   (:documentation "Is a contradiction (bottom) found anywhere inside X?"))
 
+(defmethod contains-contradiction-p ((x verum))
+  nil)
+
+(defmethod contains-contradiction-p ((x falsum))
+  t)
+
 (defmethod contains-contradiction-p ((x atomic-formula))
-  (string= (predicate x) "false"))
+  nil)
 
 (defmethod contains-contradiction-p ((x negation))
   (contains-contradiction-p (argument x)))
@@ -1450,7 +692,7 @@ value."
   (:documentation "Is a verum (top) found anywhere inside X?"))
 
 (defmethod contains-verum-p ((x atomic-formula))
-  (string= (predicate x) "true"))
+  nil)
 
 (defmethod contains-verum-p ((x negation))
   (contains-verum-p (argument x)))
@@ -1619,188 +861,9 @@ value."
     (when restart
       (invoke-restart 'try-another-formula))))
 
-(defgeneric form->formula (thing)
-  (:documentation "Given THING, try to make sense of it as a formula."))
-
-(defgeneric op-and-args->formula (operator arguments)
-  (:documentation "Try to understand a symbol OPERATOR and a list ARGUMENTS as a formula."))
-
-(defgeneric op-and-args->term (operator arguments)
-  (:documentation "Try to understand a symbol OPERATOR and a list ARGUMENTS as a term."))
-
-(defmethod op-and-args->formula ((op (eql 'or)) arguments)
-  (if (null arguments)
-      (error 'parse-form-empty-argument-list-error :operator op)
-      (if (null (cdr arguments))
-	  (error 'parse-form-at-least-two-args-expected-but-only-one-supplied-error
-		 :operator op
-		 :first-arg (car arguments))
-	  (if (null (cddr arguments))
-	      (let ((first-disjunct (form->formula (car arguments)))
-		    (second-disjunct (form->formula (cadr arguments))))
-		(make-binary-disjunction first-disjunct second-disjunct))
-	      (let ((disjuncts (mapcar #'form->formula arguments)))
-		(apply #'make-multiple-arity-disjunction disjuncts))))))
-
-(defmethod op-and-args->formula ((op (eql 'and)) arguments)
-  (if (null arguments)
-      (error 'parse-form-empty-argument-list-error :operator op)
-      (if (null (cdr arguments))
-	  (error 'parse-form-at-least-two-args-expected-but-only-one-supplied-error
-		 :operator op)
-	  (if (null (cddr arguments))
-	      (let ((first-conjunct (form->formula (car arguments)))
-		    (second-conjunct (form->formula (cadr arguments))))
-		(make-binary-conjunction first-conjunct second-conjunct))
-	      (let ((conjuncts (mapcar #'form->formula arguments)))
-		(apply #'make-multiple-arity-conjunction conjuncts))))))
-
-(defmethod op-and-args->formula ((op (eql 'not)) arguments)
-  (if (null arguments)
-      (error 'parse-form-empty-argument-list-error :operator op)
-      (if (null (cdr arguments))
-	  (let ((negated (form->formula (car arguments))))
-	    (negate negated))
-	  (error 'parse-form-unary-operator-multiple-arguments-error
-		 :operator op))))
-
-(defmethod op-and-args->formula ((op (eql 'implies)) arguments)
-  (if (null arguments)
-      (error 'parse-form-empty-argument-list-error :operator op)
-      (if (null (cdr arguments))
-	  (error 'parse-form-at-least-two-args-expected-but-only-one-supplied-error
-		 :operator op)
-	  (if (null (cddr arguments))
-	      (let ((antecedent (form->formula (car arguments)))
-		    (consequent (form->formula (cadr arguments))))
-		(make-implication antecedent consequent))
-	      (error 'parse-form-exactly-two-args-expected-but-at-least-three-supplied-error
-		     :operator op
-		     :args arguments)))))
-
-(defmethod op-and-args->formula ((op (eql 'iff)) arguments)
-  (if (null arguments)
-      (error 'parse-form-empty-argument-list-error :operator op)
-      (if (null (cdr arguments))
-	  (error 'parse-form-at-least-two-args-expected-but-only-one-supplied-error
-		 :operator op)
-	  (if (null (cddr arguments))
-	      (let ((lhs (form->formula (car arguments)))
-		    (rhs (form->formula (cadr arguments))))
-		(make-equivalence lhs rhs))
-	      (error 'parse-form-exactly-two-args-expected-but-at-least-three-supplied-error
-		     :operator op)))))
-
-(defmethod op-and-args->formula ((op (eql 'all)) arguments)
-  (if (null arguments)
-      (error 'parse-form-empty-argument-list-error :operator op)
-      (if (null (cdr arguments))
-	  (error 'parse-form-at-least-two-args-expected-but-only-one-supplied-error
-		 :operator op)
-	  (if (null (cddr arguments))
-	      (let ((var (form->term (car arguments))))
-		(if (eql (class-of var) 'unsorted-variable-term)
-		    (let ((matrix (form->formula (cadr arguments))))
-		      (if (eql (class-of matrix) 'formula)
-			  (make-universal var matrix)
-			  (error 'parse-form-formula-expected-error
-				 :operator op
-				 :form (cadr arguments))))
-		    (error 'parse-form-variable-expected
-			   :operator op
-			   :form (car arguments))))
-	      (error 'parse-form-exactly-two-args-expected-but-at-least-three-supplied-error
-		     :operator op)))))
-
-(defmethod op-and-args->formula ((op (eql 'exists)) arguments)
-  (if (null arguments)
-      (error 'parse-form-empty-argument-list-error :operator op)
-      (if (null (cdr arguments))
-	  (error 'parse-form-at-least-two-args-expected-but-only-one-supplied-error
-		 :operator op)
-	  (if (null (cddr arguments))
-	      (let ((var (form->formula (car arguments))))
-		(if (eql (class-of var) 'unsorted-variable-term)
-		    (let ((matrix (form->term (cadr arguments))))
-		      (if (eql (class-of matrix) 'formula)
-			  (make-universal var matrix)
-			  (error 'parse-form-formula-expected-error
-				 :operator op
-				 :form (cadr arguments))))
-		    (error 'parse-form-variable-expected
-			   :operator op
-			   :form (car arguments))))
-	      (error 'parse-form-exactly-two-args-expected-but-at-least-three-supplied-error
-		     :operator op)))))
-
-(defmethod form->formula ((list list))
-  (if (null list)
-      (error 'parse-form-empty-list-supplied-error)
-      (let ((first (first list)))
-	(op-and-args->formula (symbolify-here first)
-			      (cdr list)))))
-
-(defmethod op-and-args->term ((op symbol) arguments)
-  (let ((arguments-as-terms (mapcar #'form->term arguments)))
-    (apply #'make-function-term
-	   op
-	   arguments-as-terms)))
-
-(defmethod form->formula ((sym symbol))
-  (make-atomic-formula (symbolify-here sym)))
-
-(defgeneric form->term (form)
-  (:documentation "Attempt to understand FORM as a term."))
-
-(defmethod form->term ((list list))
-  (if (null list)
-      (error 'parse-form-empty-list-supplied-error)
-      (op-and-args->term (symbolify-here (car list))
-			 (cdr list))))
-
-(defmethod form->term ((sym symbol))
-  (let ((name (symbol-name sym)))
-    (if (empty-string? name)
-	(error 'parse-form-empty-string-supplied)
-	(let ((first-char (char name 0)))
-	  (if (char= first-char #\?)
-	      (make-variable (subseq name 1))
-	      (make-function-term name))))))
-
-(defmethod negate ((sym symbol))
-  (negate (form->formula sym)))
-
-(defmethod make-implication ((antecedent symbol) (consequent symbol))
-  (make-implication (form->formula antecedent)
-		    (form->formula consequent)))
-
-(defmethod make-implication ((antecedent symbol) (consequent formula))
-  (make-implication (form->formula antecedent)
-		    consequent))
-
-(defmethod make-implication ((antecedent formula) (consequent symbol))
-  (make-implication antecedent
-		    (form->formula consequent)))
-
-(defmethod make-binary-disjunction ((lhs symbol) (rhs symbol))
-  (make-binary-disjunction (form->formula lhs)
-			   (form->formula rhs)))
-
-(defmethod make-binary-disjunction ((lhs symbol) (rhs formula))
-  (make-binary-disjunction (form->formula lhs)
-			   rhs))
-
-(defmethod make-binary-disjunction ((lhs formula) (rhs symbol))
-  (make-binary-disjunction lhs
-			   (form->formula rhs)))
-
 (defun read-formula (&optional (stream *standard-input*))
-  (let ((input-form (let ((*package* (find-package :dialogues)))
-		      (read stream nil nil))))
-    (let ((formula (form->formula input-form)))
-      (if (formula? formula)
-	  formula
-	  (error 'malformed-formula-error :text input-form)))))
+  (declare (ignore stream))
+  (error "READ-FORMULA is dead."))
 
 (defun parse-formula (str)
   (with-input-from-string (s str)
@@ -1812,35 +875,13 @@ value."
 
 (defun read-atomic-formula ()
   (let (response)
-    (until (atomic-formula? response)
+    (until (atomic-formula-p response)
       (read-formula))
     response))
 
-(define-condition non-atomic-formula-error (error)
-  ((text :initarg :text
-	 :reader non-atomic-formula-error-text))
-  (:report (lambda (condition stream)
-	     (let ((text (non-atomic-formula-error-text condition)))
-	       (if (null text)
-		   (format stream
-			   "Weird: no text was given (or text is simply NIL)")
-		   (format stream
-			   "The given text,~%~%  ~A,~%~%is an atomic formula."
-			   text))))))
-
 (defun read-composite-formula (&optional (stream *standard-input*))
-  (let ((input (read-formula stream)))
-    (if (atomic-formula? input)
-	(error 'non-atomic-formula-error :text input)
-	input)))
-
-(defun read-composite-formula-in-signature (signature
-					    &optional (stream *standard-input*))
-  (let ((formula (read-composite-formula stream)))
-    (if (belongs-to-signature? signature formula)
-	formula
-	(error 'expression-not-in-signature-error
-	       :expression formula))))
+  (declare (ignore stream))
+  (error "READ-COMPOSITE-FORMULA is dead."))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Shortcuts
@@ -1858,90 +899,12 @@ value."
 (defmacro neg (argument)
   `(negate ,argument))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Tautologies
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defgeneric leftmost-atom (formula))
-
-(defmethod leftmost-atom ((formula (eql top)))
-  nil)
-
-(defmethod leftmost-atom ((formula (eql contradiction)))
-  nil)
-
-(defmethod leftmost-atom ((formula atomic-formula))
-  formula)
-
-(defmethod leftmost-atom ((formula unary-connective-formula))
-  (leftmost-atom (argument formula)))
-
-(defmethod leftmost-atom ((formula binary-connective-formula))
-  (let ((left (leftmost-atom (lhs formula))))
-    (if (null left)
-	(leftmost-atom (rhs formula))
-	left)))
-
-(defgeneric reduce-top-and-bottom-formula (formula))
-
-(defmethod reduce-top-and-bottom-formula ((formula (eql top)))
-  top)
-
-(defmethod reduce-top-and-bottom-formula ((formula (eql contradiction)))
-  contradiction)
-
-(defmethod reduce-top-and-bottom-formula ((formula negation))
-  (let ((reduced (reduce-top-and-bottom-formula (unnegate formula))))
-    (if (eq reduced top)
-	contradiction
-	top)))
-
-(defmethod reduce-top-and-bottom-formula ((formula binary-conjunction))
-  (let ((reduced-lhs (reduce-top-and-bottom-formula (lhs formula))))
-    (if (eq reduced-lhs contradiction)
-	contradiction
-	(reduce-top-and-bottom-formula (rhs formula)))))
-
-(defmethod reduce-top-and-bottom-formula ((formula binary-disjunction))
-  (let ((reduced-lhs (reduce-top-and-bottom-formula (lhs formula))))
-    (if (eq reduced-lhs top)
-	top
-	(reduce-top-and-bottom-formula (rhs formula)))))
-
-(defmethod reduce-top-and-bottom-formula ((formula implication))
-  (let ((reduced-antecedent (reduce-top-and-bottom-formula (antecedent formula))))
-    (if (eq reduced-antecedent contradiction)
-	top
-	(reduce-top-and-bottom-formula (consequent formula)))))
-
-(defmethod reduce-top-and-bottom-formula ((formula equivalence))
-  (let ((reduced-lhs (reduce-top-and-bottom-formula (lhs formula)))
-	(reduced-rhs (reduce-top-and-bottom-formula (rhs formula))))
-    (if (eq reduced-lhs reduced-rhs)
-	top
-	contradiction)))
-
-(defun tautology? (formula)
-  (let ((first-atom (leftmost-atom formula)))
-    (if (null first-atom) ;; only tops and bottoms remain
-	(eq (reduce-top-and-bottom-formula formula) top)
-	(let ((subst-true (acons first-atom top nil))
-	      (subst-false (acons first-atom contradiction nil)))
-	  (let ((formula-with-atom-true (apply-substitution subst-true
-							    formula
-							    :test #'equal-atomic-formulas?))
-		(formula-with-atom-false (apply-substitution subst-false
-							     formula
-							     :test #'equal-atomic-formulas?)))
-	    (and (tautology? formula-with-atom-true)
-		 (tautology? formula-with-atom-false)))))))
-
 (defgeneric uniquify-atoms (formula)
   (:documentation "Ensure that all the atoms of FORMULA are distinct objects, even if they have the same print name.  (We treat only the propositional case.)"))
 
 (defmethod uniquify-atoms ((atom atomic-formula))
   (make-instance 'atomic-formula
-		 :head (predicate atom)
+		 :head (head atom)
 		 :arguments nil))
 
 (defmethod uniquify-atoms ((formula unary-connective-formula))
@@ -1960,10 +923,9 @@ value."
 (defgeneric formula-< (formula-1 formula-2))
 
 (defmethod formula-< ((formula-1 atomic-formula) (formula-2 atomic-formula))
-  (let ((pred-1 (predicate formula-1))
-	(pred-2 (predicate formula-2)))
-    (lex< (format nil "~a" pred-1)
-	  (format nil "~a" pred-2))))
+  (let ((pred-1 (head formula-1))
+	(pred-2 (head formula-2)))
+    (lex< pred-1 pred-2)))
 
 (defmethod formula-< ((formula-1 atomic-formula) (formula-2 t))
   t)
