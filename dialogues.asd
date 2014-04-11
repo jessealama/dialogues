@@ -10,7 +10,7 @@
                :cl-fad)
   :components ((:file "packages")
 	       (:file "utils")
-	       (:file "signature")
+	       ;; (:file "signature")
 	       (:file "terms")
 	       (:file "formulas")
 	       (:file "symbolic-attack")
