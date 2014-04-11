@@ -953,7 +953,7 @@ fail, only whether all of them are satisfied."
        (msg "Enter a formula:")
        (format t "~A" prompt)
        (setf statement nil)
-       (until (formula? statement)
+       (until (formula-p statement)
 	 (restart-case (setf statement (read-formula))
 	   (try-another-formula (new-formula)
 	     :report "Enter a different formula."
