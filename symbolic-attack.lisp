@@ -76,16 +76,4 @@
 (defun symbolic-attack? (obj)
   (member obj *propositional-symbolic-attacks*))
 
-(defmethod render-plainly ((sa (eql *attack-left-conjunct*)))
-  "&-left")
-
-(defmethod render-plainly ((sa (eql *attack-right-conjunct*)))
-  "&-right")
-
-;; (defmethod render-plainly ((sa (eql *which-instance?*)))
-;;   "?")
-
-(defmethod render-plainly ((sa (eql *which-disjunct?*)))
-  "?")
-
 ;;; symbolic-attack ends here
