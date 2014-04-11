@@ -723,8 +723,8 @@
 					:lhs (first args)
 					:rhs (second args))
 			 (make-instance 'atomic-formula
-				    :predicate (head x)
-				    :arguments (arguments x)))))))
+                                        :head (head x)
+                                        :arguments (arguments x)))))))
 
   (defined-atomic-formula
       defined-plain-formula
@@ -736,7 +736,7 @@
 		(unless (string= (format nil "~a" pred) "=")
 		  (error "Unknown infix predicate '~a'." pred))
 		(make-instance 'equation
-			       :predicate (intern "=" :dialogues)
+			       :head (intern "=" :dialogues)
 			       :arguments (list left right)
 			       :lhs left
 			       :rhs right))))
