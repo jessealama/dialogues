@@ -433,6 +433,9 @@
 (defmethod atomic-formula-p ((x tptp-formula))
   (atomic-formula-p (formula x)))
 
+(defmethod negation-p ((x tptp-formula))
+  (negation-p (formula x)))
+
 (defmethod literal-p ((x tptp-formula))
   (literal-p (formula x)))
 
