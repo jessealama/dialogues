@@ -23,6 +23,6 @@
 	       (:file "felscher")
 	       (:file "strategy")
 	       (:file "dialogue-search")
-               (:file "expressions")
+               ;; (:file "expressions")
                (:file "tptp")
                (:file "parse")))
