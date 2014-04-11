@@ -199,8 +199,14 @@
 (defclass binary-conjunction (binary-connective-formula)
   nil)
 
+(defmethod print-object ((x binary-conjunction) stream)
+  (format stream "(~a & ~a)" (lhs x) (rhs x)))
+
 (defclass binary-disjunction (binary-connective-formula)
   nil)
+
+(defmethod print-object ((x binary-disjunction) stream)
+  (format stream "(~a | ~a)" (lhs x) (rhs x)))
 
 (defclass implication (binary-connective-formula)
   nil)
