@@ -1,6 +1,16 @@
 
 (in-package :dialogues)
 
+(defclass general-list ()
+  ((terms
+    :type list
+    :accessor terms
+    :initarg :terms
+    :initform nil)))
+
+(defmethod print-object ((l general-list) stream)
+  (format stream "[~{~a~^,~}]" (terms l)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Formulas
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
