@@ -39,12 +39,14 @@
 		    (goedel-gentzen (consequent implication))))
 
 (defmethod goedel-gentzen ((universal universal-generalization))
-  (make-universal (bound-variable universal)
-		  (goedel-gentzen (matrix universal))))
+  (make-instance 'universal-generalization
+                 :bindings (bindings universal)
+                 :matrix (goedel-gentzen (matrix universal))))
 
 (defmethod goedel-gentzen ((existential existential-generalization))
-  (negate (make-universal (bound-variable existential)
-			  (negate (goedel-gentzen (matrix existential))))))
+  (negate (make-instance 'universal-generalization
+                         :bindings (bindings existential)
+                         :matrix (negate (goedel-gentzen (matrix existential))))))
 
 (defparameter goedel-gentzen-translation
   (make-instance 'formula-translation
@@ -80,7 +82,7 @@
 
 (defmethod dn-all-subformulas ((gen generalization))
   (make-instance (class-of gen)
-		 :bound-variable (bound-variable gen)
+                 :bindings (bindings gen)
 		 :matrix (negate (negate (dn-all-subformulas (matrix gen))))))
 
 (defparameter double-negate-all-subformulas-translation
@@ -92,7 +94,7 @@
 
 (defun kuroda (formula)
   (labels ((kuroda-helper (form)
-	     (cond ((atomic-formula? form) form)
+	     (cond ((atomic-formula-p form) form)
 		   ((negation? form)
 		    (negate (kuroda-helper (unnegate form))))
 		   ((binary-connective-formula? form)
@@ -100,13 +102,15 @@
 				   :lhs (kuroda-helper (lhs form))
 				   :rhs (kuroda-helper (rhs form))))
 		   ((existential-generalization? form)
-		    (make-existential (bound-variable form)
-				      (kuroda-helper (matrix form))))
+		    (make-instance 'existential-generalization?
+                                   :bindings (bindings form)
+                                   :matrix (kuroda-helper (matrix form))))
 		   ((universal-generalization? form)
-		    (make-universal (bound-variable form)
-				    (negate
-				     (negate
-				      (kuroda-helper (matrix form)))))))))
+                    (make-instance 'universal-generalization?
+                                   :bindings (bindings form)
+                                   :matrix (negate
+                                            (negate
+                                             (kuroda-helper (matrix form)))))))))
     (negate (negate (kuroda-helper formula)))))
 
 (defparameter kuroda-translation
@@ -133,7 +137,7 @@
 
 (defmethod negate-atomic-subformulas ((gen generalization))
   (make-instance (class-of gen)
-		 :bound-variable (bound-variable gen)
+                 :bindings (bindings gen)
 		 :matrix (negate-atomic-subformulas (matrix gen))))
 
 (defparameter negate-atomic-subformulas-translation
@@ -160,7 +164,7 @@
 
 (defmethod double-negate-atomic-subformulas ((gen generalization))
   (make-instance (class-of gen)
-		 :bound-variable (bound-variable gen)
+                 :bindings (bindings gen)
 		 :matrix (double-negate-atomic-subformulas (matrix gen))))
 
 (defparameter double-negate-atomic-subformulas-translation
@@ -187,7 +191,7 @@
 
 (defmethod self-conjoin-atomic-subformulas ((gen generalization))
   (make-instance (class-of gen)
-		 :bound-variable (bound-variable gen)
+                 :bindings (bindings gen)
 		 :matrix (self-conjoin-atomic-subformulas (matrix gen))))
 
 (defparameter self-conjoin-atomic-subformulas-translation
@@ -214,7 +218,7 @@
 
 (defmethod self-disjoin-atomic-subformulas ((gen generalization))
   (make-instance (class-of gen)
-		 :bound-variable (bound-variable gen)
+                 :bindings (bindings gen)
 		 :matrix (self-disjoin-atomic-subformulas (matrix gen))))
 
 (defparameter self-disjoin-atomic-subformulas-translation
@@ -251,7 +255,7 @@
 
 (defmethod contrapositivify ((gen generalization))
   (make-instance (class-of gen)
-		 :bound-variable (bound-variable gen)
+                 :bindings (bindings gen)
 		 :matrix (contrapositivify (matrix gen))))
 
 (defparameter contrapositivify-translation
@@ -318,7 +322,7 @@
 
 (defmethod atomic->excluded-middle ((gen generalization))
   (make-instance (class-of gen)
-		 :bound-variable (bound-variable gen)
+                 :bindings (bindings gen)
 		 :matrix (atomic->excluded-middle (matrix gen))))
 
 (defparameter atomic->excluded-middle-translation
