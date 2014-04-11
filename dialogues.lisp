@@ -154,7 +154,7 @@ attacks which, being symbols, do qualify as terms."
   attacks which, being simply lisp symbols, do qualify as [atomic]
   formulas)."
   (and (not (symbolic-attack-p obj))
-       (formula? obj)))
+       (formula-p obj)))
 
 (defgeneric statement-< (statement-1 statement-2))
 
