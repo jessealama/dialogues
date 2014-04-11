@@ -336,12 +336,12 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 
 (defun make-universal (var formula)
   (make-instance 'universal-generalization
-		 :bound-variable var
+		 :bindings (list var)
 		 :matrix formula))
 
 (defun make-existential (var formula)
   (make-instance 'existential-generalization
-		 :bound-variable var
+		 :bindings (list var)
 		 :matrix formula))
 
 (defun account-for-extension (constants predicate)
