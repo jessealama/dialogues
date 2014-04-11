@@ -147,14 +147,14 @@
 (defun non-symbolic-attack-term? (obj)
   "Determine whether OBJ is a term different from the symbolic
 attacks which, being symbols, do qualify as terms."
-  (and (not (symbolic-attack? obj))
+  (and (not (symbolic-attack-p obj))
        (term? obj)))
 
 (defun non-symbolic-attack-formula? (obj)
   "Determine whether OBJ is a formula different from the symbolic
   attacks which, being simply lisp symbols, do qualify as [atomic]
   formulas)."
-  (and (not (symbolic-attack? obj))
+  (and (not (symbolic-attack-p obj))
        (formula? obj)))
 
 (defgeneric statement-< (statement-1 statement-2))
