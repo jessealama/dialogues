@@ -6,18 +6,32 @@
 ;;; Terms
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defclass atomic-expression (expression)
+  ((head
+    :initarg :head
+    :accessor head
+    :initform (error "An atomic expression needs a head.")
+    :type symbol)
+   (arguments
+    :initarg :arguments
+    :accessor arguments
+    :initform nil
+    :type list)))
+
+(defmethod print-object ((term atomic-expression) stream)
+  (with-slots (head arguments)
+      term
+    (if (null arguments)
+	(format stream "~a" head)
+	(format stream "~a(~{~a~^,~})" head arguments))))
+
 (defclass term () nil)
 
 (defun term? (thing)
   (typep thing 'term))
 
-(defclass function-term (term)
-  ((function-symbol :initarg :function
-		    :accessor function-symbol
-		    :type string)
-   (args :initarg :args
-	 :accessor arguments
-	 :type list)))
+(defclass function-term (atomic-expression term)
+  nil)
 
 (defun make-function-term (function &rest args)
   (make-instance 'function-term
@@ -28,6 +42,12 @@
   ((name :initarg :name
 	 :accessor variable-name
 	 :type string)))
+
+(defclass variable-term (atomic-expression term)
+  nil)
+
+(defun variable-term-p (x)
+  (typep x 'variable-term))
 
 (defun variable-term? (thing)
   (typep thing 'variable-term))
