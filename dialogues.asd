@@ -13,6 +13,8 @@
 	       ;; (:file "signature")
 	       (:file "terms")
 	       (:file "formulas")
+               (:file "tptp")
+               (:file "parse")
 	       (:file "symbolic-attack")
 	       ;; (:file "enumerate")
 	       (:file "translations")
