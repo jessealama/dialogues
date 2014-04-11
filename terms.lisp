@@ -11,7 +11,7 @@
     :initarg :head
     :accessor head
     :initform (error "An atomic expression needs a head.")
-    :type symbol)
+    :type string)
    (arguments
     :initarg :arguments
     :accessor arguments
