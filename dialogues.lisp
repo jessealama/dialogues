@@ -466,20 +466,6 @@ fail, only whether all of them are satisfied."
 		   (index (index condition)))
 	       (format stream "Unable to add the move ~A to the dialogue ~A at sposition ~A: the index is out-of-bounds" move dialogue index)))))
 
-(define-condition inappropriate-initial-statement-error (error)
-  ((statement :initarg :formula
-	      :reader formula)
-   (rules :initarg :rules
-	  :type ruleset
-	  :reader rules))
-  (:report (lambda (condition stream)
-	     (let ((statement (statement condition))
-		   (rules (rules condition)))
-	       (format stream
-		       "Dialogues adhereing to the rules~%~%  ~A~%~%cannot begin with the statement~%~%  ~A"
-		       (description rules)
-		       statement)))))
-
 (defun add-move-to-dialogue-at-position (dialogue move position)
   (let ((len (dialogue-length dialogue)))
     (if (<= position len)
