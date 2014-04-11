@@ -14,7 +14,7 @@
 	       (:file "terms")
 	       (:file "formulas")
 	       (:file "symbolic-attack")
-	       (:file "enumerate")
+	       ;; (:file "enumerate")
 	       (:file "translations")
 	       (:file "famous-formulas")
 	       (:file "dialogues")
