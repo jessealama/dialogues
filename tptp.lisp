@@ -116,59 +116,6 @@
     (when (pathnamep path)
       (directory-namestring path))))
 
-(defclass derivability-problem (tptp-db)
-  ((conjecture
-    :initarg :conjecture
-    :accessor conjecture
-    :initform (error "To specify a derivability problem, a conjecture must be supplied."))))
-
-(defmethod print-object ((problem derivability-problem) stream)
-  (let ((conjecture (conjecture problem))
-	(formulas (formulas problem)))
-    (format stream "~a" conjecture)
-    (when formulas
-      (terpri stream)
-      (format stream "~{~a~^~%~}" formulas))))
-
-(defmethod initialize-instance :after ((problem derivability-problem) &rest initargs &key &allow-other-keys)
-  (declare (ignore initargs))
-  (when (conjecture-formula (premises problem))
-    (error "Some non-conjecture formula has the TPTP status 'conjecture'."))
-  (loop
-     :initially (setf (role (conjecture problem)) "conjecture")
-     :for formula in (formulas problem)
-     :for role = (role formula)
-     :unless (string= role "conjecture") :do (setf (role formula) "axiom")
-     :finally (return problem)))
-
-(defgeneric make-derivability-problem (formulas))
-
-(defmethod make-derivability-problem ((formulas tptp-db))
-  (let ((conjecture (conjecture-formula formulas)))
-    (if conjecture
-	(make-instance 'derivability-problem
-		       :formulas (non-conjecture-formulas formulas)
-		       :conjecture conjecture
-		       :path (path formulas))
-	(error "There is no conjecture formula in ~a." formulas))))
-
-(defmethod make-derivability-problem ((formulas null))
-  (error "The empty list does not contain a conjecture formula."))
-
-(defmethod make-derivability-problem ((formulas list))
-  (let ((conjecture (find "conjecture" formulas :test #'string= :key #'role))
-	(non-conjecture-formulas (remove-if #'(lambda (formula)
-						(string= (role formula) "conjecture"))
-					    formulas)))
-    (if conjecture
-	(make-instance 'derivability-problem
-		       :formulas non-conjecture-formulas
-		       :conjecture conjecture)
-	(error "No conjecture formula found in ~{~a~%~}" formulas))))
-
-(defmethod make-derivability-problem ((problem pathname))
-  (make-derivability-problem (parse-tptp problem)))
-
 (defmethod render ((formulas list))
   (if formulas
       (format nil "~{~a~%~}" (mapcar #'render formulas))
@@ -176,14 +123,6 @@
 
 (defmethod render ((problem tptp-db))
   (render (formulas problem)))
-
-(defmethod render ((problem derivability-problem))
-  (with-output-to-string (s)
-    (dolist (formula (formulas problem))
-      (format s "~a" (render formula))
-      (terpri s))
-    (format s "~a" (render (conjecture problem)))
-    (terpri s)))
 
 (defgeneric proper-formulas (problem))
 
