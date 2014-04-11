@@ -6,21 +6,82 @@
 ;;; Formulas
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defclass expression ()
+  nil)
+
+(defclass atomic-expression (expression)
+  ((head
+    :initarg :head
+    :accessor head
+    :initform (error "An atomic expression needs a head.")
+    :type symbol)
+   (arguments
+    :initarg :arguments
+    :accessor arguments
+    :initform nil
+    :type list)))
+
+(defmethod print-object ((term atomic-expression) stream)
+  (with-slots (head arguments)
+      term
+    (if (null arguments)
+	(format stream "~a" head)
+	(format stream "~a(~{~a~^,~})" head arguments))))
+
 (defclass formula ()
   nil)
 
 (defun formula? (thing)
   (typep thing 'formula))
 
-(defclass atomic-formula (formula)
-  ((predicate :initarg :predicate
-	      :accessor predicate)
-   (args :initarg :args
-	 :accessor arguments
-	 :type list)))
+(defclass atomic-formula (formula atomic-expression)
+  nil)
 
 (defun atomic-formula? (thing)
   (typep thing 'atomic-formula))
+
+(defclass equation (atomic-formula)
+  ((lhs
+    :accessor lhs
+    :initarg :lhs
+    :initform (error "An equation needs a left-hand side."))
+   (rhs
+    :accessor rhs
+    :initarg :rhs
+    :initform (error "An equation needs a right-hand side."))))
+
+(defmethod initialize-instance :after ((x equation) &rest initargs &key &allow-other-keys)
+  (declare (ignore initargs))
+  (setf (predicate x) (intern "=" :dialogues)
+	(arguments x) (list (lhs x) (rhs x)))
+  x)
+
+(defmethod print-object ((x equation) stream)
+  (with-slots (lhs rhs)
+      x
+    (format stream "~a = ~a" lhs rhs)))
+
+(defclass disequation (atomic-formula)
+  ((lhs
+    :accessor lhs
+    :initarg :lhs
+    :initform (error "A disequation needs a left-hand side."))
+   (rhs
+    :accessor rhs
+    :initarg :rhs
+    :initform (error "A disquation needs a right-hand side."))))
+
+(defmethod initialize-instance :after ((x disequation) &rest initargs &key &allow-other-keys)
+  (declare (ignore initargs))
+  (setf (arguments x)
+	(list (lhs x) (rhs x)))
+  (setf (predicate x) (intern "!="))
+  x)
+
+(defmethod print-object ((x disequation) stream)
+  (with-slots (lhs rhs)
+      x
+    (format stream "~a != ~a" lhs rhs)))
 
 (defclass unary-connective-formula (composite-formula)
   ((argument :initarg :argument
@@ -40,21 +101,39 @@
 (defclass binary-conjunction (binary-connective-formula)
   nil)
 
+(defmethod print-object ((x binary-conjunction) stream)
+  (format stream "(~a => ~a)" (lhs x) (rhs x)))
+
 (defclass binary-disjunction (binary-connective-formula)
   nil)
+
+(defmethod print-object ((x binary-disjunction) stream)
+  (format stream "(~a | ~a)" (lhs x) (rhs x)))
 
 (defclass implication (binary-connective-formula)
   nil)
 
+(defmethod print-object ((x implication) stream)
+  (format stream "(~a => ~a)" (lhs x) (rhs x)))
+
+(defclass reverse-implication (binary-connective-formula)
+  nil)
+
+(defmethod print-object ((x reverse-implication) stream)
+  (format stream "(~a <= ~a)" (lhs x) (rhs x)))
+
 (defclass equivalence (binary-connective-formula)
   nil)
+
+(defmethod print-object ((x equivalence) stream)
+  (format stream "(~a <=> ~a)" (lhs x) (rhs x)))
 
 ;; quantifiers
 
 (defclass generalization (composite-formula)
-  ((bound-variable :initarg :bound-variable
-		   :accessor bound-variable
-		   :type variable-term)
+  ((bindings :initarg :bindings
+	     :accessor bindings
+	     :type list)
    (matrix :initarg :matrix
 	   :accessor matrix
 	   :type formula)))
@@ -62,8 +141,14 @@
 (defclass universal-generalization (generalization)
   nil)
 
+(defmethod print-object ((uni-gen universal-generalization) stream)
+  (format stream "(! [~{~a~^,~}] : ~a)" (bindings uni-gen) (matrix uni-gen)))
+
 (defclass existential-generalization (generalization)
   nil)
+
+(defmethod print-object ((exi-gen existential-generalization) stream)
+  (format stream "(? [~{~a~^,~}] : ~a)" (bindings exi-gen) (matrix exi-gen)))
 
 (defgeneric render-plainly (statement))
 
@@ -200,8 +285,8 @@
     (or (gethash predicate atomic-formula-store)
 	(setf (gethash predicate atomic-formula-store)
 	      (make-instance 'atomic-formula
-			     :predicate predicate
-			     :args arguments)))))
+			     :head predicate
+			     :arguments arguments)))))
 
 (defmethod belongs-to-signature? ((sig signature) (formula atomic-formula))
   (let ((pred (predicate formula))
@@ -420,9 +505,6 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (make-instance 'existential-generalization
 		 :bound-variable var
 		 :matrix formula))
-
-(defun equation? (formula)
-  (eq (car formula) '=))
 
 (defun account-for-extension (constants predicate)
   "Make a formula saying that the extension of PREDICATE is exhausted
@@ -1859,8 +1941,8 @@ value."
 
 (defmethod uniquify-atoms ((atom atomic-formula))
   (make-instance 'atomic-formula
-		 :predicate (predicate atom)
-		 :args nil))
+		 :head (predicate atom)
+		 :arguments nil))
 
 (defmethod uniquify-atoms ((formula unary-connective-formula))
   (make-instance (class-of formula)
