@@ -99,7 +99,6 @@
 
 (defun truncate-dialogue (dialogue cutoff)
   (make-instance 'dialogue
-		 :signature (dialogue-signature dialogue)
 		 :plays (subseq (dialogue-plays dialogue) 0 cutoff)
 		 :rules (dialogue-rules dialogue)))
 
@@ -374,10 +373,7 @@ fail, only whether all of them are satisfied."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defclass dialogue ()
-  ((signature :accessor dialogue-signature
-	      :initform nil
-	      :initarg :signature)
-   (plays :accessor dialogue-plays
+  ((plays :accessor dialogue-plays
 	  :initform nil
 	  :initarg :plays)
    (rules :accessor dialogue-rules
@@ -387,9 +383,8 @@ fail, only whether all of them are satisfied."
 
 (defmethod print-object ((game dialogue) stream)
   (print-unreadable-object (game stream :type t)
-    (with-slots (rules signature plays) game
+    (with-slots (rules plays) game
       (format stream "rules: ~A~%" rules)
-      ;; (format stream "signature: ~A~%" signature)
       (format stream "moves: ")
       (if (null plays)
 	  (format stream "(none)~%")
@@ -405,9 +400,8 @@ fail, only whether all of them are satisfied."
 		       (format stream "~d ~A ~A (initial move)~%" i player statement)
 		       (format stream "~d ~A ~A [~A,~A]~%" i player statement stance reference))))))))
 
-(defun make-dialogue (formula signature rules)
+(defun make-dialogue (formula rules)
   (make-instance 'dialogue
-		 :signature signature
 		 :plays (list (make-move 'p formula nil nil))
 		 :rules rules))
 
@@ -517,25 +511,20 @@ fail, only whether all of them are satisfied."
   (make-instance 'dialogue
 		 :plays (append (dialogue-plays dialogue)
 				(list move))
-		 :rules (dialogue-rules dialogue)
-		 :signature (dialogue-signature dialogue)))
+		 :rules (dialogue-rules dialogue)))
 
 (defun copy-dialogue (dialogue)
   (make-instance 'dialogue
-		 :signature (dialogue-signature dialogue)
 		 :plays (copy-list (dialogue-plays dialogue))
 		 :rules (dialogue-rules dialogue)))
 
 (defun equal-dialogues? (dialogue-1 dialogue-2)
-  (let ((signature-1 (dialogue-signature dialogue-1))
-	(signature-2 (dialogue-signature dialogue-2)))
-    (and (equal-signatures? signature-1 signature-2)
-	 (length= (dialogue-plays dialogue-1)
-		  (dialogue-plays dialogue-2))
-	 (every-pair #'(lambda (move-1 move-2)
-			 (equal-moves? move-1 move-2))
-		     (dialogue-plays dialogue-1)
-		     (dialogue-plays dialogue-2)))))
+  (and (length= (dialogue-plays dialogue-1)
+                (dialogue-plays dialogue-2))
+       (every-pair #'(lambda (move-1 move-2)
+                       (equal-moves? move-1 move-2))
+                   (dialogue-plays dialogue-1)
+                   (dialogue-plays dialogue-2))))
 
 (defun some-move (predicate dialogue &key end)
   (some predicate (subseq (dialogue-plays dialogue) 0 end)))
@@ -794,7 +783,7 @@ fail, only whether all of them are satisfied."
 ;;; Playing games
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun play-dialogue-game (rules &optional signature initial-formula)
+(defun play-dialogue-game (rules initial-formula)
   (let ((dialogue nil)
 	(turn-number 0)
 	(player nil)
@@ -807,47 +796,9 @@ fail, only whether all of them are satisfied."
        (msg "Let's play a dialogue game!")
        (go check-arguments)
      check-arguments
-       (cond ((and signature
-		   initial-formula
-		   (formula? initial-formula))
-	      (setf dialogue (make-dialogue initial-formula
-					    signature
-					    rules))
-	      (go initial-move))
-	     ((and signature initial-formula)
-	      (msg "The given initial formula is not a formula according to~%the given signature.")
-	      (yes-or-no-go
-	       "Would you like to enter a different signature?"
-	       prompt
-	       signature
-	       initial-move))
-	     (signature
-	      (go read-initial-formula))
-	     (initial-formula
-	      (msg "The given signature is empty, but a non-trivial formula was given.")
-	      (go signature-then-check-arguments))
-	     (t
-	      (go signature)))
-     signature-then-check-arguments
-       (msg "Please supply a signature in which the given formula~%~%  ~A~%~%is actually a formula." initial-formula)
-       (setf signature (read-signature prompt))
-       (go check-arguments)
-     signature
-       (msg "Please supply a signature in which the statements of the game will be written.")
-       (setf signature (read-signature prompt))
-       (go read-initial-formula)
-     read-initial-formula
-       (msg "Proponent starts by playing a composite formula.")
-       (msg "Input a composite formula:")
-       (format t "~A" prompt)
-       (setf statement nil)
-       (until (composite-formula? statement)
-	 (restart-case (setf statement (read-composite-formula))
-	   (try-another-formula (new-formula)
-	     :report "Enter another formula"
-	     :interactive read-new-formula
-	     (setf statement new-formula))))
-       (setf dialogue (make-dialogue statement signature rules))
+       (setf dialogue (make-dialogue initial-formula
+                                     rules))
+       (go initial-move)
      initial-move
        (msg "Game on!")
        (incf turn-number)
@@ -1026,7 +977,7 @@ fail, only whether all of them are satisfied."
      term-input
        (msg "Enter a term:")
        (format t "~A" prompt)
-       (setf statement (read-term-in-signature signature))
+       (setf statement (read-term))
        (go evaluate-rules)
      statement-input
        (if (eq stance 'a)
