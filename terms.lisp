@@ -33,6 +33,15 @@
 (defclass function-term (atomic-expression term)
   nil)
 
+(defgeneric function-symbol (x)
+  (:documentation "The function symbol of a function term."))
+
+(defmethod function-symbol ((x t))
+  (error "How to extract the function symbol of an object~%~%  ~a~%~%of class~%~~%  ~a~%~%?" x (class-of x)))
+
+(defmethod function-symbol ((x function-term))
+  (head x))
+
 (defun make-function-term (function &rest args)
   (make-instance 'function-term
 		 :function function
