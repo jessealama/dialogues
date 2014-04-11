@@ -756,8 +756,8 @@
   (defined-prop
       ;; should be only "$true" and "$false"
       (atomic-defined-word #'(lambda (word)
-			       (cond ((string= word "true") *nullary-true*)
-				     ((string= word "false") *nullary-false*)
+			       (cond ((string= word "true") top)
+				     ((string= word "false") contradiction)
 				     (t
 				      (error "Unknown atomic defined word '~a'." word))))))
 
