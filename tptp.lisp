@@ -88,31 +88,6 @@
 	  (role formula)
 	  (formula formula)))
 
-(defgeneric make-tptp-formula (thing))
-
-(defmethod make-tptp-formula ((thing list))
-  (destructuring-bind (syntax name status formula . more-stuff)
-      thing
-    (if more-stuff
-	(destructuring-bind (source . useful-info)
-	    more-stuff
-	  (make-instance 'tptp-formula
-		   :name (if (symbolp name)
-			     (symbol-name name)
-			     (format nil "~a" name))
-		   :syntax (symbol-name syntax)
-		   :status (symbol-name status)
-		   :formula (form->formula formula)
-		   :source source
-		   :useful-info useful-info))
-	(make-instance 'tptp-formula
-		   :name (if (symbolp name)
-			     (symbol-name name)
-			     (format nil "~a" name))
-		   :syntax (symbol-name syntax)
-		   :status (symbol-name status)
-		   :formula (form->formula formula)))))
-
 (defun sort-formula-list (formula-list)
   (let ((sorted (sort formula-list #'string< :key #'name)))
     sorted))
