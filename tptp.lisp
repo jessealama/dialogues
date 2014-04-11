@@ -116,15 +116,6 @@
     (when (pathnamep path)
       (directory-namestring path))))
 
-(defmethod signature ((formula tptp-formula))
-  (signature (formula formula)))
-
-(defmethod signature ((tptp tptp-db))
-  (reduce #'merge-signatures
-	  (mapcar #'signature
-		  (mapcar #'formula
-			  (formulas (expand-includes tptp))))))
-
 (defclass derivability-problem (tptp-db)
   ((conjecture
     :initarg :conjecture
