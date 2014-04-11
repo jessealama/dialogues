@@ -238,11 +238,13 @@ game tree developed down to depth DEPTH."
 	  (push formula inappropriate))))
     (values inappropriate valid invalid cutoff)))
 
-(defun classify-all-formulas (rules signature formula-depth search-depth)
-  (classify-formulas (reduced-enumeration formula-depth signature)
-		     rules
-		     signature
-		     search-depth))
+;; Functionality dropped.  But it might be nice to restore it later.
+;;
+;; (defun classify-all-formulas (rules signature formula-depth search-depth)
+;;   (classify-formulas (reduced-enumeration formula-depth signature)
+;; 		     rules
+;; 		     signature
+;; 		     search-depth))
 
 ;;; Strategy search for specific rulesets
 
