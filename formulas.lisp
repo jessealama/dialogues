@@ -75,7 +75,10 @@
 (defmethod print-object ((x falsum) stream)
   (format stream "$false"))
 
-(defun atomic-formula-p (thing)
+(defgeneric atomic-formula-p (x)
+  (:documentation "Is X an atomic formula?"))
+
+(defmethod atomic-formula-p ((thing t))
   (or (typep thing 'atomic-formula)
       (typep thing 'equation)
       (typep thing 'disequation)
@@ -91,6 +94,20 @@
 
 (defclass negation (unary-connective-formula)
   nil)
+
+(defgeneric negation-p (x)
+  (:documentation "Is X a negation?"))
+
+(defmethod negation-p ((x t))
+  (typep x 'negation))
+
+(defgeneric literal-p (x)
+  (:documentation "Is X a literal (atomic formula or negation of an atomic formula)?"))
+
+(defmethod literal-p ((x t))
+  (or (atomic-formula-p x)
+      (and (negation-p x)
+           (atomic-formula-p (argument x)))))
 
 (defclass binary-connective-formula (composite-formula)
   ((lhs :initarg :lhs
