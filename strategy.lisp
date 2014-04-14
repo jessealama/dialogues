@@ -19,12 +19,7 @@
     :accessor children
     :initarg :children
     :documentation "The children of this node"))
-  (:documentation "A node in a strategy tree.  These trees need not be
-  bona fide stratategies in the game-theoretic sense of the term: some
-  of their branches might not be fully expanded; some
-  branches might lead to losses; etc.  Strictly speaking, we are going
-  to be considering only certain kinds of subtrees of ful dialogue
-  trees, among which winning strategies can be found."))
+  (:documentation "A node in a strategy tree.  These trees need not be bona fide stratategies in the game-theoretic sense of the term: some of their branches might not be fully expanded; some branches might lead to losses; etc.  Strictly speaking, we are going to be considering only certain kinds of subtrees of ful dialogue trees, among which winning strategies can be found."))
 
 (defun expanded-p (strategy-node)
   "Whether we have expanded STRATEGY-NODE (that is, computed the set of all possible children of this node, relative to the ruleset by which we are playing)."
