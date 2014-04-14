@@ -20,6 +20,4 @@
 	       (:file "search")
 	       (:file "felscher")
 	       (:file "strategy")
-	       (:file "dialogue-search")
-               ;; (:file "expressions")
-               ))
+	       (:file "dialogue-search")))
