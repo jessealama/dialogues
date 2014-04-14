@@ -41,7 +41,6 @@
     (if parent
 	(add-move-to-dialogue (node->dialogue parent ruleset) move)
 	(make-dialogue (move-statement move)
-		       *alphabetic-propositional-signature* ;; ugh
 		       ruleset))))
 
 (defun node-reference-< (node-1 node-2)
@@ -280,7 +279,7 @@ the strategy.  If there no such node, return NIL."
     :documentation "The list of choices that are available for this strategy.  It is intended to be a list of STRATEGY-NODE objects."))
   (:documentation "A STRATEGY-WITH-CHOICES is a strategy that keeps tracks of possible choices that were made as the strategy was expanded."))
 
-(defun play-strategy-search-game (rules &optional (signature *alphabetic-propositional-signature*) initial-formula)
+(defun play-strategy-search-game (rules initial-formula)
   (let ((strategy nil)
 	(opp-choice-node nil)
 	(current-choice nil)
@@ -294,54 +293,16 @@ the strategy.  If there no such node, return NIL."
        (msg "Let's search for a winning strategy for a formula!")
        (go check-arguments)
      check-arguments
-       (cond ((and signature
-		   initial-formula
-		   (formula? initial-formula))
-	      (let* ((initial-move (make-move 'p
-					      initial-formula
-					      nil
-					      nil))
-		     (root (make-instance 'strategy-node
-					  :move initial-move)))
-		(setf strategy (make-instance 'strategy
-					      :root root
-					      :ruleset rules)))
-	      (go initial-move))
-	     ((and signature initial-formula)
-	      (msg "The given initial formula is not a formula according to~%the given signature.")
-	      (yes-or-no-go
-	       "Would you like to enter a different signature?"
-	       prompt
-	       signature
-	       initial-move))
-	     (signature
-	      (go read-initial-formula))
-	     (initial-formula
-	      (msg "The given signature is empty, but a non-trivial formula was given.")
-	      (go signature-then-check-arguments))
-	     (t
-	      (go signature)))
-     signature-then-check-arguments
-       (msg "Please supply a signature in which the given formula~%~%  ~A~%~%is actually a formula." initial-formula)
-       (setf signature (read-signature prompt))
-       (go check-arguments)
-     signature
-       (msg "Please supply a signature in which the statements of the game will be written.")
-       (setf signature (read-signature prompt))
-       (go read-initial-formula)
-     read-initial-formula
-       (msg "Proponent starts by playing a composite formula.")
-       (msg "Input a composite formula:")
-       (format t "~A" prompt)
-       (setf statement nil)
-       (until (composite-formula? statement)
-	 (restart-case (setf statement (read-composite-formula))
-	   (try-another-formula (new-formula)
-	     :report "Enter another formula"
-	     :interactive read-new-formula
-	     (setf statement new-formula))))
-       (setf initial-formula statement)
-       (go check-arguments)
+       (let* ((initial-move (make-move 'p
+                                       initial-formula
+                                       nil
+                                       nil))
+              (root (make-instance 'strategy-node
+                                   :move initial-move)))
+         (setf strategy (make-instance 'strategy
+                                       :root root
+                                       :ruleset rules)))
+       (go initial-move)
      initial-move
        (msg "Game on!")
        (go next-proponent-choice)
