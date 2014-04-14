@@ -143,11 +143,13 @@ Proponent."
   (:documentation "Leaf nodes reachable from ROOT"))
 
 (defmethod leaves ((node strategy-node))
+  (unless (expanded-p node)
+    (expand-strategy-node node))
   (with-slots (children)
       node
     (if (null children)
-	(list node)
-	(reduce #'append (mapcar #'leaves children)))))
+        (list node)
+        (reduce #'append (mapcar #'leaves children)))))
 
 (defmethod leaves ((strategy strategy))
   (leaves (root strategy)))
