@@ -142,9 +142,11 @@ Proponent."
 (defgeneric leaves (thing)
   (:documentation "Leaf nodes reachable from ROOT"))
 
-(defmethod leaves ((node strategy-node))
+(defmethod leaves :before ((node strategy-node))
   (unless (expanded-p node)
-    (expand-strategy-node node))
+    (expand-strategy-node node)))
+
+(defmethod leaves ((node strategy-node))
   (with-slots (children)
       node
     (if (null children)
