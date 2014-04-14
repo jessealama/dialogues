@@ -13,7 +13,6 @@
                (:file "expressions")
                (:file "tptp")
                (:file "parse")
-	       ;; (:file "enumerate")
 	       (:file "translations")
 	       (:file "famous-formulas")
 	       (:file "dialogues")
