@@ -2,6 +2,16 @@
 
 (in-package :dialogues)
 
+(defclass move ()
+  ((player :initarg :player
+	   :accessor move-player)
+   (statement :initarg :statement
+	      :accessor move-statement)
+   (stance :initarg :stance
+	   :accessor move-stance)
+   (reference :initarg :reference
+	      :accessor move-reference)))
+
 (defun make-move (player statement stance reference)
   (make-instance 'move
 		 :player player
@@ -45,16 +55,6 @@
   (case player
       (p 'o)
       (o 'p)))
-
-(defclass move ()
-  ((player :initarg :player
-	   :accessor move-player)
-   (statement :initarg :statement
-	      :accessor move-statement)
-   (stance :initarg :stance
-	   :accessor move-stance)
-   (reference :initarg :reference
-	      :accessor move-reference)))
 
 (defmethod print-object ((move move) stream)
   (print-unreadable-object (move stream :type t)
