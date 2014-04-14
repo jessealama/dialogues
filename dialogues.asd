@@ -14,7 +14,6 @@
                (:file "tptp")
                (:file "parse")
 	       (:file "translations")
-	       (:file "famous-formulas")
 	       (:file "dialogues")
 	       (:file "queue")
 	       (:file "search")
