@@ -10,7 +10,6 @@
                :cl-fad)
   :components ((:file "packages")
 	       (:file "utils")
-	       ;; (:file "signature")
                (:file "expressions")
                (:file "tptp")
                (:file "parse")
