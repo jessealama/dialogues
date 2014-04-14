@@ -12,11 +12,6 @@
   (and (null (node-successors node))
        (proponent-move? (last-move (node-state node)))))
 
-(defstruct (ncl-search-problem
-	     (:include problem))
-  (rules nil :type (or (eql nil) ruleset))
-  (signature nil :type (or (eql nil) signature)))
-
 (defmethod successors ((dsp dialogue-search-problem) node)
   (let ((dialogue-so-far (node-state node))
 	(extensions nil))
@@ -34,28 +29,6 @@
 								 index))))
 			    next-moves)
 		    extensions))))))
-
-(defmethod successors ((ncl ncl-search-problem) node)
-  (let* ((dialogue-so-far (node-state node))
-	 (last-move (last-move dialogue-so-far)))
-    (if (and (opponent-move? last-move)
-	     (defensive-move? last-move))
-	nil
-	(let (extensions)
-	  (dolist (player '(p o) extensions)
-	    (dolist (stance '(a d))
-	      (let ((next-moves (next-moves dialogue-so-far player stance)))
-		(push-all (mapcar #'(lambda (next-move)
-				      (destructuring-bind (statement index)
-					  next-move
-					(cons (list player stance index statement)
-					      (freshly-extend-dialogue dialogue-so-far
-								       player
-								       stance
-								       statement
-								       index))))
-				  next-moves)
-			  extensions))))))))
 
 (defun dialogue-search-bfs (rules initial-statement signature &optional more-nodes)
   (if (belongs-to-signature? signature initial-statement)
@@ -248,12 +221,6 @@ game tree developed down to depth DEPTH."
 
 ;;; Strategy search for specific rulesets
 
-(defun ncl-valid? (formula depth signature)
-  (dialogue-valid? nearly-classical-dialogue-rules
-		   signature
-		   formula
-		   depth))
-
 (defun intuitionistically-valid--e? (formula depth signature)
   (let ((dialogue (make-dialogue formula signature e-dialogue-rules)))
     (if (and (implication? formula)
@@ -392,16 +359,10 @@ DEPTH TREE).")
 
 (defun dialogue-search-tree (formula rules depth)
   (let ((earlier-entries (search-trees-for-formula-with-rules formula rules))
-	(problem (if (eq rules nearly-classical-dialogue-rules)
-		     (make-ncl-search-problem
-		      :initial-state (make-dialogue formula
-						    *alphabetic-propositional-signature*
-						    rules)
-		      :rules rules)
-		     (make-dialogue-search-problem :rules rules
+	(problem (make-dialogue-search-problem :rules rules
 						   :initial-state (make-dialogue formula
 										 *alphabetic-propositional-signature*
-										 rules)))))
+										 rules))))
     (let ((tree (loop
 		   for entry in earlier-entries
 		   do
