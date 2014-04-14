@@ -14,6 +14,7 @@
                (:file "tptp")
                (:file "parse")
 	       (:file "translations")
+               (:file "move")
 	       (:file "dialogues")
 	       (:file "queue")
 	       (:file "search")
