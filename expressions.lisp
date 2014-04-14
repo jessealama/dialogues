@@ -1135,3 +1135,68 @@ in TERM or FORMULA."))
 
 (defun symbolic-attack-p (obj)
   (typep obj 'symbolic-attack))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Statements
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defclass statement (formula symbolic-attack term)
+  nil)
+
+(defgeneric equal-statements? (statement-1 statement-2))
+
+(defmethod equal-statements? ((form-1 formula) (form-2 formula))
+  (equal-formulas? form-1 form-2))
+
+(defmethod equal-statements? ((form formula) (sa symbolic-attack))
+  nil)
+
+(defmethod equal-statements? ((form formula) (term term))
+  nil)
+
+(defmethod equal-statements? ((sa symbolic-attack) (form formula))
+  nil)
+
+(defmethod equal-statements? ((sa-1 symbolic-attack) (sa-2 symbolic-attack))
+  (eq sa-1 sa-2))
+
+(defmethod equal-statements? ((sa symbolic-attack) (term term))
+  nil)
+
+(defmethod equal-statements? ((term term) (formula formula))
+  nil)
+
+(defmethod equal-statements? ((term term) (sa symbolic-attack))
+  nil)
+
+(defmethod equal-statements? ((term-1 term) (term-2 term))
+  (equal-terms? term-1 term-2))
+
+(defun non-symbolic-attack-term? (obj)
+  "Determine whether OBJ is a term different from the symbolic
+attacks which, being symbols, do qualify as terms."
+  (and (not (symbolic-attack-p obj))
+       (term? obj)))
+
+(defun non-symbolic-attack-formula? (obj)
+  "Determine whether OBJ is a formula different from the symbolic
+  attacks which, being simply lisp symbols, do qualify as [atomic]
+  formulas)."
+  (and (not (symbolic-attack-p obj))
+       (formula-p obj)))
+
+(defgeneric statement-< (statement-1 statement-2))
+
+(defmethod statement-< ((statement-1 symbolic-attack) (statement-2 symbolic-attack))
+  (or (eq statement-1 *attack-left-conjunct*)
+      (and (eq statement-1 *attack-right-conjunct*)
+	   (not (eq statement-2 *attack-left-conjunct*)))))
+
+(defmethod statement-< ((statement-1 symbolic-attack) (statement-2 t))
+  nil)
+
+(defmethod statement-< ((statement-1 formula) (statement-2 symbolic-attack))
+  nil)
+
+(defmethod statement-< ((statement-1 formula) (statement-2 formula))
+  (formula-< statement-1 statement-2))
