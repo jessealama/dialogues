@@ -18,14 +18,7 @@
     :type list
     :accessor children
     :initarg :children
-    :initform nil
-    :documentation "The children of this node")
-   (expanded
-    :type boolean
-    :accessor expanded?
-    :initform nil
-    :initarg :expanded
-    :documentation "Whether we have expanded this node (i.e., computed the set of all possible children of this node, relative to the ruleset by which we are playing)."))
+    :documentation "The children of this node"))
   (:documentation "A node in a strategy tree.  These trees need not be
   bona fide stratategies in the game-theoretic sense of the term: some
   of their branches might not be fully expanded; some
@@ -33,12 +26,16 @@
   to be considering only certain kinds of subtrees of ful dialogue
   trees, among which winning strategies can be found."))
 
+(defun expanded-p (strategy-node)
+  "Whether we have expanded STRATEGY-NODE (that is, computed the set of all possible children of this node, relative to the ruleset by which we are playing)."
+  (slot-boundp strategy-node 'children))
+
 (defmethod print-object ((node strategy-node) stream)
   (print-unreadable-object (node stream :type t)
-    (with-slots (children move expanded)
+    (with-slots (children move)
 	node
       (format stream "~a (with ~d children; ~:[unexpanded~;expanded~])"
-	      move (length children) expanded))))
+	      move (length children) (expanded-p node)))))
 
 (defun node->dialogue (strategy-node ruleset)
   "By following the edges from a strategy node to its parent until we
@@ -72,7 +69,6 @@
 				     :move move
 				     :parent node))
 		  next-moves)))
-  (setf (expanded? node) t)
   node)
 
 (defun winning-node? (node ruleset)
@@ -141,7 +137,7 @@ Proponent."
 		   :ruleset ruleset)))
 
 (defun fully-expanded? (strategy)
-  (every #'expanded? (nodes strategy)))
+  (every #'expanded-p (nodes strategy)))
 
 (defgeneric leaves (thing)
   (:documentation "Leaf nodes reachable from ROOT"))
@@ -243,7 +239,7 @@ the strategy.  If there no such node, return NIL."
   :documentation "The maximum depth to which we will develop a strategy node.")
 
 (defun first-proponent-choice-wrt-ruleset (node ruleset &optional (max-depth +strategy-max-depth+))
-  (unless (expanded? node)
+  (unless (expanded-p node)
     (expand-strategy-node node ruleset))
   (let ((d (depth node)))
     (if (< d max-depth)
@@ -259,7 +255,7 @@ the strategy.  If there no such node, return NIL."
 	:too-deep)))
 
 (defun first-opponent-choice-wrt-ruleset (node ruleset &optional (max-depth +strategy-max-depth+))
-  (unless (expanded? node)
+  (unless (expanded-p node)
     (expand-strategy-node node ruleset))
   (let ((d (depth node)))
     (if (< d max-depth)
@@ -500,11 +496,11 @@ the strategy.  If there no such node, return NIL."
 (defun branch-closed? (node)
   "Determine whether NODE represents a closed branch: every leaf
   reachable from NODE is expanded."
-  (with-slots (children expanded)
-      node
-    (when expanded
+  (when (expanded-p node)
+    (with-slots (children)
+        node
       (or (null children)
-	  (every #'branch-closed? children)))))
+          (every #'branch-closed? children)))))
 
 (defun proponent-wins-every-branch? (node ruleset)
   "Determine whether Proponent wins every dialogue that passes through NODE."
