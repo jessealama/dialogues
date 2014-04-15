@@ -923,4 +923,50 @@
        collect token into tokens
        unless token return tokens)))
 
+(defmethod problematize ((path pathname))
+  (problematize (parse-tptp path)))
+
+(defmethod formula-with-name ((tptp-path pathname) name)
+  (formula-with-name (parse-tptp tptp-path) name))
+
+(defmethod expand-includes ((tptp-db pathname))
+  (expand-includes (parse-tptp tptp-db)))
+
+(defmethod has-include-instruction-p ((problem pathname))
+  (has-include-instruction-p (parse-tptp problem)))
+
+(defmethod expand-include ((include include-instruction) root-dir)
+  (with-slots (selection file)
+      include
+    (when (null selection)
+      (return-from expand-include nil))
+    (let ((real-file nil)
+	  (new-formulas nil))
+      (cond ((file-exists-p file)
+	     (setf real-file file))
+	    ((directory-exists-p root-dir)
+	     (let ((file-in-dir (merge-pathnames file root-dir)))
+	       (if (file-exists-p file-in-dir)
+		   (setf real-file file-in-dir)
+		   (error "No file found at '~a', nor could we find '~a'." (namestring file) (namestring file-in-dir)))))
+	    ((null root-dir)
+	     (error "No file at '~a', and no root directory was supplied." (namestring file)))
+	    (t
+	     (error "No file at '~a', and to boot a bogus directory (~a) was supplied." (namestring file) root-dir)))
+      (let ((included-db (handler-case (parse-tptp real-file)
+			   (error () nil))))
+	(unless included-db
+	  (error "Error parsing '~a' as a TPTP file." (namestring real-file)))
+	(setf included-db (expand-includes included-db))
+	(loop
+	   for selected in selection
+	   for corresponding = (formula-with-name included-db
+						  selected)
+	   do
+	     (when (null corresponding)
+	       (error "There is no formula in the TPTP problem '~a' with the name '~a'." (namestring real-file) selected))
+	     (push corresponding new-formulas)
+	   finally
+	     (return (reverse new-formulas)))))))
+
 ;;; parse.lisp ends here
