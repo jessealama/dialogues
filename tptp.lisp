@@ -307,25 +307,6 @@
 	:key #'(lambda (x) (stringify (name x)))
 	:test #'string=))
 
-(defmethod universally-close :around ((x tptp-formula))
-  (let ((new-formula (call-next-method)))
-    (when (slot-boundp x 'source)
-      (setf (source new-formula)
-	    (source x)))
-    (when (slot-boundp x 'optional-info)
-      (setf (optional-info new-formula)
-	    (optional-info x)))
-    new-formula))
-
-(defmethod universally-close ((x tptp-formula))
-  (make-instance (class-of x)
-		 :name (name x)
-		 :role (role x)
-		 :formula (universally-close (formula x))))
-
-(defmethod contains-predicate? ((x tptp-formula) predicate)
-  (contains-predicate? (formula x) predicate))
-
 (defmethod atomic-formula-p ((x tptp-formula))
   (atomic-formula-p (formula x)))
 
