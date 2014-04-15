@@ -19,6 +19,6 @@
 	       (:file "dialogues")
 	       (:file "queue")
 	       (:file "search")
-	       (:file "felscher")
+	       ;; (:file "felscher")
 	       (:file "strategy")
 	       (:file "dialogue-search")))
