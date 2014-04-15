@@ -1,90 +1,63 @@
+(in-package :dialogues)
+
 (defclass move ()
-  ((player :initarg :player
-	   :accessor move-player)
-   (statement :initarg :statement
-	      :accessor move-statement)
-   (stance :initarg :stance
-	   :accessor move-stance)
+  ((statement :initarg :statement
+              :type (or formula symbolic-attack)
+              :initform (error "Every move must contain a statement.")
+	      :accessor statement)
    (reference :initarg :reference
-	      :accessor move-reference)))
+              :type integer
+              :initform (error "Every move must refer to another.")
+	      :accessor reference)
+   (attack
+    :initarg :attack
+    :type boolean
+    :initform nil
+    :accessor attack-p)))
 
-(defun make-move (player statement stance reference)
-  (make-instance 'move
-		 :player player
-		 :statement statement
-		 :stance stance
-		 :reference reference))
+(defun move-p (x)
+  (typep x 'move))
 
-(defun make-proponent-move (statement stance reference)
-  (make-move 'p statement stance reference))
+(defun defense-p (x)
+  (when (move-p x)
+    (not (attack-p x))))
 
-(defun make-opponent-move (statement stance reference)
-  (make-move 'o statement stance reference))
+(defclass proponent-move (move)
+  nil)
 
-(defun make-attack (player statement reference)
-  (make-move player statement 'a reference))
+(defun proponent-move-p (x)
+  (typep x 'proponent-move))
 
-(defun make-defense (player statement reference)
-  (make-move player statement 'd reference))
+(defclass opponent-move (move)
+  nil)
 
-(defun make-proponent-attack (statement reference)
-  (make-attack 'p statement reference))
+(defun opponent-move-p (x)
+  (typep x 'opponent-move))
 
-(defun make-opponent-attack (statement reference)
-  (make-attack 'o statement reference))
+(defun initial-move-p (move)
+  (not (slot-boundp move 'reference)))
 
-(defun make-proponent-defense (statement reference)
-  (make-defense 'p statement reference))
+(defgeneric player (x)
+  (:documentation "The player of X."))
 
-(defun make-opponent-defense (statement reference)
-  (make-defense 'o statement reference))
+(defmethod player ((x t))
+  (error "What is the player of~%~%  ~a~%~%?~%" x))
 
-(defun proponent-move? (move)
-  (let ((player (move-player move)))
-    (string= player "P")))
+(defmethod player ((x proponent-move))
+  "P")
 
-(defun opponent-move? (move)
-  (let ((player (move-player move)))
-    (string= player "O")))
+(defmethod player ((x opponent-move))
+  "O")
 
-(defun other-player (player)
-  (case player
-      (p 'o)
-      (o 'p)))
-
-(defmethod print-object ((move move) stream)
-  (print-unreadable-object (move stream :type t)
-    (with-slots (player statement stance reference) move
-      (format stream "player: ~A stance: ~A statement: ~A (in reference to move ~A)"
-	      (or player "(unset)")
-	      (or stance "(unset)")
-	      (or statement "(unset)")
-	      (or reference "(unset)")))))
-
-(defun pretty-print-move (move stream)
-  (with-slots (stance reference statement)
-      move
-    (if (and stance reference) ; a non-initial move
-	(format stream "[~A,~A] ~A" stance reference statement)
-	(format stream "~A (initial move)" statement))))
-
-(defun equal-moves? (move-1 move-2)
-  (and (string= (symbol-name (move-player move-1)) (symbol-name (move-player move-2)))
-       (string= (symbol-name (move-stance move-1)) (symbol-name (move-stance move-2)))
-       (let ((ref-1 (move-reference move-1))
-	     (ref-2 (move-reference move-2)))
-	 (if (integerp ref-1)
-	     (and (integerp ref-2) (= ref-1 ref-2))
-	     (and (null ref-1) (null ref-2))))
-       (equal-statements? (move-statement move-1)
-			  (move-statement move-2))))
-
-(defun attacking-move? (move)
-  (string= (symbol-name (move-stance move)) "A"))
-
-(defun defensive-move? (move)
-  (string= (symbol-name (move-stance move)) "D"))
-
-(defun initial-move? (move)
-  (and (null (move-stance move))
-       (null (move-reference move))))
+(defun move-< (move-1 move-2)
+  (with-slots ((statement-1 statement) (stance-1 stance) (reference-1 reference))
+      move-1
+    (with-slots ((statement-2 statement) (stance-2 stance) (reference-2 reference))
+	move-2
+      (or (< reference-1 reference-2)
+	  (and (= reference-1 reference-2)
+	       (if (eq stance-1 'a)
+		   (and (eq stance-2 'a)
+			(statement-< statement-1 statement-2))
+		   (and (eq stance-2 'd)
+			(statement-< statement-1 statement-2))))))))
