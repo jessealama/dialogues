@@ -1120,9 +1120,6 @@ in TERM or FORMULA."))
 ;;; Statements
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass statement (formula symbolic-attack term)
-  nil)
-
 (defgeneric equal-statements? (statement-1 statement-2))
 
 (defmethod equal-statements? ((form-1 formula) (form-2 formula))
