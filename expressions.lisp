@@ -192,6 +192,9 @@
 (defclass implication (binary-connective-formula)
   nil)
 
+(defun implication-p (x)
+  (typep x 'implication))
+
 (defmethod print-object ((x implication) stream)
   (format stream "(~a => ~a)" (lhs x) (rhs x)))
 
