@@ -53,14 +53,6 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 		 (list n))))
     (reverse (node-ancestors-backwards (node-parent node)))))
 
-(defun always-zero (n a s)
-  (declare (ignore n a s))
-  0)
-
-(defun always-one (n a s)
-  (declare (ignore n a s))
-  1)
-
 (defun expand (node problem)
   (if (node-expanded? node)
       (node-successors node)
