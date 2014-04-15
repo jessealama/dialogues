@@ -290,6 +290,15 @@ game tree developed down to depth DEPTH."
                    formula
                    depth))
 
+(defun defenses--e (strategy-node)
+  (unless (attack-p strategy-node)
+    (error "The move of a strategy node is not an attack, so how can we defend against it?"))
+  (let ((dialogue (strategy-node->dialogue strategy-node)))
+    (let (()))))
+
+(defun defend--e (strategy-node)
+  (first (defenses--e strategy-node)))
+
 (defun e-prefer-defenses (node expander max-depth)
   "Expand a Proponent node according to EXPANDER.  The maximum depth of terms (variables, constants, function terms) will be MAX-DEPTH.
 
@@ -299,7 +308,7 @@ Defenses are preferred in the sense that if a defensive move can be made, return
     (when (attack-p p)
       (list (defend p)))))
 
-(defun intuitionistically-valid-p (formula strategy-depth)
+(defun intuitionistically-valid? (formula strategy-depth)
   (when (atomic-formula-p formula)
     (return nil))
   (loop
