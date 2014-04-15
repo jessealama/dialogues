@@ -231,13 +231,15 @@
 
 (defgeneric make-atomic-formula (predicate &rest arguments))
 
-(let ((atomic-formula-store (make-hash-table)))
-  (defmethod make-atomic-formula ((predicate symbol) &rest arguments)
-    (or (gethash predicate atomic-formula-store)
-	(setf (gethash predicate atomic-formula-store)
-	      (make-instance 'atomic-formula
-			     :head predicate
-			     :arguments arguments)))))
+(defmethod make-atomic-formula ((predicate symbol) &rest arguments)
+    (make-instance 'atomic-formula
+                   :head (symbol-name predicate)
+                   :arguments arguments))
+
+(defmethod make-atomic-formula ((predicate string) &rest arguments)
+  (make-instance 'atomic-formula
+                 :head predicate
+                 :arguments arguments))
 
 (defun make-equation (lhs rhs)
   (make-atomic-formula '= lhs rhs))
