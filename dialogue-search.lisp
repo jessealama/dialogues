@@ -290,6 +290,22 @@ game tree developed down to depth DEPTH."
                    formula
                    depth))
 
+(defun e-prefer-defenses (node expander max-depth)
+  "Expand a Proponent node according to EXPANDER.  The maximum depth of terms (variables, constants, function terms) will be MAX-DEPTH.
+
+Defenses are preferred in the sense that if a defensive move can be made, return it as the sole available move.  (If multiple defenses are available, pick one arbitrarily.)"
+  ;; is the last move by Opp an attack against which we can defend?
+  (let ((p (parent node)))
+    (when (attack-p p)
+      (list (defend p)))))
+
+(defun intuitionistically-valid-p (formula strategy-depth)
+  (when (atomic-formula-p formula)
+    (return nil))
+  (loop
+     :for term-depth :from 0
+     :when (intuitionistically-valid-wrt-strategy formula #'(lambda (node) (e-prefer-defenses node term-depth)) strategy-depth) :do (return t)))
+
 ;; constrained search (not just constrained rulesets)
 
 (defun intuitionistically-valid--e-no-repeats--prefer-defenses? (formula depth)
