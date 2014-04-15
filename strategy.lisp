@@ -503,4 +503,10 @@ the strategy.  If there no such node, return NIL."
 		     :key #'move))))
     (every-branch node #'branch-open?)))
 
+(defmethod attack-p ((s strategy-node))
+  (attack-p (move s)))
+
+(defmethod defense-p ((s strategy-node))
+  (defense-p (move s)))
+
 ;;; strategy.lisp ends here
