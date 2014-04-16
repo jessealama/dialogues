@@ -55,3 +55,8 @@
                              responses)))))
              ;; all possible attacks -- TODO
              responses)))))
+
+(defparameter *e-ruleset*
+  (make-instance 'ruleset
+                 :expander #'e-propositional-expander
+                 :description "The E ruleset, for propositional languages."))
