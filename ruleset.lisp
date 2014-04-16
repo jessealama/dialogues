@@ -127,7 +127,22 @@
                                   responses)))))
     responses))
 
+(defun e-propositional-expander (dialogue)
+  ;; Rules: E rules, with the restriction that Opponent must respond immediately to Proponent.
+  (let ((last-move (last-move dialogue))
+        (l (dialogue-length dialogue))
+        (d-possibilities (d-propositional-expander dialogue)))
+    (if (proponent-move-p last-move)
+        (remove-if-not #'(lambda (move) (= (reference move) l))
+                       d-possibilities)
+        d-possibilities)))
+
 (defparameter *d-ruleset*
   (make-instance 'ruleset
                  :expander #'d-propositional-expander
                  :description "Felscher's D ruleset, for propositional languages."))
+
+(defparameter *e-ruleset*
+  (make-instance 'ruleset
+                 :expander #'e-propositional-expander
+                 :description "Felscher's E ruleset, for propositional languages."))
