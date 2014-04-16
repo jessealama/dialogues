@@ -2,14 +2,19 @@
 
 (in-package :dialogues)
 
-(defstruct problem
-  "A problem is defined by the initial state, and the type of problem it is.
+(defclass problem ()
+  ((initial-state
+    :initarg :initial-state
+    :accessor initial-state)
+   (goal
+    :initarg :goal
+    :accessor goal)
+   (num-expanded
+    :accessor num-expanded
+    :initform 0))
+  (:documentation "A problem is defined by the initial state, and the type of problem it is.
 We will be defining subtypes of PROBLEM later on.  For bookkeeping, we
-count the number of nodes expanded."
-  (initial-state)  ; A state in the domain.
-  (goal)           ; Optionally store the desired state here.
-  (num-expanded 0) ; Number of nodes expanded in search for solution.
-  )
+count the number of nodes expanded."))
 
 (defstruct node
   "Node for generic search.  A node contains a state, a
