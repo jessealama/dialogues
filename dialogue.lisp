@@ -116,6 +116,36 @@
        :finally
        (return (reverse indices)))))
 
+(defun most-recent-open-attack-on-opponent (dialogue)
+  (loop
+     :with plays = (plays dialogue)
+     :for i :from (dialogue-length dialogue) :downto 1
+     :for tail = (subseq plays (1- i))
+     :for move = (nth-move dialogue i)
+     :when (and (proponent-move-p move)
+                (attack-p move)
+                (not (some #'(lambda (other-move)
+                               (and (opponent-move-p other-move)
+                                    (defense-p other-move)
+                                    (= (reference other-move) i)))
+                           tail))) :do (return i)
+     :finally (return nil)))
+
+(defun most-recent-open-attack-on-proponent (dialogue)
+  (loop
+     :with plays = (plays dialogue)
+     :for i :from (dialogue-length dialogue) :downto 1
+     :for tail = (subseq plays (1- i))
+     :for move = (nth-move dialogue i)
+     :when (and (opponent-move-p move)
+                (attack-p move)
+                (not (some #'(lambda (other-move)
+                               (and (proponent-move-p other-move)
+                                    (defense-p other-move)
+                                    (= (reference other-move) i)))
+                           tail))) :do (return i)
+     :finally (return nil)))
+
 (defun most-recent-open-attack (dialogue)
   (let ((open-attacks (open-attack-indices dialogue)))
     (first open-attacks)))
