@@ -2,70 +2,75 @@
 
 (in-package :dialogues)
 
-(defstruct (dialogue-search-problem
-	     (:include problem))
-  (rules nil :type (or (eql nil) ruleset)))
+(defclass dialogue-search-problem (problem)
+  ((formula
+    :type formula
+    :accessor formula
+    :initform (error "A dialogue search problem requires an initial formula.")
+    :initarg :formula)
+   (ruleset
+    :type ruleset
+    :accessor ruleset
+    :initform (error "A dialogue search problem requires a ruleset.")
+    :initarg :ruleset)))
 
 (defmethod goal-test ((problem dialogue-search-problem) node)
   (expand node problem)
   (and (null (node-successors node))
-       (proponent-move? (last-move (node-state node)))))
+       (proponent-move-p (last-move (node-state node)))))
 
 (defmethod successors ((dsp dialogue-search-problem) node)
-  (let ((dialogue-so-far (node-state node))
-	(extensions nil))
-    (dolist (player '(p o) extensions)
-      (dolist (stance '(a d))
-	(let ((next-moves (next-moves dialogue-so-far player stance)))
-	  (push-all (mapcar #'(lambda (next-move)
-				(destructuring-bind (statement index)
-				    next-move
-				  (cons (list player stance index statement)
-					(freshly-extend-dialogue dialogue-so-far
-								 player
-								 stance
-								 statement
-								 index))))
-			    next-moves)
-		    extensions))))))
+  (continuations (node-state node)))
 
 (defun dialogue-search-bfs (rules initial-statement &optional more-nodes)
-  (let* ((initial-state (make-dialogue initial-statement rules))
-         (problem (make-dialogue-search-problem :initial-state initial-state
-                                                :rules rules)))
+  (let* ((initial-state (make-instance 'dialogue
+                                       :initial-formula initial-statement
+                                       :rulset rules))
+         (problem (make-instance 'dialogue-search-problem
+                                 :initial-state initial-state
+                                 :rules rules)))
     (breadth-first-search-for-bottom-with-nodes problem more-nodes)))
 
 (defun dialogue-search-dfs (rules initial-statement)
-  (let* ((initial-state (make-dialogue initial-statement rules))
-         (problem (make-dialogue-search-problem :initial-state initial-state
-                                                :rules rules)))
+  (let* ((initial-state (make-instance 'dialogue
+                                       :initial-formula initial-statement
+                                       :ruleset rules))
+         (problem (make-instance 'dialogue-search-problem
+                                 :initial-state initial-state
+                                 :rules rules)))
     (depth-first-search-for-bottom problem)))
 
-(defun dialogue-search-dfs-no-cycles (rules initial-statement)
-  (let* ((initial-state (make-dialogue initial-statement rules))
-         (problem (make-dialogue-search-problem :initial-state initial-state
-                                                :rules rules)))
-    (no-cycles-depth-first-search-for-bottom problem #'equal-dialogues?)))
+;; (defun dialogue-search-dfs-no-cycles (rules initial-statement)
+;;   (let* ((initial-state (make-instance 'dialogue
+;;                                        :initial-formula initial-statement
+;;                                        :ruleset rules))
+;;          (problem (make-dialogue-search-problem :initial-state initial-state
+;;                                                 :rules rules)))
+;;     (no-cycles-depth-first-search-for-bottom problem #'equal-dialogues?)))
 
-(defun bounded-dialogue-search-dfs (rules initial-statement depth &optional (initial-state (make-dialogue initial-statement rules)))
-  (let ((problem (make-dialogue-search-problem :initial-state initial-state
-                                               :rules rules)))
+(defun bounded-dialogue-search-dfs (rules initial-statement depth &optional (initial-state (make-instance 'dialogue :initial-formula initial-statement :ruleset rules)))
+  (let ((problem (make-instance 'dialogue-search-problem
+                                :initial-state initial-state
+                                :rules rules)))
     (depth-limited-dfs-search problem depth)))
 
 (defun bounded-dialogue-search-bfs (rules initial-statement depth
-				    &optional (initial-state (make-dialogue initial-statement rules))
+				    &optional (initial-state (make-instance 'dialogue :initial-formula initial-statement :ruleset rules))
 				              initial-queue)
-(let ((problem (make-dialogue-search-problem :initial-state initial-state
-						   :rules rules)))
+  (let ((problem (make-instance 'dialogue-search-problem
+                                :initial-state initial-state
+                                :rules rules)))
 	(bounded-breadth-first-search-with-nodes problem depth initial-queue)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Searching for strategies
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defstruct (dialogue-strategy-search-problem
-	     (:include problem))
-  (rules nil :type list))
+(defclass dialogue-strategy-search-problem (problem)
+  ((rules
+    :initform nil
+    :type list
+    :accessor rule)))
 
 (defun strategy-successors (strategy rules)
   (declare (ignore strategy rules))
