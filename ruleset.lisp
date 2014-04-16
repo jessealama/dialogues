@@ -18,14 +18,22 @@
   (print-unreadable-object (r stream :type t :identity nil)
     (format stream "~a" (description r))))
 
+(defun opponent-asserted-atom-earlier? (dialogue move)
+  (when (atomic-formula-p move)
+    (member (statement move)
+            (opponent-assertions dialogue))))
+
 (defun e-propositional-expander (dialogue)
   (let ((initial (initial-formula dialogue))
-        (l (dialogue-length dialogue)))
-    (cond ((zerop l)
-           (list (make-instance 'opponent-move
+        (plays (plays dialogue))
+        (last-move (last-move dialogue))
+        (responses nil))
+    (cond ((null plays)
+           (push (make-instance 'opponent-move
                                 :statement (defend-against initial nil)
                                 :reference 0
-                                :attack t)))
+                                :attack t)
+                 responses))
           (t
            ;; Generate all possible defenses.  Rules: (1) an
            ;; attack may be defended only once; (2) P may not assert
