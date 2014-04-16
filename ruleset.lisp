@@ -86,7 +86,7 @@
            (cond ((implication-p statement)
                   (push (make-instance other-class
                                        :attack t
-                                       :reference (1- i)
+                                       :reference i
                                        :statement (antecedent statement))
                         responses))
                  ((negation-p statement)
