@@ -229,48 +229,47 @@
 ;;   (remove-if-not #'opponent-move?
 ;; 		 (all-next-moves-at-position dialogue position)))
 
-(defun next-moves (dialogue player stance)
-  (next-moves-at-position dialogue player stance (dialogue-length dialogue)))
+(defun continuations (dialogue)
+  "A list of moves according to which DIALOGUE could be continued."
+  (funcall (expander (ruleset dialogue)) dialogue))
 
-(defun next-attacks (dialogue player)
-  (next-moves dialogue player 'a))
+(defun next-attacks (dialogue)
+  (remove-if-not #'attack-p (continuations dialogue)))
 
 (defun next-proponent-attacks (dialogue)
-  (next-moves dialogue 'p 'a))
+  (remove-if-not #'proponent-move-p (next-attacks dialogue)))
 
 (defun next-opponent-attacks (dialogue)
-  (next-moves dialogue 'o 'a))
+  (remove-if-not #'opponent-move-p (next-attacks dialogue)))
 
-(defun next-defenses (dialogue player)
-  (next-moves dialogue player 'd))
+(defun next-defenses (dialogue)
+  (remove-if-not #'defense-p (continuations dialogue)))
 
 (defun next-proponent-defenses (dialogue)
-  (next-moves dialogue 'p 'd))
+  (remove-if-not #'proponent-move-p (next-defenses dialogue)))
 
 (defun next-opponent-defenses (dialogue)
-  (next-moves dialogue 'o 'd))
+  (remove-if-not #'opponent-move-p (next-defenses dialogue)))
 
 (defun next-proponent-moves (dialogue)
-  (all-next-proponent-moves-at-position dialogue (dialogue-length dialogue)))
+  (remove-if-not #'proponent-move-p (continuations dialogue)))
 
 (defun next-opponent-moves (dialogue)
-  (all-next-opponent-moves-at-position dialogue (dialogue-length dialogue)))
+  (remove-if-not #'opponent-move-p (continuations dialogue)))
 
-(defun proponent-wins? (dialogue)
+(defun proponent-wins-p (dialogue)
   (and (proponent-move-p (last-move dialogue))
-       (null (next-moves dialogue 'o 'a))
-       (null (next-moves dialogue 'o 'd))))
+       (null (next-opponent-moves dialogue))))
 
-(defun opponent-wins? (dialogue)
+(defun opponent-wins-p (dialogue)
   (and (opponent-move-p (last-move dialogue))
-       (null (next-moves dialogue 'p 'a))
-       (null (next-moves dialogue 'p 'd))))
+       (null (next-proponent-moves dialogue))))
 
-(defun proponent-loses? (dialogue)
-  (not (proponent-wins? dialogue)))
+(defun proponent-loses-p (dialogue)
+  (not (proponent-wins-p dialogue)))
 
-(defun opponent-loses? (dialogue)
-  (not (opponent-wins? dialogue)))
+(defun opponent-loses-p (dialogue)
+  (not (opponent-wins-p dialogue)))
 
 ;; (defun freshly-extend-dialogue (dialogue player stance statement reference)
 ;;   (let ((new-move (make-move player statement stance reference)))
