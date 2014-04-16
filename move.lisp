@@ -15,6 +15,14 @@
     :initform nil
     :accessor attack-p)))
 
+(defmethod print-object ((m move) stream)
+  (print-unreadable-object (m stream :type t :identity nil)
+    (with-slots (statement reference) m
+      (if (attack-p m)
+          (format stream "attack")
+          (format stream "defend against the attack of"))
+      (format stream " move ~d by asserting ~a" reference statement))))
+
 (defun move-p (x)
   (typep x 'move))
 
