@@ -70,11 +70,13 @@
         (last-move (last-move dialogue))
         (responses nil))
     (cond ((null plays)
-           (push (make-instance 'opponent-move
-                                :statement (defend-against initial nil)
-                                :reference 0
-                                :attack t)
-                 responses))
+           (let ((attacks (possible-propositional-attacks initial)))
+             (dolist (attack attacks)
+               (push (make-instance 'opponent-move
+                                    :statement attack
+                                    :reference 0
+                                    :attack t)
+                 responses))))
           (t
            ;; Generate all possible defenses.
            (let ((most-recent (most-recent-open-attack dialogue))
