@@ -142,20 +142,20 @@
                                  :statement defense
                                  :attack nil)
                   responses))))
-        ;; filter out duplicate Opponent attacks
-        (when (proponent-move-p last-move)
-          (setf responses
-                (remove-if-not #'(lambda (move)
-                                   (duplicate-opponent-attack? dialogue move))
-                               responses)))
-        ;; ensure that the atom restriction on Proponent is observed
-        (when (opponent-move-p last-move)
-          (setf responses
-                (remove-if #'(lambda (move)
-                               (and (atomic-formula-p move)
-                                    (not (opponent-asserted-atom-earlier? dialogue move))))
-                           responses)))
-        responses)))
+      ;; filter out duplicate Opponent attacks
+      (when (proponent-move-p last-move)
+        (setf responses
+              (remove-if #'(lambda (move)
+                             (duplicate-opponent-attack? dialogue move))
+                         responses)))
+      ;; ensure that the atom restriction on Proponent is observed
+      (when (opponent-move-p last-move)
+        (setf responses
+              (remove-if #'(lambda (move)
+                             (and (atomic-formula-p move)
+                                  (not (opponent-asserted-atom-earlier? dialogue move))))
+                         responses)))
+      responses)))
 
 (defun d-propositional-expander (dialogue)
   ;; Rules: (1) an attack may be defended only once; (2) P may not
