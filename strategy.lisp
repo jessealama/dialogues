@@ -8,6 +8,11 @@
     :accessor move
     :initarg :move
     :documentation "The move taken at this node")
+   (ruleset
+    :type ruleset
+    :accessor ruleset
+    :initarg :ruleset
+    :initform (error "A strategy node requires a ruleset to be present."))
    (parent
     :type (or null strategy-node)
     :accessor parent
@@ -51,8 +56,8 @@
   (> (reference (move node-1))
      (reference (move node-2))))
 
-(defun expand-strategy-node (node ruleset)
-  (let* ((dialogue (node->dialogue node ruleset))
+(defun expand-strategy-node (node)
+  (let* ((dialogue (node->dialogue node (ruleset node)))
 	 (move (move node))
 	 (next-moves (if (proponent-move-p move)
 			 (next-opponent-moves dialogue)
@@ -66,10 +71,8 @@
   node)
 
 (defun winning-node? (node ruleset)
-  "A strategy node is called winning with respect to a ruleset if the
-dialogue it represents, with respect to that ruleset, is won by
-Proponent."
-  (proponent-wins? (node->dialogue node ruleset)))
+  "A strategy node NODE is called winning with respect to ruleset RULESET if the dialogue it represents, with respect to that ruleset, is won by Proponent."
+  (proponent-wins-p (node->dialogue node ruleset)))
 
 (defgeneric first-splitter (thing)
   (:documentation "Find the shallowest node of THING that has multiple children."))
@@ -184,7 +187,7 @@ Proponent."
       strategy
     (and (winning-strategy-for-proponent-form? strategy)
 	 (fully-expanded? strategy)
-	 (every #'proponent-wins?
+	 (every #'proponent-wins-p
 		(mapcar #'(lambda (leaf)
 			    (node->dialogue leaf ruleset))
 			(leaves root))))))
@@ -195,7 +198,7 @@ Proponent."
       strategy
     (and (winning-strategy-for-opponent-form? strategy)
 	 (fully-expanded? strategy)
-	 (every #'opponent-wins?
+	 (every #'opponent-wins-p
 		(mapcar #'(lambda (leaf)
 			    (node->dialogue leaf ruleset))
 			(leaves root))))))
@@ -238,7 +241,7 @@ the strategy.  If there no such node, return NIL."
 
 (defun first-proponent-choice-wrt-ruleset (node ruleset &optional (max-depth +strategy-max-depth+))
   (unless (expanded-p node)
-    (expand-strategy-node node ruleset))
+    (expand-strategy-node node))
   (let ((d (depth node)))
     (if (< d max-depth)
 	(let ((children (children node)))
@@ -254,7 +257,7 @@ the strategy.  If there no such node, return NIL."
 
 (defun first-opponent-choice-wrt-ruleset (node ruleset &optional (max-depth +strategy-max-depth+))
   (unless (expanded-p node)
-    (expand-strategy-node node ruleset))
+    (expand-strategy-node node))
   (let ((d (depth node)))
     (if (< d max-depth)
 	(let ((children (children node)))
@@ -464,14 +467,14 @@ the strategy.  If there no such node, return NIL."
 
 (defun proponent-wins-every-branch? (node ruleset)
   "Determine whether Proponent wins every dialogue that passes through NODE."
-  (every #'proponent-wins?
+  (every #'proponent-wins-p
 	 (mapcar #'(lambda (leaf)
 		     (node->dialogue leaf ruleset))
 		 (leaves node))))
 
 (defun opponent-wins-every-branch? (node ruleset)
   "Determine whether Proponent wins every dialogue that passes through NODE."
-  (every #'opponent-wins?
+  (every #'opponent-wins-p
 	 (mapcar #'(lambda (leaf)
 		     (node->dialogue leaf ruleset))
 		 (leaves node))))

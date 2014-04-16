@@ -176,6 +176,17 @@
                        d-possibilities)
         d-possibilities)))
 
+(defun e-propositional-expander--prefer-defenses (dialogue)
+  ;; Rules: E rules, with the restriction that Opponent must respond immediately to Proponent.  Additionally, if Proponent can defend, then he will.  (If multiple defenses are available, one is chosen arbitrarily.)
+  (let ((last-move (last-move dialogue))
+        (e-possibilities (e-propositional-expander dialogue)))
+    (if (opponent-move-p last-move)
+        (let ((defenses (remove-if-not #'defense-p e-possibilities)))
+          (if (null defenses)
+              e-possibilities
+              (first defenses)))
+        e-possibilities)))
+
 (defparameter *d-ruleset*
   (make-instance 'ruleset
                  :expander #'d-propositional-expander
@@ -185,3 +196,8 @@
   (make-instance 'ruleset
                  :expander #'e-propositional-expander
                  :description "Felscher's E ruleset, for propositional languages."))
+
+(defparameter *e-ruleset--prefer-defenses*
+  (make-instance 'ruleset
+                 :expander #'e-propositional-expander--prefer-defenses
+                 :description "Felscher's E ruleset, for propositional languages, with the additional rule that if Proponent can defend, then he will."))
