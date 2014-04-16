@@ -198,6 +198,9 @@
 (defmethod print-object ((x binary-disjunction) stream)
   (format stream "(~a | ~a)" (lhs x) (rhs x)))
 
+(defun binary-disjunction-p (x)
+  (typep x 'binary-disjunction))
+
 (defclass implication (binary-connective-formula)
   nil)
 
