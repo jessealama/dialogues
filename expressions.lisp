@@ -368,7 +368,7 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 
 ;; conjunctions
 
-(defun binary-conjunction? (thing)
+(defun binary-conjunction-p (thing)
   (typep thing 'binary-conjunction))
 
 (defclass multiple-arity-conjunction (multiple-arity-connective-formula)
