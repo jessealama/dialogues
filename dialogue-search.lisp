@@ -290,11 +290,11 @@ game tree developed down to depth DEPTH."
                    formula
                    depth))
 
-(defun defenses--e (strategy-node)
-  (unless (attack-p strategy-node)
-    (error "The move of a strategy node is not an attack, so how can we defend against it?"))
-  (let ((dialogue (strategy-node->dialogue strategy-node)))
-    (let (()))))
+;; (defun defenses--e (strategy-node)
+;;   (unless (attack-p strategy-node)
+;;     (error "The move of a strategy node is not an attack, so how can we defend against it?"))
+;;   (let ((dialogue (strategy-node->dialogue strategy-node)))
+;;     (let (()))))
 
 (defun defend--e (strategy-node)
   (first (defenses--e strategy-node)))
@@ -308,12 +308,12 @@ Defenses are preferred in the sense that if a defensive move can be made, return
     (when (attack-p p)
       (list (defend p)))))
 
-(defun intuitionistically-valid? (formula strategy-depth)
-  (when (atomic-formula-p formula)
-    (return nil))
-  (loop
-     :for term-depth :from 0
-     :when (intuitionistically-valid-wrt-strategy formula #'(lambda (node) (e-prefer-defenses node term-depth)) strategy-depth) :do (return t)))
+;; (defun intuitionistically-valid? (formula strategy-depth)
+;;   (when (atomic-formula-p formula)
+;;     (return nil))
+;;   (loop
+;;      :for term-depth :from 0
+;;      :when (intuitionistically-valid-wrt-strategy formula #'(lambda (node) (e-prefer-defenses node term-depth)) strategy-depth) :do (return t)))
 
 ;; constrained search (not just constrained rulesets)
 
