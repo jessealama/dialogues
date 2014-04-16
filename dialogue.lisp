@@ -58,7 +58,7 @@
            (terpri stream))))))
 
 (defun dialogue-length (dialogue)
-  (length (plays dialogue)))
+  (1+ (length (plays dialogue))))
 
 (defun add-move-to-dialogue (dialogue move)
   (make-instance 'dialogue
