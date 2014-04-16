@@ -82,7 +82,7 @@
   (error "Don't know how to defend~%~%  ~a~%~%against the attack~%~%  ~a~%" statement attack))
 
 (defmethod defend-against ((statement implication) (attack t))
-  (consequent statement))
+  (antecedent statement))
 
 (defmethod defend-against ((move move) attack)
   (defend-against (statement move) attack))
