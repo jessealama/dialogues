@@ -184,7 +184,7 @@
   nil)
 
 (defmethod print-object ((x binary-conjunction) stream)
-  (format stream "(~a => ~a)" (lhs x) (rhs x)))
+  (format stream "(~a & ~a)" (lhs x) (rhs x)))
 
 (defclass binary-disjunction (binary-connective-formula)
   nil)
