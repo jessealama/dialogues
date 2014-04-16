@@ -106,13 +106,11 @@
      finally
        (return t)))
 
-(defun proponent-has-winning-strategy? (dialogue cutoff &optional (start 1))
+(defun proponent-has-winning-strategy? (dialogue cutoff)
   (cond ((minusp cutoff) :cutoff)
 	((zerop cutoff)
-	 (if (evenp start)
-	     :cutoff
-	     (or (null (next-opponent-moves dialogue))
-		 :cutoff)))
+         (or (null (next-opponent-moves dialogue))
+             :cutoff))
 	(t (let ((every-result
 		  (every-disallowing-cutoffs
 		   #'(lambda (opponent-move)
@@ -122,11 +120,10 @@
 			 (some-non-cutoff-result
 			  #'(lambda (proponent-move)
 			      (let ((dialogue-proponent
-				     (add-move-to-dialogue dialogue
-								       proponent-move)))
+				     (add-move-to-dialogue dialogue-opponent
+							   proponent-move)))
 				(proponent-has-winning-strategy? dialogue-proponent
-								 (- cutoff 2)
-								 (+ start 2))))
+								 (- cutoff 2))))
 			  (next-proponent-moves dialogue-opponent))))
 		   (next-opponent-moves dialogue))))
 	     (if (eq every-result :cutoff)
