@@ -89,6 +89,12 @@
                                        :reference (1- i)
                                        :statement (antecedent statement))
                         responses))
+                 ((negation-p statement)
+                  (push (make-instance other-class
+                                       :attack t
+                                       :reference i
+                                       :statement (unnegate statement))
+                        responses))
                  ((binary-conjunction-p statement)
                   (push (make-instance other-class
                                        :attack t
@@ -128,22 +134,28 @@
                (attacked-statement (if (zerop attack-reference)
                                        (initial-formula dialogue)
                                        (nth-statement dialogue attack-reference))))
-          (let ((defense (cond ((implication-p attacked-statement)
-                                (consequent attacked-statement))
+          (let ((defenses (cond ((implication-p attacked-statement)
+                                 (list (consequent attacked-statement)))
+                               ((binary-disjunction-p attacked-statement)
+                                (list (lhs attacked-statement)
+                                      (rhs attacked-statement)))
+                               ((negation-p attacked-statement)
+                                nil)
                                ((binary-conjunction-p attacked-statement)
                                 (cond ((eql attack-statement *attack-left-conjunct*)
-                                       (lhs attacked-statement))
+                                       (list (lhs attacked-statement)))
                                       ((eql attack-statement *attack-right-conjunct*)
-                                       (rhs attacked-statement))
+                                       (list (rhs attacked-statement)))
                                       (t
                                        (error "The statement~%~%  ~a~%~%was attacked by~%~%  ~a~%~%which is neither ~a nor ~a as we expect." attacked-statement attack-statement *attack-left-conjunct* *attack-right-conjunct*))))
                                (t
                                 (error "How to defend~%~%  ~a~%~%?~%" attacked-statement)))))
-            (push (make-instance other-class
-                                 :reference most-recent
-                                 :statement defense
-                                 :attack nil)
-                  responses))))
+            (dolist (defense defenses)
+              (push (make-instance other-class
+                                   :reference most-recent
+                                   :statement defense
+                                   :attack nil)
+                    responses)))))
       ;; filter out duplicate Opponent attacks
       (when (proponent-move-p last-move)
         (setf responses
