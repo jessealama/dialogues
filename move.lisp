@@ -74,3 +74,15 @@
 			(statement-< statement-1 statement-2))
 		   (and (eq stance-2 'd)
 			(statement-< statement-1 statement-2))))))))
+
+(defgeneric defend-against (statement attack)
+  (:documentation "Defend STATEMENT against ATTACK."))
+
+(defmethod defend-against ((statement t) (attack t))
+  (error "Don't know how to defend~%~%  ~a~%~%against the attack~%~%  ~a~%" statement attack))
+
+(defmethod defend-against ((statement implication) (attack t))
+  (consequent statement))
+
+(defmethod defend-against ((move move) attack)
+  (defend-against (statement move) attack))
