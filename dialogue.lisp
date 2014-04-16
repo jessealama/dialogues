@@ -9,7 +9,12 @@
    (initial-formula
     :accessor initial-formula
     :type formula
-    :initarg :initial-formula)))
+    :initarg :initial-formula)
+   (ruleset
+    :type ruleset
+    :accessor ruleset
+    :initarg :ruleset
+    :initform (error "To make a dialogue, a ruleset is required."))))
 
 (defun empty-dialogue-p (dialogue)
   (null (plays dialogue)))
