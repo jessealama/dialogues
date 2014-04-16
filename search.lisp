@@ -28,8 +28,6 @@ also contains some bookkeeping information."
   (expanded? nil)           ; any successors examined?
   )
 
-
-
 (defmethod print-object ((node node) stream)
   (print-unreadable-object (node stream :type t)
     (with-slots (state)
