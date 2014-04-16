@@ -132,7 +132,7 @@
                                 (cond ((eql attack-statement *attack-left-conjunct*)
                                        (lhs attacked-statement))
                                       ((eql attack-statement *attack-right-conjunct*)
-                                       (rhs attack-statement))
+                                       (rhs attacked-statement))
                                       (t
                                        (error "The statement~%~%  ~a~%~%was attacked by~%~%  ~a~%~%which is neither ~a nor ~a as we expect." attacked-statement attack-statement *attack-left-conjunct* *attack-right-conjunct*))))
                                (t
