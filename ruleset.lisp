@@ -95,15 +95,21 @@
                                        :reference i
                                        :statement (unnegate statement))
                         responses))
+                 ((binary-disjunction-p statement)
+                  (push (make-instance other-class
+                                       :attack t
+                                       :reference i
+                                       :statement *which-disjunct?*)
+                        responses))
                  ((binary-conjunction-p statement)
                   (push (make-instance other-class
                                        :attack t
-                                       :reference (1- i)
+                                       :reference i
                                        :statement *attack-left-conjunct*)
                         responses)
                   (push (make-instance other-class
                                        :attack t
-                                       :reference (1- i)
+                                       :reference i
                                        :statement *attack-right-conjunct*)
                         responses))
                  (t
