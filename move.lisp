@@ -26,6 +26,9 @@
 (defun move-p (x)
   (typep x 'move))
 
+(defmethod atomic-formula-p ((x move))
+  (atomic-formula-p (statement x)))
+
 (defgeneric defense-p (x)
   (:documentation "Is X a defense?"))
 
