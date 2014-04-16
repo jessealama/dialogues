@@ -161,6 +161,9 @@
 (defclass negation (unary-connective-formula)
   nil)
 
+(defmethod print-object ((x negation) stream)
+  (format stream "~~~a" (argument x)))
+
 (defgeneric negation-p (x)
   (:documentation "Is X a negation?"))
 
