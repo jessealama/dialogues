@@ -141,7 +141,10 @@
 (defgeneric atomic-formula-p (x)
   (:documentation "Is X an atomic formula?"))
 
-(defmethod atomic-formula-p ((thing expression))
+(defmethod atomic-formula-p ((x t))
+  nil)
+
+(defmethod atomic-formula-p ((thing formula))
   (or (typep thing 'atomic-formula)
       (typep thing 'equation)
       (typep thing 'disequation)
