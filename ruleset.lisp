@@ -3,6 +3,7 @@
 (defclass ruleset ()
   ((expander
     :type function
+    :accessor expander
     :initform (error "A ruleset needs an expander function.")
     :initarg :expander
     :documentation "A unary function that takes a dialogue and returns a list of moves by which the given dialogue can be continued.")))
