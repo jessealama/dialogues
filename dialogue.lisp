@@ -31,7 +31,14 @@
 
 (defmethod print-object ((game dialogue) stream)
   (print-unreadable-object (game stream :type t)
-    (with-slots (plays initial-formula) game
+    (with-slots (plays initial-formula ruleset) game
+      (format stream "Ruleset: ~a" ruleset)
+      (terpri stream)
+      (if (null plays)
+          (format stream "1 move")
+          (format stream "~d moves" (1+ (length plays))))
+      (format stream ":")
+      (terpri stream)
       (format stream "0 P ~a [initial move]" initial-formula)
       (unless (null plays)
         (loop
