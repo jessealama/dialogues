@@ -6,6 +6,9 @@
 ;;; Terms
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defclass expression ()
+  nil)
+
 (defclass atomic-expression (expression)
   ((head
     :initarg :head
