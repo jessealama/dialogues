@@ -39,30 +39,27 @@
            ;; attack may be defended only once; (2) P may not assert
            ;; an atom before O; (3) only the most recent open attack
            ;; may be defended
-           (let ((responses nil))
-             (let ((most-recent (most-recent-open-attack dialogue)))
-               (when (and (integerp most-recent))
-                 (let* ((attack (nth-move dialogue most-recent))
-                        (attack-reference (reference attack))
-                        (attack-statement (statement attack))
-                        (attacked-statement (nth-statement dialogue attack-reference))
-                        (defense (defend-against attacked-statement attack-statement)))
-                   ;; P can assert an atom only if O has already asserted it
-                   (if (oddp l)
-                       (when (atomic-formula-p defense)
-                         (when (member defense (opponent-assertions dialogue))
-                           (push (make-instance 'proponent-move
-                                                :reference most-recent
-                                                :statement defense
-                                                :attack nil)
-                                 responses)))
-                       (push (make-instance 'opponent-move
-                                            :reference most-recent
-                                            :statement defense
-                                            :attack nil)
-                             responses)))))
-             ;; all possible attacks -- TODO
-             responses)))))
+           (let ((most-recent (most-recent-open-attack dialogue)))
+             (when (integerp most-recent)
+               (let* ((attack (nth-move dialogue most-recent))
+                      (attack-reference (reference attack))
+                      (attack-statement (statement attack))
+                      (attacked-statement (nth-statement dialogue attack-reference))
+                      (defense (defend-against attacked-statement attack-statement)))
+                 (push (make-instance (if (opponent-move-p last-move)
+                                          'proponent-move
+                                          'opponent-move)
+                                      :reference most-recent
+                                      :statement defense
+                                      :attack nil)
+                       responses))))
+           ;; all possible attacks
+           ;; filter out illegal assertions by P of atoms
+           (when (opponent-move-p last-move)
+             (setf responses
+                   (remove-if-not #'opponent-asserted-atom-earlier?
+                                  responses)))))
+    responses))
 
 (defparameter *e-ruleset*
   (make-instance 'ruleset
