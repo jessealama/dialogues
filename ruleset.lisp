@@ -37,7 +37,7 @@
               :key #'reference
               :test #'=))))
 
-(defun e-propositional-expander (dialogue)
+(defun d-propositional-expander (dialogue)
   ;; Rules: (1) an attack may be defended only once; (2) P may not
   ;; assert an atom before O; (3) only the most recent open attack may
   ;; be defended.
@@ -127,7 +127,7 @@
                                   responses)))))
     responses))
 
-(defparameter *e-ruleset*
+(defparameter *d-ruleset*
   (make-instance 'ruleset
-                 :expander #'e-propositional-expander
-                 :description "The E ruleset, for propositional languages."))
+                 :expander #'d-propositional-expander
+                 :description "Felscher's D ruleset, for propositional languages."))
