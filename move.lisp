@@ -18,9 +18,14 @@
 (defun move-p (x)
   (typep x 'move))
 
-(defun defense-p (x)
-  (when (move-p x)
-    (not (attack-p x))))
+(defgeneric defense-p (x)
+  (:documentation "Is X a defense?"))
+
+(defmethod defense-p ((x t))
+  nil)
+
+(defmethod defense-p ((x move))
+  (not (attack-p x)))
 
 (defclass proponent-move (move)
   nil)
