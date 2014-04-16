@@ -167,10 +167,10 @@
 (defun e-propositional-expander (dialogue)
   ;; Rules: E rules, with the restriction that Opponent must respond immediately to Proponent.
   (let ((last-move (last-move dialogue))
-        (l (dialogue-length dialogue))
+        (i (1- (dialogue-length dialogue)))
         (d-possibilities (d-propositional-expander dialogue)))
     (if (proponent-move-p last-move)
-        (remove-if-not #'(lambda (move) (= (reference move) (1- l)))
+        (remove-if-not #'(lambda (move) (= (reference move) i))
                        d-possibilities)
         d-possibilities)))
 
