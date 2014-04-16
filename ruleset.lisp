@@ -37,6 +37,30 @@
               :key #'reference
               :test #'=))))
 
+(defgeneric possible-propositional-attacks (formula)
+  (:documentation "The possible attacks against FORMULA, regarded as a part of proposition logic.  (Any generalizations in FORMULA are treated as if they were atoms.)"))
+
+(defmethod possible-propositional-attacks ((x t))
+  (error "How to generate a list of possible propositional attacks against~%~%  ~a~%~%?" x))
+
+(defmethod possible-propositional-attacks ((f atomic-formula))
+  nil)
+
+(defmethod possible-propositional-attacks ((f binary-conjunction))
+  (list *attack-left-conjunct* *attack-right-conjunct*))
+
+(defmethod possible-propositional-attacks ((f binary-disjunction))
+  (list *which-disjunct?*))
+
+(defmethod possible-propositional-attacks ((f implication))
+  (list (antecedent f)))
+
+(defmethod possible-propositional-attacks ((g generalization))
+  nil)
+
+(defmethod possible-propositional-attacks ((n negation))
+  (list (unnegate n)))
+
 (defun d-propositional-expander (dialogue)
   ;; Rules: (1) an attack may be defended only once; (2) P may not
   ;; assert an atom before O; (3) only the most recent open attack may
