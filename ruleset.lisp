@@ -170,7 +170,7 @@
         (l (dialogue-length dialogue))
         (d-possibilities (d-propositional-expander dialogue)))
     (if (proponent-move-p last-move)
-        (remove-if-not #'(lambda (move) (= (reference move) l))
+        (remove-if-not #'(lambda (move) (= (reference move) (1- l)))
                        d-possibilities)
         d-possibilities)))
 
