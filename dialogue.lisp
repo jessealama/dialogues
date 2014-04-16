@@ -63,7 +63,8 @@
 (defun add-move-to-dialogue (dialogue move)
   (make-instance 'dialogue
                  :plays (append (plays dialogue) (list move))
-                 :initial-formula (initial-formula dialogue)))
+                 :initial-formula (initial-formula dialogue)
+                 :ruleset (ruleset dialogue)))
 
 (defun nth-move (dialogue n)
   (if (zerop n)
