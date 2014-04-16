@@ -6,19 +6,17 @@
     :accessor expander
     :initform (error "A ruleset needs an expander function.")
     :initarg :expander
-    :documentation "A unary function that takes a dialogue and returns a list of moves by which the given dialogue can be continued.")))
+    :documentation "A unary function that takes a dialogue and returns a list of moves by which the given dialogue can be continued.")
+   (description
+    :type string
+    :accessor description
+    :initform (error "A ruleset needs a description.")
+    :initarg :description
+    :documentation "A description of the ruleset.")))
 
-(defgeneric defend-against (statement attack)
-  (:documentation "Defend STATEMENT against ATTACK."))
-
-(defmethod defend-against ((statement t) (attack t))
-  (error "Don't know how to defend~%~%  ~a~%~%against the attack~%~%  ~a~%" statement attack))
-
-(defmethod defend-against ((statement implication) (attack t))
-  (consequent statement))
-
-(defmethod defend-against ((move move) attack)
-  (defend-against (statement move) attack))
+(defmethod print-object ((r ruleset) stream)
+  (print-unreadable-object (r stream :type t :identity nil)
+    (format stream "~a" (description r))))
 
 (defun e-propositional-expander (dialogue)
   (let ((initial (initial-formula dialogue))
