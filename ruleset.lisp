@@ -77,7 +77,7 @@
              (start (if (opponent-move-p last-move) 1 2)))
         (loop
            :with l = (dialogue-length dialogue)
-           :for i :from start :upto l :by 2
+           :for i :from start :upto (1- l) :by 2
            :for move = (nth-move dialogue i)
            :for statement = (statement move)
            :when (and (formula-p statement)
@@ -86,18 +86,18 @@
            (cond ((implication-p statement)
                   (push (make-instance other-class
                                        :attack t
-                                       :reference i
+                                       :reference (1- i)
                                        :statement (antecedent statement))
                         responses))
                  ((binary-conjunction-p statement)
                   (push (make-instance other-class
                                        :attack t
-                                       :reference i
+                                       :reference (1- i)
                                        :statement *attack-left-conjunct*)
                         responses)
                   (push (make-instance other-class
                                        :attack t
-                                       :reference i
+                                       :reference (1- i)
                                        :statement *attack-right-conjunct*)
                         responses))
                  (t
@@ -125,7 +125,9 @@
         (let* ((attack (nth-move dialogue most-recent))
                (attack-reference (reference attack))
                (attack-statement (statement attack))
-               (attacked-statement (nth-statement dialogue attack-reference)))
+               (attacked-statement (if (zerop attack-reference)
+                                       (initial-formula dialogue)
+                                       (nth-statement dialogue attack-reference))))
           (let ((defense (cond ((implication-p attacked-statement)
                                 (consequent attacked-statement))
                                ((binary-conjunction-p attacked-statement)
