@@ -569,6 +569,10 @@ in TERM or FORMULA."))
 
 (defgeneric equal-formulas? (formula-1 formula-2))
 
+(defmethod equal-formulas? ((formula-1 t) (formula-2 t))
+  "By default, if no other generic function applies, the answer is no."
+  nil)
+
 (defmethod equal-formulas? ((form-1 atomic-formula) (form-2 atomic-formula))
   (and (string= (head form-1)
                 (head form-2))
@@ -577,175 +581,33 @@ in TERM or FORMULA."))
 		   (arguments form-1)
 		   (arguments form-2))))
 
-(defmethod equal-formulas? ((form-1 atomic-formula) (form-2 composite-formula))
-  nil)
-
-(defmethod equal-formulas? ((form-1 composite-formula) (form-2 atomic-formula))
-  nil)
-
 (defmethod equal-formulas? ((form-1 negation) (form-2 negation))
   (equal-formulas? (unnegate form-1)
 		   (unnegate form-2)))
 
-(defmethod equal-formulas? ((form-1 negation)
-			    (form-2 binary-connective-formula))
-  nil)
-
-(defmethod equal-formulas? ((form-1 negation)
-			    (form-2 multiple-arity-connective-formula))
-  nil)
-
-(defmethod equal-formulas? ((form-1 negation)
-			    (form-2 generalization))
-  nil)
-
 (defmethod equal-formulas? ((form-1 binary-connective-formula)
-			    (form-2 negation))
-  nil)
-
-(defmethod equal-formulas? ((form-1 multiple-arity-connective-formula)
-			   (form-2 negation))
-  nil)
-
-(defmethod equal-formulas? ((form-1 generalization)
-			   (form-2 negation))
-  nil)
-
-(defmethod equal-formulas? ((form-1 binary-connective-formula)
-			    (form-2 multiple-arity-connective-formula))
-  nil)
-
-(defmethod equal-formulas? ((form-1 binary-connective-formula)
-			    (form-2 generalization))
-  nil)
-
-(defmethod equal-formulas? ((form-1 multiple-arity-connective-formula)
-			    (form-2 binary-connective-formula))
-  nil)
-
-(defmethod equal-formulas? ((form-1 multiple-arity-connective-formula)
-			    (form-2 generalization))
-  nil)
-
-(defmethod equal-formulas? ((form-1 generalization)
-			    (form-2 binary-connective-formula))
-  nil)
-
-(defmethod equal-formulas? ((form-1 generalization)
-			    (form-2 multiple-arity-connective-formula))
-  nil)
-
-;; subclasses of binary-connective-formula
-
-;; implication
-
-(defmethod equal-formulas? ((form-1 implication)
-			    (form-2 implication))
-  (and (equal-formulas? (antecedent form-1)
-			(antecedent form-2))
-       (equal-formulas? (consequent form-1)
-			(consequent form-2))))
-
-(defmethod equal-formulas? ((form-1 implication)
-			    (form-2 equivalence))
-  nil)
-
-(defmethod equal-formulas? ((form-1 implication)
-			    (form-2 binary-disjunction))
-  nil)
-
-(defmethod equal-formulas? ((form-1 implication)
-			   (form-2 binary-conjunction))
-  nil)
-
-;; equivalence
-
-(defmethod equal-formulas? ((form-1 equivalence)
-			    (form-2 implication))
-  nil)
-
-(defmethod equal-formulas? ((form-1 equivalence)
-			    (form-2 equivalence))
-  (and (equal-formulas? (lhs form-1)
+                            (form-2 binary-connective-formula))
+  (and (eql (class-of form-1) (class-of form-2))
+       (equal-formulas? (lhs form-1)
 			(lhs form-2))
        (equal-formulas? (rhs form-1)
 			(rhs form-2))))
 
-(defmethod equal-formulas? ((form-1 equivalence)
-			    (form-2 binary-disjunction))
-  nil)
+(defmethod equal-formulas? ((form-1 multiple-arity-connective-formula)
+                            (form-2 multiple-arity-connective-formula))
+  (when (eql (class-of form-1) (class-of form-2))
+    (let ((args-1 (arguments form-1))
+          (args-2 (arguments form-2)))
+      (when (length= args-1 args-2)
+        (every-pair #'equal-formulas? args-1 args-2)))))
 
-(defmethod equal-formulas? ((form-1 equivalence)
-			    (form-2 binary-conjunction))
-  nil)
-
-;; binary-disjunction
-
-(defmethod equal-formulas? ((form-1 binary-disjunction)
-			    (form-2 implication))
-  nil)
-
-(defmethod equal-formulas? ((form-1 binary-disjunction)
-			    (form-2 equivalence))
-  nil)
-
-(defmethod equal-formulas? ((form-1 binary-disjunction)
-			    (form-2 binary-disjunction))
-  (and (equal-formulas? (lhs form-1)
-			(lhs form-2))
-       (equal-formulas? (rhs form-1)
-			(rhs form-2))))
-
-(defmethod equal-formulas? ((form-1 binary-disjunction)
-			    (form-2 binary-conjunction))
-  nil)
-
-;; binary-conjunction
-
-(defmethod equal-formulas? ((form-1 binary-conjunction)
-			    (form-2 implication))
-  nil)
-
-(defmethod equal-formulas? ((form-1 binary-conjunction)
-			    (form-2 equivalence))
-  nil)
-
-(defmethod equal-formulas? ((form-1 binary-conjunction)
-			    (form-2 binary-disjunction))
-  nil)
-
-(defmethod equal-formulas? ((form-1 binary-conjunction)
-			    (form-2 binary-conjunction))
-  (and (equal-formulas? (lhs form-1)
-			(lhs form-2))
-       (equal-formulas? (rhs form-1)
-			(rhs form-2))))
-
-;; multiple-arity-disjunction
-
-(defmethod equal-formulas? ((form-1 multiple-arity-disjunction)
-			(form-2 multiple-arity-disjunction))
-  (every-pair #'(lambda (item-1 item-2)
-		  (equal-formulas? item-1 item-2))
-	      (items form-1)
-	      (items form-2)))
-
-(defmethod equal-formulas? ((form-1 multiple-arity-disjunction)
-			    (form-2 multiple-arity-conjunction))
-  nil)
-
-;; multiple-arity-conjunction
-
-(defmethod equal-formulas? ((form-1 multiple-arity-conjunction)
-			    (form-2 multiple-arity-disjunction))
-  nil)
-
-(defmethod equal-formulas? ((form-1 multiple-arity-conjunction)
-			    (form-2 multiple-arity-conjunction))
-  (every-pair #'(lambda (item-1 item-2)
-		  (equal-formulas? item-1 item-2))
-	      (items form-1)
-	      (items form-2)))
+(defmethod equal-formulas? ((form-1 generalization)
+                            (form-2 generalization))
+  (let ((bindings-1 (bindings form-1))
+        (bindings-2 (bindings form-2)))
+    (when (subsetp bindings-1 bindings-2 :test #'equal-variables?)
+      (when (subsetp bindings-2 bindings-1 :test #'equal-variables?)
+        (equal-formulas? (matrix form-1) (matrix form-2))))))
 
 (defun contains-formula? (lst formula)
   (member formula lst :test #'equal-formulas?))
