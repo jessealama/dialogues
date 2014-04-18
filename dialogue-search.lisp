@@ -180,45 +180,8 @@
 (defmethod intuitionistically-valid? ((formula formula) strategy-depth)
   (let ((dialogue (make-instance 'dialogue
                                  :initial-formula formula
-                                 :ruleset *e-ruleset*)))
+                                 :ruleset *e-ruleset--no-repetitions*)))
     (proponent-has-winning-strategy? dialogue strategy-depth)))
-
-;; constrained search (not just constrained rulesets)
-
-(defvar search-tree-directory (make-hash-table :test #'equal)
-  "A mapping from triples (FORMULA RULESET DEPTH) to search trees.
-
-It is represented as an association list with entries of the
-form (FORMULA . STUFF), where STUFF is a list of triples (RULESET
-DEPTH TREE).")
-
-;; (defun search-trees-for-formula (formula)
-;;   (gethash formula search-tree-directory nil))
-
-;; (defun search-trees-for-formula-with-rules (formula rules)
-;;   (remove-if-not #'(lambda (entry)
-;; 		     (destructuring-bind (ruleset depth tree)
-;; 			 entry
-;; 		       (declare (ignore depth tree))
-;; 		       (equal-rulesets? ruleset rules)))
-;; 		 (search-trees-for-formula formula)))
-
-;; (defun search-tree-for-formula-with-depth (formula depth)
-;;   (remove-if-not #'(lambda (entry)
-;; 		     (destructuring-bind (ruleset d tree)
-;; 			 entry
-;; 		       (declare (ignore ruleset tree))
-;; 		       (= depth d)))
-;; 		 (search-trees-for-formula formula)))
-
-;; (defun register-dialogue-tree (formula rules depth tree)
-;;   (let ((earlier (gethash formula search-tree-directory))
-;; 	(entry (list rules depth tree)))
-;;     (cond ((null earlier) ; we've never seen FORMULA
-;; 	   (setf (gethash formula search-tree-directory) (list entry)))
-;; 	  (t
-;; 	   (setf (gethash formula search-tree-directory)
-;; 		 (append (list entry) earlier))))))
 
 (defun develop-dialogue-tree-to-depth (tree-root depth problem)
   (let ((expandable-leaves (expandable-leaf-nodes tree-root)))
