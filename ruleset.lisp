@@ -255,3 +255,8 @@
   (make-instance 'ruleset
                  :expander #'e-propositional-expander--prefer-defenses
                  :description "Felscher's E ruleset, for propositional languages, with the additional rule that if Proponent can defend, then he will."))
+
+(defparameter *e-ruleset--no-repetitions*
+  (make-instance 'ruleset
+                 :expander #'e-propositional-expander--no-repetitions
+                 :description "Felscher's E ruleset, for propositional languages, with the restriction that no repetitions are permitted."))
