@@ -21,7 +21,8 @@
 (defun opponent-asserted-atom-earlier? (dialogue move)
   (when (atomic-formula-p move)
     (member (statement move)
-            (opponent-assertions dialogue))))
+            (opponent-assertions dialogue)
+            :test #'equal-formulas?)))
 
 (defun attacks (dialogue)
   (remove-if-not #'attack-p (plays dialogue)))
