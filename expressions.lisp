@@ -245,6 +245,9 @@
 (defmethod print-object ((uni-gen universal-generalization) stream)
   (format stream "(! [~{~a~^,~}] : ~a)" (bindings uni-gen) (matrix uni-gen)))
 
+(defun universal-generalization-p (x)
+  (typep x 'universal-generalization))
+
 (defclass existential-generalization (generalization)
   nil)
 
