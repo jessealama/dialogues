@@ -205,6 +205,42 @@
               (first defenses)))
         e-possibilities)))
 
+(defgeneric equal-moves? (move-1 move-2)
+  (:documentation "Are MOVE-1 and MOVE-2 the same?"))
+
+(defmethod equal-moves? ((move-1 proponent-move) (move-2 opponent-move))
+  nil)
+
+(defmethod equal-moves? ((move-1 opponent-move) (move-2 proponent-move))
+  nil)
+
+(defmethod equal-moves? ((move-1 proponent-move) (move-2 proponent-move))
+  (when (= (reference move-1) (reference move-2))
+    (cond ((and (attack-p move-1) (attack-p move-2))
+           (equal-statements? (statement move-1) (statement move-2)))
+          ((and (defense-p move-1) (defense-p move-2))
+           (equal-statements? (statement move-1) (statement move-2)))
+          (t
+           nil))))
+
+(defmethod equal-moves? ((move-1 opponent-move) (move-2 opponent-move))
+  (when (= (reference move-1) (reference move-2))
+    (cond ((and (attack-p move-1) (attack-p move-2))
+           (equal-statements? (statement move-1) (statement move-2)))
+          ((and (defense-p move-1) (defense-p move-2))
+           (equal-statements? (statement move-1) (statement move-2)))
+          (t
+           nil))))
+
+(defun move-is-repetition (dialogue move)
+  "Has MOVE already been made in DIALOGUE?"
+  (member move (plays dialogue) :test #'equal-moves?))
+
+(defun e-propositional-expander--no-repetitions (dialogue)
+  (remove-if #'(lambda (move)
+                 (move-is-repetition dialogue move))
+             (e-propositional-expander dialogue)))
+
 (defparameter *d-ruleset*
   (make-instance 'ruleset
                  :expander #'d-propositional-expander
