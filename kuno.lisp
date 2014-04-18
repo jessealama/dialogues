@@ -74,9 +74,7 @@
         ;; (dialogues::intuitionistically-valid--e-no-repeats? problem
         ;;                                                     depth
         ;;                                                     dialogues::*alphabetic-propositional-signature*)
-        (dialogues::intuitionistically-valid--e-no-repeats--prefer-defenses? problem
-                                                                             depth
-                                                                             dialogues::*alphabetic-propositional-signature*))
+        (dialogues::intuitionistically-valid? problem depth))
     (trivial-timeout:timeout-error (c)
       (declare (ignore c))
       :timeout)))
