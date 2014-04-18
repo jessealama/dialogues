@@ -1144,3 +1144,105 @@ attacks which, being symbols, do qualify as terms."
   (make-instance (class-of x)
                  :bindings (bindings x)
                  :matrix (binarize (matrix x))))
+
+(defgeneric instantiate (statement term variable)
+  (:documentation "Plug TERM in for VARIABLE in STATEMENT."))
+
+(defmethod instantiate ((statements list) term variable)
+  (mapcar #'(lambda (x)
+              (instantiate x term variable))
+          statements))
+
+(defmethod instantiate ((statement atomic-formula) term variable)
+  (make-instance 'atomic-formula
+                 :head (head statement)
+                 :arguments (instantiate (arguments statement) term variable)))
+
+(defmethod instantiate ((statement variable-term) term variable)
+  (if (equal-variables? statement variable)
+      term
+      statement))
+
+(defmethod instantiate ((statement function-term) term variable)
+  (make-instance 'function-term
+                 :head (head statement)
+                 :arguments (instantiate (arguments statement) term variable)))
+
+(defmethod instantiate ((statement binary-connective-formula) term variable)
+  (make-instance (class-of statement)
+                 :lhs (instantiate (lhs statement) term variable)
+                 :rhs (instantiate (rhs statement) term variable)))
+
+(defmethod instantiate ((statement unary-connective-formula) term variable)
+  (make-instance (class-of statement)
+                :argument (instantiate (argument statement) term variable)))
+
+(defmethod instantiate ((statement multiple-arity-connective-formula) term variable)
+  (make-instance (class-of statement)
+                 :arguments (instantiate (arguments statement) term variable)))
+
+(defmethod instantiate ((statement generalization) term variable)
+  (let ((remaining-bindings (remove variable (bindings statement) :test #'equal-variables?)))
+    (if (null remaining-bindings)
+        statement
+        (make-instance (class-of statement)
+                       :bindings remaining-bindings
+                       :matrix (instantiate (matrix statement) term variable)))))
+
+(defgeneric terms-in (x)
+  (:documentation "The (distinct) variables appearing in X."))
+
+(defmethod terms-in ((x list))
+  (remove-duplicates (reduce #'append (mapcar #'terms-in x))
+                     :test #'equal-terms?))
+
+(defmethod terms-in ((x variable-term))
+  (list x))
+
+(defmethod terms-in ((x function-term))
+  (terms-in (arguments x)))
+
+(defmethod terms-in ((x atomic-formula))
+  (terms-in (arguments x)))
+
+(defmethod terms-in ((x unary-connective-formula))
+  (terms-in (argument x)))
+
+(defmethod terms-in ((x binary-connective-formula))
+  (remove-duplicates (append (terms-in (lhs x))
+                             (terms-in (rhs x)))
+                     :test #'equal-terms?))
+
+(defmethod terms-in ((x multiple-arity-connective-formula))
+  (terms-in (arguments x)))
+
+(defmethod terms-in ((x generalization))
+  (remove-duplicates (append (bindings x) (terms-in (matrix x)))
+                     :test #'equal-terms?))
+
+(defun variables-in (x)
+  (remove-if-not #'variable-term-p (terms-in x)))
+
+(defparameter *fresh-variable-prefix* "X")
+
+(defun fresh-variable (x)
+  "A variable that appears nowhere in X."
+  (loop
+     :with vars = (variables-in x)
+     :with num-vars = (length vars)
+     :for i :from 1 :upto num-vars
+     :for candidate-name = (format nil "~a~d" *fresh-variable-prefix* i)
+     :for candidate = (make-variable candidate-name)
+     :do
+     (unless (some #'(lambda (v) (equal-variables? candidate v)) vars)
+       (return candidate))
+     :finally (return (make-variable (format nil "~a~d" *fresh-variable-prefix* (1+ num-vars))))))
+
+(defgeneric term-depth (x)
+  (:documentation "The term depth of X."))
+
+(defmethod term-depth ((x variable-term))
+  0)
+
+(defmethod term-depth ((x function-term))
+  (1+ (apply #'max (mapcar #'term-depth (arguments x)))))
