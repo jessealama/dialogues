@@ -567,4 +567,7 @@
 (defun opponent-assertions (dialogue)
   (mapcar #'statement (remove-if-not #'opponent-move-p (plays dialogue))))
 
+(defmethod terms-in ((dialogue dialogue))
+  (terms-in (plays dialogue)))
+
 ;;; dialogues.lisp ends hered
