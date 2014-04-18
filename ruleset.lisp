@@ -112,6 +112,10 @@
                                        :reference i
                                        :statement *attack-right-conjunct*)
                         responses))
+                 ((atomic-formula-p statement)
+                  nil)
+                 ((generalization-p statement)
+                  nil)
                  (t
                   (error "How to attack~%~%  ~a~%~%?~%" statement))))
         ;; ensure that the atom restriction on Proponent is observed
@@ -146,6 +150,8 @@
                                 (list (lhs attacked-statement)
                                       (rhs attacked-statement)))
                                ((negation-p attacked-statement)
+                                nil)
+                               ((generalization-p attacked-statement)
                                 nil)
                                ((binary-conjunction-p attacked-statement)
                                 (cond ((eql attack-statement *attack-left-conjunct*)
