@@ -178,10 +178,23 @@
   nil)
 
 (defmethod intuitionistically-valid? ((formula formula) strategy-depth)
-  (let ((dialogue (make-instance 'dialogue
-                                 :initial-formula formula
-                                 :ruleset *e-ruleset--no-repetitions*)))
-    (proponent-has-winning-strategy? dialogue strategy-depth)))
+  (if (contains-quantifier-p formula)
+      (loop
+         :for term-depth = 0
+         :for ruleset = (make-instance 'ruleset
+                                       :description (format nil "E, maximum term depth = ~d" term-depth)
+                                       :expander #'(lambda (dialogue)
+                                                     (e-fol-expander--no-repetitions+prefer-defenses dialogue term-depth)))
+         :for dialogue = (make-instance 'dialogue
+                                        :initial-formula formula
+                                        :ruleset ruleset)
+         :do
+         (when (proponent-has-winning-strategy? dialogue strategy-depth)
+           (return t)))
+      (let ((dialogue (make-instance 'dialogue
+                                     :initial-formula formula
+                                     :ruleset *e-ruleset--no-repetitions*)))
+        (proponent-has-winning-strategy? dialogue strategy-depth))))
 
 (defun develop-dialogue-tree-to-depth (tree-root depth problem)
   (let ((expandable-leaves (expandable-leaf-nodes tree-root)))
