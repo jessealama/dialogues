@@ -1192,3 +1192,80 @@ attacks which, being symbols, do qualify as terms."
 
 (defmethod statement-< ((statement-1 formula) (statement-2 formula))
   (formula-< statement-1 statement-2))
+
+(defgeneric equivalence->conjunction (thing)
+  (:documentation "Rewrite equivalences in THING as a conjunction of implications."))
+
+(defmethod equivalence->conjunction ((thing equivalence))
+  (let ((l (equivalence->conjunction (lhs thing)))
+        (r (equivalence->conjunction (rhs thing))))
+    (make-binary-conjunction (make-implication l r)
+                             (make-implication r l))))
+
+(defmethod equivalence->conjunction ((thing atomic-formula))
+  thing)
+
+(defmethod equivalence->conjunction ((x binary-connective-formula))
+  (make-instance (class-of x)
+                 :lhs (equivalence->conjunction (lhs x))
+                 :rhs (equivalence->conjunction (rhs x))))
+
+(defmethod equivalence->conjunction ((thing negation))
+  (negate (equivalence->conjunction (unnegate thing))))
+
+(defmethod equivalence->conjunction ((x multiple-arity-connective-formula))
+  (make-instance (class-of x)
+                 :arguments (mapcar #'equivalence->conjunction
+                                    (arguments x))))
+
+(defmethod equivalence->conjunction ((x generalization))
+  (make-instance (class-of x)
+                 :bindings (bindings x)
+                 :matrix (equivalence->conjunction (matrix x))))
+
+(defgeneric binarize (x)
+  (:documentation "Replace occurrences of higher-arity connectives by their binary counterparts."))
+
+(defmethod binarize ((thing atomic-formula))
+  thing)
+
+(defmethod binarize ((x binary-connective-formula))
+  (make-instance (class-of x)
+                 :lhs (binarize (lhs x))
+                 :rhs (binarize (rhs x))))
+
+(defmethod binarize ((thing negation))
+  (negate (binarize (unnegate thing))))
+
+(defmethod binarize ((x multiple-arity-disjunction))
+  (let ((a (arguments x)))
+    (cond ((null a)
+           (error "Empty list of arguments in a multiple-artity disjunction."))
+          ((length= a 1)
+           (binarize (first a)))
+          ((length= a 2)
+           (make-binary-disjunction (first a) (second a)))
+          (t
+           (let ((x (first a))
+                 (y (make-instance 'multiple-artity-disjunction
+                                   :arguments (rest a))))
+             (make-binary-disjunction x (binarize y)))))))
+
+(defmethod binarize ((x multiple-arity-conjunction))
+  (let ((a (arguments x)))
+    (cond ((null a)
+           (error "Empty list of arguments in a multiple-artity conjunction."))
+          ((length= a 1)
+           (binarize (first a)))
+          ((length= a 2)
+           (make-binary-conjunction (first a) (second a)))
+          (t
+           (let ((x (first a))
+                 (y (make-instance 'multiple-artity-conjunction
+                                   :arguments (rest a))))
+             (make-binary-conjunction x (binarize y)))))))
+
+(defmethod binarize ((x generalization))
+  (make-instance (class-of x)
+                 :bindings (bindings x)
+                 :matrix (binarize (matrix x))))
