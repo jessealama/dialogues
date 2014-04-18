@@ -77,3 +77,9 @@
 			(statement-< statement-1 statement-2))
 		   (and (eq stance-2 'd)
 			(statement-< statement-1 statement-2))))))))
+
+(defmethod terms-in ((sa symbolic-attack))
+  nil)
+
+(defmethod terms-in ((m move))
+  (terms-in (statement m)))
