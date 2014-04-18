@@ -236,6 +236,9 @@
 	   :accessor matrix
 	   :type formula)))
 
+(defun generalization-p (thing)
+  (typep thing 'generalization))
+
 (defclass universal-generalization (generalization)
   nil)
 
