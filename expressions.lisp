@@ -53,6 +53,8 @@
 (defclass variable-term (atomic-expression term)
   nil)
 
+
+
 (defun variable-term-p (x)
   (typep x 'variable-term))
 
@@ -79,13 +81,15 @@
       (when (length= args-1 args-2)
         (every #'equal-terms? args-1 args-2)))))
 
-(defun make-variable (symbol-or-string)
-  (let ((name (if (symbolp symbol-or-string)
-			   (symbol-name symbol-or-string)
-			   symbol-or-string)))
-    (cond ((string= name "")
-	   (error "One cannot make a variable with an empty name"))
-	  (t (make-symbol (concatenate 'string "?" name))))))
+(defgeneric make-variable (x)
+  (:documentation "Make a variable named 'X'."))
+
+(defmethod make-variable ((x string))
+  (make-instance 'variable-term
+                 :head x))
+
+(defmethod make-variable ((x symbol))
+  (make-variable (symbol-name x)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Formulas
