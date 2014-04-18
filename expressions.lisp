@@ -254,6 +254,9 @@
 (defmethod print-object ((exi-gen existential-generalization) stream)
   (format stream "(? [~{~a~^,~}] : ~a)" (bindings exi-gen) (matrix exi-gen)))
 
+(defun existential-generalization-p (x)
+  (typep x 'existential-generalization))
+
 (defgeneric make-atomic-formula (predicate &rest arguments))
 
 (defmethod make-atomic-formula ((predicate symbol) &rest arguments)
