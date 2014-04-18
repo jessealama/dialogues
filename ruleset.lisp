@@ -183,6 +183,121 @@
                          responses)))
       responses)))
 
+(defun d-fol-attacks (dialogue term-depth)
+  (append (d-possible-attacks dialogue)
+          (let* ((responses nil)
+                 (last-move (last-move dialogue))
+                 (other-class (if (opponent-move-p last-move)
+                                  'proponent-move
+                                  'opponent-move))
+                 (start (if (opponent-move-p last-move) 1 2)))
+            (loop
+               :with l = (dialogue-length dialogue)
+               :for i :from start :upto (1- l) :by 2
+               :for move = (nth-move dialogue i)
+               :for statement = (statement move)
+               :when (and (formula-p statement)
+                          (not (atomic-formula-p statement)))
+               :do
+               (cond ((universal-generalization-p statement)
+                      (cond ((proponent-move-p move)
+                             (push (make-instance other-class
+                                                  :attack t
+                                                  :reference i
+                                                  :statement (instantiate (matrix statement) (fresh-variable dialogue) (first (bindings statement))))
+                                   responses))
+                            ((opponent-move-p move)
+                             (let ((terms (terms-in dialogue)))
+                               (setf terms (remove-if-not #'(lambda (d)
+                                                              (<= d term-depth))
+                                                          terms
+                                                          :key #'term-depth))
+                               (dolist (term terms) ;; do we need to consider a fresh variable here?
+                                 (push (make-instance other-class
+                                                      :attack t
+                                                      :reference i
+                                                      :statement (instantiate (matrix statement) term (first (bindings statement))))
+                                       responses))))))
+                     ((existential-generalization-p statement)
+                      (cond ((proponent-move-p move)
+                             (let ((terms (terms-in dialogue)))
+                               (setf terms (remove-if-not #'(lambda (d)
+                                                              (<= d term-depth))
+                                                          terms
+                                                          :key #'term-depth))
+                               (dolist (term terms) ;; do we need to consider a fresh variable here?
+                                 (push (make-instance other-class
+                                                      :attack t
+                                                      :reference i
+                                                      :statement (instantiate (matrix statement) term (first (bindings statement))))
+                                       responses))))
+                            ((opponent-move-p move)
+                             (list (make-instance other-class
+                                                  :attack t
+                                                  :reference i
+                                                  :statement (make-instance 'which-instance-attack))))))))
+            ;; ensure that the atom restriction on Proponent is observed
+            (when (opponent-move-p last-move)
+              (setf responses
+                    (remove-if #'(lambda (move)
+                                   (and (atomic-formula-p move)
+                                        (not (opponent-asserted-atom-earlier? dialogue move))))
+                               responses)))
+            responses)))
+
+(defun d-fol-defenses (dialogue term-depth)
+  (declare (ignore term-depth))
+  (let* ((responses nil)
+         (last-move (last-move dialogue))
+         (other-class (if (opponent-move-p last-move)
+                          'proponent-move
+                          'opponent-move))
+         (most-recent (if (opponent-move-p last-move)
+                          (most-recent-open-attack-on-proponent dialogue)
+                          (most-recent-open-attack-on-opponent dialogue))))
+    (when (integerp most-recent)
+      (let* ((attack (nth-move dialogue most-recent))
+             (attack-reference (reference attack))
+             (attacked-statement (if (zerop attack-reference)
+                                     (initial-formula dialogue)
+                                     (nth-statement dialogue attack-reference))))
+        (let ((defenses
+               (when (which-instance-attack-p attack)
+                 (let ((instance (instance attack)))
+                   (cond ((universal-generalization-p attacked-statement)
+                          (cond ((opponent-move-p attack)
+                                 (unless (variable-term-p instance)
+                                   (error "Opponent attacked a universal by asking~%~%  ~a~%~%which is not asking for a variable." attack))
+                                 (list (instantiate (matrix attacked-statement) instance (first (bindings attacked-statement)))))
+                                ((proponent-move-p attack)
+                                 (list (instantiate (matrix attacked-statement) instance (first (bindings attacked-statement)))))))
+                         ((existential-generalization-p attacked-statement)
+                          (cond ((opponent-move-p attack)
+                                 (list (instantiate (matrix attacked-statement) instance (first (bindings attacked-statement)))))
+                                ((proponent-move-p attack)
+                                 (let ((fresh (fresh-variable dialogue)))
+                                   (list (instantiate (matrix attacked-statement) fresh (first (bindings attacked-statement)))))))))))))
+          (dolist (defense defenses)
+            (push (make-instance other-class
+                                 :reference most-recent
+                                 :statement defense
+                                 :attack nil)
+                  responses)))))
+    ;; filter out duplicate Opponent attacks
+    (when (proponent-move-p last-move)
+      (setf responses
+            (remove-if #'(lambda (move)
+                           (duplicate-opponent-attack? dialogue move))
+                       responses)))
+    ;; ensure that the atom restriction on Proponent is observed
+    (when (opponent-move-p last-move)
+      (setf responses
+            (remove-if #'(lambda (move)
+                           (and (atomic-formula-p move)
+                                (not (opponent-asserted-atom-earlier? dialogue move))))
+                       responses)))
+    (append (d-possible-defenses dialogue) responses)))
+
 (defun d-propositional-expander (dialogue)
   ;; Rules: (1) an attack may be defended only once; (2) P may not
   ;; assert an atom before O; (3) only the most recent open attack may
@@ -190,11 +305,29 @@
   (append (d-possible-defenses dialogue)
           (d-possible-attacks dialogue)))
 
+(defun d-fol-expander (dialogue term-depth)
+  ;; Rules: (1) an attack may be defended only once; (2) P may not
+  ;; assert an atom before O; (3) only the most recent open attack may
+  ;; be defended.  No term will be considerd having depth exceeding
+  ;; TERM-DEPTH.
+  (append (d-fol-defenses dialogue term-depth)
+          (d-fol-attacks dialogue term-depth)))
+
 (defun e-propositional-expander (dialogue)
   ;; Rules: E rules, with the restriction that Opponent must respond immediately to Proponent.
   (let ((last-move (last-move dialogue))
         (i (1- (dialogue-length dialogue)))
         (d-possibilities (d-propositional-expander dialogue)))
+    (if (proponent-move-p last-move)
+        (remove-if-not #'(lambda (move) (= (reference move) i))
+                       d-possibilities)
+        d-possibilities)))
+
+(defun e-fol-expander (dialogue term-depth)
+  ;; Rules: E rules, with the restriction that Opponent must respond immediately to Proponent.
+  (let ((last-move (last-move dialogue))
+        (i (1- (dialogue-length dialogue)))
+        (d-possibilities (d-fol-expander dialogue term-depth)))
     (if (proponent-move-p last-move)
         (remove-if-not #'(lambda (move) (= (reference move) i))
                        d-possibilities)
@@ -246,6 +379,21 @@
   (remove-if #'(lambda (move)
                  (move-is-repetition dialogue move))
              (e-propositional-expander dialogue)))
+
+(defun e-fol-expander--no-repetitions (dialogue term-depth)
+  (remove-if #'(lambda (move)
+                 (move-is-repetition dialogue move))
+             (e-fol-expander dialogue term-depth)))
+
+(defun e-fol-expander--no-repetitions+prefer-defenses (dialogue term-depth)
+  (let ((last-move (last-move dialogue))
+        (e-possibilities (e-fol-expander--no-repetitions dialogue term-depth)))
+    (if (opponent-move-p last-move)
+        (let ((defenses (remove-if-not #'defense-p e-possibilities)))
+          (if (null defenses)
+              e-possibilities
+              (list (first defenses))))
+        e-possibilities)))
 
 (defparameter *d-ruleset*
   (make-instance 'ruleset
