@@ -362,3 +362,9 @@
 
 (defmethod contains-quantifier-p ((x tptp-formula))
   (contains-quantifier-p (formula x)))
+
+(defmethod contains-equation-p ((x tptp-db))
+  (some #'contains-equation-p (formulas x)))
+
+(defmethod contains-equation-p ((x tptp-formula))
+  (contains-equation-p (formula x)))
