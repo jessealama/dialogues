@@ -154,9 +154,8 @@
                   ((dialogues::contains-equation-p tptp)
                    (values :inappropriate "At least one equation was found." t))
                   (t
-                   (setf problem (dialogues::problematize tptp))
                    (setf problem (dialogues::equivalence->conjunction problem))
-                   (setf problem (dialogues::binarize problem))
+                   (setf problem (dialogues::problematize tptp))
                    (values (solve-problem problem timeout depth)
                            nil
                            t)))
