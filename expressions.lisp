@@ -346,6 +346,19 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 (defclass multiple-arity-disjunction (multiple-arity-connective-formula)
   nil)
 
+(defmethod print-object ((x multiple-arity-disjunction) stream)
+  (let ((args (arguments x)))
+    (cond ((null args)
+           (error "A multiple arity disjunction has zero arguments."))
+          ((length= args 1)
+           (format stream "~a" (first args)))
+          (t
+           (loop
+              :initially (format stream "(~a" (first args))
+              :for arg :in (rest args)
+              :do (format stream " | ~a" arg)
+              :finally (format stream ")"))))))
+
 (defun multiple-arity-disjunction? (thing)
   (eql (class-of thing) 'multiple-arity-disjunction))
 
