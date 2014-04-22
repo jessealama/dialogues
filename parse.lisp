@@ -716,14 +716,14 @@
 
   (plain-atomic-formula
    (plain-term #'(lambda (x)
-		   (let ((head (head x))
+		   (let ((head (stringify (head x)))
 			 (args (arguments x)))
-		     (if (string= (format nil "~a" head) "=")
+		     (if (string= head "=")
 			 (make-instance 'equation
 					:lhs (first args)
 					:rhs (second args))
 			 (make-instance 'atomic-formula
-                                        :head (head x)
+                                        :head head
                                         :arguments (arguments x)))))))
 
   (defined-atomic-formula
@@ -785,7 +785,7 @@
   (variable
    (|upper-word| #'(lambda (x)
 		     (make-instance 'variable-term
-				    :head (intern x :dialogues)))))
+				    :head (stringify x)))))
 
   (fof-unary-formula
    (unary-connective fof-unitary-formula
@@ -821,7 +821,7 @@
   (function-term
    (plain-term #'(lambda (x)
 		   (make-instance 'function-term
-				  :head (head x)
+				  :head (stringify (head x))
 				  :arguments (arguments x))))
    defined-term
    system-term)
@@ -830,13 +830,13 @@
    (constant
     #'(lambda (c)
 	(make-instance 'atomic-expression
-		       :head (intern c :dialogues)
+		       :head (stringify c)
 		       :arguments nil)))
    (functor |(| arguments |)|
 	    #'(lambda (f lparen args rparen)
 		(declare (ignore lparen rparen))
 		(make-instance 'function-term
-			       :head (intern f :dialogues)
+			       :head (stringify f)
 			       :arguments args))))
 
   (constant
