@@ -725,6 +725,31 @@ in TERM or FORMULA."))
 (defmethod contains-quantifier-p ((x generalization))
   t)
 
+(defgeneric contains-equation-p (x)
+  (:documentation "Is an equation found anywhere inside X?"))
+
+(defmethod contains-equation-p ((x equation))
+  t)
+
+(defmethod contains-equation-p ((x disequation))
+  t)
+
+(defmethod contains-equation-p ((x atomic-formula))
+  nil)
+
+(defmethod contains-equation-p ((x unary-connective-formula))
+  (contains-equation-p (argument x)))
+
+(defmethod contains-equation-p ((x binary-connective-formula))
+  (or (contains-equation-p (lhs x))
+      (contains-equation-p (rhs x))))
+
+(defmethod contains-equation-p ((x generalization))
+  (contains-equation-p (matrix x)))
+
+(defmethod contains-equation-p ((x multiple-arity-connective-formula))
+  (some #'contains-equation-p (arguments x)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Reading formulas
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
