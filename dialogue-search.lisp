@@ -107,7 +107,8 @@
        (return t)))
 
 (defun proponent-has-winning-strategy? (dialogue cutoff)
-  (cond ((minusp cutoff) :cutoff)
+  (cond ((minusp cutoff)
+         :cutoff)
 	((zerop cutoff)
          (or (null (next-opponent-moves dialogue))
              :cutoff))
