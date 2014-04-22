@@ -305,8 +305,8 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
   (make-instance 'negation :argument formula))
 
 (defclass multiple-arity-connective-formula (composite-formula)
-  ((items :initarg :items
-	  :accessor items
+  ((arguments :initarg :arguments
+	  :accessor arguments
 	  :type list)))
 
 (defun implication? (thing)
@@ -361,17 +361,17 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
       (if (cdr disjuncts)
 	  (if (cddr disjuncts)
 	      (make-instance 'multiple-arity-disjunction
-			     :items disjuncts)
+			     :arguments disjuncts)
 	      (car disjuncts)))
       (make-instance 'verum)))
 
 (defun binary-disjunction->multiple-arity-disjunction (binary-disjunction)
   (make-instance 'multiple-arity-disjunction
-		 :items (list (lhs binary-disjunction)
+		 :arguments (list (lhs binary-disjunction)
 			      (rhs binary-disjunction))))
 
 (defun multiple-arity-disjunction->binary-disjunction (multiple-arity-disjunction)
-  (let ((disjuncts (items multiple-arity-disjunction)))
+  (let ((disjuncts (arguments multiple-arity-disjunction)))
     (if (null disjuncts)
 	(make-instance 'binary-disjunction
 		       :lhs (make-instance 'verum)
@@ -409,17 +409,17 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
       (if (cdr conjuncts)
 	  (if (cddr conjuncts)
 	      (make-instance 'multiple-arity-conjunction
-			     :items conjuncts))
+			     :arguments conjuncts))
 	  (cadr conjuncts))
       (make-instance 'falsum)))
 
 (defun binary-conjunction->multiple-arity-conjunction (binary-conjunction)
   (make-instance 'multiple-arity-conjunction
-		 :items (list (lhs binary-conjunction)
+		 :arguments (list (lhs binary-conjunction)
 			      (rhs binary-conjunction))))
 
 (defun multiple-arity-conjunction->binary-conjunction (multiple-arity-conjunction)
-  (let ((conjuncts (items multiple-arity-conjunction)))
+  (let ((conjuncts (arguments multiple-arity-conjunction)))
     (if (null conjuncts)
 	(make-binary-conjunction (make-instance 'falsum)
                                  (make-instance 'falsum))
@@ -486,9 +486,9 @@ should return the formula
 	    (proper-subformulas-1 rhs))))
 
 (defmethod proper-subformulas-1 ((formula multiple-arity-connective-formula))
-  (let ((items (items formula)))
-    (append items
-	    (mapcar #'proper-subformulas-1 items))))
+  (let ((arguments (arguments formula)))
+    (append arguments
+	    (mapcar #'proper-subformulas-1 arguments))))
 
 (defmethod proper-subformulas-1 ((formula generalization))
   (let ((matrix (matrix formula)))
@@ -542,9 +542,9 @@ in TERM or FORMULA."))
 
 (defmethod instantiate (term variable (formula multiple-arity-connective-formula))
   (make-instance (class-of formula)
-		 :items (mapcar #'(lambda (item)
+		 :arguments (mapcar #'(lambda (item)
 				    (instantiate term variable item))
-				(items formula))))
+				(arguments formula))))
 
 (defmethod instantiate (term variable (formula generalization))
   (let ((bindings (bindings formula))
@@ -1140,28 +1140,28 @@ attacks which, being symbols, do qualify as terms."
 (defmethod binarize ((x multiple-arity-disjunction))
   (let ((a (arguments x)))
     (cond ((null a)
-           (error "Empty list of arguments in a multiple-artity disjunction."))
+           (error "Empty list of arguments in a multiple-arity disjunction."))
           ((length= a 1)
            (binarize (first a)))
           ((length= a 2)
            (make-binary-disjunction (first a) (second a)))
           (t
            (let ((x (first a))
-                 (y (make-instance 'multiple-artity-disjunction
+                 (y (make-instance 'multiple-arity-disjunction
                                    :arguments (rest a))))
              (make-binary-disjunction x (binarize y)))))))
 
 (defmethod binarize ((x multiple-arity-conjunction))
   (let ((a (arguments x)))
     (cond ((null a)
-           (error "Empty list of arguments in a multiple-artity conjunction."))
+           (error "Empty list of arguments in a multiple-arity conjunction."))
           ((length= a 1)
            (binarize (first a)))
           ((length= a 2)
            (make-binary-conjunction (first a) (second a)))
           (t
            (let ((x (first a))
-                 (y (make-instance 'multiple-artity-conjunction
+                 (y (make-instance 'multiple-arity-conjunction
                                    :arguments (rest a))))
              (make-binary-conjunction x (binarize y)))))))
 
