@@ -189,9 +189,11 @@
          :for dialogue = (make-instance 'dialogue
                                         :initial-formula formula
                                         :ruleset ruleset)
+         :for search-result = (proponent-has-winning-strategy? dialogue strategy-depth)
          :do
-         (when (proponent-has-winning-strategy? dialogue strategy-depth)
-           (return t)))
+         (when search-result
+           (unless (eql search-result :cutoff)
+             (return t))))
       (let ((dialogue (make-instance 'dialogue
                                      :initial-formula formula
                                      :ruleset *e-ruleset--no-repetitions*)))
