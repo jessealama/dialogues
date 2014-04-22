@@ -334,17 +334,22 @@
 (defgeneric problematize (db)
   (:documentation "Make a single problem formula out of a whole TPTP DB."))
 
-(defmethod problematize ((db tptp-db))
+(defmethod problematize :around ((db tptp-db))
   (if (has-conjecture-p db)
-      (let ((c (conjecture-formula db))
-            (premises (non-conjecture-formulas db)))
-        (setf c (formula c))
-        (setf premises (mapcar #'formula premises))
-        (if (null premises)
-            c
-            (make-implication (apply #'make-multiple-arity-conjunction
-                                     premises)
-                              c)))))
+      (let ((binarized (binarize db)))
+        (call-next-method binarized))
+      (error "The given TPTP database does not have a conjecture formula.  How to problematize it?")))
+
+(defmethod problematize ((db tptp-db))
+  (let ((c (conjecture-formula db))
+        (premises (non-conjecture-formulas db)))
+    (setf c (formula c))
+    (setf premises (mapcar #'formula premises))
+    (if (null premises)
+        c
+        (make-implication (apply #'make-multiple-arity-conjunction
+                                 premises)
+                          c))))
 
 (defmethod contains-contradiction-p ((x tptp-db))
   (some #'contains-contradiction-p (formulas x)))
