@@ -154,8 +154,6 @@
                    (values :inappropriate "At least one occurrence of falsum was found." t))
                   ((dialogues::contains-verum-p tptp)
                    (values :inappropriate "At least one occurrence of verum was found." t))
-                  ((dialogues::contains-quantifier-p tptp)
-                   (values :inappropriate "At least one quantified formula was found." t))
                   ((dialogues::contains-equation-p tptp)
                    (values :inappropriate "At least one equation was found." t))
                   (t
