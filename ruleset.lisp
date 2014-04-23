@@ -154,6 +154,8 @@
                                 nil)
                                ((generalization-p attacked-statement)
                                 nil)
+                               ((atomic-formula-p attacked-statement)
+                                nil)
                                ((binary-conjunction-p attacked-statement)
                                 (cond ((eql attack-statement *attack-left-conjunct*)
                                        (list (lhs attacked-statement)))
