@@ -178,6 +178,110 @@
 (defmethod intuitionistically-valid? ((formula atomic-formula) strategy-depth)
   nil)
 
+(defun tptp->dialogue (db ruleset)
+  (let ((c (conjecture-formula db))
+        (premises (non-conjecture-formulas db)))
+    (setf c (formula c))
+    (setf premises (mapcar #'formula premises))
+    (cond ((atomic-formula-p c)
+           (if (null premises)
+               (error "Cannot make a dialogue for a TPTP database having only an atomic conjecture formula.")
+               (make-instance 'dialogue
+                              :initial-formula (make-implication (binarize (apply #'make-multiple-arity-conjunction premises)) c)
+                              :ruleset ruleset)))
+          ((length= 1 premises)
+           (let* ((premise (first premises))
+                  (initial-formula (make-implication premise c))
+                  (dialogue (make-instance 'dialogue
+                                           :initial-formula initial-formula
+                                           :ruleset ruleset))
+                  (i 0))
+             (setf dialogue
+                   (add-move-to-dialogue dialogue
+                                         (make-instance 'opponent-move
+                                                        :attack t
+                                                        :reference 0
+                                                        :statement premise)))
+             (incf i)
+             (add-move-to-dialogue dialogue
+                                   (make-instance 'proponent-move
+                                                  :attack nil
+                                                  :reference 1
+                                                  :statement c))))
+          (t
+           (let* ((conjunction (binarize (apply #'make-multiple-arity-conjunction premises)))
+                  (initial-formula (make-implication conjunction c))
+                  (dialogue (make-instance 'dialogue
+                                           :initial-formula initial-formula
+                                           :ruleset ruleset))
+                  (i 0)
+                  (lhs (lhs conjunction))
+                  (rhs (rhs conjunction)))
+             (setf dialogue
+                   (add-move-to-dialogue dialogue
+                                         (make-instance 'opponent-move
+                                                        :attack t
+                                                        :reference 0
+                                                        :statement conjunction)))
+             (incf i)
+             (while (and premises (rest premises))
+               (let ((rest (rest premises)))
+                 (setf dialogue
+                       (add-move-to-dialogue dialogue
+                                             (make-instance 'proponent-move
+                                                            :attack t
+                                                            :reference i
+                                                            :statement *attack-left-conjunct*)))
+                 (incf i)
+                 (setf dialogue
+                       (add-move-to-dialogue dialogue
+                                             (make-instance 'opponent-move
+                                                            :attack nil
+                                                            :reference i
+                                                            :statement lhs)))
+                 (incf i)
+                 (setf dialogue
+                       (add-move-to-dialogue dialogue
+                                             (make-instance 'proponent-move
+                                                            :attack t
+                                                            :reference (- i 2)
+                                                            :statement *attack-right-conjunct*)))
+                 (incf i)
+                 (setf dialogue
+                       (add-move-to-dialogue dialogue
+                                             (make-instance 'opponent-move
+                                                            :attack nil
+                                                            :reference i
+                                                            :statement rhs)))
+                 (incf i)
+                 (setf lhs (second premises))
+                 (setf rhs (third premises))
+                 (setf premises rest)))
+             (setf dialogue (add-move-to-dialogue dialogue
+                                                  (make-instance 'proponent-move
+                                                                 :attack nil
+                                                                 :reference 1
+                                                                 :statement c))))))))
+
+(defmethod intuitionistically-valid? ((tptp pathname) strategy-depth)
+  (intuitionistically-valid? (parse-tptp tptp) strategy-depth))
+
+(defmethod intuitionistically-valid? ((db tptp-db) strategy-depth)
+  (if (contains-quantifier-p db)
+      (loop
+         :for term-depth = 0
+         :for ruleset = (make-instance 'ruleset
+                                       :description (format nil "E, maximum term depth = ~d" term-depth)
+                                       :expander #'(lambda (dialogue)
+                                                     (e-fol-expander--no-repetitions+prefer-defenses dialogue term-depth)))
+         :for dialogue = (tptp->dialogue db ruleset)
+         :for search-result = (proponent-has-winning-strategy? dialogue strategy-depth)
+         :do
+         (when search-result
+           (unless (eql search-result :cutoff)
+             (return t))))
+      (intuitionistically-valid? (problematize db) strategy-depth)))
+
 (defmethod intuitionistically-valid? ((formula formula) strategy-depth)
   (if (contains-quantifier-p formula)
       (loop
