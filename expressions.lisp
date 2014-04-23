@@ -148,6 +148,10 @@
 (defmethod atomic-formula-p ((x t))
   nil)
 
+(defun non-atomic-formula-p (x)
+  (when (formula-p x)
+    (not (atomic-formula-p x))))
+
 (defmethod atomic-formula-p ((thing formula))
   (or (typep thing 'atomic-formula)
       (typep thing 'equation)
