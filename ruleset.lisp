@@ -213,7 +213,7 @@
                              (push (make-instance other-class
                                                   :attack t
                                                   :reference i
-                                                  :statement (instantiate (matrix statement) (fresh-variable dialogue) (first (bindings statement))))
+                                                  :statement (instantiate statement (fresh-variable dialogue) (first (bindings statement))))
                                    responses))
                             ((opponent-move-p move)
                              (let ((terms (terms-in dialogue)))
@@ -225,7 +225,7 @@
                                  (push (make-instance other-class
                                                       :attack t
                                                       :reference i
-                                                      :statement (instantiate (matrix statement) term (first (bindings statement))))
+                                                      :statement (instantiate statement term (first (bindings statement))))
                                        responses))))))
                      ((existential-generalization-p statement)
                       (cond ((proponent-move-p move)
@@ -238,7 +238,7 @@
                                  (push (make-instance other-class
                                                       :attack t
                                                       :reference i
-                                                      :statement (instantiate (matrix statement) term (first (bindings statement))))
+                                                      :statement (instantiate statement term (first (bindings statement))))
                                        responses))))
                             ((opponent-move-p move)
                              (list (make-instance other-class
@@ -277,15 +277,15 @@
                           (cond ((opponent-move-p attack)
                                  (unless (variable-term-p instance)
                                    (error "Opponent attacked a universal by asking~%~%  ~a~%~%which is not asking for a variable." attack))
-                                 (list (instantiate (matrix attacked-statement) instance (first (bindings attacked-statement)))))
+                                 (list (instantiate attacked-statement instance (first (bindings attacked-statement)))))
                                 ((proponent-move-p attack)
-                                 (list (instantiate (matrix attacked-statement) instance (first (bindings attacked-statement)))))))
+                                 (list (instantiate attacked-statement instance (first (bindings attacked-statement)))))))
                          ((existential-generalization-p attacked-statement)
                           (cond ((opponent-move-p attack)
-                                 (list (instantiate (matrix attacked-statement) instance (first (bindings attacked-statement)))))
+                                 (list (instantiate attacked-statement instance (first (bindings attacked-statement)))))
                                 ((proponent-move-p attack)
                                  (let ((fresh (fresh-variable dialogue)))
-                                   (list (instantiate (matrix attacked-statement) fresh (first (bindings attacked-statement)))))))))))))
+                                   (list (instantiate attacked-statement fresh (first (bindings attacked-statement)))))))))))))
           (dolist (defense defenses)
             (push (make-instance other-class
                                  :reference most-recent
