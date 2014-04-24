@@ -314,6 +314,67 @@
   (append (d-possible-defenses dialogue)
           (d-possible-attacks dialogue)))
 
+(defun moves-alternate-p (dialogue)
+  (loop
+     :with plays = (plays dialogue)
+     :for move :in plays
+     :for i :from 1
+     :do
+     (cond ((oddp i)
+            (unless (opponent-move-p move) (return nil)))
+           ((evenp i)
+            (unless (proponent-move-p move) (return nil))))
+     :finally (return t)))
+
+(defun every-defense-responds-to-most-recent-open-attack (dialogue)
+  "Is every defense in DIALOGUE against the most recent open attack?"
+  (loop
+     :with plays = (plays dialogue)
+     :for j :from 1
+     :for move :in plays
+     :do
+     (when (defense-p move)
+       (let ((i (reference move)))
+         (let ((range (subseq plays 0 i)))
+           (when (some #'(lambda (other-move)
+                           (and (defense-p move)
+                                (= (reference other-move) i)))
+                       range)
+                   (return nil)))))
+     :finally (return t)))
+
+(defun no-duplicate-defenses (dialogue)
+  "Determine whether every attack in DIALOGUE is defended at most once.
+
+This predicate is redundant when EVERY-DEFENSE-RESPONDS-TO-MOST-RECENT-OPEN-ATTACK is in force."
+  (declare (ignore dialogue))
+  t)
+
+(defun proponent-assertions-attacked-at-most-once (dialogue)
+  "Proponent's assertions are not attacked more than once."
+  (loop
+     :with plays = (plays dialogue)
+     :for i :from 0
+     :for move :in plays
+     :do
+     (when (and (opponent-move-p move) (attack-p move))
+       (let ((j (reference move)))
+         (when (some #'(lambda (other-move)
+                         (and (opponent-move-p other-move)
+                              (attack-p other-move)
+                              (= (reference other-move) j)))
+                     (subseq plays 0 i))
+           (return nil))))
+     :finally (return t)))
+
+(defun d-propositional-validator (dialogue)
+  (let ((initial (initial-formula dialogue)))
+    (when (non-atomic-formula-p initial)
+      (when (moves-alternate-p dialogue)
+        (when (every-defense-responds-to-most-recent-open-attack dialogue)
+          (when (no-duplicate-defenses dialogue)
+            (proponent-assertions-attacked-at-most-once dialogue)))))))
+
 (defun d-fol-expander (dialogue term-depth)
   ;; Rules: (1) an attack may be defended only once; (2) P may not
   ;; assert an atom before O; (3) only the most recent open attack may
@@ -332,6 +393,17 @@
                        d-possibilities)
         d-possibilities)))
 
+(defun e-propositional-validator (dialogue)
+  (and (d-propositional-validator dialogue)
+       (loop
+          :with plays = (plays dialogue)
+          :for move :in plays
+          :for i :from 0
+          :do (when (opponent-move-p move)
+                (unless (= (reference move) i)
+                  (return nil)))
+          :finally (return t))))
+
 (defun e-fol-expander (dialogue term-depth)
   ;; Rules: E rules, with the restriction that Opponent must respond immediately to Proponent.
   (let ((last-move (last-move dialogue))
@@ -341,6 +413,38 @@
         (remove-if-not #'(lambda (move) (= (reference move) i))
                        d-possibilities)
         d-possibilities)))
+
+(defun d-fol-validator (dialogue)
+  (and (d-propositional-validator dialogue)
+       (loop
+          :with plays = (plays dialogue)
+          :for move :in plays
+          :do
+          (cond ((attack-p move)
+                 (let ((attack-reference (reference move)))
+                   (let ((attacked-statement (nth-statement dialogue attack-reference)))
+                     (when (generalization-p attacked-statement)
+                       (when (which-instance-attack-p move)
+                         (cond ((universal-generalization-p attacked-statement)
+                                (let ((instance (instance move)))
+                                  (cond ((proponent-move-p attacked-statement)
+                                         (when (variable-term-p instance)
+                                           (unless (occurs-freely instance dialogue)
+                                             (return nil))))
+                                        ((opponent-move-p attacked-statement)
+                                         t))))
+                               ((existential-generalization-p attacked-statement)
+                                (let ((instance (instance move)))
+                                  (cond ((proponent-move-p attacked-statement)
+                                         t)
+                                        ((opponent-move-p attacked-statement)
+                                         (unless (occurs-freely instance dialogue)
+                                           (return nil)))))))))))))
+          :finally (return t))))
+
+(defun e-fol-validator (dialogue)
+  (when (d-fol-validator dialogue)
+    (e-propositional-validator dialogue)))
 
 (defun e-propositional-expander--prefer-defenses (dialogue)
   ;; Rules: E rules, with the restriction that Opponent must respond immediately to Proponent.  Additionally, if Proponent can defend, then he will.  (If multiple defenses are available, one is chosen arbitrarily.)
