@@ -1322,3 +1322,41 @@ attacks which, being symbols, do qualify as terms."
 
 (defmethod term-depth ((x function-term))
   (1+ (apply #'max (mapcar #'term-depth (arguments x)))))
+
+(defgeneric occurs-freely (term thing)
+  (:documentation "Does TERM occur freely in THING?"))
+
+(defmethod occurs-freely (term (thing list))
+  (some #'(lambda (x)
+            (occurs-freely term x))
+        thing))
+
+(defmethod occurs-freely ((term variable-term) (thing variable-term))
+  (equal-variables? term thing))
+
+(defmethod occurs-freely ((term t) (thing variable-term))
+  nil)
+
+(defmethod occurs-freely (term (thing atomic-expression))
+  (some #'(lambda (x)
+            (equal-terms? term x))
+        (arguments thing)))
+
+(defmethod occurs-freely (term (thing unary-connective-formula))
+  (occurs-freely term (argument thing)))
+
+(defmethod occurs-freely (term (thing binary-connective-formula))
+  (or (occurs-freely term (lhs thing))
+      (occurs-freely term (rhs thing))))
+
+(defmethod occurs-freely (term (thing multiple-arity-connective-formula))
+  (some #'(lambda (x)
+            (occurs-freely term x))
+        (arguments thing)))
+
+(defmethod occurs-freely ((term variable-term) (thing generalization))
+  (unless (member term (bindings thing) :test #'equal-variables?)
+    (occurs-freely term (matrix thing))))
+
+(defmethod occurs-freely ((term t) (thing t))
+  (error "How to determine whether~%~%  ~a~%~%occurs freely in~%~%  ~a~%~%?" term thing))
