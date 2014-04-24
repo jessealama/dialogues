@@ -95,7 +95,7 @@
 ;;; Formulas
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defclass formula ()
+(defclass formula (expression)
   nil)
 
 (defun formula-p (x)
