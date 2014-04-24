@@ -162,6 +162,9 @@
 (defmethod print-object ((x disequation) stream)
   (format stream "~a != ~a" (lhs x) (rhs x)))
 
+(defclass composite-formula (formula)
+  nil)
+
 (defclass unary-connective-formula (composite-formula)
   ((argument :initarg :argument
 	     :accessor argument)))
