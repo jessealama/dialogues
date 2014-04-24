@@ -7,6 +7,12 @@
     :initform (error "A ruleset needs an expander function.")
     :initarg :expander
     :documentation "A unary function that takes a dialogue and returns a list of moves by which the given dialogue can be continued.")
+   (validator
+    :type function
+    :accessor validator
+    :initform (error "A ruleset needs a validator function.")
+    :initarg :validator
+    :documentation "A unary function that takes a dialogue and returns T or NIL according as the given dialogue does or does not adhere to the ruleset.")
    (description
     :type string
     :accessor description
