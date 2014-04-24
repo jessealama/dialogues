@@ -511,19 +511,23 @@ This predicate is redundant when EVERY-DEFENSE-RESPONDS-TO-MOST-RECENT-OPEN-ATTA
 (defparameter *d-ruleset*
   (make-instance 'ruleset
                  :expander #'d-propositional-expander
-                 :description "Felscher's D ruleset, for propositional languages."))
+                 :description "Felscher's D ruleset, for propositional languages."
+                 :validator #'d-propositional-validator))
 
 (defparameter *e-ruleset*
   (make-instance 'ruleset
                  :expander #'e-propositional-expander
-                 :description "Felscher's E ruleset, for propositional languages."))
+                 :description "Felscher's E ruleset, for propositional languages."
+                 :validator #'e-propositional-validator))
 
 (defparameter *e-ruleset--prefer-defenses*
   (make-instance 'ruleset
                  :expander #'e-propositional-expander--prefer-defenses
-                 :description "Felscher's E ruleset, for propositional languages, with the additional rule that if Proponent can defend, then he will."))
+                 :description "Felscher's E ruleset, for propositional languages, with the additional rule that if Proponent can defend, then he will."
+                 :validator #'e-propositional-validator))
 
 (defparameter *e-ruleset--no-repetitions*
   (make-instance 'ruleset
                  :expander #'e-propositional-expander--no-repetitions
-                 :description "Felscher's E ruleset, for propositional languages, with the restriction that no repetitions are permitted."))
+                 :description "Felscher's E ruleset, for propositional languages, with the restriction that no repetitions are permitted."
+                 :validator #'e-propositional-validator))
