@@ -243,7 +243,13 @@
 	   :accessor matrix
 	   :type formula)))
 
-(defun generalization-p (thing)
+(defgeneric generalization-p (thing)
+  (:documentation "Is THING a generalization?"))
+
+(defmethod generalization-p ((thing t))
+  nil)
+
+(defmethod generalization-p ((thing expression))
   (typep thing 'generalization))
 
 (defclass universal-generalization (generalization)
@@ -252,7 +258,13 @@
 (defmethod print-object ((uni-gen universal-generalization) stream)
   (format stream "(! [~{~a~^,~}] : ~a)" (bindings uni-gen) (matrix uni-gen)))
 
-(defun universal-generalization-p (x)
+(defgeneric universal-generalization-p (x)
+  (:documentation "Is X a universal generalization (forall)?"))
+
+(defmethod universal-generalization-p ((x t))
+  nil)
+
+(defmethod universal-generalization-p ((x expression))
   (typep x 'universal-generalization))
 
 (defclass existential-generalization (generalization)
@@ -261,7 +273,13 @@
 (defmethod print-object ((exi-gen existential-generalization) stream)
   (format stream "(? [~{~a~^,~}] : ~a)" (bindings exi-gen) (matrix exi-gen)))
 
-(defun existential-generalization-p (x)
+(defgeneric existential-generalization-p (x)
+  (:documentation "Is X an existential generalization (there exists)?"))
+
+(defmethod existential-generalization-p ((x t))
+  nil)
+
+(defmethod existential-generalization-p ((x expression))
   (typep x 'existential-generalization))
 
 (defgeneric make-atomic-formula (predicate &rest arguments))
