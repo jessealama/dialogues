@@ -1260,7 +1260,7 @@ attacks which, being symbols, do qualify as terms."
 (defmethod instantiate ((statement generalization) term variable)
   (let ((remaining-bindings (remove variable (bindings statement) :test #'equal-variables?)))
     (if (null remaining-bindings)
-        statement
+        (instantiate (matrix statement) term variable)
         (make-instance (class-of statement)
                        :bindings remaining-bindings
                        :matrix (instantiate (matrix statement) term variable)))))
