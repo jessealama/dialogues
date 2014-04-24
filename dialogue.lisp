@@ -262,7 +262,18 @@
 
 (defun continuations (dialogue)
   "A list of moves according to which DIALOGUE could be continued."
-  (funcall (expander (ruleset dialogue)) dialogue))
+  (loop
+     :with ruleset = (ruleset dialogue)
+     :with l = (funcall (expander ruleset) dialogue)
+     :with validator = (validator ruleset)
+     :for move :in l
+     :for extended-dialogue = (add-move-to-dialogue dialogue move)
+     :for check = (funcall validator extended-dialogue)
+     :do
+     (unless check
+       (error "Adding the move~%~%  ~a~%~%to the dialogue~%~%~a~%~%violates the ruleset." move dialogue))
+     :finally
+     (return (remove-duplicates l :test #'equal-moves?))))
 
 (defun next-attacks (dialogue)
   (remove-if-not #'attack-p (continuations dialogue)))
