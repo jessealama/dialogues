@@ -83,3 +83,12 @@
 
 (defmethod terms-in ((m move))
   (terms-in (statement m)))
+
+(defmethod generalization-p ((x move))
+  (generalization-p (statement x)))
+
+(defmethod universal-generalization-p ((x move))
+  (universal-generalization-p (statement x)))
+
+(defmethod existential-generalization-p ((x move))
+  (existential-generalization-p (statement x)))
