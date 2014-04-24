@@ -273,7 +273,8 @@
          :for ruleset = (make-instance 'ruleset
                                        :description (format nil "E, maximum term depth = ~d" term-depth)
                                        :expander #'(lambda (dialogue)
-                                                     (e-fol-expander--no-repetitions+prefer-defenses dialogue term-depth)))
+                                                     (e-fol-expander--no-repetitions+prefer-defenses dialogue term-depth))
+                                       :validator #'e-fol-validator)
          :for dialogue = (tptp->dialogue db ruleset)
          :for search-result = (proponent-has-winning-strategy? dialogue strategy-depth)
          :do
