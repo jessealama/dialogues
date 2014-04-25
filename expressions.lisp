@@ -1348,3 +1348,40 @@ attacks which, being symbols, do qualify as terms."
 
 (defmethod occurs-freely ((term t) (thing t))
   (error "How to determine whether~%~%  ~a~%~%occurs freely in~%~%  ~a~%~%?" term thing))
+
+(defgeneric free-variables (x)
+  (:documentation "The set of variables occurring freely in X."))
+
+(defmethod free-variables ((thing list))
+  (remove-duplicates (reduce #'append (mapcar #'free-variables thing))
+                     :test #'equal-variables?))
+
+(defmethod free-variables ((thing variable-term))
+  (list thing))
+
+(defmethod free-variables ((thing atomic-expression))
+  (free-variables (arguments thing)))
+
+(defmethod free-variables ((thing symbolic-attack))
+  nil)
+
+(defmethod free-variables ((thing unary-connective-formula))
+  (free-variables (argument thing)))
+
+(defmethod free-variables ((thing binary-connective-formula))
+  (remove-duplicates (append (free-variables (lhs thing))
+                             (free-variables (rhs thing)))
+                     :test #'equal-variables?))
+
+(defmethod free-variables ((thing multiple-arity-connective-formula))
+  (remove-duplicates (reduce #'append (mapcar #'free-variables (arguments thing)))))
+
+(defmethod free-variables ((thing generalization))
+  (let ((free-in-matrix (free-variables (matrix thing)))
+        (bindings (bindings thing)))
+    (remove-if #'(lambda (x)
+                   (member x bindings :test #'equal-variables?))
+               free-in-matrix)))
+
+(defmethod free-variables ((thing t))
+  (error "How to determine the set of free variables of~%~%  ~a~%~%?" thing))
