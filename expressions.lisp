@@ -928,22 +928,6 @@ in TERM or FORMULA."))
   (declare (ignore stream))
   (error "READ-COMPOSITE-FORMULA is dead."))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Shortcuts
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmacro -> (antecdent consequent)
-  `(make-implication ,antecdent ,consequent))
-
-(defmacro & (lhs rhs)
-  `(make-binary-conjunction ,lhs ,rhs))
-
-(defmacro v (lhs rhs)
-  `(make-binary-disjunction ,lhs ,rhs))
-
-(defmacro neg (argument)
-  `(negate ,argument))
-
 (defgeneric uniquify-atoms (formula)
   (:documentation "Ensure that all the atoms of FORMULA are distinct objects, even if they have the same print name.  (We treat only the propositional case.)"))
 
