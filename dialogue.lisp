@@ -581,4 +581,7 @@
 (defmethod terms-in ((dialogue dialogue))
   (terms-in (plays dialogue)))
 
+(defmethod free-variables ((dialogue dialogue))
+  (free-variables (plays dialogue)))
+
 ;;; dialogues.lisp ends hered
