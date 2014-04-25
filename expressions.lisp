@@ -1250,7 +1250,7 @@ attacks which, being symbols, do qualify as terms."
                        :matrix (instantiate (matrix statement) term variable)))))
 
 (defgeneric terms-in (x)
-  (:documentation "The (distinct) variables appearing in X."))
+  (:documentation "The (distinct) terms appearing in X."))
 
 (defmethod terms-in ((x list))
   (remove-duplicates (reduce #'append (mapcar #'terms-in x))
