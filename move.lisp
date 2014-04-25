@@ -95,3 +95,6 @@
 
 (defmethod existential-generalization-p ((x move))
   (existential-generalization-p (statement x)))
+
+(defmethod which-instance-attack-p ((m move))
+  (which-instance-attack-p (statement m)))
