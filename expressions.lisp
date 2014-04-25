@@ -1010,7 +1010,7 @@ in TERM or FORMULA."))
 (defmethod appears-in ((term term) (thing generalization))
   (appears-in term (matrix thing)))
 
-(defclass symbolic-attack ()
+(defclass symbolic-attack (expression)
   ((name
     :initarg :name
     :type string
