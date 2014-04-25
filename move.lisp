@@ -84,6 +84,9 @@
 (defmethod terms-in ((m move))
   (terms-in (statement m)))
 
+(defmethod free-variables ((m move))
+  (free-variables (statement m)))
+
 (defmethod generalization-p ((x move))
   (generalization-p (statement x)))
 
