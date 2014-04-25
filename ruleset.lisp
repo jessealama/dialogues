@@ -216,7 +216,9 @@
                                                   :statement (instantiate statement (fresh-variable dialogue) (first (bindings statement))))
                                    responses))
                             ((opponent-move-p move)
-                             (let ((terms (terms-in dialogue)))
+                             (let ((terms (cons (fresh-variable dialogue)
+                                                (append (non-variable-terms-in dialogue)
+                                                        (free-variables dialogue)))))
                                (setf terms (remove-if-not #'(lambda (d)
                                                               (<= d term-depth))
                                                           terms
@@ -229,7 +231,9 @@
                                        responses))))))
                      ((existential-generalization-p statement)
                       (cond ((proponent-move-p move)
-                             (let ((terms (terms-in dialogue)))
+                             (let ((terms (cons (fresh-variable dialogue)
+                                                (append (non-variable-terms-in dialogue)
+                                                        (free-variables dialogue)))))
                                (setf terms (remove-if-not #'(lambda (d)
                                                               (<= d term-depth))
                                                           terms
