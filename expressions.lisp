@@ -1283,6 +1283,10 @@ attacks which, being symbols, do qualify as terms."
 (defun variables-in (x)
   (remove-if-not #'variable-term-p (terms-in x)))
 
+(defun non-variable-terms-in (x)
+  "The non-variable terms appearing in X."
+  (remove-if #'variable-term-p (terms-in x)))
+
 (defparameter *fresh-variable-prefix* "X")
 
 (defun fresh-variable (x)
