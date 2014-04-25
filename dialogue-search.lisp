@@ -183,12 +183,17 @@
         (premises (non-conjecture-formulas db)))
     (setf c (formula c))
     (setf premises (mapcar #'formula premises))
+    (setf c (equivalence->conjunction c))
     (cond ((atomic-formula-p c)
            (if (null premises)
                (error "Cannot make a dialogue for a TPTP database having only an atomic conjecture formula.")
                (make-instance 'dialogue
                               :initial-formula (make-implication (binarize (apply #'make-multiple-arity-conjunction premises)) c)
                               :ruleset ruleset)))
+          ((null premises)
+           (make-instance 'dialogue
+                          :initial-formula c
+                          :ruleset ruleset))
           ((length= 1 premises)
            (let* ((premise (first premises))
                   (initial-formula (make-implication premise c))
