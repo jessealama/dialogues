@@ -1033,8 +1033,14 @@ in TERM or FORMULA."))
         (format stream "?")
         (format stream "?-~a" instance))))
 
-(defun which-instance-attack-p (x)
-  (eql (class-of x) 'which-instance-attack))
+(defgeneric which-instance-attack-p (x)
+  (:documentation "Is X a which-instance attack?"))
+
+(defmethod which-instance-attack-p ((x t))
+  nil)
+
+(defmethod which-instance-attack-p ((x expression))
+  (typep x 'which-instance-attack))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Standard symbolic attacks for propositional and first-order languges
