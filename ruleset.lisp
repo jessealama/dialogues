@@ -240,6 +240,13 @@
        :do
        (when (non-atomic-formula-p statement)
          (cond ((universal-generalization-p statement)
+                (let ((instance (fresh-variable dialogue)))
+                  (push (make-instance 'opponent-move
+                                       :attack t
+                                       :reference i
+                                       :statement (make-instance 'which-instance-attack :instance instance :name (format nil "?-~a" instance)))
+                              responses)))
+               ((existential-generalization-p statement)
                 (let ((terms (cons (fresh-variable dialogue)
                                    (append (non-variable-terms-in dialogue)
                                            (free-variables dialogue)))))
@@ -251,12 +258,7 @@
                     (push (make-instance 'opponent-move
                                          :attack t
                                          :reference i
-                                         :statement (make-instance 'which-instance-attack :instance term :name (format nil "?-~a" term))) responses))))
-               ((existential-generalization-p statement)
-                (list (make-instance 'opponent-move
-                                     :attack t
-                                     :reference i
-                                     :statement (make-instance 'which-instance-attack))))))
+                                         :statement (make-instance 'which-instance-attack :instance term :name (format nil "?-~a" term))) responses))))))
        :finally (return responses))))
 
 (defun d-fol-attacks (dialogue term-depth)
