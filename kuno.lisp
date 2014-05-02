@@ -108,7 +108,7 @@
            (format rendered "~a" c)))))
 
 (defun main ()
-  "Entry point for the standalone application."
+  "Entry point for Kuno."
   (clon:make-context)
   (when (clon:getopt :short-name "h")
     (help-and-exit 0))
