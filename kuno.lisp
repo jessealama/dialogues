@@ -68,10 +68,10 @@
   (handler-case (dialogues::parse-tptp x)
     (error () nil)))
 
-(defun solve-problem (problem timeout depth)
+(defun solve-problem (tptp timeout depth)
   (handler-case
       (trivial-timeout:with-timeout (timeout)
-        (dialogues::intuitionistically-valid? problem depth))
+        (dialogues::intuitionistically-valid? tptp depth))
     (trivial-timeout:timeout-error (c)
       (declare (ignore c))
       :timeout)))
