@@ -135,6 +135,11 @@
       (error-message "'~a' is not an acceptable value for the depth option." timeout-arg)
       (clon:exit 1))
 
+    (when (cl-fad:directory-exists-p arg)
+      (format *standard-output* "% SZS status ~a for ~a : Argument is a directory rather than a file." (result->szs :input-error) (namestring arg))
+      (terpri *standard-output*)
+      (clon:exit 1))
+
     (unless (file-readable? arg)
       (format *standard-output* "\"~a\" is an unreadable (or non-existing) file." (namestring arg))
       (clon:exit 1))
