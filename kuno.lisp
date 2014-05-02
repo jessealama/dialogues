@@ -20,7 +20,7 @@
 (clon:defsynopsis (:postfix "TPTP-FILE")
   (text :contents
 	"Kuno -- An theorem prover for intuitionistic logic based on dialogue games")
-  (group (:header "Flags (non valued options):")
+  (group (:header "Flags (non-valued options):")
     (flag :short-name "h" :long-name "help"
 	  :description "Print this help and exit."))
   (group (:header "Built-in valued option types:")
