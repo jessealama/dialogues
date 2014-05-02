@@ -151,7 +151,8 @@
       (clon:exit 1))
 
     (unless (file-readable? arg)
-      (format *standard-output* "\"~a\" is an unreadable (or non-existing) file." (namestring arg))
+      (format *standard-output* "% SZS status ~a for ~a : File does not exist or is unreadable." (result->szs :input-error) (namestring arg))
+      (terpri *standard-output*)
       (clon:exit 1))
 
     ;; parse
