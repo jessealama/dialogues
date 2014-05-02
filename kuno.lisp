@@ -172,9 +172,7 @@
                   ((dialogues::contains-equation-p tptp)
                    (values :inappropriate "At least one equation was found." t))
                   (t
-                   (setf problem (dialogues::equivalence->conjunction problem))
-                   (setf problem (dialogues::problematize tptp))
-                   (values (solve-problem problem timeout depth)
+                   (values (solve-problem tptp timeout depth)
                            nil
                            t)))
           (error (e)
