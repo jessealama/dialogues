@@ -86,6 +86,8 @@
                 "Inappropriate")
                ((eql result :syntax-error)
                 "SyntaxError")
+               ((eql result :input-error)
+                "InputError")
                ((eql result :error)
                 "Error")
                (t
