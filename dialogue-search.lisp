@@ -286,10 +286,17 @@
          (when search-result
            (unless (eql search-result :cutoff)
              (return t))))
-      (let ((dialogue (tptp->dialogue db *e-ruleset--no-repetitions*)))
-        (let ((search-result (proponent-has-winning-strategy? dialogue strategy-depth)))
-          (when search-result
-            (not (eql search-result :cutoff)))))))
+      (let ((dialogue-1 (tptp->dialogue db *e-ruleset--no-repetitions*))
+            (dialogue-2 (tptp->dialogue db *e-ruleset--prefer-defenses*)))
+        (let ((search-result-1 (proponent-has-winning-strategy? dialogue-1 strategy-depth)))
+          (if search-result-1
+              (if (eql search-result-1 :cutoff)
+                  (let ((search-result-2 (proponent-has-winning-strategy? dialogue-2 strategy-depth)))
+                    (if search-result-2
+                        (not (eql search-result-2 :cutoff)))))
+              (let ((search-result-2 (proponent-has-winning-strategy? dialogue-2 strategy-depth)))
+                (if search-result-2
+                    (not (eql search-result-2 :cutoff)))))))))
 
 (defmethod intuitionistically-valid? ((formula formula) strategy-depth)
   (if (contains-quantifier-p formula)
