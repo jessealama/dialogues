@@ -457,11 +457,11 @@ class ATOMIC-FORMULA.  This function expresses that disjointedness."
 
 (defun make-multiple-arity-conjunction (&rest conjuncts)
   (if conjuncts
-      (if (cdr conjuncts)
-	  (if (cddr conjuncts)
+      (if (rest conjuncts)
+	  (if (rest (rest conjuncts))
 	      (make-instance 'multiple-arity-conjunction
 			     :arguments conjuncts))
-	  (cadr conjuncts))
+	  (first conjuncts))
       (make-instance 'falsum)))
 
 (defun binary-conjunction->multiple-arity-conjunction (binary-conjunction)
