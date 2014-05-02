@@ -97,6 +97,16 @@
         (t
          "CounterSatisfiable")))
 
+(defun render-error (err)
+  (with-output-to-string (rendered)
+    (format rendered "% ")
+    (loop
+       :for c :across (format nil "~a" err)
+       :do
+       (if (char= c #\Newline)
+           (format rendered "~a% " #\Newline)
+           (format rendered "~a" c)))))
+
 (defun main ()
   "Entry point for the standalone application."
   (clon:make-context)
