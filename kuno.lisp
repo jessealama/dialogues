@@ -177,7 +177,8 @@
                            nil
                            t)))
           (error (e)
-            (values :error (format nil "Internal error (~a)" e) nil)))
+            (let ((rendered-error (render-error e)))
+              (values :error (format nil "Internal error~%~a" rendered-error) nil))))
       (setf szs-result (result->szs result))
       (format *standard-output* "% SZS status ~a for ~a" szs-result (namestring arg))
       (when (stringp comment)
