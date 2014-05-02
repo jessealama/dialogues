@@ -217,11 +217,12 @@
                                          :statement (make-instance 'which-instance-attack :instance term :name (format nil "?-~a" term)))
                           responses))))
                ((existential-generalization-p statement)
-                (push (make-instance 'proponent-move
-                                     :attack t
-                                     :reference i
-                                     :statement (instantiate statement (fresh-variable dialogue) (first (bindings statement))))
-                      responses))))
+                (let ((instance (fresh-variable dialogue)))
+                  (push (make-instance 'proponent-move
+                                       :attack t
+                                       :reference i
+                                       :statement (make-instance 'which-instance-attack :instance instance :name (format nil "?-~a" instance)))
+                        responses)))))
        :finally
        ;; ensure that the atom restriction on Proponent is observed
        (return (remove-if #'(lambda (move)
