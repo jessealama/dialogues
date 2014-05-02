@@ -32,7 +32,7 @@
 		   :default-value "30")
            (stropt :short-name "d"
 		   :long-name "depth"
-		   :description "Consider winning strategies have depth at most DEPTH."
+		   :description "Consider winning strategies having depth at most DEPTH."
 		   :argument-name "DEPTH"
 		   :default-value "20"))))
 
