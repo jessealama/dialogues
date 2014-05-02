@@ -17,7 +17,7 @@
 (eval-when (:execute :load-toplevel :compile-toplevel)
   (com.dvlsoft.clon:nickname-package))
 
-(clon:defsynopsis (:postfix "FILES...")
+(clon:defsynopsis (:postfix "TPTP-FILE")
   (text :contents
 	"Kuno -- An theorem prover for intuitionistic logic based on dialogue games")
   (group (:header "Flags (non valued options):")
