@@ -479,14 +479,13 @@ This predicate is redundant when EVERY-DEFENSE-RESPONDS-TO-MOST-RECENT-OPEN-ATTA
     (e-propositional-validator dialogue)))
 
 (defun e-propositional-expander--prefer-defenses (dialogue)
-  ;; Rules: E rules, with the restriction that Opponent must respond immediately to Proponent.  Additionally, if Proponent can defend, then he will.  (If multiple defenses are available, one is chosen arbitrarily.)
+  ;; Rules: E rules, with the restriction that Opponent must respond immediately to Proponent.  Additionally, if Proponent can defend, then he will.
   (let ((last-move (last-move dialogue))
         (e-possibilities (e-propositional-expander dialogue)))
     (if (opponent-move-p last-move)
-        (let ((defenses (remove-if-not #'defense-p e-possibilities)))
-          (if (null defenses)
-              e-possibilities
-              (first defenses)))
+        (let ((defenses (remove-if-not #'defense-p e-possibilities))
+              (non-defenses (remove-if #'defense-p e-possibilities)))
+          (append defenses non-defenses))
         e-possibilities)))
 
 (defgeneric equal-moves? (move-1 move-2)
