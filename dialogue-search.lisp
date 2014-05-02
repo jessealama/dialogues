@@ -286,7 +286,10 @@
          (when search-result
            (unless (eql search-result :cutoff)
              (return t))))
-      (intuitionistically-valid? (problematize db) strategy-depth)))
+      (let ((dialogue (tptp->dialogue db *e-ruleset--no-repetitions*)))
+        (let ((search-result (proponent-has-winning-strategy? dialogue strategy-depth)))
+          (when search-result
+            (not (eql search-result :cutoff)))))))
 
 (defmethod intuitionistically-valid? ((formula formula) strategy-depth)
   (if (contains-quantifier-p formula)
