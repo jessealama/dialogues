@@ -1,5 +1,7 @@
 .PHONY: clean test all
 
+lisps = $(wildcard *.lisp)
+
 all: kuno
 
 include clean.mk
@@ -9,7 +11,7 @@ clean: clean-emacs clean-subdirectories
 	$(call trash,'*.dx64fsl')
 	rm -f kuno
 
-kuno: $(wildcard *.lisp) Makefile
+kuno: $(lisps) Makefile
 	which sbcl
 	CC=gcc sbcl --script kuno.lisp
 
