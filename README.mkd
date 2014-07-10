@@ -1,4 +1,4 @@
-This bundle of code is intended as a kind of laboritory for working
+This bundle of code is intended as a kind of laboratory for working
 with Lorenzen dialogues.
 
 This work is supported primarily by the ESF research project
