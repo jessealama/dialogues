@@ -17,21 +17,26 @@
 (defclass node ()
   ((state
     :accessor node-state
+    :initarg :state
     :documentation "A stte in the domain")
    (parent
     :initform nil
+    :initarg :parent
     :accessor node-parent
     :type (or null node)
     :documentation "The parent node of this node")
    (action
     :accessor node-action
+    :initarg :action
     :documentation "The action leading to this state.")
    (successors
     :type list
+    :initarg :successors
     :accessor node-successors
     :documentation "A list of successor nodes.")
    (depth
     :initform 0
+    :initarg :depth
     :accessor node-depth
     :type integer
     :documentation "Depth of the node in the tree (root = 0).")
@@ -39,6 +44,7 @@
     :initform nil
     :type boolean
     :accessor node-expanded?
+    :initarg :expanded-p
     :documentation "Has this node been expanded?"))
   (:documentation "Node for generic search.  A node contains a state, a domain-specific representation of a point in the search space.  It also contains some bookkeeping information."))
 
