@@ -5,24 +5,42 @@
 (defclass problem ()
   ((initial-state
     :initarg :initial-state
-    :accessor initial-state)
+    :accessor problem-initial-state)
    (goal
     :initarg :goal
-    :accessor goal)
+    :accessor problem-goal)
    (num-expanded
-    :accessor num-expanded
+    :accessor problem-num-expanded
     :initform 0))
   (:documentation "A problem is defined by the initial state, and the type of problem it is.  For bookkeeping, we count the number of nodes expanded."))
 
-(defstruct node
-  "Node for generic search.  A node contains a state, a domain-specific representation of a point in the search space.  It also contains some bookkeeping information."
-  (state)                   ; a state in the domain
-  (parent nil)              ; the parent node of this node
-  (action nil)              ; the domain action leading to state
-  (successors nil)          ; list of successor nodes
-  (depth 0)                 ; depth of node in tree (root = 0)
-  (expanded? nil)           ; any successors examined?
-  )
+(defclass node ()
+  ((state
+    :accessor node-state
+    :documentation "A stte in the domain")
+   (parent
+    :initform nil
+    :accessor node-parent
+    :type (or null node)
+    :documentation "The parent node of this node")
+   (action
+    :accessor node-action
+    :documentation "The action leading to this state.")
+   (successors
+    :type list
+    :accessor node-successors
+    :documentation "A list of successor nodes.")
+   (depth
+    :initform 0
+    :accessor node-depth
+    :type integer
+    :documentation "Depth of the node in the tree (root = 0).")
+   (expanded-p
+    :initform nil
+    :type boolean
+    :accessor node-expanded?
+    :documentation "Has this node been expanded?"))
+  (:documentation "Node for generic search.  A node contains a state, a domain-specific representation of a point in the search space.  It also contains some bookkeeping information."))
 
 (defmethod print-object ((node node) stream)
   (print-unreadable-object (node stream :type t)
@@ -64,10 +82,11 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 	   do
 	     (destructuring-bind (action . state)
 		 successor
-	       (push (make-node :parent node
-				:action action
-				:state state
-				:depth (1+ (node-depth node)))
+	       (push (make-instance 'node
+                                    :parent node
+                                    :action action
+                                    :state state
+                                    :depth (1+ (node-depth node)))
 		     nodes))
 	   finally
 	     (setf (node-successors node) nodes)
@@ -75,7 +94,8 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 
 (defun create-start-node (problem)
   "Make the starting node, corresponding to the problem's initial state."
-  (make-node :state (problem-initial-state problem)))
+  (make-instance 'node
+                 :state (problem-initial-state problem)))
 
 (defun leaf-nodes (node)
   "All nodes reachable from NODE (via the successor function) that are either unexpanded or have no successors (and are expanded)."
@@ -104,7 +124,8 @@ linear sequence), return NIL."
 (defun make-initial-queue (initial-state
 			   &key (queueing-function #'enqueue-at-end))
   (let ((q (make-empty-queue)))
-    (funcall queueing-function q (list (make-node :state initial-state)))
+    (funcall queueing-function q (list (make-instance 'node
+                                                      :state initial-state)))
     q))
 
 (defun general-search (problem queueing-function)
