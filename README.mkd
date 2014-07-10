@@ -4,4 +4,4 @@ with Lorenzen dialogues.
 This work is supported primarily by the ESF research project
 _Dialogical Foundations of Semantics_ within the ESF Eurocores program
 _LogICCC_ (funded by the Portuguese Science Foundation, FCT
-LogICCC/0001/2007).
+LogICCC/0001/2007) and by FWF grant P25417-G15 (*LOGFRADIG*).
