@@ -12,14 +12,10 @@
    (num-expanded
     :accessor num-expanded
     :initform 0))
-  (:documentation "A problem is defined by the initial state, and the type of problem it is.
-We will be defining subtypes of PROBLEM later on.  For bookkeeping, we
-count the number of nodes expanded."))
+  (:documentation "A problem is defined by the initial state, and the type of problem it is.  For bookkeeping, we count the number of nodes expanded."))
 
 (defstruct node
-  "Node for generic search.  A node contains a state, a
-domain-specific representation of a point in the search space.  It
-also contains some bookkeeping information."
+  "Node for generic search.  A node contains a state, a domain-specific representation of a point in the search space.  It also contains some bookkeeping information."
   (state)                   ; a state in the domain
   (parent nil)              ; the parent node of this node
   (action nil)              ; the domain action leading to state
