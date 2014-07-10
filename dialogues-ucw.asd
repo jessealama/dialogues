@@ -9,15 +9,12 @@ of several aspects. It is based on the UnCommon Web system."
   :author "Jesse Alama <jesse.alama@gmail.com>"
   :maintainer "Jesse Alama <jesse.alama@gmail.com>"
   :depends-on (:ucw :dialogues)
-  :components ((:module "ucw"
-			:serial t
-			:components ((:file "packages")
-				     (:file "render")
-				     (:file "ucw-formulas")
-				     (:file "ucw-utils")
-				     (:file "ucw-server")
-				     (:file "ucw-applications")
-				     (:file "ucw-ruleset")
-				     (:file "ucw-strategies")
-				     (:file "ucw-turns")
-				     (:file "ucw-site")))))
+  :components ((:file "render")
+               (:file "ucw-formulas")
+               (:file "ucw-utils")
+               (:file "ucw-server")
+               (:file "ucw-applications")
+               (:file "ucw-ruleset")
+               (:file "ucw-strategies")
+               (:file "ucw-turns")
+               (:file "ucw-site")))
