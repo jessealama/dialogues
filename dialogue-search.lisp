@@ -432,6 +432,4 @@ is assumed that OPPONENT-NODE is expanded."
                                  :expanded? t)))))
       :dialogue-tree-too-shallow))
 
-(defvar winning-strategy-registry (make-hash-table :test #'equalp))
-
 ;;; dialogue-search.lisp ends here
