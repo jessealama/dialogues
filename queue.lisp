@@ -71,8 +71,9 @@ The heap implementation is taken from \"Introduction to Algorithms\" by Cormen, 
   (when (null (elements q))
     (setf (elements q) (make-heap)))
   ;; Now insert the items
-  (loop for item in items do
-       (heap-insert (elements q) item key)))
+  (loop
+     :for item :in items
+     :do (heap-insert (elements q) item key)))
 
 ;;;; The Heap Implementation of Priority Queues
 
