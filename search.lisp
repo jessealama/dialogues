@@ -292,7 +292,9 @@ the path."
 (defun eliminate-all-duplicates (nodes node-table)
   "Get rid of all nodes that have been seen before in any path."
   (let ((result nil))
-   (loop for node in nodes do
+    (loop
+       :for node :in nodes
+       :do
 	(let ((state (state node)))
 	  (when (not (gethash state node-table))
 	    (push node result))
