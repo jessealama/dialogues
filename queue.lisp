@@ -58,7 +58,8 @@ The heap implementation is taken from \"Introduction to Algorithms\" by Cormen, 
   "Add a list of items to the end of the queue."
   ;; To make this more efficient, keep a pointer to the last cons in the queue
   (cond ((null items) nil)
-	((or (null (q-last q)) (null (elements q)))
+	((or (null (q-last q))
+             (null (elements q)))
 	 (setf (q-last q) (last items)
 	       (elements q) (nconc (elements q) items)))
 	(t (setf (cdr (q-last q)) items
