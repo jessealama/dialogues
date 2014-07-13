@@ -15,7 +15,6 @@
                (:file "parse")
 	       (:file "translations")
                (:file "move")
-               (:file "ruleset")
 	       (:file "dialogue")
 	       (:file "queue")
 	       (:file "search")
