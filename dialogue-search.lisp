@@ -442,9 +442,4 @@ is assumed that OPPONENT-NODE is expanded."
 ;; 	 (root (develop-dialogue-tree-to-depth (create-start-node problem) depth problem)))
 ;;     (proponent-ws-from-proponent-node root ruleset)))
 
-(defun explain-strategy (winning-strategy)
-  (declare (ignore winning-strategy))
-  (format t "implement something sensible here"))
-
-
 ;;; dialogue-search.lisp ends here
