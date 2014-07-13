@@ -43,7 +43,7 @@
    (expanded-p
     :initform nil
     :type boolean
-    :accessor node-expanded?
+    :accessor node-expanded-p
     :initarg :expanded-p
     :documentation "Has this node been expanded?"))
   (:documentation "Node for generic search.  A node contains a state, a domain-specific representation of a point in the search space.  It also contains some bookkeeping information."))
@@ -77,10 +77,10 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
     (reverse (node-ancestors-backwards (parent node)))))
 
 (defun expand (node problem)
-  (if (node-expanded? node)
+  (if (node-expanded-p node)
       (node-successors node)
       (progn
-	(setf (node-expanded? node) t)
+	(setf (node-expanded-p node) t)
 	(incf (problem-num-expanded problem))
 	(loop
 	   with nodes = nil
@@ -105,7 +105,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 
 (defun leaf-nodes (node)
   "All nodes reachable from NODE (via the successor function) that are either unexpanded or have no successors (and are expanded)."
-  (if (node-expanded? node)
+  (if (node-expanded-p node)
       (let ((succ (node-successors node)))
 	(if (null succ)
 	    (list node)
@@ -114,7 +114,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 
 (defun expandable-leaf-nodes (node)
   "All leaf nodes reachable from NODE that can be expanded."
-  (remove-if #'node-expanded? (leaf-nodes node)))
+  (remove-if #'node-expanded-p (leaf-nodes node)))
 
 (defun first-splitting-descendant (node)
   "The first descendant of NODE that has multiple successors.  If
@@ -272,7 +272,7 @@ unexpanded."
     (until (null to-do)
       (let ((current-node (pop to-do)))
 	(when (< (node-depth current-node) limit)
-	  (unless (node-expanded? current-node)
+	  (unless (node-expanded-p current-node)
 	    (expand current-node problem))
 	  (dolist (successor (node-successors current-node))
 	    (push successor to-do)))))))
