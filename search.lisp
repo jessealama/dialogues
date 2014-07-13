@@ -83,12 +83,13 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 (defun expand (node problem)
   (loop
      :initially (when (expanded-p node) (return (successors node)))
+     :with d = (depth node)
      :for (action . state) :in (successors-in-problem problem node)
      :collect (make-instance 'node
                              :parent node
                              :action action
                              :state state
-                             :depth (1+ (depth node)))
+                             :depth (1+ d))
      :into nodes
      :finally
      (setf (successors node) nodes
