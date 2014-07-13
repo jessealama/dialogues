@@ -235,7 +235,9 @@ Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
         ((and (integerp limit)
 	      (>= (depth node) limit))
 	 :cut-off)
-        (t (loop for n in (expand node problem) do
+        (t (loop
+              :for n :in (expand node problem)
+              :do
 		(let ((solution (depth-limited-dfs-search problem limit n)))
 		  (when (and solution
 			     (not (eq solution :cut-off)))
