@@ -285,7 +285,7 @@ unexpanded."
      :with n = (parent node)
      :with i = 1
      :do
-     (cond ((and depth (> i depth))
+     (cond ((and (integerp depth) (> i depth))
             (return nil))
            ((null n)
             (return nil))
