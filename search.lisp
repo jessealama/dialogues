@@ -310,11 +310,9 @@ the path."
 
 (defun no-cycles-depth-first-search-for-bottom (problem &optional (test #'equal))
   "Do depth-first search, but eliminate paths with repeated states."
-  (general-search-for-bottom problem
-			     #'(lambda (old-q nodes)
-				 (enqueue-at-front old-q
-						   (eliminate-cycles nodes
-								     test)))))
+  (flet ((f (old-q nodes)
+           (enqueue-at-front old-q (eliminate-cycles nodes test))))
+    (general-search-for-bottom problem #'f)))
 
 (defun no-returns-breadth-first-search (problem)
   "Do breadth-first search, but eliminate immediate returns to a prior
