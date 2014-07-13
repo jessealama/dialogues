@@ -82,7 +82,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 
 (defun make-successor-node (parent action state)
   "Make a successor of PARENT that is arrived at by taking ACTION and yielding STATE."
-  (make-instance 'node
+  (make-instance 'dialogues::node
                  :parent parent
                  :action action
                  :state state
