@@ -84,10 +84,21 @@ The heap implementation is taken from \"Introduction to Algorithms\" by Cormen, 
 
 ;; These could be made inline
 
-(defun heap-val (heap i key) (declare (fixnum i)) (funcall key (aref heap i)))
-(defun heap-parent (i) (declare (fixnum i)) (floor (- i 1) 2))
-(defun heap-left (i) (declare (fixnum i)) (the fixnum (+ 1 i i)))
-(defun heap-right (i) (declare (fixnum i)) (the fixnum (+ 2 i i)))
+(defun heap-val (heap i key)
+  (declare (fixnum i))
+  (funcall key (aref heap i)))
+
+(defun heap-parent (i)
+  (declare (fixnum i))
+  (floor (- i 1) 2))
+
+(defun heap-left (i)
+  (declare (fixnum i))
+  (the fixnum (+ 1 i i)))
+
+(defun heap-right (i)
+  (declare (fixnum i))
+  (the fixnum (+ 2 i i)))
 
 (defun heapify (heap i key)
   "Assume that the children of i are heaps, but that heap[i] may be larger than its children.  If it is, move heap[i] down where it belongs. [Page 143 CL&R]."
