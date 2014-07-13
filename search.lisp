@@ -304,8 +304,7 @@ the path."
 (defun no-cycles-depth-first-search (problem &optional (test #'equal))
   "Do depth-first search, but eliminate paths with repeated states."
   (flet ((f (old-q nodes)
-           (enqueue-at-front old-q
-                             (eliminate-cycles nodes test))))
+           (enqueue-at-front old-q (eliminate-cycles nodes test))))
     (general-search problem #'f)))
 
 (defun no-cycles-depth-first-search-for-bottom (problem &optional (test #'equal))
