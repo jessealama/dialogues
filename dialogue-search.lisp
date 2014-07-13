@@ -354,7 +354,7 @@
                  :action (action node)
                  :successors (mapcar #'copy-search-tree-node (successors node))
                  :depth (depth node)
-                 :expanded? (node-expanded-p node)))
+                 :expanded-p (node-expanded-p node)))
 
 (defun dialogue->search-tree (dialogue)
   "Construct a search tree (a sequence, in fact) from DIALOGUE."
@@ -409,7 +409,7 @@ is assumed that OPPONENT-NODE is expanded."
                                        :action (action opponent-node)
                                        :successors (list maybe-winner)
                                        :depth (depth opponent-node)
-                                       :expanded? t)
+                                       :expanded-p t)
                         :dialogue-tree-too-shallow)))))
         :dialogue-tree-too-shallow)))
 
@@ -429,7 +429,7 @@ is assumed that OPPONENT-NODE is expanded."
                                  :action (action proponent-node)
                                  :successors strategies
                                  :depth (depth proponent-node)
-                                 :expanded? t)))))
+                                 :expanded-p t)))))
       :dialogue-tree-too-shallow))
 
 ;;; dialogue-search.lisp ends here
