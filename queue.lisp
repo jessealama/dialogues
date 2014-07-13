@@ -17,10 +17,22 @@
 ;;; and simple and O(log n), but not super efficient.  Consider a Fibonacci
 ;;; heap [Page 420 CL&R] if you really have large queues to deal with.
 
-(defstruct q
-  (key #'identity)
-  (last nil)
-  (elements nil))
+(defclass q ()
+  ((key
+    :type function
+    :initform #'identity
+    :initarg :key
+    :accessor key)
+   (last
+    :type t
+    :initform nil
+    :initarg :last
+    :accessor q-last)
+   (elements
+    :type list
+    :initform nil
+    :initarg :elements
+    :accessor elements)))
 
 ;;;; Basic Operations on Queues
 
