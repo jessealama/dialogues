@@ -64,16 +64,11 @@
   (error "You need to define a SUCCESSORS-IN-PROBLEM method for the problem~%~%  ~a~%" problem))
 
 (defmethod goal-test ((problem problem) node)
-  "Return true or false: is this a goal node?  This default method
-checks if the state is equal to the state stored in the problem-goal
-slot.  You will need to define your own method if there are multiple
-goals, or if you need to compare them with something other than
-EQUAL."
+  "Return true or false: is this a goal node?  This default method checks if the state is equal to the state stored in the problem-goal slot.  You will need to define your own method if there are multiple goals, or if you need to compare them with something other than EQUAL."
   (equal (state node) (problem-goal problem)))
 
 (defun node-ancestors (node)
-  "The ancestors of NODE, starting with its most distant
-ancestor (i.e., the ancestor of NODE whose parent is NIL)."
+  "The ancestors of NODE, starting with its most distant ancestor (i.e., the ancestor of NODE whose parent is NIL)."
   (labels ((node-ancestors-backwards (n)
 	     (if (parent n)
 		 (cons n (node-ancestors-backwards (parent n)))
@@ -118,9 +113,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
   (remove-if #'expanded-p (leaf-nodes node)))
 
 (defun first-splitting-descendant (node)
-  "The first descendant of NODE that has multiple successors.  If
-there are no such nodes (i.e., the set of descendents of NODE forms a
-linear sequence), return NIL."
+  "The first descendant of NODE that has multiple successors.  If there are no such nodes (i.e., the set of descendents of NODE forms a linear sequence), return NIL."
   (let ((succs (successors node)))
     (if (null succs)
 	nil
@@ -136,9 +129,7 @@ linear sequence), return NIL."
     q))
 
 (defun general-search (problem queueing-function)
-  "Expand nodes according to the specification of PROBLEM until we find
-  a solution or run out of nodes to expand.  The QUEUING-FN decides which
-  nodes to look at first."
+  "Expand nodes according to the specification of PROBLEM until we find a solution or run out of nodes to expand.  The QUEUING-FN decides which nodes to look at first."
   (let ((nodes (make-initial-queue (initial-state problem)
 				   :queueing-function queueing-function)))
     (let (node)
@@ -148,10 +139,7 @@ linear sequence), return NIL."
 	 (funcall queueing-function nodes (expand node problem))))))
 
 (defun general-bounded-search (problem queueing-function depth)
-  "Expand nodes according to the specification of PROBLEM until we
-  find a solution or run out of nodes to expand or exceed the
-  specified DEPTH.  QUEUING-FN decides which nodes to look at
-  first."
+  "Expand nodes according to the specification of PROBLEM until we find a solution or run out of nodes to expand or exceed the specified DEPTH.  QUEUING-FN decides which nodes to look at first."
   (let ((nodes (make-initial-queue (initial-state problem)
 				   :queueing-function queueing-function)))
     (let (node)
@@ -162,12 +150,7 @@ linear sequence), return NIL."
 	 (funcall queueing-function nodes (expand node problem))))))
 
 (defun general-bounded-search-with-nodes (problem queueing-function depth &optional queue)
-  "Expand nodes according to the specification of PROBLEM until we
-find a solution or run out of nodes to expand or exceed the specified
-DEPTH.  QUEUING-FN decides which nodes to look at first.  QUEUE is a
-initial queue of node.  (NIL is an acceptable value for QUEUE.) This
-function behaves like a breadth-first search in the sense that as soon
-as a node is encountered whose depth exceeds DEPTH, it stops.
+  "Expand nodes according to the specification of PROBLEM until we find a solution or run out of nodes to expand or exceed the specified DEPTH.  QUEUING-FN decides which nodes to look at first.  QUEUE is a initial queue of node.  (NIL is an acceptable value for QUEUE.) This function behaves like a breadth-first search in the sense that as soon as a node is encountered whose depth exceeds DEPTH, it stops.
 
 Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
   (let ((nodes (or queue
@@ -191,9 +174,7 @@ Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
 	 (funcall queueing-function nodes (expand node problem))))))
 
 (defun general-search-for-bottom (problem queueing-function &optional queue)
-  "Expand nodes according to the specification of PROBLEM until we
-find a node with no successors or we run out of nodes to expand.  The
-QUEUING-FN decides which nodes to look at first."
+  "Expand nodes according to the specification of PROBLEM until we find a node with no successors or we run out of nodes to expand.  The QUEUING-FN decides which nodes to look at first."
   (let ((nodes (or queue
 		   (make-initial-queue (initial-state problem)
 				       :queueing-function queueing-function))))
@@ -207,9 +188,7 @@ QUEUING-FN decides which nodes to look at first."
 	       (return (values node nodes))))))))
 
 (defun explain-solution (node)
-  "Give the sequence of actions that produced NODE.  When NODE is a
-solution to a search problem, this function gives a \"printout\" of
-how the node was obtained, starting from an initial node."
+  "Give the sequence of actions that produced NODE.  When NODE is a solution to a search problem, this function gives a \"printout\" of how the node was obtained, starting from an initial node."
   (labels ((explain-backwards (n)
 	     (when (parent n)
 	       (cons (action n)
@@ -221,14 +200,11 @@ how the node was obtained, starting from an initial node."
   (general-search problem #'enqueue-at-end))
 
 (defun bounded-breadth-first-search (problem depth)
-  "Search the shallowest nodes in the search tree first, but don't go
-deeper than DEPTH."
+  "Search the shallowest nodes in the search tree first, but don't go deeper than DEPTH."
   (general-bounded-search problem #'enqueue-at-end depth))
 
 (defun bounded-breadth-first-search-with-nodes (problem depth &optional queue)
-  "Search the shallowest nodes in the search tree first, but don't go
-deeper than DEPTH.  QUEUE is an (possibly empty) initial pool of
-nodes.  NIL is a permissible value for QUEUE."
+  "Search the shallowest nodes in the search tree first, but don't go deeper than DEPTH.  QUEUE is an (possibly empty) initial pool of nodes.  NIL is a permissible value for QUEUE."
   (general-bounded-search-with-nodes problem #'enqueue-at-end depth queue))
 
 (defun breadth-first-search-for-bottom-with-nodes (problem &optional queue)
@@ -266,9 +242,7 @@ nodes.  NIL is a permissible value for QUEUE."
 
 (defun exhaustive-depth-limited-search (problem &optional limit
 			              (node (create-start-node problem)))
-  "Search depth-first, but only up to LIMIT branches deep in the tree.
-Expand until there are no more nodes of depth less than LIMIT that are
-unexpanded."
+  "Search depth-first, but only up to LIMIT branches deep in the tree. Expand until there are no more nodes of depth less than LIMIT that are unexpanded."
   (let ((to-do (list node)))
     (until (null to-do)
       (let ((current-node (pop to-do)))
