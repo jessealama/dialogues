@@ -291,15 +291,15 @@ the path."
 
 (defun eliminate-all-duplicates (nodes node-table)
   "Get rid of all nodes that have been seen before in any path."
-  (let ((result nil))
-    (loop
-       :for node :in nodes
-       :do
-	(let ((state (state node)))
-	  (when (not (gethash state node-table))
-	    (push node result))
-	  (setf (gethash state node-table) node)))
-   result))
+  (loop
+     :with result = nil
+     :for node :in nodes
+     :for state = (state node)
+     :do
+     (when (not (gethash state node-table))
+       (push node result))
+     (setf (gethash state node-table) node)
+     :finally (return result)))
 
 (defun no-cycles-depth-first-search (problem &optional (test #'equal))
   "Do depth-first search, but eliminate paths with repeated states."
