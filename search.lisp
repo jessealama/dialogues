@@ -61,7 +61,7 @@
 
 (defmethod successors-in-problem ((problem problem) node)
   (declare (ignore node))
-  (error "You need to define a SUCCESSORS-IN-PROBLEM method for ~A" problem))
+  (error "You need to define a SUCCESSORS-IN-PROBLEM method for the problem~%~%  ~a~%" problem))
 
 (defmethod goal-test ((problem problem) node)
   "Return true or false: is this a goal node?  This default method
