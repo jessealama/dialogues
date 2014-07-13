@@ -5,7 +5,7 @@
 (defclass problem ()
   ((initial-state
     :initarg :initial-state
-    :accessor problem-initial-state)
+    :accessor initial-state)
    (goal
     :initarg :goal
     :accessor problem-goal)
@@ -101,7 +101,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 (defun create-start-node (problem)
   "Make the starting node, corresponding to the problem's initial state."
   (make-instance 'node
-                 :state (problem-initial-state problem)))
+                 :state (initial-state problem)))
 
 (defun leaf-nodes (node)
   "All nodes reachable from NODE (via the successor function) that are either unexpanded or have no successors (and are expanded)."
@@ -138,7 +138,7 @@ linear sequence), return NIL."
   "Expand nodes according to the specification of PROBLEM until we find
   a solution or run out of nodes to expand.  The QUEUING-FN decides which
   nodes to look at first."
-  (let ((nodes (make-initial-queue (problem-initial-state problem)
+  (let ((nodes (make-initial-queue (initial-state problem)
 				   :queueing-function queueing-function)))
     (let (node)
       (loop (if (empty-queue? nodes) (return nil))
@@ -151,7 +151,7 @@ linear sequence), return NIL."
   find a solution or run out of nodes to expand or exceed the
   specified DEPTH.  QUEUING-FN decides which nodes to look at
   first."
-  (let ((nodes (make-initial-queue (problem-initial-state problem)
+  (let ((nodes (make-initial-queue (initial-state problem)
 				   :queueing-function queueing-function)))
     (let (node)
       (loop (if (empty-queue? nodes) (return (values nil nil)))
@@ -170,7 +170,7 @@ as a node is encountered whose depth exceeds DEPTH, it stops.
 
 Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
   (let ((nodes (or queue
-		   (make-initial-queue (problem-initial-state problem)
+		   (make-initial-queue (initial-state problem)
 				       :queueing-function queueing-function))))
     (let (node)
       (loop (if (empty-queue? nodes) (return (values nil nil nodes)))
@@ -181,7 +181,7 @@ Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
 
 (defun general-search-with-nodes (problem queueing-function &optional queue)
   (let ((nodes (or queue
-		   (make-initial-queue (problem-initial-state problem)
+		   (make-initial-queue (initial-state problem)
 				       :queueing-function queueing-function))))
     (let (node)
       (loop (if (empty-queue? nodes) (return (values nil nil)))
@@ -194,7 +194,7 @@ Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
 find a node with no successors or we run out of nodes to expand.  The
 QUEUING-FN decides which nodes to look at first."
   (let ((nodes (or queue
-		   (make-initial-queue (problem-initial-state problem)
+		   (make-initial-queue (initial-state problem)
 				       :queueing-function queueing-function))))
     (let (node)
       (loop (if (empty-queue? nodes) (return (values nil nil)))
