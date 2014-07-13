@@ -183,14 +183,14 @@
 
 (defun winning-strategy-for-proponent? (strategy)
   "Determine whether STRATEGY is a winning stratgy for Proponent.  There are three conditions to satisfy: (1) for every Proponent node of the strategy, the set of its children is equal (in the set of being the same set of moves) to the set of all possible moves for Opponent at that node, and (2) every Opponnent node has exactly one child, (3) every leaf of the tree, considered as a dialogue, is a win for Proponent."
-  (with-slots (root ruleset)
-      strategy
-    (and (winning-strategy-for-proponent-form? strategy)
-	 (fully-expanded? strategy)
-	 (every #'proponent-wins-p
-		(mapcar #'(lambda (leaf)
-			    (node->dialogue leaf ruleset))
-			(leaves root))))))
+  (when (winning-strategy-for-proponent-form? strategy)
+    (when (fully-expanded? strategy)
+      (with-slots (root ruleset)
+          strategy
+        (every #'proponent-wins-p
+                    (mapcar #'(lambda (leaf)
+                                (node->dialogue leaf ruleset))
+                            (leaves root)))))))
 
 (defun winning-strategy-for-opponent? (strategy)
   "Determine whether STRATEGY is a winning stratgy for Opponent.  There are three conditions to satisfy: (1) for every Opponent node of the strategy, the set of its children is equal (in the set of being the same set of moves) to the set of all possible moves for Proponent at that node, and (2) every Proponent node has exactly one child, (3) every leaf of the tree, considered as a dialogue, is a win for Opponent."
