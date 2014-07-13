@@ -9,9 +9,6 @@
 		#:directory-pathname-p
 		#:pathname-as-directory))
 
-(defpackage :dialogues-ucw
-  (:use :cl :ucw :ucw-core :cl-ppcre :alexandria :dialogues))
-
 (defvar *dialogue-package* (find-package :dialogues))
 
 ;;; packages.lisp ends here
