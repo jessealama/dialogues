@@ -340,7 +340,7 @@
 ;; 			   (return root))))
 ;; 		   finally
 ;; 		     (return (create-start-node problem)))))
-;;       (cond ((>= (node-depth tree) depth)
+;;       (cond ((>= (depth tree) depth)
 ;; 	     tree)
 ;; 	    (t
 ;; 	     (let ((new-tree (develop-dialogue-tree-to-depth tree depth problem)))
@@ -353,7 +353,7 @@
                  :parent (parent node)
                  :action (action node)
                  :successors (mapcar #'copy-search-tree-node (successors node))
-                 :depth (node-depth node)
+                 :depth (depth node)
                  :expanded? (node-expanded-p node)))
 
 (defun dialogue->search-tree (dialogue)
@@ -408,7 +408,7 @@ is assumed that OPPONENT-NODE is expanded."
                                        :parent (parent opponent-node)
                                        :action (action opponent-node)
                                        :successors (list maybe-winner)
-                                       :depth (node-depth opponent-node)
+                                       :depth (depth opponent-node)
                                        :expanded? t)
                         :dialogue-tree-too-shallow)))))
         :dialogue-tree-too-shallow)))
@@ -428,7 +428,7 @@ is assumed that OPPONENT-NODE is expanded."
                                  :parent (parent proponent-node)
                                  :action (action proponent-node)
                                  :successors strategies
-                                 :depth (node-depth proponent-node)
+                                 :depth (depth proponent-node)
                                  :expanded? t)))))
       :dialogue-tree-too-shallow))
 
