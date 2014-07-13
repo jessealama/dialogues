@@ -9,6 +9,4 @@
 		#:directory-pathname-p
 		#:pathname-as-directory))
 
-(defvar *dialogue-package* (find-package :dialogues))
-
 ;;; packages.lisp ends here
