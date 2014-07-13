@@ -93,7 +93,7 @@
 (defun heap-right (i) (declare (fixnum i)) (the fixnum (+ 2 i i)))
 
 (defun heapify (heap i key)
-  "Assume that the children of i are heaps, but that heap[i] may be 
+  "Assume that the children of i are heaps, but that heap[i] may be
   larger than its children.  If it is, move heap[i] down where it belongs.
   [Page 143 CL&R]."
   (let ((l (heap-left i))
@@ -139,7 +139,7 @@
   (let ((heap (make-heap))
 	(result nil))
     (loop for n in numbers do (heap-insert heap n key)
-	 (while (> (length heap) 0) do 
+	 (while (> (length heap) 0) do
 	   (push (heap-extract-min heap key) result))
 	 (reverse result))))
 
