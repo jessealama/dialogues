@@ -2,21 +2,6 @@
 
 (in-package :dialogues)
 
-;;; We can remove elements form the front of a queue.  We can add elements in
-;;; three ways: to the front, to the back, or ordered by some numeric score.
-;;; This is done with the following enqueing functions, which make use of the
-;;; following implementations of the elements:
-;;;   ENQUEUE-AT-FRONT - elements are a list
-;;;   ENQUEUE-AT-END   - elements are a list, with a pointer to end
-;;;   ENQUEUE-BY-PRIORITY - elements are a heap, implemented as an array
-;;; The best element in the queue is always in position 0.
-
-;;; The heap implementation is taken from "Introduction to Algorithms" by
-;;; Cormen, Lieserson & Rivest [CL&R], Chapter 7.  We could certainly speed
-;;; up the constant factors of this implementation.  It is meant to be clear
-;;; and simple and O(log n), but not super efficient.  Consider a Fibonacci
-;;; heap [Page 420 CL&R] if you really have large queues to deal with.
-
 (defclass q ()
   ((key
     :type function
@@ -32,7 +17,18 @@
     :type list
     :initform nil
     :initarg :elements
-    :accessor elements)))
+    :accessor elements)
+   (:documentation "A queue.
+
+We can remove elements form the front of a queue.  We can add elements in three ways: to the front, to the back, or ordered by some numeric score. This is done with the following enqueing functions, which make use of the following implementations of the elements:
+
+* ENQUEUE-AT-FRONT - elements are a list
+* ENQUEUE-AT-END   - elements are a list, with a pointer to end
+*  ENQUEUE-BY-PRIORITY - elements are a heap, implemented as an array
+
+The best element in the queue is always in position 0.
+
+The heap implementation is taken from \"Introduction to Algorithms\" by Cormen, Lieserson & Rivest [CL&R], Chapter 7.  We could certainly speed up the constant factors of this implementation.  It is meant to be clear and simple and O(log n), but not super efficient.  Consider a Fibonacci heap [Page 420 CL&R] if you really have large queues to deal with.")))
 
 ;;;; Basic Operations on Queues
 
