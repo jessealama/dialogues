@@ -27,13 +27,6 @@
 	  (every-pair pred (rest lst-1) (rest lst-2))))
       (null lst-2)))
 
-(defun every-pair? (pred lst-1 lst-2)
-  (if lst-1
-      (and lst-2
-	   (funcall pred (car lst-1) (car lst-2))
-	   (every-pair? pred (cdr lst-1) (cdr lst-2)))
-      (null lst-2)))
-
 (defun first-n (n lst)
   (loop :for i :from 1 :upto n :for elt :in lst :collect elt))
 
