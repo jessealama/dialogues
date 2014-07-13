@@ -26,7 +26,7 @@
     :type (or null node)
     :documentation "The parent node of this node")
    (action
-    :accessor node-action
+    :accessor action
     :initarg :action
     :documentation "The action leading to this state.")
    (successors
@@ -211,7 +211,7 @@ solution to a search problem, this function gives a \"printout\" of
 how the node was obtained, starting from an initial node."
   (labels ((explain-backwards (n)
 	     (when (parent n)
-	       (cons (node-action n)
+	       (cons (action n)
 		     (explain-backwards (parent n))))))
     (reverse (explain-backwards node))))
 
