@@ -224,9 +224,10 @@ Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
 
 (defun iterative-deepening-search (problem)
   "Do a series of depth-limited searches, increasing depth each time."
-  (loop for depth = 0 do
-       (let ((solution (depth-limited-dfs-search problem depth)))
-	 (unless (eq solution :cut-off) (return solution)))))
+  (loop
+     :for depth :from 0
+     :for solution = (depth-limited-dfs-search problem depth)
+     :unless (eq solution :cut-off) :do (return solution)))
 
 (defun depth-limited-dfs-search (problem &optional limit (node (create-start-node problem)))
   "Search depth-first, but only up to LIMIT branches deep in the tree."
