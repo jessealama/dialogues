@@ -81,22 +81,21 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
     (reverse (node-ancestors-backwards (parent node)))))
 
 (defun expand (node problem)
-  (cond ((node-expanded-p node)
-         (successors node))
-        (t
-         (loop
-            :for (action . state) :in (successors-in-problem problem node)
-            :collect (make-instance 'node
-                                    :parent node
-                                    :action action
-                                    :state state
-                                    :depth (1+ (depth node)))
-            :into nodes
-            :finally
-              (setf (successors node) nodes
-                    (node-expanded-p node) t)
-              (incf (problem-num-expanded problem))
-              (return nodes)))))
+  (loop
+     :initially (when (node-expanded-p node)
+                  (return (successors node)))
+     :for (action . state) :in (successors-in-problem problem node)
+     :collect (make-instance 'node
+                             :parent node
+                             :action action
+                             :state state
+                             :depth (1+ (depth node)))
+     :into nodes
+     :finally
+     (setf (successors node) nodes
+           (node-expanded-p node) t)
+     (incf (problem-num-expanded problem))
+     (return nodes)))
 
 (defun create-start-node (problem)
   "Make the starting node, corresponding to the problem's initial state."
