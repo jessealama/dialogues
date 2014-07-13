@@ -80,18 +80,19 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 		 (list n))))
     (reverse (node-ancestors-backwards (parent node)))))
 
+(defun make-successor-node (parent action state)
+  "Make a successor of PARENT that is arrived at by taking ACTION and yielding STATE."
+  (make-instance 'node
+                 :parent parent
+                 :action action
+                 :state state
+                 :depth (1+ (depth parent))))
+
 (defun expand (node problem)
   (loop
      :initially (when (expanded-p node) (return (successors node)))
-     :with d = (depth node)
-     :with next-d = (1+ d)
      :for (action . state) :in (successors-in-problem problem node)
-     :collect (make-instance 'node
-                             :parent node
-                             :action action
-                             :state state
-                             :depth next-d)
-     :into nodes
+     :collect (make-successor-node node action state) :into nodes
      :finally
      (setf (successors node) nodes
            (expanded-p node) t)
