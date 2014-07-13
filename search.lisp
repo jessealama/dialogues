@@ -37,7 +37,7 @@
    (depth
     :initform 0
     :initarg :depth
-    :accessor node-depth
+    :accessor depth
     :type integer
     :documentation "Depth of the node in the tree (root = 0).")
    (expanded-p
@@ -96,7 +96,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
                                     :parent node
                                     :action action
                                     :state state
-                                    :depth (1+ (node-depth node)))
+                                    :depth (1+ (depth node)))
 		     nodes))
 	   finally
 	     (setf (successors node) nodes)
@@ -160,7 +160,7 @@ linear sequence), return NIL."
     (let (node)
       (loop (if (empty-queue? nodes) (return (values nil nil)))
 	 (setf node (remove-front nodes))
-	 (if (> (node-depth node) depth) (return (values nil :cut-off)))
+	 (if (> (depth node) depth) (return (values nil :cut-off)))
 	 (if (goal-test problem node) (return (values t node)))
 	 (funcall queueing-function nodes (expand node problem))))))
 
@@ -179,7 +179,7 @@ Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
     (let (node)
       (loop (if (empty-queue? nodes) (return (values nil nil nodes)))
 	 (setf node (remove-front nodes))
-	 (if (> (node-depth node) depth) (return (values nil :cut-off nodes)))
+	 (if (> (depth node) depth) (return (values nil :cut-off nodes)))
 	 (if (goal-test problem node) (return (values t node nodes)))
 	 (funcall queueing-function nodes (expand node problem))))))
 
@@ -259,7 +259,7 @@ nodes.  NIL is a permissible value for QUEUE."
   "Search depth-first, but only up to LIMIT branches deep in the tree."
   (cond ((goal-test problem node) node)
         ((and (integerp limit)
-	      (>= (node-depth node) limit))
+	      (>= (depth node) limit))
 	 :cut-off)
         (t (loop for n in (expand node problem) do
 		(let ((solution (depth-limited-dfs-search problem limit n)))
@@ -275,7 +275,7 @@ unexpanded."
   (let ((to-do (list node)))
     (until (null to-do)
       (let ((current-node (pop to-do)))
-	(when (< (node-depth current-node) limit)
+	(when (< (depth current-node) limit)
 	  (unless (node-expanded-p current-node)
 	    (expand current-node problem))
 	  (dolist (successor (successors current-node))
