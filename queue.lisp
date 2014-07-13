@@ -135,8 +135,8 @@ The heap implementation is taken from \"Introduction to Algorithms\" by Cormen, 
 	(val (funcall key item)))
     (while (and (> i 0)
                 (>= (heap-val heap (heap-parent i) key) val))
-      do (setf (aref heap i) (aref heap (heap-parent i))
-	       i (heap-parent i)))
+      (setf (aref heap i) (aref heap (heap-parent i))
+            i (heap-parent i)))
     (setf (aref heap i) item)))
 
 (defun make-heap (&optional (size 100))
