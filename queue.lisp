@@ -102,14 +102,14 @@ The heap implementation is taken from \"Introduction to Algorithms\" by Cormen, 
 
 (defun heapify (heap i key)
   "Assume that the children of i are heaps, but that heap[i] may be larger than its children.  If it is, move heap[i] down where it belongs. [Page 143 CL&R]."
-  (let ((l (heap-left i))
-	(r (heap-right i))
-	(N (- (length heap) 1))
-	(smallest (if (and (<= l N)
-                           (<= (heap-val heap l key)
-                               (heap-val heap i key)))
-                      l
-                      i)))
+  (let* ((l (heap-left i))
+         (r (heap-right i))
+         (N (- (length heap) 1))
+         (smallest (if (and (<= l N)
+                            (<= (heap-val heap l key)
+                                (heap-val heap i key)))
+                       l
+                       i)))
     (when (and (<= r N)
                (<= (heap-val heap r key)
                    (heap-val heap smallest key)))
