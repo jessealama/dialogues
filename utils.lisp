@@ -27,13 +27,6 @@
 	  (every-pair pred (rest lst-1) (rest lst-2))))
       (null lst-2)))
 
-(defmacro push-all (objs lst)
-  (let ((obj (gensym)))
-    `(if (null ,objs)
-	 ,lst
-	 (dolist (,obj ,objs ,lst)
-	   (push ,obj ,lst)))))
-
 (defun every-pair? (pred lst-1 lst-2)
   (if lst-1
       (and lst-2
