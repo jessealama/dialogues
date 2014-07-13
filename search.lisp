@@ -52,6 +52,10 @@
   (print-unreadable-object (node stream :type t)
     (format stream "~A" (state node))))
 
+(defun node-p (x)
+  "Is X a NODE?"
+  (typep x 'dialogues::node))
+
 (defgeneric successors-in-problem (problem node)
   (:documentation "Return an alist of (action . state) pairs, reachable from this state."))
 
