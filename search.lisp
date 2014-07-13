@@ -22,7 +22,7 @@
    (parent
     :initform nil
     :initarg :parent
-    :accessor node-parent
+    :accessor parent
     :type (or null node)
     :documentation "The parent node of this node")
    (action
@@ -71,10 +71,10 @@ EQUAL."
   "The ancestors of NODE, starting with its most distant
 ancestor (i.e., the ancestor of NODE whose parent is NIL)."
   (labels ((node-ancestors-backwards (n)
-	     (if (node-parent n)
-		 (cons n (node-ancestors-backwards (node-parent n)))
+	     (if (parent n)
+		 (cons n (node-ancestors-backwards (parent n)))
 		 (list n))))
-    (reverse (node-ancestors-backwards (node-parent node)))))
+    (reverse (node-ancestors-backwards (parent node)))))
 
 (defun expand (node problem)
   (if (node-expanded? node)
@@ -210,9 +210,9 @@ QUEUING-FN decides which nodes to look at first."
 solution to a search problem, this function gives a \"printout\" of
 how the node was obtained, starting from an initial node."
   (labels ((explain-backwards (n)
-	     (when (node-parent n)
+	     (when (parent n)
 	       (cons (node-action n)
-		     (explain-backwards (node-parent n))))))
+		     (explain-backwards (parent n))))))
     (reverse (explain-backwards node))))
 
 (defun breadth-first-search (problem)
@@ -284,7 +284,7 @@ unexpanded."
 (defun looping-node? (node &optional depth (test #'equal))
   "Did this node's state appear previously in the path?"
   (loop
-     :with n = (node-parent node)
+     :with n = (parent node)
      :with i = 1
      :do
      (when (and depth (> i depth))
@@ -293,7 +293,7 @@ unexpanded."
        (return nil))
      (when (funcall test (state node) (state n))
        (return t))
-     (setf n (node-parent n))
+     (setf n (parent n))
      (incf i)))
 
 (defun return-node? (node &optional (test #'equal))
