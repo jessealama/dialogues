@@ -101,7 +101,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 
 (defun create-start-node (problem)
   "Make the starting node, corresponding to the problem's initial state."
-  (make-instance 'node
+  (make-instance 'dialogues::node
                  :state (initial-state problem)))
 
 (defun leaf-nodes (node)
@@ -131,7 +131,7 @@ linear sequence), return NIL."
 (defun make-initial-queue (initial-state
 			   &key (queueing-function #'enqueue-at-end))
   (let ((q (make-empty-queue)))
-    (funcall queueing-function q (list (make-instance 'node
+    (funcall queueing-function q (list (make-instance 'dialogues::node
                                                       :state initial-state)))
     q))
 
