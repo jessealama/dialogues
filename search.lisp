@@ -50,9 +50,7 @@
 
 (defmethod print-object ((node node) stream)
   (print-unreadable-object (node stream :type t)
-    (with-slots (state)
-	node
-      (format stream "~A" state))))
+    (format stream "~A" (state node))))
 
 (defmethod successors ((problem problem) node)
   "Return an alist of (action . state) pairs, reachable from this state."
