@@ -85,15 +85,13 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
          (successors node))
         (t
          (loop
-            :with nodes = nil
             :for (action . state) :in (successors-in-problem problem node)
-            :do
-            (push (make-instance 'node
-                                 :parent node
-                                 :action action
-                                 :state state
-                                 :depth (1+ (depth node)))
-                  nodes)
+            :collect (make-instance 'node
+                                    :parent node
+                                    :action action
+                                    :state state
+                                    :depth (1+ (depth node)))
+            :into nodes
             :finally
               (setf (successors node) nodes
                     (node-expanded-p node) t)
