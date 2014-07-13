@@ -315,8 +315,7 @@ the path."
     (general-search-for-bottom problem #'f)))
 
 (defun no-returns-breadth-first-search (problem)
-  "Do breadth-first search, but eliminate immediate returns to a prior
-state."
+  "Do breadth-first search, but eliminate immediate returns to a prior state."
   (flet ((f (old-q nodes)
            (enqueue-at-end old-q (eliminate-returns nodes))))
     (general-search problem #'f)))
