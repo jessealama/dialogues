@@ -46,7 +46,7 @@ The heap implementation is taken from \"Introduction to Algorithms\" by Cormen, 
   "Remove the element from the front of the queue and return it."
   (if (listp (elements q))
       (pop (elements q))
-    (heap-extract-min (elements q) (key q))))
+      (heap-extract-min (elements q) (key q))))
 
 ;;;; The Three Enqueing Functions
 
