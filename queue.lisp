@@ -20,7 +20,7 @@
     :accessor elements))
   (:documentation "A queue.
 
-We can remove elements form the front of a queue.  We can add elements in three ways: to the front, to the back, or ordered by some numeric score. This is done with the following enqueing functions, which make use of the following implementations of the elements:
+We can remove elements from the front of a queue.  We can add elements in three ways: to the front, to the back, or ordered by some numeric score. This is done with the following enqueing functions, which make use of the following implementations of the elements:
 
 * ENQUEUE-AT-FRONT - elements are a list
 * ENQUEUE-AT-END - elements are a list, with a pointer to end
