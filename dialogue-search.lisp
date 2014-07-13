@@ -16,11 +16,11 @@
 
 (defmethod goal-test ((problem dialogue-search-problem) node)
   (expand node problem)
-  (and (null (node-successors node))
-       (proponent-move-p (last-move (node-state node)))))
+  (and (null (successors node))
+       (proponent-move-p (last-move (state node)))))
 
-(defmethod successors ((dsp dialogue-search-problem) node)
-  (continuations (node-state node)))
+(defmethod successors-in-problem ((dsp dialogue-search-problem) node)
+  (continuations (state node)))
 
 (defun dialogue-search-bfs (rules initial-statement &optional more-nodes)
   (let* ((initial-state (make-instance 'dialogue
@@ -348,12 +348,12 @@
 ;; 	       new-tree))))))
 
 (defun copy-search-tree-node (node)
-  (make-node :state (node-state node)
-	     :parent (node-parent node)
-	     :action (node-action node)
-	     :successors (mapcar #'copy-search-tree-node (node-successors node))
+  (make-node :state (state node)
+	     :parent (parent node)
+	     :action (action node)
+	     :successors (mapcar #'copy-search-tree-node (successors node))
 	     :depth (node-depth node)
-	     :expanded? (node-expanded? node)))
+	     :expanded? (node-expanded-p node)))
 
 (defun dialogue->search-tree (dialogue)
   "Construct a search tree (a sequence, in fact) from DIALOGUE."
@@ -367,19 +367,19 @@
 	    nodes))
     (setf nodes (nreverse nodes))
     (loop
-       for node-parent in nodes
+       for parent in nodes
        for node-successor in (cdr nodes)
        do
-	 (setf (node-parent node-successor) node-parent
-	       (node-successors node-parent) (list node-successor)
-	       (node-expanded? node-parent) t))
+	 (setf (parent node-successor) parent
+	       (successors parent) (list node-successor)
+	       (node-expanded-p parent) t))
     (car (last nodes))))
 
 (defmethod proponent-node? ((node node))
-  (proponent-move-p (last-move (node-state node))))
+  (proponent-move-p (last-move (state node))))
 
 (defmethod opponent-node? ((node node))
-  (opponent-move-p (last-move (node-state node))))
+  (opponent-move-p (last-move (state node))))
 
 (defun proponent-ws-from-opponent-node (opponent-node &optional ruleset)
   "Find a winning strategy from OPPONENT-NODE, which is supposed to
@@ -390,8 +390,8 @@ existence of a winning strategy.  Return NIL if there are no winning
 strategies for Proponent starting from OPPONENT-NODE.  If there are,
 return a copy of OPPONENT-NODE that contains the winning strategy.  It
 is assumed that OPPONENT-NODE is expanded."
-  (let ((opponent-succs (node-successors opponent-node)))
-    (if (node-expanded? opponent-node)
+  (let ((opponent-succs (successors opponent-node)))
+    (if (node-expanded-p opponent-node)
         (if (null opponent-succs)
             nil
             (let ((strategies (mapcar #'(lambda (node)
@@ -401,9 +401,9 @@ is assumed that OPPONENT-NODE is expanded."
                   nil
                   (let ((maybe-winner (find-if #'node-p strategies)))
                     (if (node-p maybe-winner)
-                        (make-node :state (node-state opponent-node)
-                                   :parent (node-parent opponent-node)
-                                   :action (node-action opponent-node)
+                        (make-node :state (state opponent-node)
+                                   :parent (parent opponent-node)
+                                   :action (action opponent-node)
                                    :successors (list maybe-winner)
                                    :depth (node-depth opponent-node)
                                    :expanded? t)
@@ -411,8 +411,8 @@ is assumed that OPPONENT-NODE is expanded."
         :dialogue-tree-too-shallow)))
 
 (defun proponent-ws-from-proponent-node (proponent-node &optional ruleset)
-  (if (node-expanded? proponent-node)
-      (let ((succs (node-successors proponent-node)))
+  (if (node-expanded-p proponent-node)
+      (let ((succs (successors proponent-node)))
 	(let ((strategies (mapcar #'(lambda (node)
 				      (proponent-ws-from-opponent-node node ruleset))
 				  succs)))
@@ -420,9 +420,9 @@ is assumed that OPPONENT-NODE is expanded."
 	      nil
 	      (if (member :dialogue-tree-too-shallow strategies)
 		  :dialogue-tree-too-shallow
-		  (make-node :state (node-state proponent-node)
-			     :parent (node-parent proponent-node)
-			     :action (node-action proponent-node)
+		  (make-node :state (state proponent-node)
+			     :parent (parent proponent-node)
+			     :action (action proponent-node)
 			     :successors strategies
 			     :depth (node-depth proponent-node)
 			     :expanded? t)))))
