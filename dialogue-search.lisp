@@ -354,7 +354,7 @@
                  :action (action node)
                  :successors (mapcar #'copy-search-tree-node (successors node))
                  :depth (depth node)
-                 :expanded-p (node-expanded-p node)))
+                 :expanded-p (expanded-p node)))
 
 (defun dialogue->search-tree (dialogue)
   "Construct a search tree (a sequence, in fact) from DIALOGUE."
@@ -374,7 +374,7 @@
        do
 	 (setf (parent node-successor) parent
 	       (successors parent) (list node-successor)
-	       (node-expanded-p parent) t))
+	       (expanded-p parent) t))
     (car (last nodes))))
 
 (defmethod proponent-node? ((node node))
@@ -393,7 +393,7 @@ strategies for Proponent starting from OPPONENT-NODE.  If there are,
 return a copy of OPPONENT-NODE that contains the winning strategy.  It
 is assumed that OPPONENT-NODE is expanded."
   (let ((opponent-succs (successors opponent-node)))
-    (if (node-expanded-p opponent-node)
+    (if (expanded-p opponent-node)
         (if (null opponent-succs)
             nil
             (let ((strategies (mapcar #'(lambda (node)
@@ -414,7 +414,7 @@ is assumed that OPPONENT-NODE is expanded."
         :dialogue-tree-too-shallow)))
 
 (defun proponent-ws-from-proponent-node (proponent-node &optional ruleset)
-  (if (node-expanded-p proponent-node)
+  (if (expanded-p proponent-node)
       (let ((succs (successors proponent-node)))
 	(let ((strategies (mapcar #'(lambda (node)
 				      (proponent-ws-from-opponent-node node ruleset))

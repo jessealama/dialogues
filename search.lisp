@@ -43,7 +43,7 @@
    (expanded-p
     :initform nil
     :type boolean
-    :accessor node-expanded-p
+    :accessor expanded-p
     :initarg :expanded-p
     :documentation "Has this node been expanded?"))
   (:documentation "Node for generic search.  A node contains a state, a domain-specific representation of a point in the search space.  It also contains some bookkeeping information."))
@@ -82,8 +82,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 
 (defun expand (node problem)
   (loop
-     :initially (when (node-expanded-p node)
-                  (return (successors node)))
+     :initially (when (expanded-p node) (return (successors node)))
      :for (action . state) :in (successors-in-problem problem node)
      :collect (make-instance 'node
                              :parent node
@@ -93,7 +92,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
      :into nodes
      :finally
      (setf (successors node) nodes
-           (node-expanded-p node) t)
+           (expanded-p node) t)
      (incf (problem-num-expanded problem))
      (return nodes)))
 
@@ -104,7 +103,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 
 (defun leaf-nodes (node)
   "All nodes reachable from NODE (via the successor function) that are either unexpanded or have no successors (and are expanded)."
-  (if (node-expanded-p node)
+  (if (expanded-p node)
       (let ((succ (successors node)))
 	(if (null succ)
 	    (list node)
@@ -113,7 +112,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 
 (defun expandable-leaf-nodes (node)
   "All leaf nodes reachable from NODE that can be expanded."
-  (remove-if #'node-expanded-p (leaf-nodes node)))
+  (remove-if #'expanded-p (leaf-nodes node)))
 
 (defun first-splitting-descendant (node)
   "The first descendant of NODE that has multiple successors.  If
@@ -271,7 +270,7 @@ unexpanded."
     (until (null to-do)
       (let ((current-node (pop to-do)))
 	(when (< (depth current-node) limit)
-	  (unless (node-expanded-p current-node)
+	  (unless (expanded-p current-node)
 	    (expand current-node problem))
 	  (dolist (successor (successors current-node))
 	    (push successor to-do)))))))
