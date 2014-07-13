@@ -317,9 +317,9 @@ the path."
 (defun no-returns-breadth-first-search (problem)
   "Do breadth-first search, but eliminate immediate returns to a prior
 state."
-  (general-search problem
-		  #'(lambda (old-q nodes)
-		      (enqueue-at-end old-q (eliminate-returns nodes)))))
+  (flet ((f (old-q nodes)
+           (enqueue-at-end old-q (eliminate-returns nodes))))
+    (general-search problem #'f)))
 
 (defun no-duplicates-breadth-first-search (problem)
   "Do breadth-first search, but eliminate all duplicate states."
