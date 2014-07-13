@@ -17,8 +17,8 @@
     :type list
     :initform nil
     :initarg :elements
-    :accessor elements)
-   (:documentation "A queue.
+    :accessor elements))
+  (:documentation "A queue.
 
 We can remove elements form the front of a queue.  We can add elements in three ways: to the front, to the back, or ordered by some numeric score. This is done with the following enqueing functions, which make use of the following implementations of the elements:
 
@@ -28,51 +28,51 @@ We can remove elements form the front of a queue.  We can add elements in three 
 
 The best element in the queue is always in position 0.
 
-The heap implementation is taken from \"Introduction to Algorithms\" by Cormen, Lieserson & Rivest [CL&R], Chapter 7.  We could certainly speed up the constant factors of this implementation.  It is meant to be clear and simple and O(log n), but not super efficient.  Consider a Fibonacci heap [Page 420 CL&R] if you really have large queues to deal with.")))
+The heap implementation is taken from \"Introduction to Algorithms\" by Cormen, Lieserson & Rivest [CL&R], Chapter 7.  We could certainly speed up the constant factors of this implementation.  It is meant to be clear and simple and O(log n), but not super efficient.  Consider a Fibonacci heap [Page 420 CL&R] if you really have large queues to deal with.")  )
 
 ;;;; Basic Operations on Queues
 
-(defun make-empty-queue () (make-q))
+(defun make-empty-queue () (make-instance 'q))
 
 (defun empty-queue? (q)
   "Are there no elements in the queue?"
-  (= (length (q-elements q)) 0))
+  (= (length (elements q)) 0))
 
 (defun queue-front (q)
   "Return the element at the front of the queue."
-  (elt (q-elements q) 0))
+  (elt (elements q) 0))
 
 (defun remove-front (q)
   "Remove the element from the front of the queue and return it."
-  (if (listp (q-elements q))
-      (pop (q-elements q))
-    (heap-extract-min (q-elements q) (q-key q))))
+  (if (listp (elements q))
+      (pop (elements q))
+    (heap-extract-min (elements q) (key q))))
 
 ;;;; The Three Enqueing Functions
 
 (defun enqueue-at-front (q items)
   "Add a list of items to the front of the queue."
-  (setf (q-elements q) (nconc items (q-elements q))))
+  (setf (elements q) (nconc items (elements q))))
 
 (defun enqueue-at-end (q items)
   "Add a list of items to the end of the queue."
   ;; To make this more efficient, keep a pointer to the last cons in the queue
   (cond ((null items) nil)
-	((or (null (q-last q)) (null (q-elements q)))
+	((or (null (q-last q)) (null (elements q)))
 	 (setf (q-last q) (last items)
-	       (q-elements q) (nconc (q-elements q) items)))
+	       (elements q) (nconc (elements q) items)))
 	(t (setf (cdr (q-last q)) items
 		 (q-last q) (last items)))))
 
 (defun enqueue-by-priority (q items key)
   "Insert the items by priority according to the key function."
   ;; First make sure the queue is in a consistent state
-  (setf (q-key q) key)
-  (when (null (q-elements q))
-    (setf (q-elements q) (make-heap)))
+  (setf (key q) key)
+  (when (null (elements q))
+    (setf (elements q) (make-heap)))
   ;; Now insert the items
   (loop for item in items do
-       (heap-insert (q-elements q) item key)))
+       (heap-insert (elements q) item key)))
 
 ;;;; The Heap Implementation of Priority Queues
 
