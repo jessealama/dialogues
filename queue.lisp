@@ -133,9 +133,11 @@ The heap implementation is taken from \"Introduction to Algorithms\" by Cormen, 
   ;; There are more efficient ways of sorting (even of heap-sorting)
   (let ((heap (make-heap))
 	(result nil))
-    (loop for n in numbers do (heap-insert heap n key)
-	 (while (> (length heap) 0) do
-	   (push (heap-extract-min heap key) result))
-	 (reverse result))))
+    (loop
+       :for n :in numbers
+       :do (heap-insert heap n key))
+    (while (> (length heap) 0)
+      (push (heap-extract-min heap key) result))
+    (reverse result)))
 
 ;;; queue.lisp ends here
