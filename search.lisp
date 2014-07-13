@@ -324,9 +324,8 @@ state."
 (defun no-duplicates-breadth-first-search (problem)
   "Do breadth-first search, but eliminate all duplicate states."
   (let ((table (make-hash-table :test #'equal)))
-    (general-search problem
-		    #'(lambda (old-q nodes)
-			(enqueue-at-end old-q (eliminate-all-duplicates
-					       nodes table))))))
+    (flet ((f (old-q nodes)
+             (enqueue-at-end old-q (eliminate-all-duplicates nodes table))))
+      (general-search problem #'f))))
 
 ;;; search.lisp ends here
