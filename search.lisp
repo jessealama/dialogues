@@ -284,9 +284,9 @@ i.e., where the last two actions just undo each other."
 (defun eliminate-cycles (nodes &optional (test #'equal))
   "Get rid of nodes that end in a state that has appeared before in
 the path."
-  (remove-if #'(lambda (node)
-		 (looping-node? node nil test))
-	     nodes))
+  (flet ((loopy (node)
+            (looping-node? node nil test)))
+    (remove-if #'loopy nodes)))
 
 (defun eliminate-all-duplicates (nodes node-table)
   "Get rid of all nodes that have been seen before in any path."
