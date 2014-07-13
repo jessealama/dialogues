@@ -285,14 +285,15 @@ unexpanded."
      :with n = (parent node)
      :with i = 1
      :do
-     (when (and depth (> i depth))
-       (return nil))
-     (when (null n)
-       (return nil))
-     (when (funcall test (state node) (state n))
-       (return t))
-     (setf n (parent n))
-     (incf i)))
+     (cond ((and depth (> i depth))
+            (return nil))
+           ((null n)
+            (return nil))
+           ((funcall test (state node) (state n))
+            (return t))
+           (t
+            (setf n (parent n))
+            (incf i)))))
 
 (defun return-node? (node &optional (test #'equal))
   "Is this a node that returns to the state it just came from?"
