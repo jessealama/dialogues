@@ -348,22 +348,24 @@
 ;; 	       new-tree))))))
 
 (defun copy-search-tree-node (node)
-  (make-node :state (state node)
-	     :parent (parent node)
-	     :action (action node)
-	     :successors (mapcar #'copy-search-tree-node (successors node))
-	     :depth (node-depth node)
-	     :expanded? (node-expanded-p node)))
+  (make-instance 'dialogues::node
+                 :state (state node)
+                 :parent (parent node)
+                 :action (action node)
+                 :successors (mapcar #'copy-search-tree-node (successors node))
+                 :depth (node-depth node)
+                 :expanded? (node-expanded-p node)))
 
 (defun dialogue->search-tree (dialogue)
   "Construct a search tree (a sequence, in fact) from DIALOGUE."
   (let (nodes)
     (dotimes (i (dialogue-length dialogue)) ; first construct the nodes
-      (push (make-node :state (truncate-dialogue dialogue i)
-		       :parent nil
-		       :action nil
-		       :successors nil
-		       :depth i)
+      (push (make-instance 'dialogues::node
+                           :state (truncate-dialogue dialogue i)
+                           :parent nil
+                           :action nil
+                           :successors nil
+                           :depth i)
 	    nodes))
     (setf nodes (nreverse nodes))
     (loop
@@ -401,12 +403,13 @@ is assumed that OPPONENT-NODE is expanded."
                   nil
                   (let ((maybe-winner (find-if #'node-p strategies)))
                     (if (node-p maybe-winner)
-                        (make-node :state (state opponent-node)
-                                   :parent (parent opponent-node)
-                                   :action (action opponent-node)
-                                   :successors (list maybe-winner)
-                                   :depth (node-depth opponent-node)
-                                   :expanded? t)
+                        (make-instance 'dialogues::node
+                                       :state (state opponent-node)
+                                       :parent (parent opponent-node)
+                                       :action (action opponent-node)
+                                       :successors (list maybe-winner)
+                                       :depth (node-depth opponent-node)
+                                       :expanded? t)
                         :dialogue-tree-too-shallow)))))
         :dialogue-tree-too-shallow)))
 
@@ -420,12 +423,13 @@ is assumed that OPPONENT-NODE is expanded."
 	      nil
 	      (if (member :dialogue-tree-too-shallow strategies)
 		  :dialogue-tree-too-shallow
-		  (make-node :state (state proponent-node)
-			     :parent (parent proponent-node)
-			     :action (action proponent-node)
-			     :successors strategies
-			     :depth (node-depth proponent-node)
-			     :expanded? t)))))
+		  (make-instance 'dialogues::node
+                                 :state (state proponent-node)
+                                 :parent (parent proponent-node)
+                                 :action (action proponent-node)
+                                 :successors strategies
+                                 :depth (node-depth proponent-node)
+                                 :expanded? t)))))
       :dialogue-tree-too-shallow))
 
 (defvar winning-strategy-registry (make-hash-table :test #'equalp))
