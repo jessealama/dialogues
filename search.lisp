@@ -16,7 +16,7 @@
 
 (defclass node ()
   ((state
-    :accessor node-state
+    :accessor state
     :initarg :state
     :documentation "A stte in the domain")
    (parent
@@ -65,7 +65,7 @@ checks if the state is equal to the state stored in the problem-goal
 slot.  You will need to define your own method if there are multiple
 goals, or if you need to compare them with something other than
 EQUAL."
-  (equal (node-state node) (problem-goal problem)))
+  (equal (state node) (problem-goal problem)))
 
 (defun node-ancestors (node)
   "The ancestors of NODE, starting with its most distant
@@ -291,7 +291,7 @@ unexpanded."
        (return nil))
      (when (null n)
        (return nil))
-     (when (funcall test (node-state node) (node-state n))
+     (when (funcall test (state node) (state n))
        (return t))
      (setf n (node-parent n))
      (incf i)))
@@ -316,7 +316,7 @@ the path."
   "Get rid of all nodes that have been seen before in any path."
   (let ((result nil))
    (loop for node in nodes do
-	(let ((state (node-state node)))
+	(let ((state (state node)))
 	  (when (not (gethash state node-table))
 	    (push node result))
 	  (setf (gethash state node-table) node)))
