@@ -85,9 +85,9 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
          (successors node))
         (t
          (loop
-            with nodes = nil
-            for successor in (successors-in-problem problem node)
-            do
+            :with nodes = nil
+            :for successor :in (successors-in-problem problem node)
+            :do
               (destructuring-bind (action . state)
                   successor
                 (push (make-instance 'node
@@ -96,7 +96,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
                                      :state state
                                      :depth (1+ (depth node)))
                       nodes))
-            finally
+            :finally
               (setf (successors node) nodes
                     (node-expanded-p node) t)
               (incf (problem-num-expanded problem))
