@@ -89,9 +89,7 @@ The heap implementation is taken from \"Introduction to Algorithms\" by Cormen, 
 (defun heap-right (i) (declare (fixnum i)) (the fixnum (+ 2 i i)))
 
 (defun heapify (heap i key)
-  "Assume that the children of i are heaps, but that heap[i] may be
-  larger than its children.  If it is, move heap[i] down where it belongs.
-  [Page 143 CL&R]."
+  "Assume that the children of i are heaps, but that heap[i] may be larger than its children.  If it is, move heap[i] down where it belongs. [Page 143 CL&R]."
   (let ((l (heap-left i))
 	(r (heap-right i))
 	(N (- (length heap) 1))
