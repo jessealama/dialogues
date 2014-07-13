@@ -52,10 +52,12 @@
   (print-unreadable-object (node stream :type t)
     (format stream "~A" (state node))))
 
-(defmethod successors ((problem problem) node)
-  "Return an alist of (action . state) pairs, reachable from this state."
+(defgeneric successors-in-problem (problem node)
+  (:documentation "Return an alist of (action . state) pairs, reachable from this state."))
+
+(defmethod successors-in-problem ((problem problem) node)
   (declare (ignore node))
-  (error "You need to define a SUCCESSORS method for ~A" problem))
+  (error "You need to define a SUCCESSORS-IN-PROBLEM method for ~A" problem))
 
 (defmethod goal-test ((problem problem) node)
   "Return true or false: is this a goal node?  This default method
@@ -82,7 +84,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 	(incf (problem-num-expanded problem))
 	(loop
 	   with nodes = nil
-	   for successor in (successors problem node)
+	   for successor in (successors-in-problem problem node)
 	   do
 	     (destructuring-bind (action . state)
 		 successor
