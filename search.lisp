@@ -237,11 +237,11 @@ Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
 	 :cut-off)
         (t (loop
               :for n :in (expand node problem)
+              :for solution = (depth-limited-dfs-search problem limit n)
               :do
-		(let ((solution (depth-limited-dfs-search problem limit n)))
-		  (when (and solution
-			     (not (eq solution :cut-off)))
-		    (return solution)))))))
+              (when (and solution
+                         (not (eq solution :cut-off)))
+                (return solution))))))
 
 (defun exhaustive-depth-limited-search (problem &optional limit
 			              (node (create-start-node problem)))
