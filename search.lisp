@@ -32,7 +32,7 @@
    (successors
     :type list
     :initarg :successors
-    :accessor node-successors
+    :accessor successors
     :documentation "A list of successor nodes.")
    (depth
     :initform 0
@@ -76,7 +76,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 
 (defun expand (node problem)
   (if (node-expanded-p node)
-      (node-successors node)
+      (successors node)
       (progn
 	(setf (node-expanded-p node) t)
 	(incf (problem-num-expanded problem))
@@ -93,7 +93,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
                                     :depth (1+ (node-depth node)))
 		     nodes))
 	   finally
-	     (setf (node-successors node) nodes)
+	     (setf (successors node) nodes)
 	     (return nodes)))))
 
 (defun create-start-node (problem)
@@ -104,7 +104,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
 (defun leaf-nodes (node)
   "All nodes reachable from NODE (via the successor function) that are either unexpanded or have no successors (and are expanded)."
   (if (node-expanded-p node)
-      (let ((succ (node-successors node)))
+      (let ((succ (successors node)))
 	(if (null succ)
 	    (list node)
 	    (apply #'append (mapcar #'leaf-nodes succ))))
@@ -118,7 +118,7 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
   "The first descendant of NODE that has multiple successors.  If
 there are no such nodes (i.e., the set of descendents of NODE forms a
 linear sequence), return NIL."
-  (let ((succs (node-successors node)))
+  (let ((succs (successors node)))
     (if (null succs)
 	nil
 	(if (null (cdr succs))
@@ -272,7 +272,7 @@ unexpanded."
 	(when (< (node-depth current-node) limit)
 	  (unless (node-expanded-p current-node)
 	    (expand current-node problem))
-	  (dolist (successor (node-successors current-node))
+	  (dolist (successor (successors current-node))
 	    (push successor to-do)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
