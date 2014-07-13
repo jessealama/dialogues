@@ -84,8 +84,6 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
   (cond ((node-expanded-p node)
          (successors node))
         (t
-         (setf (node-expanded-p node) t)
-         (incf (problem-num-expanded problem))
          (loop
             with nodes = nil
             for successor in (successors-in-problem problem node)
@@ -99,7 +97,9 @@ ancestor (i.e., the ancestor of NODE whose parent is NIL)."
                                      :depth (1+ (depth node)))
                       nodes))
             finally
-              (setf (successors node) nodes)
+              (setf (successors node) nodes
+                    (node-expanded-p node) t)
+              (incf (problem-num-expanded problem))
               (return nodes)))))
 
 (defun create-start-node (problem)
