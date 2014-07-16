@@ -95,6 +95,7 @@
   (make-instance 'dialogue
                  :plays (append (plays dialogue) (list move))
                  :initial-formula (initial-formula dialogue)
+                 :concessions (concessions dialogue)
                  :ruleset (ruleset dialogue)))
 
 (defun nth-move (dialogue n)
