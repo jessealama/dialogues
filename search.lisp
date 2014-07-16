@@ -63,7 +63,7 @@
   (declare (ignore node))
   (error "You need to define a SUCCESSORS-IN-PROBLEM method for the problem~%~%  ~a~%" problem))
 
-(defmethod goal-test ((problem problem) node)
+(defmethod goal-test ((problem problem) (node node))
   "Return true or false: is this a goal node?  This default method checks if the state is equal to the state stored in the problem-goal slot.  You will need to define your own method if there are multiple goals, or if you need to compare them with something other than EQUAL."
   (equal (state node) (problem-goal problem)))
 
