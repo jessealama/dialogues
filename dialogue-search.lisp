@@ -42,14 +42,6 @@
                                  :rules rules)))
     (depth-first-search-for-bottom problem)))
 
-;; (defun dialogue-search-dfs-no-cycles (rules initial-statement)
-;;   (let* ((initial-state (make-instance 'dialogue
-;;                                        :initial-formula initial-statement
-;;                                        :ruleset rules))
-;;          (problem (make-dialogue-search-problem :initial-state initial-state
-;;                                                 :rules rules)))
-;;     (no-cycles-depth-first-search-for-bottom problem #'equal-dialogues?)))
-
 (defun bounded-dialogue-search-dfs (rules initial-statement depth &optional (initial-state (make-instance 'dialogue :initial-formula initial-statement :ruleset rules)))
   (let ((problem (make-instance 'dialogue-search-problem
                                 :initial-state initial-state
