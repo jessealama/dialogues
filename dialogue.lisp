@@ -55,9 +55,6 @@
                  :concessions (concessions dialogue)
                  :initial-formula (initial-formula dialogue)))
 
-;; (defun copy-and-truncate-dialogue (dialogue cutoff)
-;;   (truncate-dialogue (copy-dialogue dialogue) cutoff))
-
 (defvar *prompt* "> ")
 
 (defmethod print-object ((game dialogue) stream)
