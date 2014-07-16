@@ -9,7 +9,7 @@
    (num-expanded
     :accessor problem-num-expanded
     :initform 0))
-  (:documentation "A problem is defined by the initial state, and the type of problem it is.  For bookkeeping, we count the number of nodes expanded."))
+  (:documentation "A problem is defined by an initial state.  For bookkeeping purposes, we count the number of nodes expanded."))
 
 (defclass node ()
   ((state
