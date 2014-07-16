@@ -62,9 +62,23 @@
 
 (defmethod print-object ((game dialogue) stream)
   (print-unreadable-object (game stream :type t)
-    (with-slots (plays initial-formula ruleset) game
+    (with-slots (plays initial-formula ruleset concessions) game
       (format stream "Ruleset: ~a" ruleset)
       (terpri stream)
+      (cond ((length= concessions 0)
+             (format stream "No concessions."))
+            ((length= concessions 1)
+             (format stream "1 concession:")
+             (terpri stream)
+             (format stream "~a" (first concessions)))
+            (t
+             (format stream "~d concessions:" (length concessions))
+             (terpri stream)
+             (loop
+                :for f :in concessions
+                :do
+                (format stream "~a" f)
+                (terpri stream))))
       (if (null plays)
           (format stream "1 move")
           (format stream "~d moves" (1+ (length plays))))
