@@ -52,6 +52,7 @@
 (defun truncate-dialogue (dialogue cutoff)
   (make-instance 'dialogue
 		 :plays (subseq (plays dialogue) 0 cutoff)
+                 :concessions (concessions dialogue)
                  :initial-formula (initial-formula dialogue)))
 
 ;; (defun copy-and-truncate-dialogue (dialogue cutoff)
