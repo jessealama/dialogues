@@ -91,14 +91,10 @@
 (defun every-disallowing-cutoffs (pred list)
   (loop
      :for elt :in list
-     :do
-       (let ((result (funcall pred elt)))
-	 (when (eq result :cutoff)
-	   (return :cutoff))
-	 (when (null result)
-	   (return nil)))
-     :finally
-       (return t)))
+     :for result = (funcall pred elt)
+     :when (eq result :cutoff) :do (return :cutoff)
+     :when (null result) :do (return nil)
+     :finally (return t)))
 
 (defun proponent-has-winning-strategy? (dialogue cutoff)
   (cond ((minusp cutoff)
