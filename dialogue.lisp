@@ -55,8 +55,6 @@
                  :concessions (concessions dialogue)
                  :initial-formula (initial-formula dialogue)))
 
-(defvar *prompt* "> ")
-
 (defmethod print-object ((game dialogue) stream)
   (print-unreadable-object (game stream :type t)
     (with-slots (plays initial-formula ruleset concessions) game
