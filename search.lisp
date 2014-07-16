@@ -326,4 +326,13 @@ the path."
              (enqueue-at-end old-q (eliminate-all-duplicates nodes table))))
       (general-search problem #'f))))
 
+(defun copy-search-tree-node (node)
+  (make-instance 'dialogues::node
+                 :state (state node)
+                 :parent (parent node)
+                 :action (action node)
+                 :successors (mapcar #'copy-search-tree-node (successors node))
+                 :depth (depth node)
+                 :expanded-p (expanded-p node)))
+
 ;;; search.lisp ends here

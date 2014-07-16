@@ -273,15 +273,6 @@
     (dolist (leaf expandable-leaves tree-root)
       (exhaustive-depth-limited-search problem depth leaf))))
 
-(defun copy-search-tree-node (node)
-  (make-instance 'dialogues::node
-                 :state (state node)
-                 :parent (parent node)
-                 :action (action node)
-                 :successors (mapcar #'copy-search-tree-node (successors node))
-                 :depth (depth node)
-                 :expanded-p (expanded-p node)))
-
 (defun dialogue->search-tree (dialogue)
   "Construct a search tree (a sequence, in fact) from DIALOGUE."
   (let (nodes)
