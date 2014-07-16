@@ -34,11 +34,11 @@
     (breadth-first-search-for-bottom-with-nodes problem more-nodes)))
 
 (defun dialogue-search-dfs (rules initial-statement)
-  (let* ((initial-state (make-instance 'dialogue
-                                       :initial-formula initial-statement
-                                       :ruleset rules))
+  (let* ((d (make-instance 'dialogue
+                           :initial-formula initial-statement
+                           :ruleset rules))
          (problem (make-instance 'dialogue-search-problem
-                                 :initial-state initial-state
+                                 :initial-state d
                                  :rules rules)))
     (depth-first-search-for-bottom problem)))
 
