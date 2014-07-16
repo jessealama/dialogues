@@ -34,6 +34,12 @@
     :accessor initial-formula
     :type formula
     :initarg :initial-formula)
+   (concessions
+    :type list
+    :reader concessions
+    :initform nil
+    :initarg :concessions
+    :documentation "A list of formulas that are initially conceded by the Opponent.  (Another term is \"common ground\".)")
    (ruleset
     :type ruleset
     :accessor ruleset
