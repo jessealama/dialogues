@@ -125,47 +125,6 @@
 		 :cutoff
 		 every-result)))))
 
-;; (defun dialogue-valid? (rules statement depth)
-;;   "Determine whether statement is valid in the dialogue games defined by
-;; RULES.  \"Valid\" means that Proponent has a winning strategy in the
-;; game tree developed down to depth DEPTH."
-;;   (let ((dialogue (make-dialogue statement rules)))
-;;     (if (fast-eval-entire-dialogue dialogue)
-;; 	(proponent-has-winning-strategy? dialogue depth 1)
-;; 	(error 'inappropriate-initial-statement-error
-;; 	       :rules rules
-;; 	       :statement statement))))
-
-;; (defun classify-formulas (formulas rules search-depth)
-;;   (let (inappropriate valid invalid cutoff)
-;;     (dolist (formula formulas)
-;;       (handler-case (let ((result (dialogue-valid? rules
-;; 						   formula
-;; 						   search-depth)))
-;; 		      (ecase result
-;; 			(:cutoff (push formula cutoff))
-;; 			(t (push formula valid))
-;; 			((nil) (push formula invalid))))
-;; 	(inappropriate-initial-statement-error ()
-;; 	  (push formula inappropriate))))
-;;     (values inappropriate valid invalid cutoff)))
-
-;; Functionality dropped.  But it might be nice to restore it later.
-;;
-;; (defun classify-all-formulas (rules signature formula-depth search-depth)
-;;   (classify-formulas (reduced-enumeration formula-depth signature)
-;; 		     rules
-;; 		     signature
-;; 		     search-depth))
-
-;;; Strategy search for specific rulesets
-
-;; (defun defenses--e (strategy-node)
-;;   (unless (attack-p strategy-node)
-;;     (error "The move of a strategy node is not an attack, so how can we defend against it?"))
-;;   (let ((dialogue (strategy-node->dialogue strategy-node)))
-;;     (let (()))))
-
 (defgeneric intuitionistically-valid? (formula strategy-depth)
   (:documentation "Does there exist a winning strategy for FORMULA having depth at most STRATEGY-DEPTH?"))
 
