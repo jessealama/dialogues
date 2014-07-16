@@ -277,29 +277,6 @@
     (dolist (leaf expandable-leaves tree-root)
       (exhaustive-depth-limited-search problem depth leaf))))
 
-;; (defun dialogue-search-tree (formula rules depth)
-;;   (let ((earlier-entries (search-trees-for-formula-with-rules formula rules))
-;; 	(problem (make-dialogue-search-problem :rules rules
-;;                                                :initial-state (make-dialogue formula
-
-;;                                                                              rules))))
-;;     (let ((tree (loop
-;; 		   for entry in earlier-entries
-;; 		   do
-;; 		     (destructuring-bind (ruleset d root)
-;; 			 entry
-;; 		       (when (equal-rulesets? ruleset rules)
-;; 			 (when (>= d depth)
-;; 			   (return root))))
-;; 		   finally
-;; 		     (return (create-start-node problem)))))
-;;       (cond ((>= (depth tree) depth)
-;; 	     tree)
-;; 	    (t
-;; 	     (let ((new-tree (develop-dialogue-tree-to-depth tree depth problem)))
-;; 	       (register-dialogue-tree formula rules depth new-tree)
-;; 	       new-tree))))))
-
 (defun copy-search-tree-node (node)
   (make-instance 'dialogues::node
                  :state (state node)
