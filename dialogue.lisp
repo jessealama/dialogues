@@ -50,7 +50,7 @@
   (null (plays dialogue)))
 
 (defun truncate-dialogue (dialogue cutoff)
-  (make-instance 'dialogue
+  (make-instance 'dialogues::dialogue
 		 :plays (subseq (plays dialogue) 0 cutoff)
                  :concessions (concessions dialogue)
                  :initial-formula (initial-formula dialogue)))
@@ -92,7 +92,7 @@
   (1+ (length (plays dialogue))))
 
 (defun add-move-to-dialogue (dialogue move)
-  (make-instance 'dialogue
+  (make-instance 'dialogues::dialogue
                  :plays (append (plays dialogue) (list move))
                  :initial-formula (initial-formula dialogue)
                  :concessions (concessions dialogue)
