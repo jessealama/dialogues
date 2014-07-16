@@ -314,14 +314,7 @@
   (opponent-move-p (last-move (state node))))
 
 (defun proponent-ws-from-opponent-node (opponent-node &optional ruleset)
-  "Find a winning strategy from OPPONENT-NODE, which is supposed to
-represent a move just played by opponent.
-Return :DIALOGUE-TREE-TOO-SHALLOW if there are any unexpanded nodes that,
-if expanded, could make a difference in the determination of the
-existence of a winning strategy.  Return NIL if there are no winning
-strategies for Proponent starting from OPPONENT-NODE.  If there are,
-return a copy of OPPONENT-NODE that contains the winning strategy.  It
-is assumed that OPPONENT-NODE is expanded."
+  "Find a winning strategy from OPPONENT-NODE, which is supposed to represent a move just played by opponent. Return :DIALOGUE-TREE-TOO-SHALLOW if there are any unexpanded nodes that, if expanded, could make a difference in the determination of the existence of a winning strategy.  Return NIL if there are no winning strategies for Proponent starting from OPPONENT-NODE.  If there are, return a copy of OPPONENT-NODE that contains the winning strategy.  It is assumed that OPPONENT-NODE is expanded."
   (let ((opponent-succs (successors opponent-node)))
     (if (expanded-p opponent-node)
         (if (null opponent-succs)
