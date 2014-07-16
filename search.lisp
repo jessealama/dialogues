@@ -60,9 +60,11 @@
   (declare (ignore node))
   (error "You need to define a SUCCESSORS-IN-PROBLEM method for the problem~%~%  ~a~%" problem))
 
+(defgeneric goal-test (problem node)
+  (:documentation "Is NODE a goal node for the relevant PROBLEM?"))
+
 (defmethod goal-test ((problem problem) (node node))
-  "Return true or false: is this a goal node?  This default method checks if the state is equal to the state stored in the problem-goal slot.  You will need to define your own method if there are multiple goals, or if you need to compare them with something other than EQUAL."
-  (equal (state node) (problem-goal problem)))
+  (error "GOAL-TEST method undefined for the problem~%~%  ~a~%~%and node~%~%  ~a~%" problem node))
 
 (defun node-ancestors (node)
   "The ancestors of NODE, starting with its most distant ancestor (i.e., the ancestor of NODE whose parent is NIL)."
