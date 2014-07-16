@@ -24,7 +24,7 @@
       (format stream " move ~d by asserting ~a" reference statement))))
 
 (defun move-p (x)
-  (typep x 'move))
+  (typep x 'dialogues::move))
 
 (defmethod atomic-formula-p ((x move))
   (atomic-formula-p (statement x)))
