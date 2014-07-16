@@ -199,11 +199,11 @@ Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
   "Search the shallowest nodes in the search tree first."
   (general-search problem #'enqueue-at-end))
 
-(defun bounded-breadth-first-search (problem depth)
+(defun bounded-bfs (problem depth)
   "Search the shallowest nodes in the search tree first, but don't go deeper than DEPTH."
   (general-bounded-search problem #'enqueue-at-end depth))
 
-(defun bounded-breadth-first-search-with-nodes (problem depth &optional queue)
+(defun bounded-bfs-with-nodes (problem depth &optional queue)
   "Search the shallowest nodes in the search tree first, but don't go deeper than DEPTH.  QUEUE is an (possibly empty) initial pool of nodes.  NIL is a permissible value for QUEUE."
   (general-bounded-search-with-nodes problem #'enqueue-at-end depth queue))
 
