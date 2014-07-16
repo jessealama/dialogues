@@ -65,19 +65,6 @@
 (defmethod player ((x opponent-move))
   "O")
 
-(defun move-< (move-1 move-2)
-  (with-slots ((statement-1 statement) (stance-1 stance) (reference-1 reference))
-      move-1
-    (with-slots ((statement-2 statement) (stance-2 stance) (reference-2 reference))
-	move-2
-      (or (< reference-1 reference-2)
-	  (and (= reference-1 reference-2)
-	       (if (eq stance-1 'a)
-		   (and (eq stance-2 'a)
-			(statement-< statement-1 statement-2))
-		   (and (eq stance-2 'd)
-			(statement-< statement-1 statement-2))))))))
-
 (defmethod terms-in ((sa symbolic-attack))
   nil)
 
