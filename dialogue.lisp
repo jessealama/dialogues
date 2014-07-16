@@ -65,7 +65,8 @@
             ((length= concessions 1)
              (format stream "1 concession:")
              (terpri stream)
-             (format stream "~a" (first concessions)))
+             (format stream "~a" (first concessions))
+             (terpri stream))
             (t
              (format stream "~d concessions:" (length concessions))
              (terpri stream)
