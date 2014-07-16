@@ -6,9 +6,6 @@
   ((initial-state
     :initarg :initial-state
     :accessor initial-state)
-   (goal
-    :initarg :goal
-    :accessor problem-goal)
    (num-expanded
     :accessor problem-num-expanded
     :initform 0))
