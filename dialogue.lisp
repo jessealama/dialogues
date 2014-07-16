@@ -904,4 +904,4 @@ This predicate is redundant when EVERY-DEFENSE-RESPONDS-TO-MOST-RECENT-OPEN-ATTA
                  :description "Felscher's E ruleset, for propositional languages, with the restriction that no repetitions are permitted."
                  :validator #'e-propositional-validator))
 
-;;; dialogues.lisp ends hered
+;;; dialogues.lisp ends here
