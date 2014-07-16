@@ -18,6 +18,5 @@
                (:file "move")
 	       (:file "dialogue")
 	       (:file "search")
-	       ;; (:file "felscher")
 	       (:file "strategy")
 	       (:file "dialogue-search")))
