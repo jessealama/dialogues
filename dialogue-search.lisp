@@ -25,11 +25,11 @@
   (continuations (state node)))
 
 (defun dialogue-search-bfs (rules initial-statement &optional more-nodes)
-  (let* ((initial-state (make-instance 'dialogue
-                                       :initial-formula initial-statement
-                                       :rulset rules))
+  (let* ((d (make-instance 'dialogue
+                           :initial-formula initial-statement
+                           :rulset rules))
          (problem (make-instance 'dialogue-search-problem
-                                 :initial-state initial-state
+                                 :initial-state d
                                  :rules rules)))
     (breadth-first-search-for-bottom-with-nodes problem more-nodes)))
 
