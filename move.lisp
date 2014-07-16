@@ -42,16 +42,16 @@
   nil)
 
 (defun proponent-move-p (x)
-  (typep x 'proponent-move))
+  (typep x 'dialogues::proponent-move))
 
 (defclass opponent-move (move)
   nil)
 
 (defun opponent-move-p (x)
-  (typep x 'opponent-move))
+  (typep x 'dialogues::opponent-move))
 
 (defun initial-move-p (move)
-  (not (slot-boundp move 'reference)))
+  (not (slot-boundp move 'dialogues::reference)))
 
 (defgeneric player (x)
   (:documentation "The player of X."))
