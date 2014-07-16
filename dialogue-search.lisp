@@ -54,7 +54,7 @@
   (let ((problem (make-instance 'dialogue-search-problem
                                 :initial-state initial-state
                                 :rules rules)))
-	(bounded-breadth-first-search-with-nodes problem depth initial-queue)))
+	(bounded-bfs-with-nodes problem depth initial-queue)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Searching for strategies
