@@ -14,8 +14,10 @@
     :initform (error "A dialogue search problem requires a ruleset.")
     :initarg :ruleset)))
 
+(defmethod goal-test :before ((problem dialogue-search-problem) node)
+  (expand node problem))
+
 (defmethod goal-test ((problem dialogue-search-problem) node)
-  (expand node problem)
   (and (null (successors node))
        (proponent-move-p (last-move (state node)))))
 
