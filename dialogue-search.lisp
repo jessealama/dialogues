@@ -286,9 +286,9 @@
 	    nodes))
     (setf nodes (nreverse nodes))
     (loop
-       for parent in nodes
-       for node-successor in (cdr nodes)
-       do
+       :for parent :in nodes
+       :for node-successor :in (cdr nodes)
+       :do
 	 (setf (parent node-successor) parent
 	       (successors parent) (list node-successor)
 	       (expanded-p parent) t))
