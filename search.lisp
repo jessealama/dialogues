@@ -36,13 +36,7 @@
     :initarg :depth
     :accessor depth
     :type integer
-    :documentation "Depth of the node in the tree (root = 0).")
-   (expanded-p
-    :initform nil
-    :type boolean
-    :accessor expanded-p
-    :initarg :expanded-p
-    :documentation "Has this node been expanded?"))
+    :documentation "Depth of the node in the tree (root = 0)."))
   (:documentation "Node for generic search.  A node contains a state, a domain-specific representation of a point in the search space.  It also contains some bookkeeping information."))
 
 (defmethod print-object ((node node) stream)
@@ -52,6 +46,12 @@
 (defun node-p (x)
   "Is X a NODE?"
   (typep x 'dialogues::node))
+
+(defgeneric expanded-p (node)
+  (:documentation "Has NODE been expanded?"))
+
+(defmethod expanded-p ((node node))
+  (slot-boundp node 'dialogues::successors))
 
 (defgeneric successors-in-problem (problem node)
   (:documentation "Return an alist of (action . state) pairs, reachable from this state."))
