@@ -88,8 +88,7 @@
      :for (action . state) :in (successors-in-problem problem node)
      :collect (make-successor-node node action state) :into nodes
      :finally
-     (setf (successors node) nodes
-           (expanded-p node) t)
+     (setf (successors node) nodes)
      (incf (problem-num-expanded problem))
      (return nodes)))
 
@@ -331,7 +330,6 @@ the path."
                  :parent (parent node)
                  :action (action node)
                  :successors (mapcar #'copy-search-tree-node (successors node))
-                 :depth (depth node)
-                 :expanded-p (expanded-p node)))
+                 :depth (depth node)))
 
 ;;; search.lisp ends here
