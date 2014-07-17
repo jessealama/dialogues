@@ -290,8 +290,7 @@
        :for node-successor :in (cdr nodes)
        :do
 	 (setf (parent node-successor) parent
-	       (successors parent) (list node-successor)
-	       (expanded-p parent) t))
+	       (successors parent) (list node-successor)))
     (car (last nodes))))
 
 (defmethod proponent-node? ((node node))
@@ -318,8 +317,7 @@
                                        :parent (parent opponent-node)
                                        :action (action opponent-node)
                                        :successors (list maybe-winner)
-                                       :depth (depth opponent-node)
-                                       :expanded-p t)
+                                       :depth (depth opponent-node))
                         :dialogue-tree-too-shallow)))))
         :dialogue-tree-too-shallow)))
 
@@ -338,8 +336,7 @@
                                  :parent (parent proponent-node)
                                  :action (action proponent-node)
                                  :successors strategies
-                                 :depth (depth proponent-node)
-                                 :expanded-p t)))))
+                                 :depth (depth proponent-node))))))
       :dialogue-tree-too-shallow))
 
 ;;; dialogue-search.lisp ends here
