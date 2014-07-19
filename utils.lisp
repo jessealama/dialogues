@@ -197,4 +197,13 @@
 		   (t
 		    nil))))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Files
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun file-readable? (path)
+  (and (probe-file path)
+       (streamp (handler-case (open path :direction :probe)
+		  (error () nil)))))
+
 ;;; utils.lisp ends here

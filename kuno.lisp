@@ -35,11 +35,6 @@
 		   :argument-name "DEPTH"
 		   :default-value "20"))))
 
-(defun file-readable? (path)
-  (and (probe-file path)
-       (streamp (handler-case (open path :direction :probe)
-		  (error () nil)))))
-
 (defun red (str)
   (format nil "~C[;31m~a~C[0;m" #\Escape str #\Escape))
 
@@ -141,7 +136,7 @@
       (terpri *standard-output*)
       (clon:exit 1))
 
-    (unless (file-readable? arg)
+    (unless (dialogues::file-readable? arg)
       (format *standard-output* "% SZS status ~a for ~a : File does not exist or is unreadable." (result->szs :input-error) (namestring arg))
       (terpri *standard-output*)
       (clon:exit 1))
