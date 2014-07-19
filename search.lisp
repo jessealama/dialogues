@@ -60,9 +60,8 @@
 (defgeneric successors-in-problem (problem node)
   (:documentation "Return an alist of (action . state) pairs, reachable from this state."))
 
-(defmethod successors-in-problem ((problem problem) node)
-  (declare (ignore node))
-  (error "You need to define a SUCCESSORS-IN-PROBLEM method for the problem~%~%  ~a~%" problem))
+(defmethod successors-in-problem ((problem problem) (node node))
+  (error "You need to define a SUCCESSORS-IN-PROBLEM method for the node~%~%  ~a~%~%relative to the problem~%~%  ~a~%" node problem))
 
 (defgeneric goal-test (problem node)
   (:documentation "Is NODE a goal node for the relevant PROBLEM?"))
