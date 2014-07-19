@@ -374,3 +374,28 @@
 
 (defmethod contains-equation-p ((x tptp-formula))
   (contains-equation-p (formula x)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SZS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun result->szs (result)
+  (cond ((keywordp result)
+         (cond ((eql result :cutoff)
+                "ResourceOut")
+               ((eql result :timeout)
+                "Timeout")
+               ((eql result :inappropriate)
+                "Inappropriate")
+               ((eql result :syntax-error)
+                "SyntaxError")
+               ((eql result :input-error)
+                "InputError")
+               ((eql result :error)
+                "Error")
+               (t
+                "Unknown")))
+        (result
+         "Theorem")
+        (t
+         "CounterSatisfiable")))

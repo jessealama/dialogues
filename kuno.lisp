@@ -53,27 +53,6 @@
       (declare (ignore c))
       :timeout)))
 
-(defun result->szs (result)
-  (cond ((keywordp result)
-         (cond ((eql result :cutoff)
-                "ResourceOut")
-               ((eql result :timeout)
-                "Timeout")
-               ((eql result :inappropriate)
-                "Inappropriate")
-               ((eql result :syntax-error)
-                "SyntaxError")
-               ((eql result :input-error)
-                "InputError")
-               ((eql result :error)
-                "Error")
-               (t
-                "Unknown")))
-        (result
-         "Theorem")
-        (t
-         "CounterSatisfiable")))
-
 (defun render-error (err)
   (with-output-to-string (rendered)
     (format rendered "% ")
@@ -123,17 +102,17 @@
       (clon:exit 1))
 
     (when (cl-fad:directory-exists-p arg)
-      (format *standard-output* "% SZS status ~a for ~a : Argument is a directory rather than a file." (result->szs :input-error) (namestring arg))
+      (format *standard-output* "% SZS status ~a for ~a : Argument is a directory rather than a file." (dialogues::result->szs :input-error) (namestring arg))
       (terpri *standard-output*)
       (clon:exit 1))
 
     (unless (cl-fad:file-exists-p arg)
-      (format *standard-output* "% SZS status ~a for ~a : File does not exist." (result->szs :input-error) (namestring arg))
+      (format *standard-output* "% SZS status ~a for ~a : File does not exist." (dialogues::result->szs :input-error) (namestring arg))
       (terpri *standard-output*)
       (clon:exit 1))
 
     (unless (dialogues::file-readable? arg)
-      (format *standard-output* "% SZS status ~a for ~a : File is unreadable." (result->szs :input-error) (namestring arg))
+      (format *standard-output* "% SZS status ~a for ~a : File is unreadable." (dialogues::result->szs :input-error) (namestring arg))
       (terpri *standard-output*)
       (clon:exit 1))
 
@@ -160,7 +139,7 @@
           (error (e)
             (let ((rendered-error (render-error e)))
               (values :error (format nil "Internal error~%~a" rendered-error) nil))))
-      (setf szs-result (result->szs result))
+      (setf szs-result (dialogues::result->szs result))
       (format *standard-output* "% SZS status ~a for ~a" szs-result (namestring arg))
       (when (stringp comment)
         (format *standard-output* " : ~a" comment))
