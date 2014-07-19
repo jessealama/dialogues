@@ -145,7 +145,7 @@
     (let (node)
       (loop (if (empty-queue? nodes) (return (values nil nil)))
 	 (setf node (remove-front nodes))
-	 (if (> (depth node) depth) (return (values nil :cut-off)))
+	 (if (> (depth node) depth) (return (values nil :cutoff)))
 	 (if (goal-test problem node) (return (values t node)))
 	 (funcall queueing-function nodes (expand node problem))))))
 
@@ -159,7 +159,7 @@ Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
     (let (node)
       (loop (if (empty-queue? nodes) (return (values nil nil nodes)))
 	 (setf node (remove-front nodes))
-	 (if (> (depth node) depth) (return (values nil :cut-off nodes)))
+	 (if (> (depth node) depth) (return (values nil :cutoff nodes)))
 	 (if (goal-test problem node) (return (values t node nodes)))
 	 (funcall queueing-function nodes (expand node problem))))))
 
@@ -227,18 +227,18 @@ Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
   (loop
      :for d :from 0
      :for solution = (depth-limited-dfs-search problem d)
-     :unless (eq solution :cut-off) :do (return solution)))
+     :unless (eq solution :cutoff) :do (return solution)))
 
 (defun depth-limited-dfs-search (problem &optional limit (node (create-start-node problem)))
   "Search depth-first, but only up to LIMIT branches deep in the tree."
   (cond ((goal-test problem node) node)
         ((and (integerp limit)
 	      (>= (depth node) limit))
-	 :cut-off)
+	 :cutoff)
         (t (loop
               :for n :in (expand node problem)
               :for solution = (depth-limited-dfs-search problem limit n)
-              :when (and solution (not (eq solution :cut-off)))
+              :when (and solution (not (eq solution :cutoff)))
               :do (return solution)))))
 
 (defun exhaustive-depth-limited-search (problem &optional limit
