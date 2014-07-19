@@ -8,6 +8,7 @@
     :accessor initial-state)
    (num-expanded
     :accessor problem-num-expanded
+    :type integer
     :initform 0))
   (:documentation "A problem is defined by an initial state.  For bookkeeping purposes, we count the number of nodes expanded."))
 
