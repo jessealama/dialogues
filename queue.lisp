@@ -36,7 +36,7 @@ The heap implementation is taken from \"Introduction to Algorithms\" by Cormen, 
 
 (defun empty-queue? (q)
   "Are there no elements in the queue?"
-  (length= (elements q)) 0)
+  (length= (elements q) 0))
 
 (defun queue-front (q)
   "Return the element at the front of the queue."
