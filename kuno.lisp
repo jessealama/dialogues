@@ -54,9 +54,9 @@
     (loop
        :for c :across (format nil "~a" err)
        :do
-       (if (char= c #\Newline)
-           (format rendered "~a% " #\Newline)
-           (format rendered "~a" c)))))
+       (format rendered "~a" c)
+       (when (char= c #\Newline)
+         (format rendered "% ")))))
 
 (defun main ()
   "Entry point for Kuno."
