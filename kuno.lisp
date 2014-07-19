@@ -35,17 +35,8 @@
 		   :argument-name "DEPTH"
 		   :default-value "20"))))
 
-(defun red (str)
-  (format nil "~C[;31m~a~C[0;m" #\Escape str #\Escape))
-
-(defun cyan (str)
-  (format nil "~C[;36m~a~C[0;m" #\Escape str #\Escape))
-
-(defun yellow (str)
-  (format nil "~C[;33m~a~C[0;m" #\Escape str #\Escape))
-
 (defun error-message (format-string &rest format-args)
-  (format *error-output* (red "Error"))
+  (format *error-output* (dialogues::red "Error"))
   (format *error-output* "~a" #\Space)
   (apply #'format *error-output* format-string format-args))
 
