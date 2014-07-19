@@ -30,13 +30,7 @@
     :type list
     :initarg :successors
     :accessor successors
-    :documentation "A list of successor nodes.")
-   (depth
-    :initform 0
-    :initarg :depth
-    :accessor depth
-    :type integer
-    :documentation "Depth of the node in the tree (root = 0)."))
+    :documentation "A list of successor nodes."))
   (:documentation "Node for generic search.  A node contains a state, a domain-specific representation of a point in the search space.  It also contains some bookkeeping information."))
 
 (defmethod print-object ((node node) stream)
@@ -52,6 +46,15 @@
 
 (defmethod expanded-p ((node node))
   (slot-boundp node 'dialogues::successors))
+
+(defgeneric depth (node)
+  (:documentation "Depth of the node in the tree (root = 0)."))
+
+(defmethod depth ((node node))
+  (let ((p (parent node)))
+    (if (null p)
+        0
+        (1+ (depth p)))))
 
 (defgeneric successors-in-problem (problem node)
   (:documentation "Return an alist of (action . state) pairs, reachable from this state."))
@@ -79,8 +82,7 @@
   (make-instance 'dialogues::node
                  :parent parent
                  :action action
-                 :state state
-                 :depth (1+ (depth parent))))
+                 :state state))
 
 (defun expand (node problem)
   (loop
@@ -329,7 +331,6 @@ the path."
                  :state (state node)
                  :parent (parent node)
                  :action (action node)
-                 :successors (mapcar #'copy-search-tree-node (successors node))
-                 :depth (depth node)))
+                 :successors (mapcar #'copy-search-tree-node (successors node))))
 
 ;;; search.lisp ends here
