@@ -84,15 +84,24 @@
                  :action action
                  :state state))
 
-(defun expand (node problem)
+(defgeneric expand (node problem)
+  (:documentation "Make the successors of NODE (relative to PROBLEM)."))
+
+(defmethod expand :around ((node node) (problem problem))
+  (if (expanded-p node)
+      (successors node)
+      (let ((nodes (call-next-method)))
+        (setf (successors node) nodes)
+        nodes)))
+
+(defmethod expand :after ((node node) (problem problem))
+  (declare (ignore node))
+  (incf (problem-num-expanded problem)))
+
+(defmethod expand ((node node) (problem problem))
   (loop
-     :initially (when (expanded-p node) (return (successors node)))
      :for (action . state) :in (successors-in-problem problem node)
-     :collect (make-successor-node node action state) :into nodes
-     :finally
-     (setf (successors node) nodes)
-     (incf (problem-num-expanded problem))
-     (return nodes)))
+     :collect (make-successor-node node action state)))
 
 (defun create-start-node (problem)
   "Make the starting node, corresponding to the problem's initial state."
