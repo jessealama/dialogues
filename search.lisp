@@ -15,7 +15,7 @@
   ((state
     :accessor state
     :initarg :state
-    :documentation "A stte in the domain")
+    :documentation "A state in the domain")
    (parent
     :initform nil
     :initarg :parent
