@@ -59,6 +59,10 @@
  "All pairs (A . B) of natural numbers summing to N."
  (loop :for a :from 0 :upto n :collect (cons a (- n a))))
 
+(defun parse-integer-noerror (x)
+  (handler-case (parse-integer x :junk-allowed nil)
+    (error () nil)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Input and output
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

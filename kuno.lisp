@@ -59,10 +59,6 @@
      (clon:help)
      (clon:exit ,exit-code)))
 
-(defun parse-integer-noerror (x)
-  (handler-case (parse-integer x :junk-allowed nil)
-    (error () nil)))
-
 (defun parse-tptp-noerror (x)
   (handler-case (dialogues::parse-tptp x)
     (error () nil)))
@@ -133,7 +129,7 @@
     (setf arg (pathname (first remainder)))
 
     ;; timeout option
-    (setf timeout (parse-integer-noerror timeout-arg))
+    (setf timeout (dialogues::parse-integer-noerror timeout-arg))
     (unless (integerp timeout)
       (error-message "'~a' is not an acceptable value for the timeout option." timeout-arg)
       (clon:exit 1))
