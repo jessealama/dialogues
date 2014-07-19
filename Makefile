@@ -15,10 +15,8 @@ kuno: $(lisps) Makefile
 	which sbcl
 	CC=gcc sbcl --script kuno.lisp
 
-test:
-	test -d test
-	test -r test/Makefile
-	+make -C test
+test: kuno
+	# no tests defined
 
 # Local Variables:
 # mode: makefile-gmake
