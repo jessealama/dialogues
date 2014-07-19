@@ -126,13 +126,6 @@
 	    (first-splitting-descendant (first succs))
 	    node))))
 
-(defun make-initial-queue (initial-state
-			   &key (queueing-function #'enqueue-at-end))
-  (let ((q (make-empty-queue)))
-    (funcall queueing-function q (list (make-instance 'dialogues::node
-                                                      :state initial-state)))
-    q))
-
 (defun general-search (problem queueing-function)
   "Expand nodes according to the specification of PROBLEM until we find a solution or run out of nodes to expand.  The QUEUING-FN decides which nodes to look at first."
   (let ((nodes (make-initial-queue (initial-state problem)
