@@ -77,13 +77,6 @@
 		 (list n))))
     (reverse (node-ancestors-backwards (parent node)))))
 
-(defun make-successor-node (parent action state)
-  "Make a successor of PARENT that is arrived at by taking ACTION and yielding STATE."
-  (make-instance 'dialogues::node
-                 :parent parent
-                 :action action
-                 :state state))
-
 (defgeneric expand (node problem)
   (:documentation "Make the successors of NODE (relative to PROBLEM)."))
 
@@ -101,7 +94,10 @@
 (defmethod expand ((node node) (problem problem))
   (loop
      :for (action . state) :in (successors-in-problem problem node)
-     :collect (make-successor-node node action state)))
+     :collect (make-instance 'dialogues::node
+                             :parent node
+                             :action action
+                             :state state)))
 
 (defun create-start-node (problem)
   "Make the starting node, corresponding to the problem's initial state."
