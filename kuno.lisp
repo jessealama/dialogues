@@ -35,11 +35,6 @@
 		   :argument-name "DEPTH"
 		   :default-value "20"))))
 
-(defun error-message (format-string &rest format-args)
-  (format *error-output* (dialogues::red "Error"))
-  (format *error-output* "~a" #\Space)
-  (apply #'format *error-output* format-string format-args))
-
 (defmacro help-and-exit (&optional (exit-code 0))
   `(progn
      (clon:help)
@@ -82,23 +77,23 @@
 
     ;; arguments
     (when (null remainder)
-      (error-message "Not enough arguments (exactly one argument is expected, but zero were given.")
+      (dialogues::error-message "Not enough arguments (exactly one argument is expected, but zero were given.")
       (help-and-exit 1))
     (when (rest remainder)
-      (error-message "Too many arguments (exactly one is expected).")
+      (dialogues::error-message "Too many arguments (exactly one is expected).")
       (help-and-exit 1))
     (setf arg (pathname (first remainder)))
 
     ;; timeout option
     (setf timeout (dialogues::parse-integer-noerror timeout-arg))
     (unless (integerp timeout)
-      (error-message "'~a' is not an acceptable value for the timeout option." timeout-arg)
+      (dialogues::error-message "'~a' is not an acceptable value for the timeout option." timeout-arg)
       (clon:exit 1))
 
     ;; depth option
     (setf depth (parse-integer-noerror depth-arg))
     (unless (integerp depth)
-      (error-message "'~a' is not an acceptable value for the depth option." timeout-arg)
+      (dialogues::error-message "'~a' is not an acceptable value for the depth option." timeout-arg)
       (clon:exit 1))
 
     (when (cl-fad:directory-exists-p arg)

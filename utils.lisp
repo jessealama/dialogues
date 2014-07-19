@@ -162,6 +162,11 @@
 (defun yellow (str)
   (format nil "~C[;33m~a~C[0;m" #\Escape str #\Escape))
 
+(defun error-message (format-string &rest format-args)
+  (format *error-output* (red "Error"))
+  (format *error-output* "~a" #\Space)
+  (apply #'format *error-output* format-string format-args))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Strings
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
