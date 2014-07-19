@@ -57,6 +57,16 @@
         0
         (1+ (depth p)))))
 
+(defun root-node-p (node)
+  (null (parent node)))
+
+(defun root-of (node)
+  "The root node accessible from NODE."
+  (let ((p (parent node)))
+    (if p
+        (root-of p)
+        node)))
+
 (defgeneric successors-in-problem (problem node)
   (:documentation "Return an alist of (action . state) pairs, reachable from this state."))
 
