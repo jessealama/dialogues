@@ -968,4 +968,8 @@
 	   finally
 	     (return (reverse new-formulas)))))))
 
+(defun parse-tptp-noerror (x)
+  (handler-case (dialogues::parse-tptp x)
+    (error () nil)))
+
 ;;; parse.lisp ends here

@@ -59,10 +59,6 @@
      (clon:help)
      (clon:exit ,exit-code)))
 
-(defun parse-tptp-noerror (x)
-  (handler-case (dialogues::parse-tptp x)
-    (error () nil)))
-
 (defun solve-problem (tptp timeout depth)
   (handler-case
       (trivial-timeout:with-timeout (timeout)
@@ -152,7 +148,7 @@
 
     ;; parse
 
-    (setf tptp (parse-tptp-noerror arg))
+    (setf tptp (dialogues::parse-tptp-noerror arg))
 
     (multiple-value-bind (result comment exit-cleanly-p)
         (handler-case
