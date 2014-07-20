@@ -236,17 +236,27 @@
            (unless (eql search-result :cutoff)
              (return t))))
       (let ((dialogue-1 (tptp->dialogue db *e-ruleset--no-repetitions*))
-            (dialogue-2 (tptp->dialogue db *e-ruleset--prefer-defenses*)))
+            (dialogue-2 (tptp->dialogue db *e-ruleset--prefer-defenses*))
+            (dialogue-3 (tptp->dialogue db *e-ruleset*)))
         (let ((search-result-1 (proponent-has-winning-strategy? dialogue-1 strategy-depth)))
-          (if search-result-1
-              (if (eql search-result-1 :cutoff)
-                  (let ((search-result-2 (proponent-has-winning-strategy? dialogue-2 strategy-depth)))
-                    (if search-result-2
-                        (not (eql search-result-2 :cutoff))))
-                  t)
-              (let ((search-result-2 (proponent-has-winning-strategy? dialogue-2 strategy-depth)))
-                (if search-result-2
-                    (not (eql search-result-2 :cutoff)))))))))
+          (cond ((eql search-result-1 :cutoff)
+                 (let ((search-result-2 (proponent-has-winning-strategy? dialogue-2 strategy-depth)))
+                   (cond ((eql search-result-2 :cutoff)
+                          (proponent-has-winning-strategy? dialogue-3 strategy-depth))
+                         (search-result-2
+                          t)
+                         (t
+                          (proponent-has-winning-strategy? dialogue-3 strategy-depth)))))
+                (search-result-1
+                 t)
+                (t
+                 (let ((search-result-2 (proponent-has-winning-strategy? dialogue-2 strategy-depth)))
+                   (cond ((eql search-result-2 :cutoff)
+                          (proponent-has-winning-strategy? dialogue-3 strategy-depth))
+                         (search-result-2
+                          t)
+                         (t
+                          (proponent-has-winning-strategy? dialogue-3 strategy-depth))))))))))
 
 (defmethod intuitionistically-valid? ((formula formula) strategy-depth)
   (if (contains-quantifier-p formula)
