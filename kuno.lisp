@@ -34,7 +34,7 @@
 		   :long-name "depth"
 		   :description "Consider winning strategies having depth at most DEPTH."
 		   :argument-name "DEPTH"
-		   :default-value "20"))))
+		   :default-value "30"))))
 
 (defun file-readable? (path)
   (and (probe-file path)
