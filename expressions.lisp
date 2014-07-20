@@ -1046,6 +1046,10 @@ in TERM or FORMULA."))
 ;;; Standard symbolic attacks for propositional and first-order languges
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defparameter *attack-atom*
+  (make-instance 'symbolic-attack
+                 :name "attack-atom"))
+
 (defparameter *attack-left-conjunct*
   (make-instance 'symbolic-attack
                  :name "attack-left-conjunct"))
