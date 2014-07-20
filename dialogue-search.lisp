@@ -242,7 +242,8 @@
               (if (eql search-result-1 :cutoff)
                   (let ((search-result-2 (proponent-has-winning-strategy? dialogue-2 strategy-depth)))
                     (if search-result-2
-                        (not (eql search-result-2 :cutoff)))))
+                        (not (eql search-result-2 :cutoff))))
+                  t)
               (let ((search-result-2 (proponent-has-winning-strategy? dialogue-2 strategy-depth)))
                 (if search-result-2
                     (not (eql search-result-2 :cutoff)))))))))
