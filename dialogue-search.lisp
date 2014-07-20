@@ -17,9 +17,9 @@
 (defmethod goal-test :before ((problem dialogue-search-problem) node)
   (expand node problem))
 
-(defmethod goal-test ((problem dialogue-search-problem) node)
-  (and (null (successors node))
-       (proponent-move-p (last-move (state node)))))
+;; (defmethod goal-test ((problem dialogue-search-problem) node)
+;;   (and (null (successors node))
+;;        (proponent-move-p (last-move (state node)))))
 
 (defmethod successors-in-problem ((dsp dialogue-search-problem) node)
   (continuations (state node)))
@@ -247,26 +247,32 @@
                 (if search-result-2
                     (not (eql search-result-2 :cutoff)))))))))
 
+;; (defmethod intuitionistically-valid? ((formula formula) strategy-depth)
+;;   (if (contains-quantifier-p formula)
+;;       (loop
+;;          :for term-depth = 0
+;;          :for ruleset = (make-instance 'ruleset
+;;                                        :description (format nil "E, maximum term depth = ~d" term-depth)
+;;                                        :expander #'(lambda (dialogue)
+;;                                                      (e-fol-expander--no-repetitions+prefer-defenses dialogue term-depth)))
+;;          :for dialogue = (make-instance 'dialogue
+;;                                         :initial-formula formula
+;;                                         :ruleset ruleset)
+;;          :for search-result = (proponent-has-winning-strategy? dialogue strategy-depth)
+;;          :do
+;;          (when search-result
+;;            (unless (eql search-result :cutoff)
+;;              (return t))))
+;;       (let ((dialogue (make-instance 'dialogue
+;;                                      :initial-formula formula
+;;                                      :ruleset *e-ruleset--no-repetitions*)))
+;;         (proponent-has-winning-strategy? dialogue strategy-depth))))
+
 (defmethod intuitionistically-valid? ((formula formula) strategy-depth)
-  (if (contains-quantifier-p formula)
-      (loop
-         :for term-depth = 0
-         :for ruleset = (make-instance 'ruleset
-                                       :description (format nil "E, maximum term depth = ~d" term-depth)
-                                       :expander #'(lambda (dialogue)
-                                                     (e-fol-expander--no-repetitions+prefer-defenses dialogue term-depth)))
-         :for dialogue = (make-instance 'dialogue
-                                        :initial-formula formula
-                                        :ruleset ruleset)
-         :for search-result = (proponent-has-winning-strategy? dialogue strategy-depth)
-         :do
-         (when search-result
-           (unless (eql search-result :cutoff)
-             (return t))))
-      (let ((dialogue (make-instance 'dialogue
-                                     :initial-formula formula
-                                     :ruleset *e-ruleset--no-repetitions*)))
-        (proponent-has-winning-strategy? dialogue strategy-depth))))
+  (let ((problem (make-instance 'strategy-search-problem
+                                :initial-state formula
+                                :ruleset *e-ruleset*)))
+    (general-bounded-search problem #'enqueue-at-end strategy-depth)))
 
 (defun develop-dialogue-tree-to-depth (tree-root depth problem)
   (let ((expandable-leaves (expandable-leaf-nodes tree-root)))
