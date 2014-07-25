@@ -8,7 +8,7 @@
     :accessor statement)
    (reference
     :initarg :reference
-    :type integer
+    :type (or formula symbolic-attack)
     :initform (error "Every move must refer to another.")
     :accessor reference)
    (attack
@@ -22,8 +22,8 @@
     (with-slots (statement reference) m
       (if (attack-p m)
           (format stream "attack")
-          (format stream "defend against the attack of"))
-      (format stream " move ~d by asserting ~a" reference statement))))
+          (format stream "defend against the attack on"))
+      (format stream " ~a by asserting ~a" reference statement))))
 
 (defun move-p (x)
   (typep x 'dialogues::move))
