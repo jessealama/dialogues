@@ -254,27 +254,6 @@
                          (t
                           (proponent-has-winning-strategy? dialogue-3 strategy-depth))))))))))
 
-;; (defmethod intuitionistically-valid? ((formula formula) strategy-depth)
-;;   (if (contains-quantifier-p formula)
-;;       (loop
-;;          :for term-depth = 0
-;;          :for ruleset = (make-instance 'ruleset
-;;                                        :description (format nil "E, maximum term depth = ~d" term-depth)
-;;                                        :expander #'(lambda (dialogue)
-;;                                                      (e-fol-expander--no-repetitions+prefer-defenses dialogue term-depth)))
-;;          :for dialogue = (make-instance 'dialogue
-;;                                         :initial-formula formula
-;;                                         :ruleset ruleset)
-;;          :for search-result = (proponent-has-winning-strategy? dialogue strategy-depth)
-;;          :do
-;;          (when search-result
-;;            (unless (eql search-result :cutoff)
-;;              (return t))))
-;;       (let ((dialogue (make-instance 'dialogue
-;;                                      :initial-formula formula
-;;                                      :ruleset *e-ruleset--no-repetitions*)))
-;;         (proponent-has-winning-strategy? dialogue strategy-depth))))
-
 (defmethod intuitionistically-valid? ((formula formula) strategy-depth)
   (let ((problem (make-instance 'strategy-search-problem
                                 :initial-state formula
