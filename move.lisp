@@ -5,17 +5,17 @@
     :initarg :statement
     :type (or formula symbolic-attack)
     :initform (error "Every move must contain a statement.")
-    :accessor statement)
+    :reader statement)
    (reference
     :initarg :reference
     :type (or formula symbolic-attack)
     :initform (error "Every move must refer to another.")
-    :accessor reference)
+    :reader reference)
    (attack
     :initarg :attack
     :type boolean
     :initform nil
-    :accessor attack-p)))
+    :reader attack-p)))
 
 (defmethod print-object ((m move) stream)
   (print-unreadable-object (m stream :type t :identity nil)
