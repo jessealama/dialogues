@@ -38,6 +38,10 @@
           ((proponent-node-p node)
            (some #'contains-winning-strategy-p (successors node))))))
 
+(defmethod goal-test ((problem dialogue-search-problem) (node node))
+  (declare (ignore problem))
+  (proponent-wins-p node))
+
 (defmethod goal-test ((problem strategy-search-problem) (node node))
   (contains-winning-strategy-p (root-of node)))
 
