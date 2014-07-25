@@ -124,7 +124,7 @@
   (remove-if #'expanded-p (leaf-nodes node)))
 
 (defun general-search (problem queueing-function)
-  "Expand nodes according to the specification of PROBLEM until we find a solution or run out of nodes to expand.  The QUEUING-FN decides which nodes to look at first."
+  "Expand nodes according to PROBLEM until either a solution is found or no more nodes are available to expand.  QUEUING-FUNCTION is used to regiment how queueing of expanded nodes."
   (loop
      :with nodes = (make-initial-queue (initial-node problem)
                                        :queueing-function queueing-function)
