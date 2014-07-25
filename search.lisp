@@ -2,16 +2,6 @@
 
 (in-package :dialogues)
 
-(defclass problem ()
-  ((initial-state
-    :initarg :initial-state
-    :accessor initial-state)
-   (num-expanded
-    :accessor problem-num-expanded
-    :type integer
-    :initform 0))
-  (:documentation "A problem is defined by an initial state.  For bookkeeping purposes, we count the number of nodes expanded."))
-
 (defclass node ()
   ((state
     :accessor state
@@ -33,6 +23,17 @@
     :accessor successors
     :documentation "A list of successor nodes."))
   (:documentation "Node for generic search.  A node contains a state, a domain-specific representation of a point in the search space.  It also contains some bookkeeping information."))
+
+(defclass problem ()
+  ((initial-node
+    :initarg :initial-node
+    :type node
+    :accessor initial-node)
+   (num-expanded
+    :accessor problem-num-expanded
+    :type integer
+    :initform 0))
+  (:documentation "A problem is defined by an initial state.  For bookkeeping purposes, we count the number of nodes expanded."))
 
 (defmethod print-object ((node node) stream)
   (print-unreadable-object (node stream :type t)
