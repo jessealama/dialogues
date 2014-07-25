@@ -132,7 +132,7 @@
      :do
      (when (empty-queue? nodes) (return nil))
      (setf node (remove-front nodes))
-     (if (goal-test problem node) (return node))
+     (when (goal-test problem node) (return node))
      (funcall queueing-function nodes (expand node problem))))
 
 (defun general-bounded-search (problem queueing-function depth)
