@@ -125,13 +125,15 @@
 
 (defun general-search (problem queueing-function)
   "Expand nodes according to the specification of PROBLEM until we find a solution or run out of nodes to expand.  The QUEUING-FN decides which nodes to look at first."
-  (let ((nodes (make-initial-queue (initial-node problem)
-				   :queueing-function queueing-function)))
-    (let (node)
-      (loop (if (empty-queue? nodes) (return nil))
-	 (setf node (remove-front nodes))
-	 (if (goal-test problem node) (return node))
-	 (funcall queueing-function nodes (expand node problem))))))
+  (loop
+     :with nodes = (make-initial-queue (initial-node problem)
+                                       :queueing-function queueing-function)
+     :with node = nil
+     :do
+     (when (empty-queue? nodes) (return nil))
+     (setf node (remove-front nodes))
+     (if (goal-test problem node) (return node))
+     (funcall queueing-function nodes (expand node problem))))
 
 (defun general-bounded-search (problem queueing-function depth)
   "Expand nodes according to the specification of PROBLEM until we find a solution or run out of nodes to expand or exceed the specified DEPTH.  QUEUING-FN decides which nodes to look at first."
