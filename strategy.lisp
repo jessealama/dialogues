@@ -37,9 +37,6 @@
 (defmethod goal-test ((problem strategy-search-problem) (node node))
   (contains-winning-strategy-p (root-of node)))
 
-(defmethod successors-in-problem ((problem strategy-search-problem) (node node))
-  nil)
-
 (defmethod successors-in-problem ((problem strategy-search-problem)
                                   (node node))
   (cond ((opponent-node-p node)
