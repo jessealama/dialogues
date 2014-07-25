@@ -123,15 +123,6 @@
   "All leaf nodes reachable from NODE that can be expanded."
   (remove-if #'expanded-p (leaf-nodes node)))
 
-(defun first-splitting-descendant (node)
-  "The first descendant of NODE that has multiple successors.  If there are no such nodes (i.e., the set of descendents of NODE forms a linear sequence), return NIL."
-  (let ((succs (successors node)))
-    (if (null succs)
-	nil
-	(if (null (cdr succs))
-	    (first-splitting-descendant (first succs))
-	    node))))
-
 (defun general-search (problem queueing-function)
   "Expand nodes according to the specification of PROBLEM until we find a solution or run out of nodes to expand.  The QUEUING-FN decides which nodes to look at first."
   (let ((nodes (make-initial-queue (initial-node problem)
