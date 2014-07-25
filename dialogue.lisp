@@ -196,26 +196,6 @@
   (let ((open-attacks (open-attack-indices dialogue)))
     (first (last open-attacks))))
 
-(defun earliest-open-attack-for-player (dialogue player &key end)
-  "The smallest index (starting from 0) of the attacking move by
-  PLAYER in DIALOGUE to which there is no response."
-  (loop
-     with plays = (plays dialogue)
-     for i from 1 upto (if end end (length plays))
-     for move in (cdr plays)
-     do
-       (when (attack-p move)
-	 (let ((move-player (player move)))
-	   (when (eql player move-player)
-	     (unless (some #'(lambda (other-move)
-			       (and (not (eql (player other-move) player))
-				    (defense-p other-move)
-				    (= (reference other-move) i)))
-			   plays)
-	       (return i)))))
-     finally
-       (return nil)))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Evaluating rules
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
