@@ -40,6 +40,9 @@
 (defmethod defense-p ((x move))
   (not (attack-p x)))
 
+(defmethod attack-p ((x t))
+  nil)
+
 (defclass proponent-move (move)
   nil)
 
