@@ -52,9 +52,6 @@
 (defun opponent-move-p (x)
   (typep x 'dialogues::opponent-move))
 
-(defun initial-move-p (move)
-  (not (slot-boundp move 'dialogues::reference)))
-
 (defgeneric player (x)
   (:documentation "The player of X."))
 
