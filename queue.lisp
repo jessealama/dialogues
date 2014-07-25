@@ -76,11 +76,10 @@ The heap implementation is taken from \"Introduction to Algorithms\" by Cormen, 
      :for item :in items
      :do (heap-insert (elements q) item key)))
 
-(defun make-initial-queue (initial-state
+(defun make-initial-queue (initial-node
 			   &key (queueing-function #'enqueue-at-end))
   (let ((q (make-empty-queue)))
-    (funcall queueing-function q (list (make-instance 'dialogues::node
-                                                      :state initial-state)))
+    (funcall queueing-function q (list initial-node))
     q))
 
 ;;;; The Heap Implementation of Priority Queues

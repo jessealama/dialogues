@@ -134,7 +134,7 @@
 
 (defun general-search (problem queueing-function)
   "Expand nodes according to the specification of PROBLEM until we find a solution or run out of nodes to expand.  The QUEUING-FN decides which nodes to look at first."
-  (let ((nodes (make-initial-queue (initial-state problem)
+  (let ((nodes (make-initial-queue (initial-node problem)
 				   :queueing-function queueing-function)))
     (let (node)
       (loop (if (empty-queue? nodes) (return nil))
@@ -144,7 +144,7 @@
 
 (defun general-bounded-search (problem queueing-function depth)
   "Expand nodes according to the specification of PROBLEM until we find a solution or run out of nodes to expand or exceed the specified DEPTH.  QUEUING-FN decides which nodes to look at first."
-  (let ((nodes (make-initial-queue (initial-state problem)
+  (let ((nodes (make-initial-queue (initial-node problem)
 				   :queueing-function queueing-function)))
     (let (node)
       (loop (if (empty-queue? nodes) (return (values nil nil)))
@@ -158,7 +158,7 @@
 
 Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
   (let ((nodes (or queue
-		   (make-initial-queue (initial-state problem)
+		   (make-initial-queue (initial-node problem)
 				       :queueing-function queueing-function))))
     (let (node)
       (loop (if (empty-queue? nodes) (return (values nil nil nodes)))
@@ -169,7 +169,7 @@ Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
 
 (defun general-search-with-nodes (problem queueing-function &optional queue)
   (let ((nodes (or queue
-		   (make-initial-queue (initial-state problem)
+		   (make-initial-queue (initial-node problem)
 				       :queueing-function queueing-function))))
     (let (node)
       (loop (if (empty-queue? nodes) (return (values nil nil)))
@@ -180,7 +180,7 @@ Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
 (defun general-search-for-bottom (problem queueing-function &optional queue)
   "Expand nodes according to the specification of PROBLEM until we find a node with no successors or we run out of nodes to expand.  The QUEUING-FN decides which nodes to look at first."
   (let ((nodes (or queue
-		   (make-initial-queue (initial-state problem)
+		   (make-initial-queue (initial-node problem)
 				       :queueing-function queueing-function))))
     (let (node)
       (loop (if (empty-queue? nodes) (return (values nil nil)))
@@ -233,8 +233,10 @@ Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
      :for solution = (depth-limited-dfs-search problem d)
      :unless (eq solution :cutoff) :do (return solution)))
 
-(defun depth-limited-dfs-search (problem &optional limit (node (create-start-node problem)))
+(defun depth-limited-dfs-search (problem &optional limit node)
   "Search depth-first, but only up to LIMIT branches deep in the tree."
+  (unless node
+    (setf node (initial-node problem)))
   (cond ((goal-test problem node) node)
         ((and (integerp limit)
 	      (>= (depth node) limit))
@@ -245,9 +247,10 @@ Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
               :when (and solution (not (eq solution :cutoff)))
               :do (return solution)))))
 
-(defun exhaustive-depth-limited-search (problem &optional limit
-			              (node (create-start-node problem)))
+(defun exhaustive-depth-limited-search (problem &optional limit node)
   "Search depth-first, but only up to LIMIT branches deep in the tree. Expand until there are no more nodes of depth less than LIMIT that are unexpanded."
+  (unless node
+    (setf node (initial-node problem)))
   (let ((to-do (list node)))
     (until (null to-do)
       (let ((current-node (pop to-do)))

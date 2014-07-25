@@ -21,34 +21,35 @@
   (continuations (state node)))
 
 (defun dialogue-search-bfs (rules initial-statement &optional more-nodes)
-  (let* ((d (make-instance 'dialogue
-                           :initial-formula initial-statement
-                           :rulset rules))
+  (let* ((n (make-instance 'dialogues::node :state initial-statement))
          (problem (make-instance 'dialogue-search-problem
-                                 :initial-state d
+                                 :initial-node n
                                  :rules rules)))
     (breadth-first-search-for-bottom-with-nodes problem more-nodes)))
 
 (defun dialogue-search-dfs (rules initial-statement)
-  (let* ((d (make-instance 'dialogue
-                           :initial-formula initial-statement
-                           :ruleset rules))
+  (let* ((n (make-instance 'dialogues::node :state initial-statement))
          (problem (make-instance 'dialogue-search-problem
-                                 :initial-state d
+                                 :initial-node n
                                  :rules rules)))
     (depth-first-search-for-bottom problem)))
 
-(defun bounded-dialogue-search-dfs (rules initial-statement depth &optional (initial-state (make-instance 'dialogue :initial-formula initial-statement :ruleset rules)))
+(defun bounded-dialogue-search-dfs (rules initial-statement depth &optional (initial-node))
+  (unless initial-node
+    (make-instance 'dialogues::node :state initial-statement))
   (let ((problem (make-instance 'dialogue-search-problem
-                                :initial-state initial-state
+                                :initial-node initial-node
                                 :rules rules)))
     (depth-limited-dfs-search problem depth)))
 
-(defun bounded-dialogue-search-bfs (rules initial-statement depth
-				    &optional (initial-state (make-instance 'dialogue :initial-formula initial-statement :ruleset rules))
-				              initial-queue)
+(defun bounded-dialogue-search-bfs (rules initial-statement depth &optional initial-node initial-queue)
+  (unless initial-node
+    (setf state (make-instance 'dialogue :initial-formula initial-statement :ruleset rules)))
+  (unless initial-queue
+    (setf queue (make-initial-queue initial-node
+                                    :queueing-function #'enqueue-at-end)))
   (let ((problem (make-instance 'dialogue-search-problem
-                                :initial-state initial-state
+                                :initial-node initial-node
                                 :rules rules)))
 	(bounded-bfs-with-nodes problem depth initial-queue)))
 
@@ -255,9 +256,10 @@
                           (proponent-has-winning-strategy? dialogue-3 strategy-depth))))))))))
 
 (defmethod intuitionistically-valid? ((formula formula) strategy-depth)
-  (let ((problem (make-instance 'strategy-search-problem
-                                :initial-state formula
-                                :ruleset *e-ruleset*)))
+  (let* ((n (make-instance 'dialogues::node :state formula))
+         (problem (make-instance 'strategy-search-problem
+                                 :initial-node n
+                                 :ruleset *e-ruleset*)))
     (general-bounded-search problem #'enqueue-at-end strategy-depth)))
 
 (defun develop-dialogue-tree-to-depth (tree-root depth problem)
