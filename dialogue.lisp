@@ -116,9 +116,6 @@
 (defun last-move (dialogue)
   (first (last (plays dialogue))))
 
-(defun last-player (dialogue)
-  (player (last-move dialogue)))
-
 (defun nth-statement (dialogue n)
   (if (zerop n)
       (initial-formula dialogue)
