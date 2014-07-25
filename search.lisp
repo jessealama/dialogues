@@ -152,7 +152,8 @@ Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
 		   (make-initial-queue (initial-node problem)
 				       :queueing-function queueing-function))))
     (let (node)
-      (loop (if (empty-queue? nodes) (return (values nil nil nodes)))
+      (loop
+         (if (empty-queue? nodes) (return (values nil nil nodes)))
 	 (setf node (remove-front nodes))
 	 (if (> (depth node) depth) (return (values nil :cutoff nodes)))
 	 (if (goal-test problem node) (return (values t node nodes)))
