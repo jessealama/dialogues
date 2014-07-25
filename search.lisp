@@ -110,11 +110,6 @@
                              :action action
                              :state state)))
 
-(defun create-start-node (problem)
-  "Make the starting node, corresponding to the problem's initial state."
-  (make-instance 'dialogues::node
-                 :state (initial-state problem)))
-
 (defun leaf-nodes (node)
   "All nodes reachable from NODE (via the successor function) that are either unexpanded or have no successors (and are expanded)."
   (if (expanded-p node)
