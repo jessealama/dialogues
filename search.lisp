@@ -28,7 +28,7 @@
   ((initial-node
     :initarg :initial-node
     :type node
-    :accessor initial-node)
+    :reader initial-node)
    (num-expanded
     :accessor problem-num-expanded
     :type integer
