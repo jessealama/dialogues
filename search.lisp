@@ -147,19 +147,21 @@
 	 (funcall queueing-function nodes (expand node problem))))))
 
 (defun general-bounded-search-with-nodes (problem queueing-function depth &optional queue)
-  "Expand nodes according to the specification of PROBLEM until we find a solution or run out of nodes to expand or exceed the specified DEPTH.  QUEUING-FN decides which nodes to look at first.  QUEUE is a initial queue of node.  (NIL is an acceptable value for QUEUE.) This function behaves like a breadth-first search in the sense that as soon as a node is encountered whose depth exceeds DEPTH, it stops.
+  "Expand nodes according to the specification of PROBLEM until we find a solution or run out of nodes to expand or exceed the specified DEPTH.  QUEUING-FUNCTION decides which nodes to look at first.  QUEUE is a initial queue of node.  (NIL is an acceptable value for QUEUE.) This function behaves like a breadth-first search in the sense that as soon as a node is encountered whose depth exceeds DEPTH, it stops.
 
 Returns three values: (SUCCESS SOLUTION REMAINING-NODES)."
-  (let ((nodes (or queue
-		   (make-initial-queue (initial-node problem)
-				       :queueing-function queueing-function))))
-    (let (node)
-      (loop
-         (if (empty-queue? nodes) (return (values nil nil nodes)))
-	 (setf node (remove-front nodes))
-	 (if (> (depth node) depth) (return (values nil :cutoff nodes)))
-	 (if (goal-test problem node) (return (values t node nodes)))
-	 (funcall queueing-function nodes (expand node problem))))))
+  (loop
+     :with initial-node = (initial-node problem)
+     :with nodes = (or queue
+                       (make-initial-queue (initial-node problem)
+                                           :queueing-function queueing-function))
+     :with node = nil
+     :do
+     (when (empty-queue? nodes) (return (values nil nil nodes)))
+     (setf node (remove-front nodes))
+     (when (> (depth node) depth) (return (values nil :cutoff nodes)))
+     (when (goal-test problem node) (return (values t node nodes)))
+     (funcall queueing-function nodes (expand node problem))))
 
 (defun general-search-with-nodes (problem queueing-function &optional queue)
   (let ((nodes (or queue
