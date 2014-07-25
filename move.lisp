@@ -1,14 +1,16 @@
 (in-package :dialogues)
 
 (defclass move ()
-  ((statement :initarg :statement
-              :type (or formula symbolic-attack)
-              :initform (error "Every move must contain a statement.")
-	      :accessor statement)
-   (reference :initarg :reference
-              :type integer
-              :initform (error "Every move must refer to another.")
-	      :accessor reference)
+  ((statement
+    :initarg :statement
+    :type (or formula symbolic-attack)
+    :initform (error "Every move must contain a statement.")
+    :accessor statement)
+   (reference
+    :initarg :reference
+    :type integer
+    :initform (error "Every move must refer to another.")
+    :accessor reference)
    (attack
     :initarg :attack
     :type boolean
