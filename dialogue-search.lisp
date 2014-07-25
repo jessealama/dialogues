@@ -17,10 +17,6 @@
 (defmethod goal-test :before ((problem dialogue-search-problem) node)
   (expand node problem))
 
-;; (defmethod goal-test ((problem dialogue-search-problem) node)
-;;   (and (null (successors node))
-;;        (proponent-move-p (last-move (state node)))))
-
 (defmethod successors-in-problem ((dsp dialogue-search-problem) node)
   (continuations (state node)))
 
