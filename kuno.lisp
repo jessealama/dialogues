@@ -33,7 +33,7 @@
 		   :long-name "depth"
 		   :description "Consider winning strategies having depth at most DEPTH."
 		   :argument-name "DEPTH"
-		   :default-value "20"))))
+		   :default-value "30"))))
 
 (defmacro help-and-exit (&optional (exit-code 0))
   `(progn
