@@ -26,6 +26,10 @@
   (and (not (root-node-p node))
        (opponent-node-p (parent node))))
 
+(defun proponent-wins-p (node)
+  "Does Proponent win the dialogue ending at NODE?"
+  nil)
+
 (defun contains-winning-strategy-p (node)
   "Does NODE contain a winning strategy (for Proponent)?"
   (when (expanded-p node)
