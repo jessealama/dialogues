@@ -33,7 +33,7 @@
     :accessor problem-num-expanded
     :type integer
     :initform 0))
-  (:documentation "A problem is defined by an initial state.  For bookkeeping purposes, we count the number of nodes expanded."))
+  (:documentation "A problem is characterized by an initial node.  For bookkeeping purposes, we keep track of the number of nodes that have been expanded."))
 
 (defmethod print-object ((node node) stream)
   (print-unreadable-object (node stream :type t)
