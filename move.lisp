@@ -52,18 +52,6 @@
 (defun opponent-move-p (x)
   (typep x 'dialogues::opponent-move))
 
-(defgeneric player (x)
-  (:documentation "The player of X."))
-
-(defmethod player ((x t))
-  (error "What is the player of~%~%  ~a~%~%?~%" x))
-
-(defmethod player ((x proponent-move))
-  "P")
-
-(defmethod player ((x opponent-move))
-  "O")
-
 (defmethod terms-in ((sa symbolic-attack))
   nil)
 
