@@ -38,11 +38,7 @@
   (contains-winning-strategy-p (root-of node)))
 
 (defmethod successors-in-problem ((problem strategy-search-problem) (node node))
-  (loop
-     :with dialogue = (node->dialogue node (ruleset problem))
-     :with continuations = (continuations node)
-     :for move :in continuations
-     :collect (cons (list (attack-p move) (reference move)) (statement move))))
+  nil)
 
 (defmethod successors-in-problem ((problem strategy-search-problem)
                                   (node node))
