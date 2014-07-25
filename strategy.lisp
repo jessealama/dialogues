@@ -39,34 +39,6 @@
 
 (defmethod successors-in-problem ((problem strategy-search-problem)
                                   (node node))
-  (cond ((opponent-node-p node)
-         (cond ((root-node-p node)
-                (let ((f (initial-formula problem)))
-                  (cond ((atomic-formula-p f)
-                         (list (cons :attack *attack-atom*)))
-                        (t
-                         (error "How should Opponent attack the initial formula~%~%  ~a~%~%?" f)))))
-               (t
-                (destructuring-bind (attack-or-defend . statement)
-                    (action node)
-                  (assert (or (eql attack-or-defend :attack)
-                              (eql attack-or-defend :defend))
-                          attack-or-defend
-                          "Action should be either :attack or :defend, but we are dealing with~%~%  ~a~%" attack-or-defend)
-                  (when (eql attack-or-defend :defend)
-                    ;; Opponent must attack the statement
-                    (cond ((atomic-formula-p statement)
-                           (list (cons :attack *attack-atom*)))
-                          (t
-                           (error "How should Opponent attack the formula~%~%  ~a~%~%?" statement))))
-                  (when (eql attack-or-defend :attack)
-                    ;; attacks
-                    (attack)
-                    ;; defenses
-
-                    ))
-                ;; attacks
-                ;; defenses
-                )))))
+  nil)
 
 ;;; strategy.lisp ends here
