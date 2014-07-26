@@ -42,11 +42,11 @@
   (declare (ignore problem))
   (proponent-wins-p node))
 
-(defmethod goal-test ((problem strategy-search-problem) (node node))
+(defmethod goal-test ((problem strategy-search-problem) (node dialogue-node))
   (contains-winning-strategy-p (root-of node)))
 
 (defmethod successors-in-problem ((problem strategy-search-problem)
-                                  (node node))
+                                  (node dialogue-node))
   nil)
 
 ;;; strategy.lisp ends here
