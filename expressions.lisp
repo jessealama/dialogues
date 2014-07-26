@@ -1042,6 +1042,29 @@ in TERM or FORMULA."))
 (defmethod which-instance-attack-p ((x expression))
   (typep x 'which-instance-attack))
 
+(defgeneric equal-symbolic-attacks? (sa-1 sa-2)
+  (:documentation "Are symbolic attacks SA-1 and SA-2 equal?  (They can be equal without being identical objects.)"))
+
+(defmethod equal-symbolic-attacks? ((sa-1 symbolic-attack) (sa-2 which-instance-attack))
+  nil)
+
+(defmethod equal-symbolic-attacks? ((sa-1 which-instance-attack) (sa-2 symbolic-attack))
+  nil)
+
+(defmethod equal-symbolic-attacks? ((sa-1 which-instance-attack)
+                                    (sa-2 which-instance-attack))
+  (let ((i-1 (instance sa-1))
+        (i-2 (instance sa-2)))
+    (or (and (null i-1)
+             (null i-2))
+        (and (term-p i-1)
+             (term-p i-2)
+             (equal-terms? i-1 i-2)))))
+
+(defmethod equal-symbolic-attacks? ((sa-1 symbolic-attack)
+                                    (sa-2 symbolic-attack))
+  (eq sa-1 sa-2))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Standard symbolic attacks for propositional and first-order languges
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
