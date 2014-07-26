@@ -12,7 +12,13 @@
     :type ruleset
     :accessor ruleset
     :initform (error "A dialogue search problem requires a ruleset.")
-    :initarg :ruleset)))
+    :initarg :ruleset)
+   (concessions
+    :type list
+    :initform nil
+    :initarg :concessions
+    :reader concessions
+    :documentation "A list of formulas granted by the Opponent prior to the start of the game.")))
 
 (defmethod goal-test :before ((problem dialogue-search-problem) node)
   (expand node problem))
