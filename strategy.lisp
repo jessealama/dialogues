@@ -32,11 +32,7 @@
 
 (defun contains-winning-strategy-p (node)
   "Does NODE contain a winning strategy (for Proponent)?"
-  (when (expanded-p node)
-    (cond ((opponent-node-p node)
-           (every #'contains-winning-strategy-p (successors node)))
-          ((proponent-node-p node)
-           (some #'contains-winning-strategy-p (successors node))))))
+  nil)
 
 (defmethod goal-test ((problem dialogue-search-problem) (node node))
   (declare (ignore problem))
