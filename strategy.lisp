@@ -46,15 +46,18 @@
   (remove-if-not #'equal-formulas?
                  (opponent-attacked-formulas-by-occurrence node)))
 
-(defun proponent-wins-p (node)
+(defun proponent-wins? (node concessions)
   "Does Proponent win the dialogue ending at NODE?"
   (when (proponent-node-p node)
     (let ((opponent-assertions (opponent-assertions node))
           (opponent-attacks (opponent-attacked-formulas node)))
       (or (find-if #'falsum-p opponent-assertions)
-          (not (null (intersection opponent-attacks
-                                   opponent-assertions
-                                   :test #'equal-formulas?)))))))
+          (intersection opponent-attacks
+                        concessions
+                        :test #'equal-formulas?)
+          (intersection opponent-attacks
+                        opponent-assertions
+                        :test #'equal-formulas?)))))
 
 (defun contains-winning-strategy-p (node)
   "Does NODE contain a winning strategy (for Proponent)?"
@@ -62,8 +65,7 @@
   nil)
 
 (defmethod goal-test ((problem dialogue-search-problem) (node node))
-  (declare (ignore problem))
-  (proponent-wins-p node))
+  (proponent-wins? node (concessions problem)))
 
 (defmethod goal-test ((problem strategy-search-problem) (node dialogue-node))
   (contains-winning-strategy-p (root-of node)))
