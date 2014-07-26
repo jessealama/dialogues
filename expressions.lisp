@@ -1418,3 +1418,18 @@ attacks which, being symbols, do qualify as terms."
 
 (defmethod free-variables ((thing t))
   (error "How to determine the set of free variables of~%~%  ~a~%~%?" thing))
+
+(defgeneric equal-expressions? (expression-1 expression-2)
+  (:documentation "Are EXPRESSION-1 and EXPRESSION-2 equal?  (We are not testing identity, but equality.)"))
+
+(defmethod equal-expressions? ((expression-1 t) (expression-2 t))
+  nil)
+
+(defmethod equal-expressions? ((expression-1 formula) (expression-2 formula))
+  (equal-formulas? expression-1 expression-2))
+
+(defmethod equal-expressions? ((expression-1 term) (expression-2 term))
+  (equal-terms? expression-1 expression-2))
+
+(defmethod equal-expressions? ((e-1 symbolic-attack) (e-2 symbolic-attack))
+  (equal-symbolic-attacks? e-1 e-2))
