@@ -30,7 +30,7 @@
 
 (defclass term () nil)
 
-(defun term? (thing)
+(defun term-p (thing)
   (typep thing 'term))
 
 (defclass function-term (atomic-expression term)
@@ -1113,7 +1113,7 @@ in TERM or FORMULA."))
   "Determine whether OBJ is a term different from the symbolic
 attacks which, being symbols, do qualify as terms."
   (and (not (symbolic-attack-p obj))
-       (term? obj)))
+       (term-p obj)))
 
 (defun non-symbolic-attack-formula? (obj)
   "Determine whether OBJ is a formula different from the symbolic
