@@ -146,6 +146,10 @@
 (defmethod print-object ((x falsum) stream)
   (format stream "$false"))
 
+(defun falsum-p (x)
+  "Is X falsum?"
+  (typep x 'falsum))
+
 (defgeneric atomic-formula-p (x)
   (:documentation "Is X an atomic formula?"))
 
