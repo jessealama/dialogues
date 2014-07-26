@@ -136,6 +136,10 @@
 (defmethod print-object ((x verum) stream)
   (format stream "$true"))
 
+(defun verum-p (x)
+  "Is X verum?"
+  (typep x 'verum))
+
 (defclass falsum ()
   nil)
 
