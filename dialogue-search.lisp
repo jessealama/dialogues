@@ -45,10 +45,12 @@
 
 (defun bounded-dialogue-search-bfs (rules initial-statement depth &optional initial-node initial-queue)
   (unless initial-node
-    (setf initial-node (make-instance 'dialogues::node :state initial-statement)))
+    (setf initial-node
+          (make-instance 'dialogues::node :state initial-statement)))
   (unless initial-queue
-    (setf initial-queue (make-initial-queue initial-node
-                                    :queueing-function #'enqueue-at-end)))
+    (setf initial-queue
+          (make-initial-queue initial-node
+                              :queueing-function #'enqueue-at-end)))
   (let ((problem (make-instance 'dialogue-search-problem
                                 :formula initial-statement
                                 :rules rules)))
