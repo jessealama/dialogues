@@ -92,7 +92,7 @@
                      (opponent-attacked-formulas-by-occurrence (parent node)))
                (opponent-attacked-formulas-by-occurrence (parent node)))))
         (t
-         (opponent-assertions-by-occurrence (parent node)))))
+         (opponent-attacked-formulas-by-occurrence (parent node)))))
 
 (defun opponent-attacked-formulas (node)
   "A list of formulas attacked so far by Opponent in the dialogue leading up to NODE.  The list is given up to formula equality (thus, if Opponent attacks distinct instances of the same formula, only one of the occurrences will appear in this list.)"
