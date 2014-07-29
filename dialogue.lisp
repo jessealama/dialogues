@@ -446,6 +446,9 @@ This predicate is redundant when EVERY-DEFENSE-RESPONDS-TO-MOST-RECENT-OPEN-ATTA
        (cond ((atomic-formula-p formula)
               ;; Proponent cannot attack atoms
               )
+             ((symbolic-attack-p formula)
+              ;; symbolic attacks cannot be attacked
+              )
              ((implication-p formula)
               (push (make-instance 'dialogue-node
                                    :action (make-instance 'move
