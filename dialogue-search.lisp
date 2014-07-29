@@ -20,9 +20,6 @@
     :reader concessions
     :documentation "A list of formulas granted by the Opponent prior to the start of the game.")))
 
-(defmethod goal-test :before ((problem dialogue-search-problem) node)
-  (expand node problem))
-
 (defmethod successors-in-problem ((dsp dialogue-search-problem) node)
   (continuations (state node)))
 
