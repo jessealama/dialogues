@@ -83,16 +83,18 @@
 
 (defun opponent-attacked-formulas-by-occurrence (node)
   "A list of formulas attacked so far by Opponent in the dialogue leading up to NODE.  Distinct occurrences of the same formula will appear here (thus, the \"same\" formula may appear more than once in this list)."
-  (cond ((root-node-p node)
-         nil)
-        ((proponent-node-p node)
-         (let ((move (action node)))
-           (if (attack-p move)
-               (cons (reference move)
-                     (opponent-attacked-formulas-by-occurrence (parent node)))
-               (opponent-attacked-formulas-by-occurrence (parent node)))))
-        (t
-         (opponent-attacked-formulas-by-occurrence (parent node)))))
+  (labels ((oafbo (node)
+             (cond ((root-node-p node)
+                    nil)
+                   ((proponent-node-p node)
+                    (let ((move (action node)))
+                      (if (attack-p move)
+                          (cons (reference move)
+                                (oafbo (parent node)))
+                          (oafbo (parent node)))))
+                   (t
+                    (oafbo (parent node))))))
+    (remove-duplicates (oafbo node) :test #'eq)))
 
 (defun opponent-attacked-formulas (node)
   "A list of formulas attacked so far by Opponent in the dialogue leading up to NODE.  The list is given up to formula equality (thus, if Opponent attacks distinct instances of the same formula, only one of the occurrences will appear in this list.)"
