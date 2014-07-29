@@ -563,12 +563,6 @@ This predicate is redundant when EVERY-DEFENSE-RESPONDS-TO-MOST-RECENT-OPEN-ATTA
               (list (first defenses))))
         e-possibilities)))
 
-(defparameter *d-ruleset*
-  (make-instance 'ruleset
-                 :expander #'d-propositional-expander
-                 :description "Felscher's D ruleset, for propositional languages."
-                 :validator #'d-propositional-validator))
-
 (defparameter *e-ruleset*
   (make-instance 'ruleset
                  :expander #'e-propositional-expander
