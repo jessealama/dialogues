@@ -35,26 +35,21 @@
                                  :rules rules)))
     (depth-first-search-for-bottom problem)))
 
-(defun bounded-dialogue-search-dfs (rules initial-statement depth &optional (initial-node))
-  (unless initial-node
-    (make-instance 'dialogues::node :state initial-statement))
+(defun bounded-dialogue-search-dfs (rules initial-statement depth)
   (let ((problem (make-instance 'dialogue-search-problem
                                 :formula initial-statement
                                 :rules rules)))
     (depth-limited-dfs-search problem depth)))
 
-(defun bounded-dialogue-search-bfs (rules initial-statement depth &optional initial-node initial-queue)
-  (unless initial-node
-    (setf initial-node
-          (make-instance 'dialogues::node :state initial-statement)))
-  (unless initial-queue
-    (setf initial-queue
-          (make-initial-queue initial-node
-                              :queueing-function #'enqueue-at-end)))
-  (let ((problem (make-instance 'dialogue-search-problem
-                                :formula initial-statement
-                                :rules rules)))
-	(bounded-bfs-with-nodes problem depth initial-queue)))
+(defun bounded-dialogue-search-bfs (rules initial-statement depth)
+  (let* ((node (make-instance 'dialogues::node
+                              :state initial-statement))
+         (queue (make-initial-queue node
+                                    :queueing-function #'enqueue-at-end))
+         (problem (make-instance 'dialogue-search-problem
+                                 :formula initial-statement
+                                 :rules rules)))
+    (bounded-bfs-with-nodes problem depth queue)))
 
 (defun opponent-node-p (node)
   (or (root-node-p node)
