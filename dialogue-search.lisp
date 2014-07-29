@@ -68,30 +68,36 @@
 
 (defun opponent-assertions-by-occurrence (node)
   "A list of all formulas asserted by Opponent in the sequence of moves up to NODE.  All occurrences of otherwise identical formulas are listed (thus, the \"same\" formula may appear more than once in the resulting list)."
-  (if (proponent-node-p node)
-      (cons (statement (action node))
-            (opponent-assertions-by-occurrence (parent node)))
-      (opponent-assertions-by-occurrence (parent node))))
+  (cond ((root-node-p node)
+         nil)
+        ((proponent-node-p node)
+         (cons (statement (action node))
+                     (opponent-assertions-by-occurrence (parent node))))
+        (t
+         (opponent-assertions-by-occurrence (parent node)))))
 
 (defun opponent-assertions (node)
   "A list of all formulas asserted by Opponent in the sequence of moves up to NODE.  The list is given up to formula equality; distinct occurrences of otherwise identical formulas are not considered."
-  (remove-if-not #'equal-formulas?
-                  (opponent-assertions-by-occurrence node)))
+  (remove-duplicates (opponent-assertions-by-occurrence node)
+                     :test #'equal-formulas?))
 
 (defun opponent-attacked-formulas-by-occurrence (node)
   "A list of formulas attacked so far by Opponent in the dialogue leading up to NODE.  Distinct occurrences of the same formula will appear here (thus, the \"same\" formula may appear more than once in this list)."
-  (if (proponent-node-p node)
-      (let ((move (action node)))
-        (if (attack-p move)
-            (cons (reference move)
-                  (opponent-attacked-formulas-by-occurrence (parent node)))
-            (opponent-attacked-formulas-by-occurrence (parent node))))
-      (opponent-assertions-by-occurrence (parent node))))
+  (cond ((root-node-p node)
+         nil)
+        ((proponent-node-p node)
+         (let ((move (action node)))
+           (if (attack-p move)
+               (cons (reference move)
+                     (opponent-attacked-formulas-by-occurrence (parent node)))
+               (opponent-attacked-formulas-by-occurrence (parent node)))))
+        (t
+         (opponent-assertions-by-occurrence (parent node)))))
 
 (defun opponent-attacked-formulas (node)
   "A list of formulas attacked so far by Opponent in the dialogue leading up to NODE.  The list is given up to formula equality (thus, if Opponent attacks distinct instances of the same formula, only one of the occurrences will appear in this list.)"
-  (remove-if-not #'equal-formulas?
-                 (opponent-attacked-formulas-by-occurrence node)))
+  (remove-duplicates (opponent-attacked-formulas-by-occurrence node)
+                     :test #'equal-formulas?))
 
 (defun proponent-wins? (node concessions)
   "Does Proponent win the dialogue ending at NODE?"
