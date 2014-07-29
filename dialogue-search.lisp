@@ -87,7 +87,7 @@
   "A list of formulas attacked so far by Opponent in the dialogue leading up to NODE.  Distinct occurrences of the same formula will appear here (thus, the \"same\" formula may appear more than once in this list)."
   (labels ((oafbo (node)
              (cond ((root-node-p node)
-                    nil)
+                    (list (state node)))
                    ((proponent-node-p node)
                     (let ((move (action node)))
                       (if (attack-p move)
