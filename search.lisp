@@ -4,7 +4,7 @@
 
 (defclass node ()
   ((state
-    :reader state
+    :accessor state
     :initarg :state
     :documentation "A state in the domain")
    (parent
@@ -28,7 +28,7 @@
   ((initial-node
     :initarg :initial-node
     :type node
-    :reader initial-node)
+    :accessor initial-node)
    (num-expanded
     :accessor problem-num-expanded
     :type integer
