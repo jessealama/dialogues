@@ -246,20 +246,11 @@
 (defun opponent-loses-p (dialogue)
   (not (opponent-wins-p dialogue)))
 
-(defun opponent-assertions (dialogue)
-  (mapcar #'statement (remove-if-not #'opponent-move-p (plays dialogue))))
-
 (defmethod terms-in ((dialogue dialogue))
   (terms-in (plays dialogue)))
 
 (defmethod free-variables ((dialogue dialogue))
   (free-variables (plays dialogue)))
-
-(defun opponent-asserted-atom-earlier? (dialogue move)
-  (when (atomic-formula-p move)
-    (member (statement move)
-            (opponent-assertions dialogue)
-            :test #'equal-formulas?)))
 
 (defun attacks (dialogue)
   (remove-if-not #'attack-p (plays dialogue)))
