@@ -103,12 +103,7 @@
   (incf (problem-num-expanded problem)))
 
 (defmethod expand ((node node) (problem problem))
-  (loop
-     :for (action . state) :in (successors-in-problem problem node)
-     :collect (make-instance 'dialogues::node
-                             :parent node
-                             :action action
-                             :state state)))
+  (successors-in-problem problem node))
 
 (defun leaf-nodes (node)
   "All nodes reachable from NODE (via the successor function) that are either unexpanded or have no successors (and are expanded)."
