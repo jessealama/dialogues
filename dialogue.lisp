@@ -351,156 +351,166 @@ This predicate is redundant when EVERY-DEFENSE-RESPONDS-TO-MOST-RECENT-OPEN-ATTA
           (when (no-duplicate-defenses dialogue)
             (proponent-assertions-attacked-at-most-once dialogue)))))))
 
-(defun d-fol-expander (dialogue term-depth)
-  ;; Rules: (1) an attack may be defended only once; (2) P may not
-  ;; assert an atom before O; (3) only the most recent open attack may
-  ;; be defended.  No term will be considerd having depth exceeding
-  ;; TERM-DEPTH.
-  (append (d-fol-defenses dialogue term-depth)
-          (d-fol-attacks dialogue term-depth)))
-
 (defun e-opponent-attacks (node)
-  (let ((formula (state node)))
-    (cond ((atomic-formula-p formula)
-           (list (make-instance 'dialogue-node
-                                :action (make-instance 'move
-                                                       :statement *attack-atom*
-                                                       :reference formula
-                                                       :attack t)
-                                :parent node)))
-          ((implication-p formula)
-           (list (make-instance 'dialogue-node
-                                :action (make-instance 'move
-                                                       :statement (antecedent formula)
-                                                       :reference formula
-                                                       :attack t)
-                                :parent node)))
-          ((negation-p formula)
-           (list (make-instance 'dialogue-node
-                                :action (make-instance 'move
-                                                       :statement (unnegate formula)
-                                                       :reference formula
-                                                       :attack t)
-                                :parent node)))
-          (t
-           (error "This is an Opponent node, but we don't know how to attack~%~%  ~a~%" formula)))))
+  (when (opponent-node-p node)
+    (let ((formula (state node)))
+      (cond ((atomic-formula-p formula)
+             (list (make-instance 'dialogue-node
+                                  :action (make-instance 'move
+                                                         :statement *attack-atom*
+                                                         :reference formula
+                                                         :attack t)
+                                  :parent node)))
+            ((implication-p formula)
+             (list (make-instance 'dialogue-node
+                                  :action (make-instance 'move
+                                                         :statement (antecedent formula)
+                                                         :reference formula
+                                                         :attack t)
+                                  :parent node)))
+            ((negation-p formula)
+             (list (make-instance 'dialogue-node
+                                  :action (make-instance 'move
+                                                         :statement (unnegate formula)
+                                                         :reference formula
+                                                         :attack t)
+                                  :parent node)))
+            ((symbolic-attack-p formula)
+             ;; symbolic attacks cannot be attacked
+             nil)
+            (t
+             (error "This is an Opponent node, but we don't know how to attack~%~%  ~a~%" formula))))))
 
 (defun e-opponent-defenses (node)
-  (declare (ignore node))
-  nil)
+  (when (opponent-node-p node)
+    (unless (root-node-p node)
+      (let ((move (action node)))
+        (when (attack-p move)
+          (let ((formula (state node))
+                (reference (reference move)))
+            (cond ((atomic-formula-p formula)
+                   ;; no defenses against attacks on atomic formulas
+                   nil
+                   )
+                  ((implication-p formula)
+                   (list (make-instance 'dialogue-node
+                                        :action (make-instance 'move
+                                                               :statement (consequent formula)
+                                                               :reference formula
+                                                               :attack nil)
+                                        :parent node)))
+                  ((negation-p formula)
+                   ;; no defense against attacks on negations
+                   nil
+                   )
+                  ((symbolic-attack-p formula)
+                   (cond ((eql formula *attack-left-conjunct*)
+                          (list (make-instance 'dialogue-node
+                                               :action (make-instance 'move
+                                                                      :statement (lhs reference)
+                                                                      :reference formula
+                                                                      :attack nil)
+                                               :parent node)))
+                         ((eql formula *attack-right-conjunct*)
+                          (list (make-instance 'dialogue-node
+                                               :action (make-instance 'move
+                                                                      :statement (rhs reference)
+                                                                      :reference formula
+                                                                      :attack nil)
+                                               :parent node)))
+                         (t
+                          (error "This is an Opponent node, but we don't know how to defend against the symbolic attack~%~%  ~a~%" formula))))
+                  (t
+                   (error "This is an Opponent node, but we don't know how to defend against the attack on~%~%  ~a~%" formula)))))))))
 
 (defun e-proponent-attacks (node)
-  (loop
-     :with attacks = nil
-     :with asserted = (opponent-assertions-by-occurrence node)
-     :for formula :in asserted
-     :do
-     (cond ((atomic-formula-p formula)
-            ;; Proponent cannot attack atoms
-            )
-           ((implication-p formula)
-            (push (make-instance 'dialogue-node
-                                 :action (make-instance 'move
-                                                        :attack t
-                                                        :reference formula
-                                                        :statement (antecedent formula))
-                                 :parent node)
-                  attacks))
-           ((negation-p formula)
-            (push (make-instance 'dialogue-node
-                                 :action (make-instance 'move
-                                                        :attack t
-                                                        :reference formula
-                                                        :statement (unnegate formula))
-                                 :parent node)
-                  attacks))
-           (t
-            (error "Don't know how to compute Proponent attacks on~%~%  ~a~%~%" formula)))
-     :finally
-     (return attacks)))
+  (when (proponent-node-p node)
+    (loop
+       :with attacks = nil
+       :with asserted = (opponent-assertions-by-occurrence node)
+       :for formula :in asserted
+       :do
+       (cond ((atomic-formula-p formula)
+              ;; Proponent cannot attack atoms
+              )
+             ((implication-p formula)
+              (push (make-instance 'dialogue-node
+                                   :action (make-instance 'move
+                                                          :attack t
+                                                          :reference formula
+                                                          :statement (antecedent formula))
+                                   :parent node)
+                    attacks))
+             ((binary-disjunction-p formula)
+              (push (make-instance 'dialogue-node
+                                   :action (make-instance 'move
+                                                          :attack t
+                                                          :reference formula
+                                                          :statement *which-disjunct?*))
+                    attacks))
+             ((negation-p formula)
+              (push (make-instance 'dialogue-node
+                                   :action (make-instance 'move
+                                                          :attack t
+                                                          :reference formula
+                                                          :statement (unnegate formula))
+                                   :parent node)
+                    attacks))
+             ((binary-conjunction-p formula)
+              (push (make-instance 'dialogue-node
+                                   :action (make-instance 'move
+                                                          :attack t
+                                                          :reference formula
+                                                          :statement *attack-left-conjunct*)
+                                   :parent node)
+                    attacks)
+              (push (make-instance 'dialogue-node
+                                   :action (make-instance 'move
+                                                          :attack t
+                                                          :reference formula
+                                                          :statement *attack-right-conjunct*)
+                                   :parent node)
+                    attacks))
+             (t
+              (error "Don't know how to compute Proponent attacks on~%~%  ~a~%~%" formula)))
+       :finally
+       (return attacks))))
 
 (defun e-proponent-defenses (node)
-  (loop
-     :with defenses = nil
-     :with attacked = (opponent-attacked-formulas-by-occurrence node)
-     :for formula :in attacked
-     :do
-     (cond ((atomic-formula-p formula)
-            ;; Proponent cannot defend against attacks on atoms
-            )
-           ((implication-p formula)
-            (push (make-instance 'dialogue-node
-                                 :action (make-instance 'move
-                                                        :attack nil
-                                                        :reference formula
-                                                        :statement (consequent formula))
-                                 :parent node)
-                  defenses))
-           ((negation-p formula)
-            ;; no defense against negations
-            )
-           (t
-            (error "Don't know how to compute Proponent defenses against~%~%  ~a~%~%" formula)))
-     :finally
-     (return defenses)))
+  (when (proponent-node-p node)
+    (loop
+       :with defenses = nil
+       :with attacked = (opponent-attacked-formulas-by-occurrence node)
+       :for formula :in attacked
+       :do
+       (cond ((atomic-formula-p formula)
+              ;; Proponent cannot defend against attacks on atoms
+              )
+             ((implication-p formula)
+              (push (make-instance 'dialogue-node
+                                   :action (make-instance 'move
+                                                          :attack nil
+                                                          :reference formula
+                                                          :statement (consequent formula))
+                                   :parent node)
+                    defenses))
+             ((negation-p formula)
+              ;; no defense against negations
+              )
+             (t
+              (error "Don't know how to compute Proponent defenses against~%~%  ~a~%~%" formula)))
+       :finally
+       (return defenses))))
 
 (defun e-propositional-expander (node)
-  (cond ((opponent-node-p node)
-         (append (e-opponent-attacks node)
-                 (e-opponent-defenses node)))
-        ((proponent-node-p node)
-         (append (e-proponent-attacks node)
-                 (e-proponent-defenses node)))
-        (t
-         (error "The node~%~%  ~a~%~%seems to be neither a Proponent node nor an Opponent node." node))))
+  (append (e-opponent-attacks node)
+          (e-opponent-defenses node)
+          (e-proponent-attacks node)
+          (e-proponent-defenses node)))
 
 (defun e-propositional-validator (dialogue)
   (declare (ignore dialogue))
   t)
-
-(defun e-fol-expander (dialogue term-depth)
-  ;; Rules: E rules, with the restriction that Opponent must respond immediately to Proponent.
-  (let ((last-move (last-move dialogue))
-        (i (1- (dialogue-length dialogue)))
-        (d-possibilities (d-fol-expander dialogue term-depth)))
-    (if (proponent-move-p last-move)
-        (remove-if-not #'(lambda (move) (= (reference move) i))
-                       d-possibilities)
-        d-possibilities)))
-
-(defun d-fol-validator (dialogue)
-  (and (d-propositional-validator dialogue)
-       (loop
-          :with plays = (plays dialogue)
-          :for move :in plays
-          :for i :from 1
-          :for statement = (statement move)
-          :do
-          (cond ((attack-p move)
-                 (let ((attack-reference (reference move)))
-                   (let ((attacked-statement (nth-statement dialogue attack-reference)))
-                     (when (generalization-p attacked-statement)
-                       (when (which-instance-attack-p move)
-                         (cond ((universal-generalization-p attacked-statement)
-                                (let ((instance (instance statement)))
-                                  (cond ((proponent-move-p attacked-statement)
-                                         (when (variable-term-p instance)
-                                           (unless (occurs-freely instance (truncate-dialogue dialogue i))
-                                             (return nil))))
-                                        ((opponent-move-p attacked-statement)
-                                         t))))
-                               ((existential-generalization-p attacked-statement)
-                                (let ((instance (instance statement)))
-                                  (cond ((proponent-move-p attacked-statement)
-                                         t)
-                                        ((opponent-move-p attacked-statement)
-                                         (unless (occurs-freely instance (truncate-dialogue dialogue i))
-                                           (return nil)))))))))))))
-          :finally (return t))))
-
-(defun e-fol-validator (dialogue)
-  (when (d-fol-validator dialogue)
-    (e-propositional-validator dialogue)))
 
 (defun e-propositional-expander--prefer-defenses (dialogue)
   ;; Rules: E rules, with the restriction that Opponent must respond immediately to Proponent.  Additionally, if Proponent can defend, then he will.
