@@ -418,6 +418,19 @@ This predicate is redundant when EVERY-DEFENSE-RESPONDS-TO-MOST-RECENT-OPEN-ATTA
                                                                       :reference formula
                                                                       :attack nil)
                                                :parent node)))
+                         ((eql formula *which-disjunct?*)
+                          (list (make-instance 'dialogue-node
+                                               :action (make-instance 'move
+                                                                      :statement (lhs reference)
+                                                                      :reference formula
+                                                                      :attack nil)
+                                               :parent node)
+                                (make-instance 'dialogue-node
+                                               :action (make-instance 'move
+                                                                      :statement (rhs reference)
+                                                                      :reference formula
+                                                                      :attack nil)
+                                               :parent node)))
                          (t
                           (error "This is an Opponent node, but we don't know how to defend against the symbolic attack~%~%  ~a~%" formula))))
                   (t
