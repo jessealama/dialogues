@@ -438,8 +438,34 @@ This predicate is redundant when EVERY-DEFENSE-RESPONDS-TO-MOST-RECENT-OPEN-ATTA
   nil)
 
 (defun e-proponent-attacks (node)
-  (declare (ignore node))
-  nil)
+  (loop
+     :with attacks = nil
+     :with asserted = (opponent-assertions-by-occurrence node)
+     :for formula :in asserted
+     :do
+     (cond ((atomic-formula-p formula)
+            ;; Proponent cannot attack atoms
+            )
+           ((implication-p formula)
+            (push (make-instance 'dialogue-node
+                                 :action (make-instance 'move
+                                                        :attack t
+                                                        :reference formula
+                                                        :statement (antecedent formula))
+                                 :parent node)
+                  attacks))
+           ((negation-p formula)
+            (push (make-instance 'dialogue-node
+                                 :action (make-instance 'move
+                                                        :attack t
+                                                        :reference formula
+                                                        :statement (unnegate formula))
+                                 :parent node)
+                  attacks))
+           (t
+            (error "Don't know how to compute Proponent attacks on~%~%  ~a~%~%" formula)))
+     :finally
+     (return attacks)))
 
 (defun e-proponent-defenses (node)
   (loop
