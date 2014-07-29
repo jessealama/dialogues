@@ -6,6 +6,13 @@
   nil
   (:documentation "A node in the search for a (Proponent) winning strategy."))
 
+(defmethod initialize-instance :after ((node dialogue-node) &rest initargs &key &allow-other-keys)
+  (declare (ignore initargs))
+  (when (and (slot-boundp node 'action)
+             (not (slot-boundp node 'state)))
+    (setf (state node)
+          (statement (action node)))))
+
 (defclass strategy-search-problem (problem)
   ((ruleset
     :type ruleset
