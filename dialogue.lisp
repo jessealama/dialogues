@@ -484,6 +484,9 @@ This predicate is redundant when EVERY-DEFENSE-RESPONDS-TO-MOST-RECENT-OPEN-ATTA
                                                         :statement (consequent formula))
                                  :parent node)
                   defenses))
+           ((negation-p formula)
+            ;; no defense against negations
+            )
            (t
             (error "Don't know how to compute Proponent defenses against~%~%  ~a~%~%" formula)))
      :finally
