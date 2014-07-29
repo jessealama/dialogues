@@ -68,13 +68,15 @@
 
 (defun opponent-assertions-by-occurrence (node)
   "A list of all formulas asserted by Opponent in the sequence of moves up to NODE.  All occurrences of otherwise identical formulas are listed (thus, the \"same\" formula may appear more than once in the resulting list)."
-  (cond ((root-node-p node)
-         nil)
-        ((proponent-node-p node)
-         (cons (statement (action node))
-                     (opponent-assertions-by-occurrence (parent node))))
-        (t
-         (opponent-assertions-by-occurrence (parent node)))))
+  (labels ((oabo (node)
+             (cond ((root-node-p node)
+                    nil)
+                   ((proponent-node-p node)
+                    (cons (statement (action node))
+                          (oabo (parent node))))
+                   (t
+                    (oabo (parent node))))))
+    (remove-duplicates (oabo node) :test #'eq)))
 
 (defun opponent-assertions (node)
   "A list of all formulas asserted by Opponent in the sequence of moves up to NODE.  The list is given up to formula equality; distinct occurrences of otherwise identical formulas are not considered."
