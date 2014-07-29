@@ -2,6 +2,10 @@
 
 (in-package :dialogues)
 
+(defclass dialogue-node (node)
+  nil
+  (:documentation "A node in the search for a (Proponent) winning strategy."))
+
 (defclass strategy-search-problem (problem)
   ((ruleset
     :type ruleset

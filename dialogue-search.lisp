@@ -59,10 +59,6 @@
                                 :rules rules)))
 	(bounded-bfs-with-nodes problem depth initial-queue)))
 
-(defclass dialogue-node (node)
-  nil
-  (:documentation "A node in the search for a (Proponent) winning strategy."))
-
 (defun opponent-node-p (node)
   (or (root-node-p node)
       (proponent-node-p (parent node))))
