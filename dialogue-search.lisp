@@ -108,7 +108,8 @@
   (when (proponent-node-p node)
     (let ((opponent-assertions (opponent-assertions node))
           (opponent-attacks (opponent-attacked-formulas node)))
-      (or (find-if #'falsum-p opponent-assertions)
+      (or (find-if #'falsum-p concessions)
+          (find-if #'falsum-p opponent-assertions)
           (intersection opponent-attacks
                         concessions
                         :test #'equal-formulas?)
