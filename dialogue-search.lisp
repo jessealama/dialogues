@@ -24,16 +24,14 @@
   (continuations (state node)))
 
 (defun dialogue-search-bfs (rules initial-statement &optional more-nodes)
-  (let* ((n (make-instance 'dialogues::node :state initial-statement))
-         (problem (make-instance 'dialogue-search-problem
-                                 :initial-node n
+  (let* ((problem (make-instance 'dialogue-search-problem
+                                 :formula initial-statement
                                  :rules rules)))
     (breadth-first-search-for-bottom-with-nodes problem more-nodes)))
 
 (defun dialogue-search-dfs (rules initial-statement)
-  (let* ((n (make-instance 'dialogues::node :state initial-statement))
-         (problem (make-instance 'dialogue-search-problem
-                                 :initial-node n
+  (let* ((problem (make-instance 'dialogue-search-problem
+                                 :formula initial-statement
                                  :rules rules)))
     (depth-first-search-for-bottom problem)))
 
@@ -41,7 +39,7 @@
   (unless initial-node
     (make-instance 'dialogues::node :state initial-statement))
   (let ((problem (make-instance 'dialogue-search-problem
-                                :initial-node initial-node
+                                :formula initial-statement
                                 :rules rules)))
     (depth-limited-dfs-search problem depth)))
 
@@ -52,7 +50,7 @@
     (setf initial-queue (make-initial-queue initial-node
                                     :queueing-function #'enqueue-at-end)))
   (let ((problem (make-instance 'dialogue-search-problem
-                                :initial-node initial-node
+                                :formula initial-statement
                                 :rules rules)))
 	(bounded-bfs-with-nodes problem depth initial-queue)))
 
