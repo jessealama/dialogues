@@ -423,6 +423,13 @@ This predicate is redundant when EVERY-DEFENSE-RESPONDS-TO-MOST-RECENT-OPEN-ATTA
                                                        :reference formula
                                                        :attack t)
                                 :parent node)))
+          ((negation-p formula)
+           (list (make-instance 'dialogue-node
+                                :action (make-instance 'move
+                                                       :statement (unnegate formula)
+                                                       :reference formula
+                                                       :attack t)
+                                :parent node)))
           (t
            (error "This is an Opponent node, but we don't know how to attack~%~%  ~a~%" formula)))))
 
