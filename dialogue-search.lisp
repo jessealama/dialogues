@@ -99,7 +99,8 @@
                         opponent-assertions
                         :test #'equal-formulas?)))))
 
-(defmethod goal-test ((problem dialogue-search-problem) (node node))
+(defmethod goal-test ((problem dialogue-search-problem)
+                      (node dialogue-node))
   (proponent-wins? node (concessions problem)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
