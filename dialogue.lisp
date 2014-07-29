@@ -290,37 +290,6 @@
 (defmethod possible-propositional-attacks ((n negation))
   (list (unnegate n)))
 
-(defun d-fol-opponent-defenses (dialogue term-depth)
-  (declare (ignore term-depth))
-  (let* ((responses nil)
-         (last-move (last-move dialogue))
-         (most-recent (most-recent-open-attack-on-opponent dialogue)))
-    (when (proponent-move-p last-move)
-      (when (integerp most-recent)
-        (let* ((attack (nth-move dialogue most-recent))
-               (attack-reference (reference attack))
-               (attacked-statement (if (zerop attack-reference)
-                                       (initial-formula dialogue)
-                                       (nth-statement dialogue attack-reference))))
-          (let ((defenses
-                 (when (which-instance-attack-p attack)
-                   (let ((instance (instance (statement attack))))
-                     (cond ((universal-generalization-p attacked-statement)
-                            (list (instantiate attacked-statement instance (first (bindings attacked-statement)))))
-                           ((existential-generalization-p attacked-statement)
-                            (let ((fresh (fresh-variable dialogue)))
-                              (list (instantiate attacked-statement fresh (first (bindings attacked-statement)))))))))))
-            (dolist (defense defenses)
-              (push (make-instance 'opponent-move
-                                   :reference most-recent
-                                   :statement defense
-                                   :attack nil)
-                    responses))))))
-    ;; filter out duplicate Opponent attacks
-    (remove-if #'(lambda (move)
-                   (duplicate-opponent-attack? dialogue move))
-               responses)))
-
 (defun moves-alternate-p (dialogue)
   (loop
      :with plays = (plays dialogue)
