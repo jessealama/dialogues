@@ -10,7 +10,7 @@
    (parent
     :initform nil
     :initarg :parent
-    :accessor parent
+    :reader parent
     :type (or null node)
     :documentation "The parent node of this node")
    (action
