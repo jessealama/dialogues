@@ -290,11 +290,6 @@
 (defmethod possible-propositional-attacks ((n negation))
   (list (unnegate n)))
 
-(defun d-fol-attacks (dialogue term-depth)
-  (append (d-possible-attacks dialogue)
-          (d-fol-proponent-attacks dialogue term-depth)
-          (d-fol-opponent-attacks dialogue term-depth)))
-
 (defun d-fol-opponent-defenses (dialogue term-depth)
   (declare (ignore term-depth))
   (let* ((responses nil)
@@ -325,18 +320,6 @@
     (remove-if #'(lambda (move)
                    (duplicate-opponent-attack? dialogue move))
                responses)))
-
-(defun d-fol-defenses (dialogue term-depth)
-  (append (d-possible-defenses dialogue)
-          (d-fol-opponent-defenses dialogue term-depth)
-          (d-fol-proponent-defenses dialogue term-depth)))
-
-(defun d-propositional-expander (dialogue)
-  ;; Rules: (1) an attack may be defended only once; (2) P may not
-  ;; assert an atom before O; (3) only the most recent open attack may
-  ;; be defended.
-  (append (d-possible-defenses dialogue)
-          (d-possible-attacks dialogue)))
 
 (defun moves-alternate-p (dialogue)
   (loop
