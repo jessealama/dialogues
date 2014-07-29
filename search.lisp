@@ -14,7 +14,7 @@
     :type (or null node)
     :documentation "The parent node of this node")
    (action
-    :accessor action
+    :reader action
     :initarg :action
     :documentation "The action leading to this state.")
    (successors
