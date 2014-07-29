@@ -459,7 +459,8 @@ This predicate is redundant when EVERY-DEFENSE-RESPONDS-TO-MOST-RECENT-OPEN-ATTA
                                    :action (make-instance 'move
                                                           :attack t
                                                           :reference formula
-                                                          :statement *which-disjunct?*))
+                                                          :statement *which-disjunct?*)
+                                   :parent node)
                     attacks))
              ((negation-p formula)
               (push (make-instance 'dialogue-node
