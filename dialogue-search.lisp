@@ -20,35 +20,42 @@
     :reader concessions
     :documentation "A list of formulas granted by the Opponent prior to the start of the game.")))
 
-(defmethod successors-in-problem ((dsp dialogue-search-problem) node)
-  (continuations (state node)))
+(defmethod initialize-instance :after ((dsp dialogue-search-problem) &rest initargs &key &allow-other-keys)
+  (declare (ignore initargs))
+  (setf (initial-node dsp)
+        (make-instance 'dialogue-node :state (formula dsp))))
+
+(defmethod successors-in-problem ((dsp dialogue-search-problem)
+                                  (node dialogue-node))
+  (let ((ruleset (ruleset dsp)))
+    (funcall (expander ruleset) node)))
 
 (defun dialogue-search-bfs (rules initial-statement &optional more-nodes)
   (let* ((problem (make-instance 'dialogue-search-problem
                                  :formula initial-statement
-                                 :rules rules)))
+                                 :ruleset rules)))
     (breadth-first-search-for-bottom-with-nodes problem more-nodes)))
 
 (defun dialogue-search-dfs (rules initial-statement)
   (let* ((problem (make-instance 'dialogue-search-problem
                                  :formula initial-statement
-                                 :rules rules)))
+                                 :ruleset rules)))
     (depth-first-search-for-bottom problem)))
 
 (defun bounded-dialogue-search-dfs (rules initial-statement depth)
   (let ((problem (make-instance 'dialogue-search-problem
                                 :formula initial-statement
-                                :rules rules)))
+                                :ruleset rules)))
     (depth-limited-dfs-search problem depth)))
 
 (defun bounded-dialogue-search-bfs (rules initial-statement depth)
-  (let* ((node (make-instance 'dialogues::node
+  (let* ((node (make-instance 'dialogues::dialogue-node
                               :state initial-statement))
          (queue (make-initial-queue node
                                     :queueing-function #'enqueue-at-end))
          (problem (make-instance 'dialogue-search-problem
                                  :formula initial-statement
-                                 :rules rules)))
+                                 :ruleset rules)))
     (bounded-bfs-with-nodes problem depth queue)))
 
 (defun opponent-node-p (node)
