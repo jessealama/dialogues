@@ -4,7 +4,7 @@
 
 (defclass node ()
   ((state
-    :accessor state
+    :reader state
     :initarg :state
     :documentation "A state in the domain")
    (parent
