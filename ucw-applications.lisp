@@ -1,7 +1,7 @@
 
 (in-package :dialogues)
 
-(defparameter *maintainer-email* "j.alama@fct.unl.pt")
+(defparameter *maintainer-email* "alama@logic.at")
 
 (defclass dialogue-application (standard-application cookie-session-application-mixin)
   ()
