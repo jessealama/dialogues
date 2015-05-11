@@ -171,7 +171,7 @@
       (<:h1 "...or quit.")
       (<:form
        :method "get"
-       :action "/dialogues/"
+       :action "/"
        (<:submit :value "Quit"))))
 
 (defcomponent alternative-move-chooser (game-component play-style-component ruleset-component)
