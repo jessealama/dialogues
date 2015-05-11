@@ -95,10 +95,10 @@
 	    :align "center"
 	    (render-heuristics extra-rules)))
        (if heuristics
-	   (<:td 
+	   (<:td
 	    :align "left"
 	    (render-heuristics heuristics))
-	   (<:td 
+	   (<:td
 	    :align "center"
 	    (render-heuristics heuristics))))))
     (<:br) ;; no like
@@ -117,7 +117,7 @@
 			(progn
 			  (render-strategy-with-alternative strategy nil)
 			  (<:p "Congratulations!  You've found a winning strategy for Proponent."))
-			
+
 			(progn
 			  (<:p "I'm sorry to say that there is no winning strategy consistent with your choices so far.  (If you didn't make any choices at all, this means that the formula you started with,")
 			  (<:blockquote
@@ -127,14 +127,14 @@
 			(progn
 			  (<:p "Congratulations!  You've found a winning strategy for Opponent.  Here it is:")
 			  (render-strategy-with-alternative strategy nil))
-			
+
 			(progn
 			  (<:p "I'm sorry to say that there is no winning strategy for Opponent consistent with your choices so far.  (If you didn't make any choices at all, this means that the formula you started with,")
 			  (<:blockquote
 			   (render (move-statement (move (root strategy)))) ",")
 			  (<:p "is valid with respect to the ruleset that you chose.)"))))))))
-    
-    (<:a :href "/dialogues/" "[Quit]")))
+
+    (<:a :href "/" "[Quit]")))
 
 (defcomponent winning-strategy-searcher (game-component play-style-component)
   ((depth :initarg :depth
@@ -381,7 +381,7 @@
 				   #'move-< :key #'move)))
     (symbol-macrolet
 	(($padding (dotimes (i padding) (<:td))))
-      (<:tr 
+      (<:tr
        :valign "top"
        $padding
        (<:td
