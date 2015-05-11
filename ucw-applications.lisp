@@ -6,7 +6,7 @@
 (defclass dialogue-application (standard-application cookie-session-application-mixin)
   ()
   (:default-initargs
-   :url-prefix "/dialogues/"
+   :url-prefix ""
     :debug-on-error t))
 
 (defvar *dialogue-application* (make-instance 'dialogue-application))
