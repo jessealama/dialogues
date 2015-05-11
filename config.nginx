@@ -1,0 +1,9 @@
+server {
+    listen 80;
+    server_name dialogical-logic.info;
+    location / {
+      proxy_pass http://localhost:8000;
+    }
+    access_log /var/log/nginx/dialogical-logic.info.access.log;
+    error_log /var/log/nginx/dialogical-logic.info.error.log;
+}
